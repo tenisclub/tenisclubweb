@@ -397,3 +397,69 @@ export function getSelectableCheckoutOptions(
     const badgeLabel =
       pickupFee > 0 ? formatCurrency(pickupFee) : cfg.pickup_badge || 'Grátis';
 
+    options.push({
+      key: 'pickup',
+      kind: 'pickup',
+      icon: cfg.pickup_icon,
+      title: cfg.pickup_title || 'Retirar na Loja',
+      subtitle: cfg.pickup_subtitle || storeAddress,
+      badgeLabel,
+      shippingCost: pickupFee,
+      summaryLabel: badgeLabel,
+      freeThreshold: 0,
+      requiresAddress: false,
+      deliveryMethod: 'pickup',
+    });
+  }
+
+  if (!cfg.delivery_removed && cfg.delivery_enabled) {
+    const feeCalc = computeOptionFee(
+      cfg.delivery_fee_mode,
+      cfg.delivery_fee,
+      cfg.free_delivery_threshold,
+      cfg.delivery_badge,
+      itemsTotal
+    );
+
+    options.push({
+      key: 'local_delivery',
+      kind: 'local_delivery',
+      icon: cfg.delivery_icon,
+      title: cfg.delivery_title || 'Solicitar Entrega Local',
+      subtitle: cfg.delivery_subtitle,
+      badgeLabel: feeCalc.badgeLabel,
+      shippingCost: feeCalc.shippingCost,
+      summaryLabel: feeCalc.summaryLabel,
+      freeThreshold:
+        cfg.delivery_fee_mode === 'fixed' ? safeNum(cfg.free_delivery_threshold, 0) : 0,
+      requiresAddress: cfg.require_address_on_delivery,
+      deliveryMethod: 'local_delivery',
+    });
+  }
+
+  for (const card of cfg.extra_cards) {
+    if (!card.enabled || card.card_type !== 'option') continue;
+    const feeCalc = computeOptionFee(
+      card.fee_mode,
+      card.fee,
+      card.free_threshold,
+      card.badge,
+      itemsTotal
+    );
+
+    options.push({
+      key: `custom:${card.id}`,
+      kind: 'custom',
+      customCardId: card.id,
+      icon: card.icon,
+      title: card.title || 'Opção de Recebimento',
+      subtitle: card.description,
+      badgeLabel: feeCalc.badgeLabel,
+      shippingCost: feeCalc.shippingCost,
+      summaryLabel: feeCalc.summaryLabel,
+      freeThreshold: card.fee_mode === 'fixed' ? safeNum(card.free_threshold, 0) : 0,
+      requiresAddress: card.require_address,
+      deliveryMethod: card.require_address ? 'local_delivery' : 'pickup',
+    });
+  }
+
