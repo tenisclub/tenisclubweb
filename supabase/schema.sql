@@ -334,3 +334,116 @@ CREATE TABLE IF NOT EXISTS public.orders (
   paid_at TIMESTAMPTZ,
   customer_notes TEXT DEFAULT '',
   store_notes TEXT DEFAULT '',
+  internal_notes TEXT DEFAULT '',
+  stock_deducted BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.order_items (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID NOT NULL REFERENCES public.orders(id) ON DELETE CASCADE,
+  product_id UUID REFERENCES public.products(id) ON DELETE SET NULL,
+  variant_id UUID REFERENCES public.product_variants(id) ON DELETE SET NULL,
+  product_name TEXT NOT NULL,
+  product_sku TEXT DEFAULT '',
+  product_image TEXT DEFAULT '',
+  brand_name TEXT DEFAULT '',
+  color TEXT NOT NULL,
+  size TEXT NOT NULL,
+  unit_price NUMERIC(10, 2) NOT NULL CHECK (unit_price >= 0),
+  original_price NUMERIC(10, 2) NOT NULL DEFAULT 0,
+  quantity INT NOT NULL CHECK (quantity > 0),
+  stock_deducted_qty INT NOT NULL DEFAULT 0,
+  subtotal NUMERIC(10, 2) NOT NULL CHECK (subtotal >= 0),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Idempotent column upgrades for existing deployments
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'products' AND column_name = 'allow_backorder'
+  ) THEN
+    ALTER TABLE public.products ADD COLUMN allow_backorder BOOLEAN NOT NULL DEFAULT FALSE;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'order_items' AND column_name = 'stock_deducted_qty'
+  ) THEN
+    ALTER TABLE public.order_items ADD COLUMN stock_deducted_qty INT;
+    UPDATE public.order_items SET stock_deducted_qty = quantity WHERE stock_deducted_qty IS NULL;
+    ALTER TABLE public.order_items ALTER COLUMN stock_deducted_qty SET DEFAULT 0;
+    ALTER TABLE public.order_items ALTER COLUMN stock_deducted_qty SET NOT NULL;
+  END IF;
+END $$;
+
+CREATE TABLE IF NOT EXISTS public.order_status_history (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID NOT NULL REFERENCES public.orders(id) ON DELETE CASCADE,
+  previous_status TEXT,
+  new_status TEXT NOT NULL,
+  note TEXT DEFAULT '',
+  changed_by UUID REFERENCES public.user_profiles(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ----------------------------------------------------------------------------
+-- 7. NOTIFICATIONS, ADMIN LOGS & STORE SETTINGS
+-- ----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.notifications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES public.user_profiles(id) ON DELETE CASCADE,
+  target_audience TEXT NOT NULL DEFAULT 'customer' CHECK (target_audience IN ('customer', 'admin')),
+  type TEXT NOT NULL DEFAULT 'info',
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  link TEXT,
+  is_read BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.admin_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  admin_id UUID REFERENCES public.user_profiles(id) ON DELETE SET NULL,
+  action TEXT NOT NULL,
+  entity_type TEXT NOT NULL,
+  entity_id TEXT,
+  details JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.store_settings (
+  id INT PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+  store_name TEXT NOT NULL DEFAULT 'Tênis Club',
+  tagline TEXT NOT NULL DEFAULT 'Estilo para toda a família',
+  hero_badge TEXT NOT NULL DEFAULT 'DROP NOVO · CATÁLOGO',
+  hero_title TEXT NOT NULL DEFAULT 'Seu próximo par tá aqui. Bora?',
+  hero_subtitle TEXT NOT NULL DEFAULT 'Tênis, mocassins, sociais e lançamentos exclusivos com numeração garantida e atendimento ágil.',
+  hero_banner_url TEXT,
+  logo_url TEXT,
+  whatsapp TEXT NOT NULL DEFAULT '5511999999999',
+  phone TEXT NOT NULL DEFAULT '(11) 99999-9999',
+  email TEXT NOT NULL DEFAULT 'tenisclub.contato@gmail.com',
+  address TEXT NOT NULL DEFAULT 'Av. Paulista, 1000 - Bela Vista, São Paulo - SP',
+  business_hours TEXT NOT NULL DEFAULT 'Seg a Sex: 09h às 19h | Sáb: 09h às 16h',
+  instagram_url TEXT DEFAULT 'https://instagram.com/tenisclub',
+  facebook_url TEXT DEFAULT '',
+  tiktok_url TEXT DEFAULT '',
+  pickup_info TEXT NOT NULL DEFAULT 'Retirada gratuita na loja física mediante confirmação de separação do pedido.',
+  delivery_info TEXT NOT NULL DEFAULT 'Entrega local rápida via motoboy ou transportadora parceira. Valor e prazo confirmados no atendimento.',
+  exchange_policy TEXT NOT NULL DEFAULT 'Você pode solicitar a troca de numeração ou modelo em até 7 dias corridos após o recebimento, desde que o calçado esteja sem sinais de uso e na caixa original.',
+  privacy_policy TEXT NOT NULL DEFAULT 'Em conformidade com a LGPD (Lei nº 13.709/2018), coletamos apenas os dados essenciais para processar seus pedidos, entrega e atendimento.',
+  terms_of_use TEXT NOT NULL DEFAULT 'Ao realizar um pedido na Tênis Club, os itens selecionados têm preço e disponibilidade validados no momento da confirmação.',
+  about_text TEXT NOT NULL DEFAULT 'A Tênis Club nasceu com a missão de unir estilo, conforto e autenticidade para toda a família. Trabalhamos com curadoria rigorosa de tênis casuais, esportivos, sapatos sociais e lançamentos.',
+  checkout_delivery_config JSONB NOT NULL DEFAULT '{}'::jsonb,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ----------------------------------------------------------------------------
+-- 8. INDEXES FOR PERFORMANCE
+-- ----------------------------------------------------------------------------
+CREATE INDEX IF NOT EXISTS idx_products_slug ON public.products(slug);
+CREATE INDEX IF NOT EXISTS idx_products_active ON public.products(is_active, created_at DESC);
