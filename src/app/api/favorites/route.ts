@@ -1,0 +1,37 @@
+import { NextResponse } from 'next/server';
+import { getAuthSession } from '@/lib/auth';
+import { createServiceClient } from '@/lib/supabase/server';
+
+export async function POST(request: Request) {
+  const session = await getAuthSession();
+  if (!session) {
+    return NextResponse.json(
+      { error: 'Faça login para salvar favoritos.', code: 'UNAUTHENTICATED' },
+      { status: 401 }
+    );
+  }
+
+  const { productId } = await request.json();
+  if (!productId) {
+    return NextResponse.json({ error: 'Produto inválido.' }, { status: 400 });
+  }
+
+  const supabase = createServiceClient();
+  const { data: existing } = await supabase
+    .from('favorites')
+    .select('id')
+    .eq('user_id', session.userId)
+    .eq('product_id', productId)
+    .maybeSingle();
+
+  if (existing) {
+    await supabase.from('favorites').delete().eq('id', existing.id);
+    return NextResponse.json({ favorited: false });
+  } else {
+    await supabase.from('favorites').insert({
+      user_id: session.userId,
+      product_id: productId,
+    });
+    return NextResponse.json({ favorited: true });
+  }
+}
