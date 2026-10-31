@@ -158,3 +158,43 @@ export function invalidateServerCache(
   remoteVersion?: number
 ): boolean {
   if (typeof remoteVersion === 'number' && remoteVersion > 0) {
+    if (remoteVersion <= store.lastBustedRealtimeVersion) {
+      return false;
+    }
+    store.lastBustedRealtimeVersion = remoteVersion;
+
+    // If this server process JUST ran a local mutation within the last 800ms, its slots were already cleared synchronously
+    if (Date.now() - store.lastLocalMutationAt < 800) {
+      return false;
+    }
+  } else {
+    store.lastLocalMutationAt = Date.now();
+  }
+
+  if (scope === 'all') {
+    clearSlot('settings');
+    clearSlot('allProductsAdmin');
+    clearSlot('allCategoriesAndBrands');
+    clearSlot('adminBadges');
+    store.authByUser.clear();
+    return true;
+  }
+
+  if (scope === 'settings') {
+    clearSlot('settings');
+  } else if (scope === 'catalog') {
+    clearSlot('allProductsAdmin');
+    clearSlot('allCategoriesAndBrands');
+    clearSlot('adminBadges');
+  } else if (scope === 'orders') {
+    clearSlot('allProductsAdmin');
+    clearSlot('adminBadges');
+  } else if (scope === 'notifications') {
+    clearSlot('adminBadges');
+  } else if (scope === 'users') {
+    store.authByUser.clear();
+  }
+
+  return true;
+}
+
