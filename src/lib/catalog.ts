@@ -317,3 +317,82 @@ export async function getCatalogProducts(filters: CatalogFilters = {}) {
     products = products.filter((p) => p.is_featured);
   }
 
+  // Sort
+  switch (filters.sort) {
+    case 'price_asc':
+      products.sort((a, b) => a.effective_price - b.effective_price);
+      break;
+    case 'price_desc':
+      products.sort((a, b) => b.effective_price - a.effective_price);
+      break;
+    case 'bestsellers':
+      products.sort((a, b) => b.sold_count - a.sold_count);
+      break;
+    case 'popular':
+      products.sort((a, b) => b.views_count + b.sold_count * 2 - (a.views_count + a.sold_count * 2));
+      break;
+    case 'newest':
+    default:
+      products.sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      break;
+  }
+
+  const total = products.length;
+  const page = Math.max(1, filters.page || 1);
+  const pageSize = filters.pageSize || 12;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const paginated = products.slice((page - 1) * pageSize, page * pageSize);
+
+  return {
+    products: paginated,
+    allMatching: products,
+    total,
+    page,
+    pageSize,
+    totalPages,
+  };
+}
+
+export async function getProductBySlug(slug: string): Promise<Product | null> {
+  const cachedAll = await getActiveProductsMemo();
+  const cachedMatch = cachedAll.find((p) => p.slug === slug);
+
+  if (cachedMatch) {
+    const supabase = createServiceClient();
+    supabase
+      .from('products')
+      .update({ views_count: Number(cachedMatch.views_count || 0) + 1 })
+      .eq('id', cachedMatch.id)
+      .then(() => {});
+    return cachedMatch;
+  }
+
+  const supabase = createServiceClient();
+  const { data: row } = await supabase
+    .from('products')
+    .select(PRODUCT_SELECT_QUERY)
+    .eq('slug', slug)
+    .eq('is_active', true)
+    .maybeSingle();
+
+  if (!row) return null;
+
+  // Increment view count asynchronously
+  supabase
+    .from('products')
+    .update({ views_count: Number(row.views_count || 0) + 1 })
+    .eq('id', row.id)
+    .then(() => {});
+
+  return enrichProductRow(row, false);
+}
+
+export async function getRelatedProducts(product: Product, limit = 4): Promise<Product[]> {
+  const { products } = await getCatalogProducts({ pageSize: 24 });
+  return products
+    .filter(
+      (p) =>
+        p.id !== product.id &&
+        (p.category_id === product.category_id || p.gender === product.gender)
