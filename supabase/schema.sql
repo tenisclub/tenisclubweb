@@ -1345,3 +1345,116 @@ CREATE POLICY "products_admin_write" ON public.products
 
 CREATE POLICY "product_images_public_read" ON public.product_images
   FOR SELECT USING (TRUE);
+CREATE POLICY "product_images_admin_write" ON public.product_images
+  FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+CREATE POLICY "product_variants_public_read" ON public.product_variants
+  FOR SELECT USING (TRUE);
+CREATE POLICY "product_variants_admin_write" ON public.product_variants
+  FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+CREATE POLICY "inventory_public_read" ON public.inventory
+  FOR SELECT USING (TRUE);
+CREATE POLICY "inventory_admin_write" ON public.inventory
+  FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+CREATE POLICY "inventory_movements_admin_only" ON public.inventory_movements
+  FOR SELECT USING (public.is_admin());
+
+CREATE POLICY "promotions_public_read" ON public.promotions
+  FOR SELECT USING (is_active = TRUE OR public.is_admin());
+CREATE POLICY "promotions_admin_write" ON public.promotions
+  FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+-- Carts & Cart Items (RN06)
+CREATE POLICY "carts_own" ON public.carts
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "cart_items_own" ON public.cart_items
+  FOR ALL USING (
+    EXISTS (SELECT 1 FROM public.carts c WHERE c.id = cart_id AND c.user_id = auth.uid())
+  )
+  WITH CHECK (
+    EXISTS (SELECT 1 FROM public.carts c WHERE c.id = cart_id AND c.user_id = auth.uid())
+  );
+
+-- Favorites
+CREATE POLICY "favorites_own" ON public.favorites
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+-- Orders (RN14: customers only see their own orders; admins see all)
+CREATE POLICY "orders_select_own_or_admin" ON public.orders
+  FOR SELECT USING (auth.uid() = user_id OR public.is_admin());
+
+CREATE POLICY "order_items_select_own_or_admin" ON public.order_items
+  FOR SELECT USING (
+    public.is_admin() OR EXISTS (
+      SELECT 1 FROM public.orders o WHERE o.id = order_id AND o.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "order_history_select_own_or_admin" ON public.order_status_history
+  FOR SELECT USING (
+    public.is_admin() OR EXISTS (
+      SELECT 1 FROM public.orders o WHERE o.id = order_id AND o.user_id = auth.uid()
+    )
+  );
+
+-- Notifications
+CREATE POLICY "notifications_select_own_or_admin" ON public.notifications
+  FOR SELECT USING (
+    (target_audience = 'customer' AND auth.uid() = user_id)
+    OR (target_audience = 'admin' AND public.is_admin())
+  );
+CREATE POLICY "notifications_update_own_or_admin" ON public.notifications
+  FOR UPDATE USING (
+    (target_audience = 'customer' AND auth.uid() = user_id)
+    OR (target_audience = 'admin' AND public.is_admin())
+  );
+
+-- Admin Logs
+CREATE POLICY "admin_logs_select_admin" ON public.admin_logs
+  FOR SELECT USING (public.is_admin());
+CREATE POLICY "admin_logs_insert_admin" ON public.admin_logs
+  FOR INSERT WITH CHECK (public.is_admin());
+
+-- Store Settings
+CREATE POLICY "store_settings_public_read" ON public.store_settings
+  FOR SELECT USING (TRUE);
+CREATE POLICY "store_settings_admin_write" ON public.store_settings
+  FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+-- ----------------------------------------------------------------------------
+-- 14. HARDEN SECURITY DEFINER RPC EXECUTE PERMISSIONS
+-- ----------------------------------------------------------------------------
+REVOKE ALL ON FUNCTION public.adjust_stock_atomic(uuid, text, integer, text, integer, uuid) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.adjust_stock_atomic(uuid, text, integer, text, integer, uuid) TO postgres, service_role;
+
+REVOKE ALL ON FUNCTION public.change_order_status_atomic(uuid, text, text, text, text, text, text, uuid) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.change_order_status_atomic(uuid, text, text, text, text, text, text, uuid) TO postgres, service_role;
+
+REVOKE ALL ON FUNCTION public.create_order_from_cart(uuid, text, text, text, text, jsonb, text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.create_order_from_cart(uuid, text, text, text, text, jsonb, text) TO postgres, service_role;
+
+REVOKE ALL ON FUNCTION public.handle_new_user() FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.handle_new_user() TO postgres, service_role, supabase_auth_admin;
+
+REVOKE ALL ON FUNCTION public.get_user_role(uuid) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.get_user_role(uuid) TO postgres, service_role;
+
+
+-- ----------------------------------------------------------------------------
+-- 15. FOREIGN-KEY INDEXES & SINGLE-ROUND-TRIP CART RPC
+-- ----------------------------------------------------------------------------
+CREATE INDEX IF NOT EXISTS idx_product_images_product ON public.product_images(product_id);
+CREATE INDEX IF NOT EXISTS idx_promotions_product_active ON public.promotions(product_id) WHERE is_active = true;
+CREATE INDEX IF NOT EXISTS idx_order_items_order ON public.order_items(order_id);
+CREATE INDEX IF NOT EXISTS idx_order_history_order ON public.order_status_history(order_id);
+CREATE INDEX IF NOT EXISTS idx_user_addresses_user ON public.user_addresses(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_roles_user ON public.user_roles(user_id);
+CREATE INDEX IF NOT EXISTS idx_favorites_user ON public.favorites(user_id);
+CREATE INDEX IF NOT EXISTS idx_cart_items_cart ON public.cart_items(cart_id);
+
+CREATE OR REPLACE FUNCTION public.add_to_cart_fast(
+  p_user_id UUID,
+  p_product_id UUID,
