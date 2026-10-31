@@ -237,3 +237,83 @@ export async function getCatalogProducts(filters: CatalogFilters = {}) {
 
   // Search query (name, brand, category, color, sku, description)
   if (filters.q && filters.q.trim()) {
+    const terms = filters.q
+      .toLowerCase()
+      .trim()
+      .split(/\s+/);
+    products = products.filter((p) => {
+      const haystack = [
+        p.name,
+        p.sku || '',
+        p.brand?.name || '',
+        p.category?.name || '',
+        p.gender,
+        p.short_description,
+        ...p.variants.map((v) => v.color),
+      ]
+        .join(' ')
+        .toLowerCase();
+      return terms.every((t) => haystack.includes(t));
+    });
+  }
+
+  if (filters.gender && filters.gender !== 'todos') {
+    const g = filters.gender.toLowerCase();
+    products = products.filter((p) =>
+      g === 'unissex'
+        ? p.gender === 'unissex'
+        : p.gender === g || (p.gender === 'unissex' && (g === 'masculino' || g === 'feminino'))
+    );
+  }
+
+  if (filters.category && filters.category !== 'todos') {
+    const cat = filters.category.toLowerCase();
+    products = products.filter(
+      (p) => p.category?.slug.toLowerCase() === cat || p.category_id === filters.category
+    );
+  }
+
+  if (filters.brand && filters.brand !== 'todas') {
+    const br = filters.brand.toLowerCase();
+    products = products.filter(
+      (p) => p.brand?.slug.toLowerCase() === br || p.brand_id === filters.brand
+    );
+  }
+
+  if (filters.size && filters.size !== 'todos') {
+    products = products.filter((p) => p.available_sizes.includes(String(filters.size)));
+  }
+
+  if (filters.color && filters.color !== 'todas') {
+    const col = filters.color.toLowerCase();
+    products = products.filter((p) =>
+      p.variants.some(
+        (v) => v.color.toLowerCase().includes(col) && (v.stock > 0 || p.allow_backorder)
+      )
+    );
+  }
+
+  if (typeof filters.minPrice === 'number' && !Number.isNaN(filters.minPrice)) {
+    products = products.filter((p) => p.effective_price >= filters.minPrice!);
+  }
+
+  if (typeof filters.maxPrice === 'number' && !Number.isNaN(filters.maxPrice)) {
+    products = products.filter((p) => p.effective_price <= filters.maxPrice!);
+  }
+
+  if (filters.onlyAvailable) {
+    products = products.filter((p) => p.total_stock > 0 || p.allow_backorder);
+  }
+
+  if (filters.onlyPromo) {
+    products = products.filter((p) => p.discount_percent > 0);
+  }
+
+  if (filters.onlyNew) {
+    products = products.filter((p) => p.is_new_release);
+  }
+
+  if (filters.onlyFeatured) {
+    products = products.filter((p) => p.is_featured);
+  }
+
