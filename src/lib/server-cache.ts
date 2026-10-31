@@ -118,3 +118,43 @@ export function primeCacheSlot<K extends SlotKey>(
 function clearSlot(key: SlotKey) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const slot = store[key] as CacheSlot<any>;
+  slot.generation += 1;
+  slot.value = null;
+  slot.expiresAt = 0;
+  slot.inflight = null;
+}
+
+export function getCachedAuthRecord(userId: string): CachedAuthRecord | null | undefined {
+  const entry = store.authByUser.get(userId);
+  if (!entry) return undefined;
+  if (Date.now() >= entry.expiresAt) {
+    store.authByUser.delete(userId);
+    return undefined;
+  }
+  return entry.value;
+}
+
+export function setCachedAuthRecord(
+  userId: string,
+  value: CachedAuthRecord | null,
+  ttlMs = 45_000
+) {
+  store.authByUser.set(userId, {
+    value,
+    expiresAt: Date.now() + ttlMs,
+  });
+}
+
+export function invalidateAuthCache(userId?: string) {
+  if (userId) {
+    store.authByUser.delete(userId);
+  } else {
+    store.authByUser.clear();
+  }
+}
+
+export function invalidateServerCache(
+  scope: ServerSyncScope = 'all',
+  remoteVersion?: number
+): boolean {
+  if (typeof remoteVersion === 'number' && remoteVersion > 0) {
