@@ -1570,3 +1570,115 @@ GRANT EXECUTE ON FUNCTION public.add_to_cart_fast(UUID, UUID, UUID, INT) TO post
 CREATE SCHEMA IF NOT EXISTS internal;
 REVOKE ALL ON SCHEMA internal FROM PUBLIC, anon, authenticated;
 GRANT USAGE ON SCHEMA internal TO postgres, service_role, anon, authenticated;
+
+CREATE SEQUENCE IF NOT EXISTS public.site_sync_version_seq START WITH 100;
+GRANT USAGE, SELECT ON SEQUENCE public.site_sync_version_seq TO postgres, service_role;
+
+CREATE TABLE IF NOT EXISTS public.site_sync_state (
+  id INT PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+  version BIGINT NOT NULL DEFAULT 1,
+  scope TEXT NOT NULL DEFAULT 'all',
+  entity TEXT NOT NULL DEFAULT 'init',
+  actor_tag TEXT,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+INSERT INTO public.site_sync_state (id, version, scope, entity, actor_tag)
+VALUES (1, 1, 'all', 'init', NULL)
+ON CONFLICT (id) DO NOTHING;
+
+ALTER TABLE public.site_sync_state REPLICA IDENTITY FULL;
+ALTER TABLE public.site_sync_state ENABLE ROW LEVEL SECURITY;
+
+GRANT SELECT ON public.site_sync_state TO anon, authenticated;
+GRANT ALL ON public.site_sync_state TO postgres, service_role;
+
+DROP POLICY IF EXISTS "site_sync_state_public_read" ON public.site_sync_state;
+CREATE POLICY "site_sync_state_public_read"
+  ON public.site_sync_state
+  FOR SELECT
+  TO anon, authenticated
+  USING (TRUE);
+
+CREATE OR REPLACE FUNCTION internal.emit_site_sync(
+  p_scope TEXT,
+  p_entity TEXT,
+  p_user_id UUID DEFAULT NULL
+)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  INSERT INTO public.site_sync_state (id, version, scope, entity, actor_tag, updated_at)
+  VALUES (
+    1,
+    nextval('public.site_sync_version_seq'),
+    p_scope,
+    p_entity,
+    CASE WHEN p_user_id IS NOT NULL THEN md5('tc:' || p_user_id::text) ELSE NULL END,
+    NOW()
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    version = EXCLUDED.version,
+    scope = EXCLUDED.scope,
+    entity = EXCLUDED.entity,
+    actor_tag = EXCLUDED.actor_tag,
+    updated_at = EXCLUDED.updated_at;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION internal.trg_sync_global()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  PERFORM internal.emit_site_sync(TG_ARGV[0], TG_TABLE_NAME, NULL);
+  RETURN NULL;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION internal.trg_sync_by_user_col()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_rec JSONB;
+  v_uid_text TEXT;
+  v_uid UUID;
+BEGIN
+  v_rec := CASE WHEN TG_OP = 'DELETE' THEN to_jsonb(OLD) ELSE to_jsonb(NEW) END;
+  v_uid_text := v_rec ->> TG_ARGV[1];
+  IF v_uid_text IS NOT NULL AND v_uid_text <> '' THEN
+    v_uid := v_uid_text::UUID;
+  END IF;
+  PERFORM internal.emit_site_sync(TG_ARGV[0], TG_TABLE_NAME, v_uid);
+  RETURN NULL;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION internal.trg_sync_cart_items()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_cart_id UUID;
+  v_uid UUID;
+BEGIN
+  v_cart_id := CASE WHEN TG_OP = 'DELETE' THEN OLD.cart_id ELSE NEW.cart_id END;
+  SELECT c.user_id INTO v_uid FROM public.carts c WHERE c.id = v_cart_id;
+  PERFORM internal.emit_site_sync('user_private', 'cart_items', v_uid);
+  RETURN NULL;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION internal.trg_sync_global() TO postgres, service_role, authenticated, anon;
+GRANT EXECUTE ON FUNCTION internal.trg_sync_by_user_col() TO postgres, service_role, authenticated, anon;
+GRANT EXECUTE ON FUNCTION internal.trg_sync_cart_items() TO postgres, service_role, authenticated, anon;
