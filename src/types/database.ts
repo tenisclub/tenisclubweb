@@ -155,3 +155,56 @@ export interface CartItemView {
   base_price: number;
   unit_price: number;
   available_stock: number;
+  allow_backorder: boolean;
+  is_available: boolean;
+  subtotal: number;
+}
+
+export interface OrderItem {
+  id: string;
+  order_id: string;
+  product_id: string | null;
+  variant_id: string | null;
+  product_name: string;
+  product_sku: string;
+  product_image: string;
+  brand_name: string;
+  color: string;
+  size: string;
+  unit_price: number;
+  original_price: number;
+  quantity: number;
+  stock_deducted_qty?: number;
+  subtotal: number;
+}
+
+export interface OrderStatusHistory {
+  id: string;
+  order_id: string;
+  previous_status: OrderStatus | null;
+  new_status: OrderStatus;
+  note: string;
+  changed_by: string | null;
+  created_at: string;
+}
+
+export type OrderShippingAddress = Partial<UserAddress> & {
+  custom_option_id?: string;
+  custom_option_title?: string;
+  shipping_label?: string;
+  pickup_address?: string;
+};
+
+export interface Order {
+  id: string;
+  order_number: string;
+  user_id: string;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  delivery_method: DeliveryMethod;
+  shipping_address: OrderShippingAddress | null;
+  subtotal: number;
+  discount_total: number;
+  shipping_cost: number;
+  total: number;
