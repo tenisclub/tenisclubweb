@@ -77,3 +77,83 @@ export function enrichProductRow(row: any, includeCost = false): Product {
     })
     .sort((a, b) => {
       const na = Number(a.size);
+      const nb = Number(b.size);
+      if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;
+      return a.size.localeCompare(b.size);
+    });
+
+  const allowBackorder = Boolean(row.allow_backorder);
+  const totalStock = variants.reduce((acc, v) => acc + v.stock, 0);
+  const allSizes = sortShoeSizes(variants.map((v) => v.size));
+  const availableSizes = allowBackorder
+    ? allSizes
+    : sortShoeSizes(variants.filter((v) => v.stock > 0).map((v) => v.size));
+
+  let sizeRangeLabel = 'Sob consulta';
+  if (allSizes.length === 1) {
+    sizeRangeLabel = allSizes[0];
+  } else if (allSizes.length > 1) {
+    sizeRangeLabel = `${allSizes[0]} ao ${allSizes[allSizes.length - 1]}`;
+  }
+
+  const basePrice = Number(row.base_price ?? 0);
+  let activePromoPrice = row.promo_price != null ? Number(row.promo_price) : null;
+
+  const now = Date.now();
+  const activePromos = (row.promotions || []).filter(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (pr: any) =>
+      pr.is_active &&
+      (!pr.starts_at || new Date(pr.starts_at).getTime() <= now) &&
+      (!pr.ends_at || new Date(pr.ends_at).getTime() >= now)
+  );
+  if (activePromos.length > 0) {
+    const minPromo = Math.min(...activePromos.map((p: { promo_price: number }) => Number(p.promo_price)));
+    if (activePromoPrice === null || minPromo < activePromoPrice) {
+      activePromoPrice = minPromo;
+    }
+  }
+
+  const effectivePrice =
+    activePromoPrice !== null && activePromoPrice > 0 && activePromoPrice < basePrice
+      ? activePromoPrice
+      : basePrice;
+
+  const discountPercent =
+    effectivePrice < basePrice && basePrice > 0
+      ? Math.round(((basePrice - effectivePrice) / basePrice) * 100)
+      : 0;
+
+  const product: Product = {
+    id: row.id,
+    name: row.name,
+    slug: row.slug,
+    sku: row.sku || null,
+    brand_id: row.brand_id || null,
+    category_id: row.category_id || null,
+    gender: (row.gender || 'unissex') as ProductGender,
+    short_description: row.short_description || '',
+    description: row.description || '',
+    additional_info: (row.additional_info as Record<string, string>) || {},
+    base_price: basePrice,
+    promo_price: effectivePrice < basePrice ? effectivePrice : null,
+    effective_price: effectivePrice,
+    discount_percent: discountPercent,
+    is_active: Boolean(row.is_active),
+    is_featured: Boolean(row.is_featured),
+    is_new_release: Boolean(row.is_new_release),
+    allow_backorder: allowBackorder,
+    sold_count: Number(row.sold_count ?? 0),
+    views_count: Number(row.views_count ?? 0),
+    meta_title: row.meta_title || null,
+    meta_description: row.meta_description || null,
+    created_at: row.created_at,
+    brand: Array.isArray(row.brands) ? row.brands[0] : row.brands || null,
+    category: Array.isArray(row.categories) ? row.categories[0] : row.categories || null,
+    images,
+    primary_image: primaryImage,
+    variants,
+    available_sizes: availableSizes,
+    all_sizes: allSizes,
+    total_stock: totalStock,
+    size_range_label: sizeRangeLabel,
