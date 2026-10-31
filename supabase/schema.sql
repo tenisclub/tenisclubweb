@@ -559,3 +559,115 @@ DECLARE
   v_discount_total NUMERIC(10, 2) := 0;
   v_shipping_cost NUMERIC(10, 2) := 0;
   v_items_total NUMERIC(10, 2) := 0;
+  v_total NUMERIC(10, 2) := 0;
+  v_unit_price NUMERIC(10, 2);
+  v_promo_price NUMERIC(10, 2);
+  v_order_id UUID;
+  v_order_number TEXT;
+  v_items_count INT := 0;
+  v_primary_img TEXT;
+  v_deduct_qty INT;
+  v_new_qty INT;
+  v_delivery_cfg JSONB := '{}'::jsonb;
+  v_custom_card JSONB := NULL;
+  v_fee NUMERIC(10, 2) := 0;
+  v_free_min NUMERIC(10, 2) := 0;
+BEGIN
+  IF current_user IN ('anon', 'authenticated') AND (auth.uid() IS NULL OR (auth.uid() <> p_user_id AND NOT public.is_admin(auth.uid()))) THEN
+    RAISE EXCEPTION 'Operação não autorizada para este usuário.';
+  END IF;
+
+  IF p_delivery_method NOT IN ('pickup', 'local_delivery') THEN
+    RAISE EXCEPTION 'Modalidade de recebimento inválida.';
+  END IF;
+
+  SELECT id INTO v_cart_id FROM public.carts WHERE user_id = p_user_id;
+  IF v_cart_id IS NULL THEN
+    RAISE EXCEPTION 'Carrinho não encontrado.';
+  END IF;
+
+  SELECT COUNT(*) INTO v_items_count FROM public.cart_items WHERE cart_id = v_cart_id;
+  IF v_items_count = 0 THEN
+    RAISE EXCEPTION 'Seu carrinho está vazio.';
+  END IF;
+
+  SELECT COALESCE(checkout_delivery_config, '{}'::jsonb)
+  INTO v_delivery_cfg
+  FROM public.store_settings
+  WHERE id = 1;
+
+  -- Generate unique order number TC-YYYY-XXXX
+  v_order_number := 'TC-' || EXTRACT(YEAR FROM NOW())::TEXT || '-' || LPAD(NEXTVAL('public.order_number_seq')::TEXT, 4, '0');
+
+  -- First pass: lock inventory rows and validate stock & active status
+  FOR v_item IN
+    SELECT
+      ci.id AS cart_item_id,
+      ci.quantity AS cart_qty,
+      p.id AS product_id,
+      p.name AS product_name,
+      p.sku AS product_sku,
+      p.base_price,
+      p.promo_price AS product_promo_price,
+      p.is_active AS product_active,
+      COALESCE(p.allow_backorder, FALSE) AS allow_backorder,
+      b.name AS brand_name,
+      pv.id AS variant_id,
+      pv.color,
+      pv.size,
+      pv.is_active AS variant_active,
+      inv.id AS inv_id,
+      inv.quantity AS stock_qty,
+      inv.low_stock_threshold
+    FROM public.cart_items ci
+    JOIN public.products p ON p.id = ci.product_id
+    LEFT JOIN public.brands b ON b.id = p.brand_id
+    JOIN public.product_variants pv ON pv.id = ci.variant_id
+    JOIN public.inventory inv ON inv.variant_id = pv.id
+    WHERE ci.cart_id = v_cart_id
+    ORDER BY inv.id
+    FOR UPDATE OF inv
+  LOOP
+    IF NOT v_item.product_active OR NOT v_item.variant_active THEN
+      RAISE EXCEPTION 'O produto "%" (Tam. %) não está mais disponível para venda.', v_item.product_name, v_item.size;
+    END IF;
+
+    IF NOT v_item.allow_backorder AND v_item.stock_qty < v_item.cart_qty THEN
+      IF v_item.stock_qty = 0 THEN
+        RAISE EXCEPTION 'O produto "%" na numeração % esgotou.', v_item.product_name, v_item.size;
+      ELSE
+        RAISE EXCEPTION 'Estoque insuficiente para "%" (Tam. %). Disponível: % un.', v_item.product_name, v_item.size, v_item.stock_qty;
+      END IF;
+    END IF;
+
+    -- RN07: Validate current price (active scheduled promotion OR product promo_price OR base_price)
+    SELECT pr.promo_price INTO v_promo_price
+    FROM public.promotions pr
+    WHERE pr.product_id = v_item.product_id
+      AND pr.is_active = TRUE
+      AND (pr.starts_at IS NULL OR pr.starts_at <= NOW())
+      AND (pr.ends_at IS NULL OR pr.ends_at >= NOW())
+    ORDER BY pr.promo_price ASC
+    LIMIT 1;
+
+    v_unit_price := COALESCE(v_promo_price, v_item.product_promo_price, v_item.base_price);
+    IF v_unit_price > v_item.base_price THEN
+      v_unit_price := v_item.base_price;
+    END IF;
+
+    v_subtotal := v_subtotal + (v_item.base_price * v_item.cart_qty);
+    v_discount_total := v_discount_total + ((v_item.base_price - v_unit_price) * v_item.cart_qty);
+    v_items_total := v_items_total + (v_unit_price * v_item.cart_qty);
+  END LOOP;
+
+  IF p_shipping_address IS NOT NULL AND (p_shipping_address ? 'custom_option_id') THEN
+    SELECT elem INTO v_custom_card
+    FROM jsonb_array_elements(COALESCE(v_delivery_cfg->'extra_cards', '[]'::jsonb)) AS elem
+    WHERE elem->>'id' = (p_shipping_address->>'custom_option_id')
+      AND COALESCE((elem->>'enabled')::boolean, TRUE) = TRUE
+      AND elem->>'card_type' = 'option'
+    LIMIT 1;
+  END IF;
+
+  IF v_custom_card IS NOT NULL THEN
+    IF COALESCE(v_custom_card->>'fee_mode', 'to_combine') = 'fixed' THEN
