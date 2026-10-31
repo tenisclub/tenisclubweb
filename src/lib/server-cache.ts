@@ -38,3 +38,43 @@ interface GlobalServerCacheStore {
   lastLocalMutationAt: number;
 }
 
+function createEmptySlot<T>(): CacheSlot<T> {
+  return {
+    value: null,
+    expiresAt: 0,
+    inflight: null,
+    generation: 0,
+  };
+}
+
+const globalRef = globalThis as unknown as {
+  __tcServerCache?: GlobalServerCacheStore;
+};
+
+const store: GlobalServerCacheStore =
+  globalRef.__tcServerCache ??
+  (globalRef.__tcServerCache = {
+    settings: createEmptySlot<StoreSettings>(),
+    allProductsAdmin: createEmptySlot<Product[]>(),
+    allCategoriesAndBrands: createEmptySlot<{ categories: Category[]; brands: Brand[] }>(),
+    adminBadges: createEmptySlot<AdminBadgesSnapshot>(),
+    authByUser: new Map(),
+    lastBustedRealtimeVersion: 0,
+    lastLocalMutationAt: 0,
+  });
+
+export type SlotKey = 'settings' | 'allProductsAdmin' | 'allCategoriesAndBrands' | 'adminBadges';
+
+export async function getOrLoadCacheSlot<K extends SlotKey>(
+  key: K,
+  ttlMs: number,
+  loader: () => Promise<NonNullable<GlobalServerCacheStore[K]['value']>>
+): Promise<NonNullable<GlobalServerCacheStore[K]['value']>> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const slot = store[key] as CacheSlot<any>;
+  const now = Date.now();
+
+  if (slot.value !== null && now < slot.expiresAt) {
+    return slot.value;
+  }
+
