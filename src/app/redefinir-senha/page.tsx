@@ -39,7 +39,7 @@ export default function RedefinirSenhaPage() {
       }
 
       toast('Nova senha definida com sucesso!', 'success');
-      router.push('/minha-conta');
+      router.push('/');
     } catch {
       setErrorMsg('Erro ao redefinir senha.');
       setLoading(false);
@@ -106,3 +106,4 @@ export default function RedefinirSenhaPage() {
     </div>
   );
 }
+

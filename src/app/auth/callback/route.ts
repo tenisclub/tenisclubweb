@@ -12,15 +12,17 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
       const session = await getAuthSession();
-      if (next && next.startsWith('/')) {
+      if (!session) {
+        await supabase.auth.signOut();
+        return NextResponse.redirect(`${origin}/login?error=account_disabled`);
+      }
+      if (next && next.startsWith('/') && !next.startsWith('//')) {
         return NextResponse.redirect(`${origin}${next}`);
       }
-      if (session?.isAdmin) {
-        return NextResponse.redirect(`${origin}/admin`);
-      }
-      return NextResponse.redirect(`${origin}/minha-conta`);
+      return NextResponse.redirect(`${origin}/`);
     }
   }
 
   return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`);
 }
+

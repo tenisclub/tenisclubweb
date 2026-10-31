@@ -83,10 +83,10 @@ function CadastroForm() {
       await refreshSession();
       toast('Cadastro realizado com sucesso! Bem-vindo(a) à Tênis Club!', 'success');
 
-      if (redirectParam && redirectParam.startsWith('/')) {
+      if (redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')) {
         router.push(redirectParam);
       } else {
-        router.push('/minha-conta');
+        router.push('/');
       }
       router.refresh();
     } catch {
@@ -327,3 +327,4 @@ export default function CadastroPage() {
     </Suspense>
   );
 }
+

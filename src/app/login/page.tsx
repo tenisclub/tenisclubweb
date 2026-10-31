@@ -39,7 +39,7 @@ function LoginForm() {
         return;
       }
 
-      // Query role from server to route admin vs customer automatically
+      // Verify active account status and load session profile
       const meRes = await fetch('/api/auth/me', { cache: 'no-store' });
       const meData = await meRes.json();
 
@@ -53,12 +53,10 @@ function LoginForm() {
       await refreshSession();
       toast(`Bem-vindo(a) de volta, ${meData.user?.full_name?.split(' ')[0] || ''}!`, 'success');
 
-      if (redirectParam && redirectParam.startsWith('/')) {
+      if (redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')) {
         router.push(redirectParam);
-      } else if (meData.isAdmin) {
-        router.push('/admin');
       } else {
-        router.push('/minha-conta');
+        router.push('/');
       }
       router.refresh();
     } catch {
@@ -229,3 +227,4 @@ export default function LoginPage() {
     </Suspense>
   );
 }
+
