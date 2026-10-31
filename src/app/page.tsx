@@ -48,31 +48,10 @@ export default async function HomePage() {
             logoUrl={settings.logo_url}
           />
 
-          <h1 className="mt-5 text-lg sm:text-2xl font-semibold text-zinc-200 tracking-tight">
+          <h1 className="mt-4 text-base sm:text-xl font-medium text-zinc-300 tracking-tight">
             {settings.hero_title || 'Seu próximo par tá aqui. Bora?'}{' '}
             <span aria-hidden="true">👟</span>
           </h1>
-
-          <p className="mt-2 max-w-xl text-xs sm:text-sm text-zinc-400">
-            {settings.hero_subtitle}
-          </p>
-
-          <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/produtos"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#BEFA46] hover:bg-[#d1ff70] text-[#09090B] text-sm font-extrabold transition shadow-[0_0_28px_rgba(190,250,70,0.28)]"
-            >
-              Explorar Catálogo
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link
-              href="/ofertas"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#16161D] hover:bg-zinc-800 border border-zinc-800 text-sm font-bold text-white transition"
-            >
-              <Tag className="w-4 h-4 text-[#BEFA46]" />
-              Ofertas da Semana
-            </Link>
-          </div>
         </div>
       </section>
 
@@ -268,3 +247,4 @@ export default async function HomePage() {
     </div>
   );
 }
+

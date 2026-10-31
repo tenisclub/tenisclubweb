@@ -12,7 +12,6 @@ import {
   X,
   ShieldCheck,
   Bell,
-  Sparkles,
   Tag,
 } from 'lucide-react';
 import { TenisClubLogo } from '@/components/brand/TenisClubLogo';
@@ -56,18 +55,6 @@ export function Navbar({ settings }: { settings: StoreSettings }) {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-zinc-800/80 bg-[#09090B]/90 backdrop-blur-xl">
-      {/* Top Promo Strip */}
-      <div className="bg-[#121216] border-b border-zinc-800/70 px-4 py-1.5 text-center text-[11px] md:text-xs font-medium text-zinc-300">
-        <span className="inline-flex items-center gap-1.5">
-          <Sparkles className="w-3.5 h-3.5 text-[#BEFA46]" />
-          <span className="text-[#BEFA46] font-bold tracking-wider uppercase">
-            {settings.hero_badge || 'DROP NOVO'}
-          </span>
-          <span className="text-zinc-500">•</span>
-          <span>Retirada rápida na loja ou entrega local com estoque real por numeração</span>
-        </span>
-      </div>
-
       {/* Main Header Row */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20 gap-3">
@@ -243,3 +230,4 @@ export function Navbar({ settings }: { settings: StoreSettings }) {
     </header>
   );
 }
+
