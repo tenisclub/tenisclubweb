@@ -78,3 +78,43 @@ export async function getOrLoadCacheSlot<K extends SlotKey>(
     return slot.value;
   }
 
+  if (slot.inflight) {
+    return slot.inflight;
+  }
+
+  const startGen = slot.generation;
+  const promise = loader()
+    .then((result) => {
+      // Only commit to cache if no invalidation occurred while the query was in flight
+      if (slot.generation === startGen) {
+        slot.value = result;
+        slot.expiresAt = Date.now() + ttlMs;
+      }
+      return result;
+    })
+    .finally(() => {
+      if (slot.inflight === promise) {
+        slot.inflight = null;
+      }
+    });
+
+  slot.inflight = promise;
+  return promise;
+}
+
+export function primeCacheSlot<K extends SlotKey>(
+  key: K,
+  value: NonNullable<GlobalServerCacheStore[K]['value']>,
+  ttlMs: number
+) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const slot = store[key] as CacheSlot<any>;
+  slot.generation += 1;
+  slot.inflight = null;
+  slot.value = value;
+  slot.expiresAt = Date.now() + ttlMs;
+}
+
+function clearSlot(key: SlotKey) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const slot = store[key] as CacheSlot<any>;
