@@ -197,3 +197,70 @@ export function normalizeCheckoutDeliveryConfig(
       ? false
       : typeof obj.pickup_enabled === 'boolean'
         ? obj.pickup_enabled
+        : d.pickup_enabled,
+    pickup_icon: safeIcon(obj.pickup_icon, d.pickup_icon),
+    pickup_title: typeof obj.pickup_title === 'string' ? obj.pickup_title : d.pickup_title,
+    pickup_subtitle:
+      typeof obj.pickup_subtitle === 'string' ? obj.pickup_subtitle : d.pickup_subtitle,
+    pickup_badge: typeof obj.pickup_badge === 'string' ? obj.pickup_badge : d.pickup_badge,
+    pickup_fee: safeNum(obj.pickup_fee, d.pickup_fee),
+
+    delivery_removed: deliveryRemoved,
+    delivery_enabled: deliveryRemoved
+      ? false
+      : typeof obj.delivery_enabled === 'boolean'
+        ? obj.delivery_enabled
+        : d.delivery_enabled,
+    delivery_icon: safeIcon(obj.delivery_icon, d.delivery_icon),
+    delivery_title:
+      typeof obj.delivery_title === 'string' ? obj.delivery_title : d.delivery_title,
+    delivery_subtitle:
+      typeof obj.delivery_subtitle === 'string'
+        ? obj.delivery_subtitle
+        : d.delivery_subtitle,
+    delivery_fee_mode:
+      obj.delivery_fee_mode === 'fixed' ||
+      obj.delivery_fee_mode === 'free' ||
+      obj.delivery_fee_mode === 'to_combine'
+        ? obj.delivery_fee_mode
+        : d.delivery_fee_mode,
+    delivery_fee: safeNum(obj.delivery_fee, d.delivery_fee),
+    free_delivery_threshold: safeNum(
+      obj.free_delivery_threshold,
+      d.free_delivery_threshold
+    ),
+    delivery_badge:
+      typeof obj.delivery_badge === 'string' ? obj.delivery_badge : d.delivery_badge,
+    require_address_on_delivery:
+      typeof obj.require_address_on_delivery === 'boolean'
+        ? obj.require_address_on_delivery
+        : d.require_address_on_delivery,
+
+    pickup_info_removed: pickupInfoRemoved,
+    pickup_info_card_enabled: pickupInfoRemoved
+      ? false
+      : typeof obj.pickup_info_card_enabled === 'boolean'
+        ? obj.pickup_info_card_enabled
+        : d.pickup_info_card_enabled,
+    pickup_info_card_icon: safeIcon(obj.pickup_info_card_icon, d.pickup_info_card_icon),
+    pickup_info_card_title:
+      typeof obj.pickup_info_card_title === 'string'
+        ? obj.pickup_info_card_title
+        : d.pickup_info_card_title,
+    show_pickup_hours:
+      typeof obj.show_pickup_hours === 'boolean'
+        ? obj.show_pickup_hours
+        : d.show_pickup_hours,
+
+    delivery_info_card_enabled:
+      typeof obj.delivery_info_card_enabled === 'boolean'
+        ? obj.delivery_info_card_enabled
+        : d.delivery_info_card_enabled,
+    delivery_info_card_icon: safeIcon(
+      obj.delivery_info_card_icon,
+      d.delivery_info_card_icon
+    ),
+    delivery_info_card_title:
+      typeof obj.delivery_info_card_title === 'string'
+        ? obj.delivery_info_card_title
+        : d.delivery_info_card_title,
