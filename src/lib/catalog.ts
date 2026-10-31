@@ -396,3 +396,83 @@ export async function getRelatedProducts(product: Product, limit = 4): Promise<P
       (p) =>
         p.id !== product.id &&
         (p.category_id === product.category_id || p.gender === product.gender)
+    )
+    .slice(0, limit);
+}
+
+export const getAdminCategoriesAndBrands = cache(
+  async (): Promise<{ categories: Category[]; brands: Brand[] }> => {
+    return getOrLoadCacheSlot('allCategoriesAndBrands', 60_000, async () => {
+      const supabase = createServiceClient();
+      const [{ data: categories }, { data: brands }] = await Promise.all([
+        supabase.from('categories').select('*').order('sort_order', { ascending: true }),
+        supabase.from('brands').select('*').order('name', { ascending: true }),
+      ]);
+
+      return {
+        categories: (categories || []) as Category[],
+        brands: (brands || []) as Brand[],
+      };
+    });
+  }
+);
+
+export const getCategoriesAndBrands = cache(
+  async (): Promise<{ categories: Category[]; brands: Brand[] }> => {
+    const all = await getAdminCategoriesAndBrands();
+    return {
+      categories: all.categories.filter((c) => c.is_active),
+      brands: all.brands.filter((b) => b.is_active),
+    };
+  }
+);
+
+export const getStoreSettings = cache(async (): Promise<StoreSettings> => {
+  try {
+    return await getOrLoadCacheSlot('settings', 60_000, async () => {
+      const supabase = createServiceClient();
+      const { data } = await supabase
+        .from('store_settings')
+        .select('*')
+        .eq('id', 1)
+        .maybeSingle();
+      return data ? ({ ...DEFAULT_SETTINGS, ...data } as StoreSettings) : DEFAULT_SETTINGS;
+    });
+  } catch {
+    return DEFAULT_SETTINGS;
+  }
+});
+
+export function primeStoreSettingsCache(settings: Partial<StoreSettings>) {
+  primeCacheSlot('settings', { ...DEFAULT_SETTINGS, ...settings } as StoreSettings, 60_000);
+}
+
+export const getAdminBadgeCounts = cache(async (): Promise<AdminBadgesSnapshot> => {
+  return getOrLoadCacheSlot('adminBadges', 15_000, async () => {
+    const supabase = createServiceClient();
+    const [pendingOrdersRes, unreadNotifsRes] = await Promise.all([
+      supabase
+        .from('orders')
+        .select('id', { count: 'exact', head: true })
+        .in('status', ['received', 'awaiting_confirmation']),
+      supabase
+        .from('notifications')
+        .select('id', { count: 'exact', head: true })
+        .eq('target_audience', 'admin')
+        .eq('is_read', false),
+    ]);
+
+    return {
+      pendingOrdersCount: pendingOrdersRes.count || 0,
+      unreadAdminNotifs: unreadNotifsRes.count || 0,
+    };
+  });
+});
+
+export const getUserNavbarState = cache(
+  async (userId: string): Promise<{ cartCount: number; favoriteIds: string[] }> => {
+    const supabase = createServiceClient();
+    const [{ data: cart }, { data: favs }] = await Promise.all([
+      supabase
+        .from('carts')
+        .select(
