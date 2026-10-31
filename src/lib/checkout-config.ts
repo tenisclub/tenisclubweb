@@ -131,3 +131,69 @@ export const DEFAULT_CHECKOUT_DELIVERY_CONFIG: CheckoutDeliveryConfig = {
 
   pickup_info_removed: false,
   pickup_info_card_enabled: true,
+  pickup_info_card_icon: 'none',
+  pickup_info_card_title: 'Informações de retirada:',
+  show_pickup_hours: true,
+
+  delivery_info_card_enabled: false,
+  delivery_info_card_icon: 'info',
+  delivery_info_card_title: 'Informações de entrega:',
+
+  extra_cards: [],
+  custom_buttons: [],
+
+  always_require_address: false,
+
+  next_button_label: 'Finalizar Pedido no WhatsApp',
+};
+
+const VALID_ICONS = new Set<CheckoutIconKey>([
+  'map-pin',
+  'store',
+  'truck',
+  'package',
+  'clock',
+  'zap',
+  'shield-check',
+  'sparkles',
+  'message-circle',
+  'navigation',
+  'gift',
+  'external-link',
+  'info',
+  'none',
+]);
+
+function safeIcon(val: unknown, fallback: CheckoutIconKey): CheckoutIconKey {
+  return typeof val === 'string' && VALID_ICONS.has(val as CheckoutIconKey)
+    ? (val as CheckoutIconKey)
+    : fallback;
+}
+
+function safeNum(val: unknown, fallback = 0): number {
+  const n = Number(val);
+  return Number.isFinite(n) && n >= 0 ? n : fallback;
+}
+
+export function normalizeCheckoutDeliveryConfig(
+  raw: unknown
+): CheckoutDeliveryConfig {
+  const obj = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
+  const d = DEFAULT_CHECKOUT_DELIVERY_CONFIG;
+
+  const extraCardsRaw = Array.isArray(obj.extra_cards) ? obj.extra_cards : [];
+  const customButtonsRaw = Array.isArray(obj.custom_buttons) ? obj.custom_buttons : [];
+
+  const pickupRemoved = Boolean(obj.pickup_removed);
+  const deliveryRemoved = Boolean(obj.delivery_removed);
+  const pickupInfoRemoved = Boolean(obj.pickup_info_removed);
+
+  return {
+    step_title: typeof obj.step_title === 'string' ? obj.step_title : d.step_title,
+    step_icon: safeIcon(obj.step_icon, d.step_icon),
+
+    pickup_removed: pickupRemoved,
+    pickup_enabled: pickupRemoved
+      ? false
+      : typeof obj.pickup_enabled === 'boolean'
+        ? obj.pickup_enabled
