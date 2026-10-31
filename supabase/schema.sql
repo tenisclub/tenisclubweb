@@ -1316,3 +1316,109 @@ GRANT EXECUTE ON FUNCTION public.handle_new_user() TO postgres, service_role, su
 REVOKE ALL ON FUNCTION public.get_user_role(uuid) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.get_user_role(uuid) TO postgres, service_role;
 
+
+-- ----------------------------------------------------------------------------
+-- 15. FOREIGN-KEY INDEXES & SINGLE-ROUND-TRIP CART RPC
+-- ----------------------------------------------------------------------------
+CREATE INDEX IF NOT EXISTS idx_product_images_product ON public.product_images(product_id);
+CREATE INDEX IF NOT EXISTS idx_promotions_product_active ON public.promotions(product_id) WHERE is_active = true;
+CREATE INDEX IF NOT EXISTS idx_order_items_order ON public.order_items(order_id);
+CREATE INDEX IF NOT EXISTS idx_order_history_order ON public.order_status_history(order_id);
+CREATE INDEX IF NOT EXISTS idx_user_addresses_user ON public.user_addresses(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_roles_user ON public.user_roles(user_id);
+CREATE INDEX IF NOT EXISTS idx_favorites_user ON public.favorites(user_id);
+CREATE INDEX IF NOT EXISTS idx_cart_items_cart ON public.cart_items(cart_id);
+
+CREATE OR REPLACE FUNCTION public.add_to_cart_fast(
+  p_user_id UUID,
+  p_product_id UUID,
+  p_variant_id UUID,
+  p_quantity INT DEFAULT 1
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_is_active BOOLEAN;
+  v_prod_active BOOLEAN;
+  v_var_active BOOLEAN;
+  v_size TEXT;
+  v_stock INT;
+  v_cart_id UUID;
+  v_existing_qty INT := 0;
+  v_target_qty INT;
+  v_total_items INT := 0;
+BEGIN
+  IF p_quantity IS NULL OR p_quantity < 1 THEN
+    RAISE EXCEPTION 'Selecione a quantidade desejada.';
+  END IF;
+
+  SELECT up.is_active INTO v_is_active
+  FROM public.user_profiles up
+  WHERE up.id = p_user_id;
+
+  IF v_is_active IS DISTINCT FROM true THEN
+    RAISE EXCEPTION 'Conta inativa ou não encontrada.';
+  END IF;
+
+  SELECT p.is_active, pv.is_active, pv.size, COALESCE(inv.quantity, 0)
+  INTO v_prod_active, v_var_active, v_size, v_stock
+  FROM public.product_variants pv
+  JOIN public.products p ON p.id = pv.product_id
+  LEFT JOIN public.inventory inv ON inv.variant_id = pv.id
+  WHERE pv.id = p_variant_id AND pv.product_id = p_product_id;
+
+  IF v_size IS NULL THEN
+    RAISE EXCEPTION 'Variação do produto não encontrada.';
+  END IF;
+
+  IF v_prod_active IS DISTINCT FROM true OR v_var_active IS DISTINCT FROM true THEN
+    RAISE EXCEPTION 'Este produto não está disponível no momento.';
+  END IF;
+
+  IF v_stock <= 0 THEN
+    RAISE EXCEPTION 'A numeração % está esgotada.', v_size;
+  END IF;
+
+  INSERT INTO public.carts (user_id)
+  VALUES (p_user_id)
+  ON CONFLICT (user_id) DO UPDATE SET updated_at = NOW()
+  RETURNING id INTO v_cart_id;
+
+  SELECT ci.quantity INTO v_existing_qty
+  FROM public.cart_items ci
+  WHERE ci.cart_id = v_cart_id AND ci.variant_id = p_variant_id;
+
+  v_target_qty := COALESCE(v_existing_qty, 0) + p_quantity;
+
+  IF v_target_qty > v_stock THEN
+    RAISE EXCEPTION 'Temos apenas % unidade(s) disponível(is) na numeração %.', v_stock, v_size;
+  END IF;
+
+  INSERT INTO public.cart_items (cart_id, product_id, variant_id, quantity, updated_at)
+  VALUES (v_cart_id, p_product_id, p_variant_id, p_quantity, NOW())
+  ON CONFLICT (cart_id, variant_id)
+  DO UPDATE SET quantity = v_target_qty, updated_at = NOW();
+
+  SELECT COALESCE(SUM(LEAST(ci.quantity, inv.quantity)), 0)::INT
+  INTO v_total_items
+  FROM public.cart_items ci
+  JOIN public.products p ON p.id = ci.product_id
+  JOIN public.product_variants pv ON pv.id = ci.variant_id
+  JOIN public.inventory inv ON inv.variant_id = pv.id
+  WHERE ci.cart_id = v_cart_id
+    AND p.is_active = true
+    AND pv.is_active = true
+    AND inv.quantity > 0;
+
+  RETURN jsonb_build_object(
+    'totalItems', v_total_items,
+    'cartId', v_cart_id
+  );
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.add_to_cart_fast(UUID, UUID, UUID, INT) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.add_to_cart_fast(UUID, UUID, UUID, INT) TO postgres, service_role;

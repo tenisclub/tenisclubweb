@@ -13,3 +13,4 @@ export default async function AdminCategoriasPage() {
 
   return <CategoriesClient initialCategories={(data || []) as Category[]} />;
 }
+

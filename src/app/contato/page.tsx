@@ -3,7 +3,7 @@ import { MapPin, Phone, Mail, Clock, MessageCircle } from 'lucide-react';
 import { getStoreSettings } from '@/lib/catalog';
 import { cleanWhatsAppNumber } from '@/lib/utils';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300;
 export const metadata: Metadata = { title: 'Contato' };
 
 export default async function ContatoPage() {
@@ -85,3 +85,4 @@ export default async function ContatoPage() {
     </div>
   );
 }
+

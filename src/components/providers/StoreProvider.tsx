@@ -18,6 +18,15 @@ interface PendingCartIntent {
   returnUrl: string;
 }
 
+interface SessionSnapshot {
+  authenticated: boolean;
+  user: UserProfile | null;
+  role: UserRole;
+  cartCount: number;
+  favoriteIds: string[];
+  unreadNotifications: number;
+}
+
 interface StoreContextValue {
   authenticated: boolean;
   user: UserProfile | null;
@@ -41,6 +50,8 @@ interface StoreContextValue {
 const StoreContext = createContext<StoreContextValue | null>(null);
 
 const PENDING_CART_KEY = 'tc_pending_cart_intent';
+const SESSION_CACHE_KEY = 'tc_session_cache_v1';
+const EMPTY_FAVORITES: string[] = [];
 
 export function StoreProvider({
   children,
@@ -48,7 +59,7 @@ export function StoreProvider({
   initialUser = null,
   initialRole = 'visitor',
   initialCartCount = 0,
-  initialFavoriteIds = [],
+  initialFavoriteIds = EMPTY_FAVORITES,
 }: {
   children: React.ReactNode;
   initialAuth?: boolean;
@@ -66,6 +77,7 @@ export function StoreProvider({
   const [cartCount, setCartCount] = useState(initialCartCount);
   const [favoriteIds, setFavoriteIds] = useState<string[]>(initialFavoriteIds);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [hydratedCache, setHydratedCache] = useState(false);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
   const toast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'success') => {
@@ -76,52 +88,119 @@ export function StoreProvider({
     }, 4200);
   }, []);
 
+  const replayPendingCartIntent = useCallback(async () => {
+    if (typeof window === 'undefined') return;
+    const rawIntent = sessionStorage.getItem(PENDING_CART_KEY);
+    if (!rawIntent) return;
+
+    sessionStorage.removeItem(PENDING_CART_KEY);
+    try {
+      const intent: PendingCartIntent = JSON.parse(rawIntent);
+      const cartRes = await fetch('/api/cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId: intent.productId,
+          variantId: intent.variantId,
+          quantity: intent.quantity || 1,
+        }),
+      });
+      if (cartRes.ok) {
+        const updated = await cartRes.json();
+        setCartCount(updated.totalItems || 0);
+        toast('Produto adicionado ao seu carrinho! Continue sua compra.', 'success');
+      }
+    } catch {
+      // Ignore malformed intent
+    }
+  }, [toast]);
+
   const refreshSession = useCallback(async () => {
     try {
       const res = await fetch('/api/auth/me', { cache: 'no-store' });
       if (!res.ok) return;
       const data = await res.json();
-      setAuthenticated(Boolean(data.authenticated));
+      const isAuth = Boolean(data.authenticated);
+      setAuthenticated(isAuth);
       setUser(data.user || null);
       setRole(data.role || 'visitor');
       setCartCount(data.cartCount || 0);
       setFavoriteIds(data.favoriteIds || []);
       setUnreadNotifications(data.unreadNotifications || 0);
 
-      // Section 4.1: Replay preserved purchase intent right after authentication
-      if (data.authenticated && typeof window !== 'undefined') {
-        const rawIntent = sessionStorage.getItem(PENDING_CART_KEY);
-        if (rawIntent) {
-          sessionStorage.removeItem(PENDING_CART_KEY);
-          try {
-            const intent: PendingCartIntent = JSON.parse(rawIntent);
-            const cartRes = await fetch('/api/cart', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                productId: intent.productId,
-                variantId: intent.variantId,
-                quantity: intent.quantity || 1,
-              }),
-            });
-            if (cartRes.ok) {
-              const updated = await cartRes.json();
-              setCartCount(updated.totalItems || 0);
-              toast('Produto adicionado ao seu carrinho! Continue sua compra.', 'success');
-            }
-          } catch {
-            // Ignore malformed intent
-          }
+      if (typeof window !== 'undefined') {
+        if (isAuth) {
+          const snap: SessionSnapshot = {
+            authenticated: true,
+            user: data.user || null,
+            role: data.role || 'visitor',
+            cartCount: data.cartCount || 0,
+            favoriteIds: data.favoriteIds || [],
+            unreadNotifications: data.unreadNotifications || 0,
+          };
+          sessionStorage.setItem(SESSION_CACHE_KEY, JSON.stringify(snap));
+        } else {
+          sessionStorage.removeItem(SESSION_CACHE_KEY);
         }
+      }
+
+      if (isAuth) {
+        await replayPendingCartIntent();
       }
     } catch {
       // Ignore transient fetch errors
     }
-  }, [toast]);
+  }, [replayPendingCartIntent]);
 
+  // Hydrate navbar session once on mount (zero requests for anonymous visitors; instant cache restore + background sync for logged-in users)
   useEffect(() => {
-    refreshSession();
-  }, [pathname, refreshSession]);
+    if (typeof window === 'undefined') return;
+
+    const hasAuthCookie = document.cookie.includes('-auth-token');
+    if (!hasAuthCookie) {
+      sessionStorage.removeItem(SESSION_CACHE_KEY);
+      setHydratedCache(true);
+      return;
+    }
+
+    try {
+      const raw = sessionStorage.getItem(SESSION_CACHE_KEY);
+      if (raw) {
+        const cached = JSON.parse(raw) as SessionSnapshot;
+        if (cached.authenticated) {
+          setAuthenticated(true);
+          setUser(cached.user);
+          setRole(cached.role);
+          setCartCount(cached.cartCount);
+          setFavoriteIds(cached.favoriteIds);
+          setUnreadNotifications(cached.unreadNotifications);
+        }
+      }
+    } catch {
+      // Ignore corrupt cache
+    }
+
+    setHydratedCache(true);
+    void refreshSession();
+  }, [refreshSession]);
+
+  // Keep sessionStorage snapshot synced with optimistic cart/favorite updates
+  useEffect(() => {
+    if (!hydratedCache || typeof window === 'undefined') return;
+    if (!authenticated) {
+      sessionStorage.removeItem(SESSION_CACHE_KEY);
+      return;
+    }
+    const snap: SessionSnapshot = {
+      authenticated,
+      user,
+      role,
+      cartCount,
+      favoriteIds,
+      unreadNotifications,
+    };
+    sessionStorage.setItem(SESSION_CACHE_KEY, JSON.stringify(snap));
+  }, [hydratedCache, authenticated, user, role, cartCount, favoriteIds, unreadNotifications]);
 
   const addToCart = useCallback(
     async ({
@@ -148,6 +227,48 @@ export function StoreProvider({
         return false;
       }
 
+      // Optimistic instant feedback when staying on the current page
+      if (!redirectToCart) {
+        setCartCount((prev) => prev + quantity);
+        toast('Adicionado ao carrinho com sucesso!', 'success');
+
+        fetch('/api/cart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId, variantId, quantity }),
+        })
+          .then(async (res) => {
+            const data = await res.json();
+            if (res.status === 401) {
+              setCartCount((prev) => Math.max(0, prev - quantity));
+              if (typeof window !== 'undefined') {
+                const returnUrl = window.location.pathname;
+                sessionStorage.setItem(
+                  PENDING_CART_KEY,
+                  JSON.stringify({ productId, variantId, quantity, returnUrl })
+                );
+                toast('Faça login para continuar. Guardamos sua numeração!', 'info');
+                router.push(`/login?redirect=${encodeURIComponent(returnUrl)}`);
+              }
+              return;
+            }
+            if (!res.ok) {
+              setCartCount((prev) => Math.max(0, prev - quantity));
+              toast(data.error || 'Não foi possível adicionar ao carrinho.', 'error');
+              return;
+            }
+            if (typeof data.totalItems === 'number') {
+              setCartCount(data.totalItems);
+            }
+          })
+          .catch(() => {
+            setCartCount((prev) => Math.max(0, prev - quantity));
+            toast('Erro de conexão ao adicionar ao carrinho.', 'error');
+          });
+
+        return true;
+      }
+
       const res = await fetch('/api/cart', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -158,7 +279,7 @@ export function StoreProvider({
 
       if (res.status === 401) {
         if (typeof window !== 'undefined') {
-          const returnUrl = redirectToCart ? '/carrinho' : window.location.pathname;
+          const returnUrl = '/carrinho';
           sessionStorage.setItem(
             PENDING_CART_KEY,
             JSON.stringify({ productId, variantId, quantity, returnUrl })
@@ -176,9 +297,7 @@ export function StoreProvider({
 
       setCartCount(data.totalItems || 0);
       toast('Adicionado ao carrinho com sucesso!', 'success');
-      if (redirectToCart) {
-        router.push('/carrinho');
-      }
+      router.push('/carrinho');
       return true;
     },
     [authenticated, router, toast]
@@ -196,25 +315,30 @@ export function StoreProvider({
       setFavoriteIds((prev) =>
         wasFav ? prev.filter((id) => id !== productId) : [...prev, productId]
       );
-
-      const res = await fetch('/api/favorites', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId }),
-      });
-
-      if (!res.ok) {
-        setFavoriteIds((prev) =>
-          wasFav ? [...prev, productId] : prev.filter((id) => id !== productId)
-        );
-        toast('Erro ao atualizar favoritos.', 'error');
-        return;
-      }
-
       toast(
         wasFav ? 'Removido da sua lista de favoritos.' : 'Salvo nos seus favoritos!',
         'info'
       );
+
+      try {
+        const res = await fetch('/api/favorites', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId }),
+        });
+
+        if (!res.ok) {
+          setFavoriteIds((prev) =>
+            wasFav ? [...prev, productId] : prev.filter((id) => id !== productId)
+          );
+          toast('Erro ao atualizar favoritos.', 'error');
+        }
+      } catch {
+        setFavoriteIds((prev) =>
+          wasFav ? [...prev, productId] : prev.filter((id) => id !== productId)
+        );
+        toast('Erro ao atualizar favoritos.', 'error');
+      }
     },
     [authenticated, favoriteIds, pathname, router, toast]
   );

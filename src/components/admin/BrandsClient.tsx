@@ -117,3 +117,4 @@ export function BrandsClient({ initialBrands }: { initialBrands: Brand[] }) {
     </div>
   );
 }
+

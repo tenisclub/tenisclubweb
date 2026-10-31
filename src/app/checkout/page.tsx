@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { CheckoutClient } from '@/components/cart/CheckoutClient';
-import { requireAuth } from '@/lib/auth';
+import { getAuthSession, requireUserId } from '@/lib/auth';
 import { getStoreSettings, getUserCartView } from '@/lib/catalog';
 import { createServiceClient } from '@/lib/supabase/server';
 import type { UserAddress } from '@/types/database';
@@ -13,23 +13,28 @@ export const metadata: Metadata = {
 };
 
 export default async function CheckoutPage() {
-  const session = await requireAuth('/checkout');
-  const [cart, settings] = await Promise.all([
-    getUserCartView(session.userId),
+  const userId = await requireUserId('/checkout');
+  const supabase = createServiceClient();
+
+  const [session, cart, settings, { data: addresses }] = await Promise.all([
+    getAuthSession(),
+    getUserCartView(userId),
     getStoreSettings(),
+    supabase
+      .from('user_addresses')
+      .select('*')
+      .eq('user_id', userId)
+      .order('is_default', { ascending: false }),
   ]);
+
+  if (!session) {
+    redirect('/login?redirect=/checkout');
+  }
 
   const activeItems = cart.items.filter((i) => i.is_available);
   if (activeItems.length === 0) {
     redirect('/carrinho');
   }
-
-  const supabase = createServiceClient();
-  const { data: addresses } = await supabase
-    .from('user_addresses')
-    .select('*')
-    .eq('user_id', session.userId)
-    .order('is_default', { ascending: false });
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
@@ -53,3 +58,4 @@ export default async function CheckoutPage() {
     </div>
   );
 }
+

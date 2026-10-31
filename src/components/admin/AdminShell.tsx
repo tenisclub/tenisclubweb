@@ -22,6 +22,7 @@ import {
   LogOut,
 } from 'lucide-react';
 import { TenisClubLogo } from '@/components/brand/TenisClubLogo';
+import { useStore } from '@/components/providers/StoreProvider';
 import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 import type { UserProfile, UserRole } from '@/types/database';
@@ -56,6 +57,7 @@ export function AdminShell({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { refreshSession } = useStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const isSuper = role === 'super_admin';
@@ -63,6 +65,7 @@ export function AdminShell({
   const handleLogout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
+    await refreshSession();
     router.push('/login');
     router.refresh();
   };
@@ -232,3 +235,4 @@ export function AdminShell({
     </div>
   );
 }
+

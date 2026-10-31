@@ -10,7 +10,7 @@ import {
   getStoreSettings,
 } from '@/lib/catalog';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 export async function generateMetadata({
   params,
@@ -128,3 +128,4 @@ export default async function ProdutoDetailPage({
     </div>
   );
 }
+

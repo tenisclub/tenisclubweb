@@ -1,3 +1,4 @@
+import { revalidateTag } from 'next/cache';
 import { NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase/server';
@@ -35,6 +36,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
+    revalidateTag('catalog', { expire: 0 });
     return NextResponse.json({ result: data });
   } catch (err) {
     return NextResponse.json(
@@ -43,3 +45,4 @@ export async function POST(request: Request) {
     );
   }
 }
+

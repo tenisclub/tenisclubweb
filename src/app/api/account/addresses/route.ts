@@ -119,3 +119,4 @@ export async function DELETE(request: Request) {
   await supabase.from('user_addresses').delete().eq('id', id).eq('user_id', session.userId);
   return NextResponse.json({ success: true });
 }
+

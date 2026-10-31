@@ -161,3 +161,4 @@ export function CustomersClient({ initialCustomers }: { initialCustomers: Custom
     </div>
   );
 }
+

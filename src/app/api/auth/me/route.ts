@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
-import { getUserCartView, getUserFavoriteIds } from '@/lib/catalog';
+import { getUserNavbarState } from '@/lib/catalog';
 import { createServiceClient } from '@/lib/supabase/server';
 
 export async function GET() {
@@ -17,9 +17,8 @@ export async function GET() {
   }
 
   const supabase = createServiceClient();
-  const [cart, favoriteIds, notifRes] = await Promise.all([
-    getUserCartView(session.userId),
-    getUserFavoriteIds(session.userId),
+  const [navState, notifRes] = await Promise.all([
+    getUserNavbarState(session.userId),
     session.isAdmin
       ? supabase
           .from('notifications')
@@ -40,8 +39,8 @@ export async function GET() {
     role: session.role,
     isAdmin: session.isAdmin,
     isSuperAdmin: session.isSuperAdmin,
-    cartCount: cart.totalItems,
-    favoriteIds,
+    cartCount: navState.cartCount,
+    favoriteIds: navState.favoriteIds,
     unreadNotifications: notifRes.count || 0,
   });
 }

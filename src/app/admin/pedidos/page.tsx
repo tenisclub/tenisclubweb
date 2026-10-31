@@ -13,3 +13,4 @@ export default async function AdminPedidosPage() {
 
   return <OrdersListClient initialOrders={(data || []) as Order[]} />;
 }
+

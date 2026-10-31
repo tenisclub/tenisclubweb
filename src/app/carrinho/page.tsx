@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { CartClient } from '@/components/cart/CartClient';
-import { requireAuth } from '@/lib/auth';
+import { requireUserId } from '@/lib/auth';
 import { getUserCartView } from '@/lib/catalog';
 
 export const dynamic = 'force-dynamic';
@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 };
 
 export default async function CarrinhoPage() {
-  const session = await requireAuth('/carrinho');
-  const cart = await getUserCartView(session.userId);
+  const userId = await requireUserId('/carrinho');
+  const cart = await getUserCartView(userId);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
@@ -33,3 +33,4 @@ export default async function CarrinhoPage() {
     </div>
   );
 }
+

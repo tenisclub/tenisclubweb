@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { getStoreSettings } from '@/lib/catalog';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300;
 export const metadata: Metadata = { title: 'Política de Privacidade (LGPD)' };
 
 export default async function PrivacidadePage() {
@@ -27,3 +27,4 @@ export default async function PrivacidadePage() {
     </div>
   );
 }
+

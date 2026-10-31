@@ -34,3 +34,4 @@ export default async function AdminEstoquePage() {
 
   return <InventoryManagerClient initialRows={stockRows} />;
 }
+

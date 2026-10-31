@@ -1,3 +1,4 @@
+import { revalidateTag } from 'next/cache';
 import { NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase/server';
@@ -42,44 +43,52 @@ export async function POST(request: Request) {
 
     const supabase = createServiceClient();
 
-    // Update customer phone if missing
-    if (!session.profile.phone && customerPhone) {
-      await supabase
-        .from('user_profiles')
-        .update({ phone: customerPhone.trim() })
-        .eq('id', session.userId);
-    }
+    const phoneUpdatePromise =
+      !session.profile.phone && customerPhone
+        ? supabase
+            .from('user_profiles')
+            .update({ phone: customerPhone.trim() })
+            .eq('id', session.userId)
+        : Promise.resolve();
 
-    const { data: rpcResult, error: rpcError } = await supabase.rpc('create_order_from_cart', {
-      p_user_id: session.userId,
-      p_customer_name: customerName.trim(),
-      p_customer_email: customerEmail.trim(),
-      p_customer_phone: customerPhone.trim(),
-      p_delivery_method: deliveryMethod,
-      p_shipping_address: deliveryMethod === 'local_delivery' ? shippingAddress : null,
-      p_customer_notes: customerNotes || '',
-    });
+    const [{ data: rpcResult, error: rpcError }] = await Promise.all([
+      supabase.rpc('create_order_from_cart', {
+        p_user_id: session.userId,
+        p_customer_name: customerName.trim(),
+        p_customer_email: customerEmail.trim(),
+        p_customer_phone: customerPhone.trim(),
+        p_delivery_method: deliveryMethod,
+        p_shipping_address: deliveryMethod === 'local_delivery' ? shippingAddress : null,
+        p_customer_notes: customerNotes || '',
+      }),
+      phoneUpdatePromise,
+    ]);
 
     if (rpcError) {
       return NextResponse.json({ error: rpcError.message }, { status: 400 });
     }
 
-    const orderId = rpcResult?.order_id;
+    revalidateTag('catalog', { expire: 0 });
+
+    const r = rpcResult as { order_id?: string; order_number?: string } | null;
+    const orderId = r?.order_id;
     const { data: fullOrder } = await supabase
       .from('orders')
       .select('*, order_items(*)')
-      .eq('id', orderId)
+      .eq('id', orderId!)
       .single();
 
+    const orderData = fullOrder as Record<string, unknown> | null;
+
     return NextResponse.json({
-      order: fullOrder
+      order: orderData
         ? {
-            ...fullOrder,
-            items: fullOrder.order_items || [],
+            ...orderData,
+            items: (orderData.order_items as unknown[]) || [],
           }
         : null,
       orderId,
-      orderNumber: rpcResult?.order_number,
+      orderNumber: r?.order_number,
     });
   } catch (err) {
     return NextResponse.json(

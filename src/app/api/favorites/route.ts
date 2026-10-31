@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import { getAuthSession } from '@/lib/auth';
+import { getAuthenticatedUserId } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase/server';
 
 export async function POST(request: Request) {
-  const session = await getAuthSession();
-  if (!session) {
+  const userId = await getAuthenticatedUserId();
+  if (!userId) {
     return NextResponse.json(
       { error: 'Faça login para salvar favoritos.', code: 'UNAUTHENTICATED' },
       { status: 401 }
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   const { data: existing } = await supabase
     .from('favorites')
     .select('id')
-    .eq('user_id', session.userId)
+    .eq('user_id', userId)
     .eq('product_id', productId)
     .maybeSingle();
 
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ favorited: false });
   } else {
     await supabase.from('favorites').insert({
-      user_id: session.userId,
+      user_id: userId,
       product_id: productId,
     });
     return NextResponse.json({ favorited: true });

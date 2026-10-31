@@ -541,3 +541,4 @@ export function CatalogExplorer({
     </div>
   );
 }
+

@@ -31,3 +31,4 @@ export default async function AdminPedidoDetailPage({
 
   return <OrderDetailAdminClient initialOrder={order} />;
 }
+

@@ -1,5 +1,7 @@
+import { cache } from 'react';
 import { redirect } from 'next/navigation';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
+import { getSupabaseJwks } from '@/lib/supabase/jwks';
 import type { UserProfile, UserRole } from '@/types/database';
 
 export interface AuthSession {
@@ -11,43 +13,66 @@ export interface AuthSession {
   isSuperAdmin: boolean;
 }
 
-export async function getAuthSession(): Promise<AuthSession | null> {
-  try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser();
+interface VerifiedClaims {
+  sub: string;
+  email?: string;
+  user_metadata?: Record<string, unknown>;
+  app_metadata?: Record<string, unknown>;
+}
 
-    if (error || !user) return null;
+const getVerifiedClaims = cache(async (): Promise<VerifiedClaims | null> => {
+  try {
+    const [supabase, jwks] = await Promise.all([createClient(), getSupabaseJwks()]);
+    const { data, error } = await supabase.auth.getClaims(undefined, jwks ? { jwks } : undefined);
+    if (error || !data?.claims?.sub) return null;
+    return data.claims as unknown as VerifiedClaims;
+  } catch {
+    return null;
+  }
+});
+
+export const getAuthenticatedUserId = cache(async (): Promise<string | null> => {
+  const claims = await getVerifiedClaims();
+  return claims?.sub || null;
+});
+
+export const getAuthSession = cache(async (): Promise<AuthSession | null> => {
+  try {
+    const claims = await getVerifiedClaims();
+    if (!claims?.sub) return null;
+
+    const userId = claims.sub;
+    const claimEmail = typeof claims.email === 'string' ? claims.email : '';
+    const userMeta = claims.user_metadata || {};
+    const appMeta = claims.app_metadata || {};
 
     const service = createServiceClient();
 
     const [{ data: profile }, { data: userRoles }] = await Promise.all([
-      service.from('user_profiles').select('*').eq('id', user.id).maybeSingle(),
-      service
-        .from('user_roles')
-        .select('roles(name)')
-        .eq('user_id', user.id),
+      service.from('user_profiles').select('*').eq('id', userId).maybeSingle(),
+      service.from('user_roles').select('roles(name)').eq('user_id', userId),
     ]);
 
     // Ensure profile exists even if signed up before trigger
     let resolvedProfile = profile as UserProfile | null;
     if (!resolvedProfile) {
       const fullName =
-        user.user_metadata?.full_name ||
-        user.user_metadata?.name ||
-        user.email?.split('@')[0] ||
+        (typeof userMeta.full_name === 'string' && userMeta.full_name) ||
+        (typeof userMeta.name === 'string' && userMeta.name) ||
+        claimEmail.split('@')[0] ||
         'Cliente';
       const { data: inserted } = await service
         .from('user_profiles')
         .upsert({
-          id: user.id,
-          email: (user.email || '').toLowerCase(),
+          id: userId,
+          email: claimEmail.toLowerCase(),
           full_name: fullName,
-          phone: user.user_metadata?.phone || '',
-          avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
-          auth_provider: user.app_metadata?.provider || 'email',
+          phone: typeof userMeta.phone === 'string' ? userMeta.phone : '',
+          avatar_url:
+            (typeof userMeta.avatar_url === 'string' && userMeta.avatar_url) ||
+            (typeof userMeta.picture === 'string' && userMeta.picture) ||
+            null,
+          auth_provider: typeof appMeta.provider === 'string' ? appMeta.provider : 'email',
           is_active: true,
         })
         .select('*')
@@ -71,8 +96,8 @@ export async function getAuthSession(): Promise<AuthSession | null> {
     else if (roleNames.includes('admin_operational')) role = 'admin_operational';
 
     return {
-      userId: user.id,
-      email: user.email || resolvedProfile.email,
+      userId,
+      email: claimEmail || resolvedProfile.email,
       profile: { ...resolvedProfile, role },
       role,
       isAdmin: role === 'super_admin' || role === 'admin_operational',
@@ -81,6 +106,14 @@ export async function getAuthSession(): Promise<AuthSession | null> {
   } catch {
     return null;
   }
+});
+
+export async function requireUserId(redirectTo = '/minha-conta'): Promise<string> {
+  const userId = await getAuthenticatedUserId();
+  if (!userId) {
+    redirect(`/login?redirect=${encodeURIComponent(redirectTo)}`);
+  }
+  return userId;
 }
 
 export async function requireAuth(redirectTo = '/minha-conta'): Promise<AuthSession> {

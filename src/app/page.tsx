@@ -1,11 +1,12 @@
 import Link from 'next/link';
 import { ArrowRight, Flame, Sparkles, Tag, TrendingUp, Layers } from 'lucide-react';
 import { TenisClubLogo } from '@/components/brand/TenisClubLogo';
+import { HeroVideoBackground } from '@/components/home/HeroVideoBackground';
 import { HomeQuickCatalog } from '@/components/product/HomeQuickCatalog';
 import { ProductCard } from '@/components/product/ProductCard';
 import { getCatalogProducts, getCategoriesAndBrands, getStoreSettings } from '@/lib/catalog';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 export default async function HomePage() {
   const [settings, { allMatching: allProducts }, { categories }] = await Promise.all([
@@ -24,19 +25,13 @@ export default async function HomePage() {
   return (
     <div className="space-y-16">
       {/* 1. HERO BANNER (Matching TÊNIS CLUB Visual Identity) */}
-      <section className="relative overflow-hidden border-b border-zinc-900 bg-[#070709] pt-12 pb-14 md:pt-16 md:pb-20">
-        {settings.hero_banner_url && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={settings.hero_banner_url}
-            alt={settings.store_name}
-            className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none"
-          />
-        )}
+      <section className="relative min-h-[380px] sm:min-h-[430px] md:min-h-[480px] flex items-center justify-center overflow-hidden border-b border-zinc-900 bg-[#070709] py-14 md:py-20">
+        <HeroVideoBackground />
+
         {/* Ambient Volt Glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[520px] h-[280px] bg-[#BEFA46]/10 blur-[130px] rounded-full pointer-events-none" />
 
-        <div className="relative max-w-4xl mx-auto px-4 text-center flex flex-col items-center">
+        <div className="relative z-10 max-w-4xl mx-auto px-4 text-center flex flex-col items-center drop-shadow-[0_6px_24px_rgba(0,0,0,0.85)]">
           <span className="text-[11px] sm:text-xs font-extrabold tracking-[0.34em] uppercase text-[#BEFA46] mb-5">
             {settings.hero_badge || 'DROP NOVO · CATÁLOGO'}
           </span>
@@ -46,7 +41,7 @@ export default async function HomePage() {
             logoUrl={settings.logo_url}
           />
 
-          <h1 className="mt-4 text-base sm:text-xl font-medium text-zinc-300 tracking-tight">
+          <h1 className="mt-4 text-base sm:text-xl font-medium text-zinc-100 tracking-tight">
             {settings.hero_title || 'Seu próximo par tá aqui. Bora?'}{' '}
             <span aria-hidden="true">👟</span>
           </h1>

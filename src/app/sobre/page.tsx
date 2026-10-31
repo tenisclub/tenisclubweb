@@ -4,7 +4,7 @@ import { ShieldCheck, Sparkles, Users } from 'lucide-react';
 import { TenisClubLogo } from '@/components/brand/TenisClubLogo';
 import { getStoreSettings } from '@/lib/catalog';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300;
 export const metadata: Metadata = { title: 'Sobre Nós' };
 
 export default async function SobrePage() {
@@ -57,3 +57,4 @@ export default async function SobrePage() {
     </div>
   );
 }
+

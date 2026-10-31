@@ -361,3 +361,4 @@ export function OrderDetailAdminClient({ initialOrder }: { initialOrder: Order }
     </div>
   );
 }
+

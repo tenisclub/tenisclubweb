@@ -13,3 +13,4 @@ export default async function AdminMarcasPage() {
 
   return <BrandsClient initialBrands={(data || []) as Brand[]} />;
 }
+

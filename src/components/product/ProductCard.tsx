@@ -227,3 +227,4 @@ export function ProductCard({ product, whatsapp = '5511999999999' }: ProductCard
     </article>
   );
 }
+

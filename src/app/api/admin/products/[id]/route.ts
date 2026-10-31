@@ -1,3 +1,4 @@
+import { revalidateTag } from 'next/cache';
 import { NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase/server';
@@ -40,6 +41,7 @@ export async function PATCH(
         details: updates,
       });
 
+      revalidateTag('catalog', { expire: 0 });
       return NextResponse.json({ product: prod });
     }
 
@@ -229,6 +231,7 @@ export async function PATCH(
       details: { name: product.name, base_price: product.base_price },
     });
 
+    revalidateTag('catalog', { expire: 0 });
     return NextResponse.json({ product });
   } catch (err) {
     return NextResponse.json(
@@ -271,6 +274,7 @@ export async function DELETE(
       details: { reason: 'Produto possui pedidos históricos vinculados; arquivado como inativo.' },
     });
 
+    revalidateTag('catalog', { expire: 0 });
     return NextResponse.json({
       archived: true,
       message: 'Produto arquivado (inativado) pois possui histórico de pedidos.',
@@ -288,5 +292,7 @@ export async function DELETE(
     details: {},
   });
 
+  revalidateTag('catalog', { expire: 0 });
   return NextResponse.json({ deleted: true });
 }
+

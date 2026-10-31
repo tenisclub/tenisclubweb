@@ -257,3 +257,4 @@ export function AdminProductsTable({ initialProducts }: { initialProducts: Produ
     </div>
   );
 }
+

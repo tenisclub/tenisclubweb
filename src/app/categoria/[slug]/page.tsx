@@ -4,7 +4,7 @@ import { ChevronRight } from 'lucide-react';
 import { CatalogExplorer } from '@/components/product/CatalogExplorer';
 import { getCatalogProducts, getCategoriesAndBrands, getStoreSettings } from '@/lib/catalog';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 const GENDER_SLUGS: Record<string, { title: string; subtitle: string }> = {
   masculino: {
@@ -91,3 +91,4 @@ export default async function CategoriaPage({
     </div>
   );
 }
+

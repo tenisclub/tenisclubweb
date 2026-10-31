@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Store, Truck } from 'lucide-react';
 import { getStoreSettings } from '@/lib/catalog';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300;
 export const metadata: Metadata = { title: 'Entrega e Retirada' };
 
 export default async function EntregaRetiradaPage() {
@@ -35,3 +35,4 @@ export default async function EntregaRetiradaPage() {
     </div>
   );
 }
+

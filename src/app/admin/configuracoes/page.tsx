@@ -7,3 +7,4 @@ export default async function AdminConfiguracoesPage() {
   const settings = await getStoreSettings();
   return <SettingsClient initialSettings={settings} />;
 }
+

@@ -1,7 +1,18 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { getSupabaseJwks } from '@/lib/supabase/jwks';
 
 export async function proxy(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+  const hasSbCookie = request.cookies.getAll().some((c) => c.name.startsWith('sb-'));
+
+  if (!hasSbCookie) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = '/login';
+    loginUrl.searchParams.set('redirect', pathname + request.nextUrl.search);
+    return NextResponse.redirect(loginUrl);
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   });
@@ -27,17 +38,10 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const jwks = await getSupabaseJwks();
+  const { data, error } = await supabase.auth.getClaims(undefined, jwks ? { jwks } : undefined);
 
-  const pathname = request.nextUrl.pathname;
-  const protectedPrefixes = ['/minha-conta', '/carrinho', '/checkout', '/admin'];
-  const isProtected = protectedPrefixes.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
-  );
-
-  if (isProtected && !user) {
+  if (error || !data?.claims?.sub) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = '/login';
     loginUrl.searchParams.set('redirect', pathname + request.nextUrl.search);
@@ -51,6 +55,9 @@ export default proxy;
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif)$).*)',
+    '/minha-conta/:path*',
+    '/carrinho/:path*',
+    '/checkout/:path*',
+    '/admin/:path*',
   ],
 };

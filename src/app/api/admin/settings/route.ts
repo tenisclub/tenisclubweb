@@ -1,3 +1,4 @@
+import { revalidateTag } from 'next/cache';
 import { NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase/server';
@@ -62,6 +63,7 @@ export async function PATCH(request: Request) {
       details: { store_name: data.store_name, whatsapp: data.whatsapp },
     });
 
+    revalidateTag('store-settings', { expire: 0 });
     return NextResponse.json({ settings: data });
   } catch (err) {
     return NextResponse.json(
@@ -70,3 +72,4 @@ export async function PATCH(request: Request) {
     );
   }
 }
+

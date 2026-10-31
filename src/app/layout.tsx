@@ -4,8 +4,7 @@ import './globals.css';
 import { StoreProvider } from '@/components/providers/StoreProvider';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
-import { getStoreSettings, getUserCartView, getUserFavoriteIds } from '@/lib/catalog';
-import { getAuthSession } from '@/lib/auth';
+import { getStoreSettings } from '@/lib/catalog';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -43,33 +42,16 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [settings, session] = await Promise.all([
-    getStoreSettings(),
-    getAuthSession(),
-  ]);
-
-  let initialCartCount = 0;
-  let initialFavoriteIds: string[] = [];
-
-  if (session) {
-    const [cart, favs] = await Promise.all([
-      getUserCartView(session.userId),
-      getUserFavoriteIds(session.userId),
-    ]);
-    initialCartCount = cart.totalItems;
-    initialFavoriteIds = favs;
-  }
+  const settings = await getStoreSettings();
 
   return (
-    <html lang="pt-BR" className={`${inter.variable} ${montserrat.variable} dark`}>
+    <html
+      lang="pt-BR"
+      data-scroll-behavior="smooth"
+      className={`${inter.variable} ${montserrat.variable} dark`}
+    >
       <body className="min-h-screen flex flex-col bg-[#09090B] text-zinc-100 antialiased font-sans">
-        <StoreProvider
-          initialAuth={Boolean(session)}
-          initialUser={session?.profile || null}
-          initialRole={session?.role || 'visitor'}
-          initialCartCount={initialCartCount}
-          initialFavoriteIds={initialFavoriteIds}
-        >
+        <StoreProvider>
           <Navbar settings={settings} />
           <main className="flex-1">{children}</main>
           <Footer settings={settings} />

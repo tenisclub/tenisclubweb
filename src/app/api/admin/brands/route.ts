@@ -1,3 +1,4 @@
+import { revalidateTag } from 'next/cache';
 import { NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase/server';
@@ -31,6 +32,7 @@ export async function POST(request: Request) {
     details: { name: data.name },
   });
 
+  revalidateTag('catalog', { expire: 0 });
   return NextResponse.json({ brand: data });
 }
 
@@ -66,6 +68,7 @@ export async function PATCH(request: Request) {
     details: updates,
   });
 
+  revalidateTag('catalog', { expire: 0 });
   return NextResponse.json({ brand: data });
 }
 
@@ -89,5 +92,7 @@ export async function DELETE(request: Request) {
     details: {},
   });
 
+  revalidateTag('catalog', { expire: 0 });
   return NextResponse.json({ success: true });
 }
+

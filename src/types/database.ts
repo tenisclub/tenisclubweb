@@ -248,3 +248,4 @@ export interface StoreSettings {
   terms_of_use: string;
   about_text: string;
 }
+

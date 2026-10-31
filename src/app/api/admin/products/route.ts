@@ -1,3 +1,4 @@
+import { revalidateTag } from 'next/cache';
 import { NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase/server';
@@ -146,6 +147,7 @@ export async function POST(request: Request) {
       details: { name: product.name, sku: product.sku, base_price: product.base_price },
     });
 
+    revalidateTag('catalog', { expire: 0 });
     return NextResponse.json({ product });
   } catch (err) {
     return NextResponse.json(
@@ -154,3 +156,4 @@ export async function POST(request: Request) {
     );
   }
 }
+

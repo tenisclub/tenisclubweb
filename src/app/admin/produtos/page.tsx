@@ -15,3 +15,4 @@ export default async function AdminProdutosPage() {
 
   return <AdminProductsTable initialProducts={products} />;
 }
+

@@ -341,3 +341,4 @@ export function InventoryManagerClient({ initialRows }: { initialRows: StockRowI
     </div>
   );
 }
+

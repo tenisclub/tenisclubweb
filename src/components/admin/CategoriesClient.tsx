@@ -155,3 +155,4 @@ export function CategoriesClient({ initialCategories }: { initialCategories: Cat
     </div>
   );
 }
+

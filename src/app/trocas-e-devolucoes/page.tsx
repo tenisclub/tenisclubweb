@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { getStoreSettings } from '@/lib/catalog';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300;
 export const metadata: Metadata = { title: 'Trocas e Devoluções' };
 
 export default async function TrocasPage() {
@@ -21,3 +21,4 @@ export default async function TrocasPage() {
     </div>
   );
 }
+

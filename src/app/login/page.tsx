@@ -142,12 +142,12 @@ function LoginForm() {
           {googleLoading ? 'Conectando ao Google...' : 'Continuar com Google'}
         </button>
 
-        <div className="relative flex items-center justify-center">
-          <span className="w-full border-t border-zinc-800" />
-          <span className="px-3 bg-[#111116] text-[11px] uppercase tracking-wider text-zinc-500 font-semibold">
+        <div className="flex items-center gap-3">
+          <span className="flex-1 border-t border-zinc-800" />
+          <span className="shrink-0 whitespace-nowrap text-[11px] uppercase tracking-wider text-zinc-500 font-semibold">
             ou com e-mail
           </span>
-          <span className="w-full border-t border-zinc-800" />
+          <span className="flex-1 border-t border-zinc-800" />
         </div>
 
         <form onSubmit={handleEmailLogin} className="space-y-4">
