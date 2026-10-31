@@ -896,3 +896,115 @@ BEGIN
   -- Customer & Admin notifications
   INSERT INTO public.notifications (user_id, target_audience, type, title, message, link)
   VALUES (
+    p_user_id,
+    'customer',
+    'order_received',
+    'Pedido ' || v_order_number || ' recebido!',
+    'Recebemos sua solicitação. Nossa equipe já vai conferir e confirmar os detalhes.',
+    '/minha-conta/pedidos/' || v_order_id
+  );
+
+  INSERT INTO public.notifications (user_id, target_audience, type, title, message, link)
+  VALUES (
+    NULL,
+    'admin',
+    'new_order',
+    'Novo pedido ' || v_order_number,
+    p_customer_name || ' realizou um pedido no valor de R$ ' || TO_CHAR(v_total, 'FM999G990D00') || '.',
+    '/admin/pedidos/' || v_order_id
+  );
+
+  RETURN jsonb_build_object(
+    'order_id', v_order_id,
+    'order_number', v_order_number,
+    'total', v_total
+  );
+END;
+$$;
+
+-- ----------------------------------------------------------------------------
+-- 11. TRANSACTIONAL INVENTORY ADJUSTMENT RPC (RN13)
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.adjust_stock_atomic(
+  p_variant_id UUID,
+  p_operation TEXT, -- 'in', 'out', 'adjustment'
+  p_amount INT,
+  p_reason TEXT,
+  p_low_stock_threshold INT DEFAULT NULL,
+  p_admin_id UUID DEFAULT auth.uid()
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_inv RECORD;
+  v_new_qty INT;
+  v_moved INT;
+BEGIN
+  IF p_admin_id IS NOT NULL AND NOT public.is_admin(p_admin_id) THEN
+    RAISE EXCEPTION 'Acesso negado: apenas administradores podem movimentar o estoque.';
+  END IF;
+
+  IF TRIM(COALESCE(p_reason, '')) = '' THEN
+    RAISE EXCEPTION 'Informe o motivo da movimentação de estoque.';
+  END IF;
+
+  SELECT
+    inv.id,
+    inv.quantity,
+    inv.low_stock_threshold,
+    pv.product_id,
+    pv.color,
+    pv.size,
+    p.name AS product_name
+  INTO v_inv
+  FROM public.inventory inv
+  JOIN public.product_variants pv ON pv.id = inv.variant_id
+  JOIN public.products p ON p.id = pv.product_id
+  WHERE inv.variant_id = p_variant_id
+  FOR UPDATE OF inv;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Variação de estoque não encontrada.';
+  END IF;
+
+  IF p_operation = 'in' THEN
+    IF p_amount <= 0 THEN RAISE EXCEPTION 'A quantidade de entrada deve ser maior que zero.'; END IF;
+    v_new_qty := v_inv.quantity + p_amount;
+    v_moved := p_amount;
+  ELSIF p_operation = 'out' THEN
+    IF p_amount <= 0 THEN RAISE EXCEPTION 'A quantidade de saída deve ser maior que zero.'; END IF;
+    IF v_inv.quantity < p_amount THEN RAISE EXCEPTION 'Saldo insuficiente para remover % unidades (atual: %).', p_amount, v_inv.quantity; END IF;
+    v_new_qty := v_inv.quantity - p_amount;
+    v_moved := -p_amount;
+  ELSIF p_operation = 'adjustment' THEN
+    IF p_amount < 0 THEN RAISE EXCEPTION 'A quantidade corrigida não pode ser negativa.'; END IF;
+    v_new_qty := p_amount;
+    v_moved := p_amount - v_inv.quantity;
+  ELSE
+    RAISE EXCEPTION 'Tipo de operação inválido.';
+  END IF;
+
+  UPDATE public.inventory
+  SET
+    quantity = v_new_qty,
+    low_stock_threshold = COALESCE(p_low_stock_threshold, low_stock_threshold),
+    updated_at = NOW()
+  WHERE id = v_inv.id;
+
+  INSERT INTO public.inventory_movements (
+    variant_id,
+    product_id,
+    previous_quantity,
+    moved_quantity,
+    new_quantity,
+    movement_type,
+    reason,
+    performed_by
+  ) VALUES (
+    p_variant_id,
+    v_inv.product_id,
+    v_inv.quantity,
+    v_moved,
