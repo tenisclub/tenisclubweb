@@ -247,5 +247,6 @@ export interface StoreSettings {
   privacy_policy: string;
   terms_of_use: string;
   about_text: string;
+  checkout_delivery_config?: unknown;
 }
 

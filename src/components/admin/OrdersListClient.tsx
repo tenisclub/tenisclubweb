@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Search, Eye } from 'lucide-react';
 import { cn, formatCurrency, formatDateTime, ORDER_STATUS_CONFIG } from '@/lib/utils';
@@ -11,6 +11,17 @@ export function OrdersListClient({ initialOrders }: { initialOrders: Order[] }) 
   const [statusFilter, setStatusFilter] = useState('all');
   const [deliveryFilter, setDeliveryFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('');
+
+  useEffect(() => {
+    const pendingCount = initialOrders.filter(
+      (o) => o.status === 'received' || o.status === 'awaiting_confirmation'
+    ).length;
+    window.dispatchEvent(
+      new CustomEvent('tc:admin-stats-sync', {
+        detail: { pendingOrdersCount: pendingCount },
+      })
+    );
+  }, [initialOrders]);
 
   const filtered = useMemo(() => {
     return initialOrders.filter((o) => {

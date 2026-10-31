@@ -22,7 +22,11 @@ const montserrat = Montserrat({
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getStoreSettings();
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://tenisclub.vercel.app';
+  const ogImage = settings.hero_banner_url || settings.logo_url || undefined;
+
   return {
+    metadataBase: new URL(siteUrl),
     title: {
       default: `${settings.store_name} — ${settings.tagline}`,
       template: `%s | ${settings.store_name}`,
@@ -31,8 +35,11 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: `${settings.store_name} — ${settings.tagline}`,
       description: settings.hero_subtitle,
+      siteName: settings.store_name,
+      url: siteUrl,
       type: 'website',
       locale: 'pt_BR',
+      ...(ogImage ? { images: [{ url: ogImage }] } : {}),
     },
   };
 }

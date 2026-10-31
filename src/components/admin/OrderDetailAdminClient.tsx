@@ -71,6 +71,7 @@ export function OrderDetailAdminClient({ initialOrder }: { initialOrder: Order }
       setStatus(nextStatus);
       setStatusNote('');
       toast('Pedido atualizado com sucesso!', 'success');
+      window.dispatchEvent(new CustomEvent('tc:admin-stats-sync'));
       router.refresh();
     } finally {
       setSaving(false);

@@ -78,6 +78,11 @@ export function buildOrderWhatsAppUrl(whatsapp: string, order: Order): string {
       ? 'Retirada na Loja'
       : `Entrega Local (${order.shipping_address?.street || ''}, ${order.shipping_address?.number || ''} - ${order.shipping_address?.neighborhood || ''})`;
 
+  const shippingLine =
+    Number(order.shipping_cost) > 0
+      ? `*Taxa de entrega:* ${formatCurrency(order.shipping_cost)}\n`
+      : '';
+
   const msg = [
     `Olá, *Tênis Club*! Acabei de realizar um pedido pelo site:`,
     ``,
@@ -88,7 +93,7 @@ export function buildOrderWhatsAppUrl(whatsapp: string, order: Order): string {
     `*Itens do pedido:*`,
     itemsLines,
     ``,
-    `*Total:* ${formatCurrency(order.total)}`,
+    `${shippingLine}*Total:* ${formatCurrency(order.total)}`,
     ``,
     `Gostaria de alinhar a confirmação e forma de pagamento!`,
   ].join('\n');

@@ -43,6 +43,7 @@ const DEFAULT_SETTINGS: StoreSettings = {
   terms_of_use: 'Preços e estoques são validados no momento da confirmação do pedido.',
   about_text:
     'A Tênis Club nasceu com a missão de unir estilo, conforto e autenticidade para toda a família.',
+  checkout_delivery_config: {},
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

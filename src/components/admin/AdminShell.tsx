@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -59,8 +59,62 @@ export function AdminShell({
   const router = useRouter();
   const { refreshSession } = useStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [livePendingOrders, setLivePendingOrders] = useState(pendingOrdersCount);
+  const [liveUnreadNotifs, setLiveUnreadNotifs] = useState(unreadAdminNotifs);
 
   const isSuper = role === 'super_admin';
+
+  useEffect(() => {
+    setLivePendingOrders(pendingOrdersCount);
+  }, [pendingOrdersCount]);
+
+  useEffect(() => {
+    setLiveUnreadNotifs(unreadAdminNotifs);
+  }, [unreadAdminNotifs]);
+
+  const fetchAdminStats = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/stats', { cache: 'no-store' });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (typeof data.pendingOrdersCount === 'number') {
+        setLivePendingOrders(data.pendingOrdersCount);
+      }
+      if (typeof data.unreadAdminNotifs === 'number') {
+        setLiveUnreadNotifs(data.unreadAdminNotifs);
+      }
+    } catch {
+      // Ignore transient errors
+    }
+  }, []);
+
+  // Keep sidebar order count & notifications fresh across admin route transitions and tab focus
+  useEffect(() => {
+    void fetchAdminStats();
+  }, [pathname, fetchAdminStats]);
+
+  useEffect(() => {
+    const onSync = (e: Event) => {
+      const custom = e as CustomEvent<{ pendingOrdersCount?: number }>;
+      if (typeof custom.detail?.pendingOrdersCount === 'number') {
+        setLivePendingOrders(custom.detail.pendingOrdersCount);
+      } else {
+        void fetchAdminStats();
+      }
+    };
+    const onFocus = () => {
+      if (document.visibilityState === 'visible') {
+        void fetchAdminStats();
+      }
+    };
+
+    window.addEventListener('tc:admin-stats-sync', onSync);
+    document.addEventListener('visibilitychange', onFocus);
+    return () => {
+      window.removeEventListener('tc:admin-stats-sync', onSync);
+      document.removeEventListener('visibilitychange', onFocus);
+    };
+  }, [fetchAdminStats]);
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -106,7 +160,7 @@ export function AdminShell({
                   <Icon className="w-4 h-4 shrink-0" />
                   {item.label}
                 </span>
-                {item.href === '/admin/pedidos' && pendingOrdersCount > 0 && (
+                {item.href === '/admin/pedidos' && livePendingOrders > 0 && (
                   <span
                     className={cn(
                       'px-2 py-0.5 rounded-full text-[10px] font-black',
@@ -115,7 +169,7 @@ export function AdminShell({
                         : 'bg-amber-500/20 text-amber-300'
                     )}
                   >
-                    {pendingOrdersCount}
+                    {livePendingOrders}
                   </span>
                 )}
               </Link>
@@ -169,12 +223,12 @@ export function AdminShell({
           </div>
 
           <div className="flex items-center gap-3">
-            {unreadAdminNotifs > 0 && (
+            {liveUnreadNotifs > 0 && (
               <Link
                 href="/admin"
                 className="px-3 py-1.5 rounded-full bg-[#BEFA46]/15 border border-[#BEFA46]/40 text-[#BEFA46] text-xs font-extrabold"
               >
-                {unreadAdminNotifs} alerta(s) pendente(s)
+                {liveUnreadNotifs} alerta(s) pendente(s)
               </Link>
             )}
             <Link
@@ -212,27 +266,67 @@ export function AdminShell({
                 const Icon = item.icon;
                 const active = item.exact
                   ? pathname === item.href
-                  : pathname.startsWith(item.href);
+                  : pathname === item.href || pathname.startsWith(`${item.href}/`);
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
                     onClick={() => setSidebarOpen(false)}
                     className={cn(
-                      'flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold',
+                      'flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold',
                       active ? 'bg-[#BEFA46] text-[#09090B]' : 'text-zinc-300'
                     )}
                   >
-                    <Icon className="w-4 h-4" />
-                    {item.label}
+                    <span className="flex items-center gap-3">
+                      <Icon className="w-4 h-4 shrink-0" />
+                      {item.label}
+                    </span>
+                    {item.href === '/admin/pedidos' && livePendingOrders > 0 && (
+                      <span
+                        className={cn(
+                          'px-2 py-0.5 rounded-full text-[10px] font-black',
+                          active
+                            ? 'bg-[#09090B] text-[#BEFA46]'
+                            : 'bg-amber-500/20 text-amber-300'
+                        )}
+                      >
+                        {livePendingOrders}
+                      </span>
+                    )}
                   </Link>
                 );
               })}
             </nav>
+
+            <div className="p-4 border-t border-zinc-800/80 space-y-3">
+              <div className="rounded-xl bg-[#14141A] border border-zinc-800 p-3">
+                <p className="text-xs font-extrabold text-white truncate">{profile.full_name}</p>
+                <p className="text-[11px] text-[#BEFA46] font-semibold">
+                  {isSuper ? 'Administrador Principal' : 'Administrador Operacional'}
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Link
+                  href="/"
+                  onClick={() => setSidebarOpen(false)}
+                  className="h-9 rounded-xl bg-zinc-800/80 text-xs font-bold text-zinc-200 inline-flex items-center justify-center gap-1.5"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  Ver Loja
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="h-9 rounded-xl bg-red-500/10 text-xs font-bold text-red-400 inline-flex items-center justify-center gap-1.5"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  Sair
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
     </div>
   );
 }
-

@@ -415,6 +415,7 @@ CREATE TABLE IF NOT EXISTS public.store_settings (
   privacy_policy TEXT NOT NULL DEFAULT 'Em conformidade com a LGPD (Lei nº 13.709/2018), coletamos apenas os dados essenciais para processar seus pedidos, entrega e atendimento.',
   terms_of_use TEXT NOT NULL DEFAULT 'Ao realizar um pedido na Tênis Club, os itens selecionados têm preço e disponibilidade validados no momento da confirmação.',
   about_text TEXT NOT NULL DEFAULT 'A Tênis Club nasceu com a missão de unir estilo, conforto e autenticidade para toda a família. Trabalhamos com curadoria rigorosa de tênis casuais, esportivos, sapatos sociais e lançamentos.',
+  checkout_delivery_config JSONB NOT NULL DEFAULT '{}'::jsonb,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -533,6 +534,8 @@ DECLARE
   v_item RECORD;
   v_subtotal NUMERIC(10, 2) := 0;
   v_discount_total NUMERIC(10, 2) := 0;
+  v_shipping_cost NUMERIC(10, 2) := 0;
+  v_items_total NUMERIC(10, 2) := 0;
   v_total NUMERIC(10, 2) := 0;
   v_unit_price NUMERIC(10, 2);
   v_promo_price NUMERIC(10, 2);
@@ -541,8 +544,11 @@ DECLARE
   v_items_count INT := 0;
   v_primary_img TEXT;
   v_new_qty INT;
+  v_delivery_cfg JSONB := '{}'::jsonb;
+  v_fee NUMERIC(10, 2) := 0;
+  v_free_min NUMERIC(10, 2) := 0;
 BEGIN
-  IF auth.uid() IS NOT NULL AND auth.uid() <> p_user_id AND NOT public.is_admin(auth.uid()) THEN
+  IF current_user IN ('anon', 'authenticated') AND (auth.uid() IS NULL OR (auth.uid() <> p_user_id AND NOT public.is_admin(auth.uid()))) THEN
     RAISE EXCEPTION 'Operação não autorizada para este usuário.';
   END IF;
 
@@ -559,6 +565,11 @@ BEGIN
   IF v_items_count = 0 THEN
     RAISE EXCEPTION 'Seu carrinho está vazio.';
   END IF;
+
+  SELECT COALESCE(checkout_delivery_config, '{}'::jsonb)
+  INTO v_delivery_cfg
+  FROM public.store_settings
+  WHERE id = 1;
 
   -- Generate unique order number TC-YYYY-XXXX
   v_order_number := 'TC-' || EXTRACT(YEAR FROM NOW())::TEXT || '-' || LPAD(NEXTVAL('public.order_number_seq')::TEXT, 4, '0');
@@ -620,8 +631,31 @@ BEGIN
 
     v_subtotal := v_subtotal + (v_item.base_price * v_item.cart_qty);
     v_discount_total := v_discount_total + ((v_item.base_price - v_unit_price) * v_item.cart_qty);
-    v_total := v_total + (v_unit_price * v_item.cart_qty);
+    v_items_total := v_items_total + (v_unit_price * v_item.cart_qty);
   END LOOP;
+
+  IF p_delivery_method = 'local_delivery' AND COALESCE(v_delivery_cfg->>'delivery_fee_mode', 'to_combine') = 'fixed' THEN
+    BEGIN
+      v_fee := GREATEST(COALESCE(NULLIF(v_delivery_cfg->>'delivery_fee', '')::NUMERIC(10, 2), 0), 0);
+      v_free_min := GREATEST(COALESCE(NULLIF(v_delivery_cfg->>'free_delivery_threshold', '')::NUMERIC(10, 2), 0), 0);
+    EXCEPTION WHEN OTHERS THEN
+      v_fee := 0;
+      v_free_min := 0;
+    END;
+    IF v_free_min > 0 AND v_items_total >= v_free_min THEN
+      v_shipping_cost := 0;
+    ELSE
+      v_shipping_cost := v_fee;
+    END IF;
+  ELSIF p_delivery_method = 'pickup' THEN
+    BEGIN
+      v_shipping_cost := GREATEST(COALESCE(NULLIF(v_delivery_cfg->>'pickup_fee', '')::NUMERIC(10, 2), 0), 0);
+    EXCEPTION WHEN OTHERS THEN
+      v_shipping_cost := 0;
+    END;
+  END IF;
+
+  v_total := v_items_total + v_shipping_cost;
 
   -- Create Order record
   INSERT INTO public.orders (
@@ -650,7 +684,7 @@ BEGIN
     p_shipping_address,
     v_subtotal,
     v_discount_total,
-    0,
+    v_shipping_cost,
     v_total,
     'received',
     'pending',

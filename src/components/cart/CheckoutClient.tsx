@@ -1,19 +1,22 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
   CheckCircle2,
-  Store,
-  Truck,
   ArrowRight,
   ArrowLeft,
   MessageCircle,
   ClipboardList,
-  MapPin,
   UserCheck,
 } from 'lucide-react';
+import { CheckoutIcon } from '@/components/cart/CheckoutDeliveryIcons';
 import { useStore } from '@/components/providers/StoreProvider';
+import {
+  calculateCheckoutShipping,
+  normalizeCheckoutDeliveryConfig,
+  resolveDefaultDeliveryMethod,
+} from '@/lib/checkout-config';
 import { buildOrderWhatsAppUrl, cn, formatCurrency } from '@/lib/utils';
 import type {
   CartItemView,
@@ -42,13 +45,20 @@ export function CheckoutClient({
   const { setCartCount, toast } = useStore();
   const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
 
+  const deliveryCfg = useMemo(
+    () => normalizeCheckoutDeliveryConfig(settings.checkout_delivery_config),
+    [settings.checkout_delivery_config]
+  );
+
   // Step 2: Customer info
   const [customerName, setCustomerName] = useState(profile.full_name || '');
   const [customerEmail, setCustomerEmail] = useState(profile.email || '');
   const [customerPhone, setCustomerPhone] = useState(profile.phone || '');
 
   // Step 3: Delivery or Pickup
-  const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>('pickup');
+  const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>(() =>
+    resolveDefaultDeliveryMethod(deliveryCfg)
+  );
   const defaultAddr = savedAddresses.find((a) => a.is_default) || savedAddresses[0];
   const [zipCode, setZipCode] = useState(defaultAddr?.zip_code || '');
   const [street, setStreet] = useState(defaultAddr?.street || '');
@@ -66,6 +76,39 @@ export function CheckoutClient({
 
   // Step 5: Created Order
   const [createdOrder, setCreatedOrder] = useState<Order | null>(null);
+
+  const shippingCalc = useMemo(
+    () => calculateCheckoutShipping(deliveryCfg, deliveryMethod, total),
+    [deliveryCfg, deliveryMethod, total]
+  );
+
+  const finalOrderTotal = total + shippingCalc.shippingCost;
+
+  const visibleExtraCards = useMemo(
+    () =>
+      deliveryCfg.extra_cards.filter(
+        (c) =>
+          (c.title.trim() || c.description.trim()) &&
+          (c.visibility === 'always' || c.visibility === deliveryMethod)
+      ),
+    [deliveryCfg.extra_cards, deliveryMethod]
+  );
+
+  const visibleCustomButtons = useMemo(
+    () =>
+      deliveryCfg.custom_buttons.filter(
+        (b) =>
+          b.label.trim() &&
+          b.url.trim() &&
+          (b.visibility === 'always' || b.visibility === deliveryMethod)
+      ),
+    [deliveryCfg.custom_buttons, deliveryMethod]
+  );
+
+  const showAddressForm =
+    deliveryCfg.delivery_enabled &&
+    deliveryMethod === 'local_delivery' &&
+    deliveryCfg.require_address_on_delivery;
 
   const applySavedAddress = (addr: UserAddress) => {
     setZipCode(addr.zip_code || '');
@@ -92,7 +135,7 @@ export function CheckoutClient({
           customerPhone,
           deliveryMethod,
           shippingAddress:
-            deliveryMethod === 'local_delivery'
+            deliveryMethod === 'local_delivery' && showAddressForm
               ? {
                   zip_code: zipCode,
                   street,
@@ -156,8 +199,8 @@ export function CheckoutClient({
             <span className="text-zinc-400">Modalidade:</span>
             <strong className="text-white">
               {createdOrder.delivery_method === 'pickup'
-                ? 'Retirada na Loja'
-                : 'Entrega Local'}
+                ? deliveryCfg.pickup_title || 'Retirada na Loja'
+                : deliveryCfg.delivery_title || 'Entrega Local'}
             </strong>
           </div>
           <div className="border-t border-zinc-800 pt-3 space-y-1.5">
@@ -169,6 +212,14 @@ export function CheckoutClient({
                 <span className="font-bold text-white">{formatCurrency(it.subtotal)}</span>
               </div>
             ))}
+            {Number(createdOrder.shipping_cost) > 0 && (
+              <div className="flex justify-between text-zinc-300 pt-1">
+                <span>Taxa de entrega / recebimento</span>
+                <span className="font-bold text-white">
+                  {formatCurrency(createdOrder.shipping_cost)}
+                </span>
+              </div>
+            )}
           </div>
           <div className="border-t border-zinc-800 pt-3 flex justify-between items-baseline">
             <span className="font-bold text-white">Valor Total Registrado</span>
@@ -362,61 +413,225 @@ export function CheckoutClient({
             </div>
           )}
 
-          {/* STEP 3: DELIVERY OR PICKUP */}
+          {/* STEP 3: DELIVERY OR PICKUP (DYNAMIC ADMIN CONFIGURATION) */}
           {step === 3 && (
             <div className="space-y-5">
-              <h2 className="text-xl font-black text-white flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-[#BEFA46]" />
-                Etapa 3 — Entrega ou Retirada
-              </h2>
+              {deliveryCfg.step_title && (
+                <h2 className="text-xl font-black text-white flex items-center gap-2">
+                  {deliveryCfg.step_icon !== 'none' && (
+                    <CheckoutIcon
+                      name={deliveryCfg.step_icon}
+                      className="w-5 h-5 text-[#BEFA46] shrink-0"
+                    />
+                  )}
+                  <span>{deliveryCfg.step_title}</span>
+                </h2>
+              )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <button
-                  type="button"
-                  onClick={() => setDeliveryMethod('pickup')}
+              {(deliveryCfg.pickup_enabled || deliveryCfg.delivery_enabled) && (
+                <div
                   className={cn(
-                    'rounded-2xl border p-4 text-left space-y-1.5 transition',
-                    deliveryMethod === 'pickup'
-                      ? 'border-[#BEFA46] bg-[#BEFA46]/10'
-                      : 'border-zinc-800 bg-[#18181F] hover:border-zinc-700'
+                    'grid grid-cols-1 gap-3.5',
+                    deliveryCfg.pickup_enabled &&
+                      deliveryCfg.delivery_enabled &&
+                      'sm:grid-cols-2'
                   )}
                 >
-                  <div className="flex items-center justify-between">
-                    <Store className="w-5 h-5 text-[#BEFA46]" />
-                    <span className="text-xs font-extrabold text-emerald-400">Grátis</span>
-                  </div>
-                  <p className="text-sm font-extrabold text-white">Retirar na Loja</p>
-                  <p className="text-xs text-zinc-400">{settings.address}</p>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setDeliveryMethod('local_delivery')}
-                  className={cn(
-                    'rounded-2xl border p-4 text-left space-y-1.5 transition',
-                    deliveryMethod === 'local_delivery'
-                      ? 'border-[#BEFA46] bg-[#BEFA46]/10'
-                      : 'border-zinc-800 bg-[#18181F] hover:border-zinc-700'
+                  {deliveryCfg.pickup_enabled && (
+                    <button
+                      type="button"
+                      onClick={() => setDeliveryMethod('pickup')}
+                      className={cn(
+                        'rounded-2xl border p-4 text-left space-y-1.5 transition',
+                        deliveryMethod === 'pickup'
+                          ? 'border-[#BEFA46] bg-[#BEFA46]/10'
+                          : 'border-zinc-800 bg-[#18181F] hover:border-zinc-700'
+                      )}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        {deliveryCfg.pickup_icon !== 'none' ? (
+                          <CheckoutIcon
+                            name={deliveryCfg.pickup_icon}
+                            className="w-5 h-5 text-[#BEFA46]"
+                          />
+                        ) : (
+                          <span />
+                        )}
+                        <span className="text-xs font-extrabold text-emerald-400">
+                          {shippingCalc.pickupCardBadge}
+                        </span>
+                      </div>
+                      <p className="text-sm font-extrabold text-white">
+                        {deliveryCfg.pickup_title || 'Retirar na Loja'}
+                      </p>
+                      <p className="text-xs text-zinc-400">
+                        {deliveryCfg.pickup_subtitle || settings.address}
+                      </p>
+                    </button>
                   )}
-                >
-                  <div className="flex items-center justify-between">
-                    <Truck className="w-5 h-5 text-[#BEFA46]" />
-                    <span className="text-xs font-semibold text-zinc-300">A combinar</span>
-                  </div>
-                  <p className="text-sm font-extrabold text-white">Solicitar Entrega Local</p>
-                  <p className="text-xs text-zinc-400">
-                    Disponibilidade e taxa confirmadas manualmente pela loja.
-                  </p>
-                </button>
-              </div>
 
-              {deliveryMethod === 'pickup' ? (
-                <div className="rounded-2xl border border-zinc-800 bg-[#18181F] p-4 text-xs text-zinc-300 space-y-1">
-                  <p className="font-bold text-white">Informações de retirada:</p>
-                  <p>{settings.pickup_info}</p>
-                  <p className="text-zinc-400">Horário: {settings.business_hours}</p>
+                  {deliveryCfg.delivery_enabled && (
+                    <button
+                      type="button"
+                      onClick={() => setDeliveryMethod('local_delivery')}
+                      className={cn(
+                        'rounded-2xl border p-4 text-left space-y-1.5 transition',
+                        deliveryMethod === 'local_delivery'
+                          ? 'border-[#BEFA46] bg-[#BEFA46]/10'
+                          : 'border-zinc-800 bg-[#18181F] hover:border-zinc-700'
+                      )}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        {deliveryCfg.delivery_icon !== 'none' ? (
+                          <CheckoutIcon
+                            name={deliveryCfg.delivery_icon}
+                            className="w-5 h-5 text-[#BEFA46]"
+                          />
+                        ) : (
+                          <span />
+                        )}
+                        <span
+                          className={cn(
+                            'text-xs font-semibold',
+                            shippingCalc.deliveryCardBadge === 'Grátis'
+                              ? 'text-emerald-400 font-extrabold'
+                              : 'text-zinc-200'
+                          )}
+                        >
+                          {shippingCalc.deliveryCardBadge}
+                        </span>
+                      </div>
+                      <p className="text-sm font-extrabold text-white">
+                        {deliveryCfg.delivery_title || 'Solicitar Entrega Local'}
+                      </p>
+                      <p className="text-xs text-zinc-400">
+                        {deliveryCfg.delivery_subtitle}
+                      </p>
+                      {deliveryCfg.delivery_fee_mode === 'fixed' &&
+                        deliveryCfg.free_delivery_threshold > 0 &&
+                        total < deliveryCfg.free_delivery_threshold && (
+                          <p className="text-[11px] font-semibold text-[#BEFA46] pt-0.5">
+                            Frete grátis acima de{' '}
+                            {formatCurrency(deliveryCfg.free_delivery_threshold)}
+                          </p>
+                        )}
+                    </button>
+                  )}
                 </div>
-              ) : (
+              )}
+
+              {/* Card 3: Pickup Info Box */}
+              {deliveryMethod === 'pickup' &&
+                deliveryCfg.pickup_info_card_enabled &&
+                (settings.pickup_info ||
+                  (deliveryCfg.show_pickup_hours && settings.business_hours)) && (
+                  <div className="rounded-2xl border border-zinc-800 bg-[#18181F] p-4 text-xs text-zinc-300 space-y-1.5">
+                    {deliveryCfg.pickup_info_card_title && (
+                      <div className="flex items-center gap-2 font-bold text-white">
+                        {deliveryCfg.pickup_info_card_icon !== 'none' && (
+                          <CheckoutIcon
+                            name={deliveryCfg.pickup_info_card_icon}
+                            className="w-4 h-4 text-[#BEFA46] shrink-0"
+                          />
+                        )}
+                        <span>{deliveryCfg.pickup_info_card_title}</span>
+                      </div>
+                    )}
+                    {settings.pickup_info && (
+                      <p className="whitespace-pre-line">{settings.pickup_info}</p>
+                    )}
+                    {deliveryCfg.show_pickup_hours && settings.business_hours && (
+                      <p className="text-zinc-400">Horário: {settings.business_hours}</p>
+                    )}
+                  </div>
+                )}
+
+              {/* Delivery Info Box (optional) */}
+              {deliveryMethod === 'local_delivery' &&
+                deliveryCfg.delivery_info_card_enabled &&
+                settings.delivery_info && (
+                  <div className="rounded-2xl border border-zinc-800 bg-[#18181F] p-4 text-xs text-zinc-300 space-y-1.5">
+                    {deliveryCfg.delivery_info_card_title && (
+                      <div className="flex items-center gap-2 font-bold text-white">
+                        {deliveryCfg.delivery_info_card_icon !== 'none' && (
+                          <CheckoutIcon
+                            name={deliveryCfg.delivery_info_card_icon}
+                            className="w-4 h-4 text-[#BEFA46] shrink-0"
+                          />
+                        )}
+                        <span>{deliveryCfg.delivery_info_card_title}</span>
+                      </div>
+                    )}
+                    <p className="whitespace-pre-line">{settings.delivery_info}</p>
+                  </div>
+                )}
+
+              {/* Extra Custom Cards */}
+              {visibleExtraCards.length > 0 && (
+                <div className="space-y-3">
+                  {visibleExtraCards.map((card) => (
+                    <div
+                      key={card.id}
+                      className="rounded-2xl border border-zinc-800 bg-[#18181F] p-4 text-xs text-zinc-300 space-y-1"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 font-bold text-white">
+                          {card.icon !== 'none' && (
+                            <CheckoutIcon
+                              name={card.icon}
+                              className="w-4 h-4 text-[#BEFA46] shrink-0"
+                            />
+                          )}
+                          <span>{card.title}</span>
+                        </div>
+                        {card.badge && (
+                          <span className="text-[11px] font-extrabold text-[#BEFA46]">
+                            {card.badge}
+                          </span>
+                        )}
+                      </div>
+                      {card.description && (
+                        <p className="whitespace-pre-line text-zinc-400">
+                          {card.description}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Custom Action Buttons */}
+              {visibleCustomButtons.length > 0 && (
+                <div className="flex flex-wrap gap-2.5">
+                  {visibleCustomButtons.map((btn) => (
+                    <a
+                      key={btn.id}
+                      href={btn.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={cn(
+                        'inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition',
+                        btn.variant === 'volt' &&
+                          'bg-[#BEFA46] hover:bg-[#d1ff70] text-[#09090B] font-black',
+                        btn.variant === 'whatsapp' &&
+                          'bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300',
+                        btn.variant === 'outline' &&
+                          'bg-[#18181F] hover:bg-zinc-800 border border-zinc-700 text-white',
+                        btn.variant === 'subtle' &&
+                          'bg-zinc-900 hover:bg-zinc-800 text-zinc-300'
+                      )}
+                    >
+                      {btn.icon !== 'none' && (
+                        <CheckoutIcon name={btn.icon} className="w-4 h-4 shrink-0" />
+                      )}
+                      <span>{btn.label}</span>
+                    </a>
+                  ))}
+                </div>
+              )}
+
+              {/* Local Delivery Address Form */}
+              {showAddressForm && (
                 <div className="space-y-4 pt-2">
                   {savedAddresses.length > 0 && (
                     <div className="space-y-1.5">
@@ -532,7 +747,7 @@ export function CheckoutClient({
                   type="button"
                   onClick={() => {
                     if (
-                      deliveryMethod === 'local_delivery' &&
+                      showAddressForm &&
                       (!street.trim() || !number.trim() || !neighborhood.trim() || !city.trim())
                     ) {
                       setErrorMsg('Informe rua, número, bairro e cidade para entrega local.');
@@ -543,7 +758,7 @@ export function CheckoutClient({
                   }}
                   className="px-6 py-3 rounded-xl bg-[#BEFA46] text-[#09090B] text-sm font-black inline-flex items-center gap-2"
                 >
-                  Revisar Confirmação
+                  {deliveryCfg.next_button_label}
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
@@ -564,11 +779,21 @@ export function CheckoutClient({
                 <p>
                   <strong className="text-white">Recebimento:</strong>{' '}
                   {deliveryMethod === 'pickup'
-                    ? `Retirada na loja (${settings.address})`
-                    : `Entrega local em ${street}, ${number} - ${neighborhood}, ${city}/${stateUf}${
-                        reference ? ` (Ref: ${reference})` : ''
-                      }`}
+                    ? `${deliveryCfg.pickup_title || 'Retirada na loja'} (${
+                        deliveryCfg.pickup_subtitle || settings.address
+                      })`
+                    : showAddressForm
+                      ? `${deliveryCfg.delivery_title || 'Entrega local'} em ${street}, ${number} - ${neighborhood}, ${city}/${stateUf}${
+                          reference ? ` (Ref: ${reference})` : ''
+                        }`
+                      : deliveryCfg.delivery_title || 'Entrega local'}
                 </p>
+                {shippingCalc.shippingCost > 0 && (
+                  <p>
+                    <strong className="text-white">Taxa de entrega:</strong>{' '}
+                    {formatCurrency(shippingCalc.shippingCost)}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-1.5">
@@ -623,16 +848,24 @@ export function CheckoutClient({
             )}
             <div className="flex justify-between text-zinc-400">
               <span>Frete / Entrega</span>
-              <span>{deliveryMethod === 'pickup' ? 'Grátis' : 'A combinar'}</span>
+              <span
+                className={cn(
+                  shippingCalc.summaryLabel === 'Grátis' && 'text-emerald-400 font-bold',
+                  shippingCalc.shippingCost > 0 && 'text-white font-bold'
+                )}
+              >
+                {shippingCalc.summaryLabel}
+              </span>
             </div>
           </div>
           <div className="flex justify-between items-baseline">
             <span className="text-sm font-bold text-white">Total do Pedido</span>
-            <span className="text-2xl font-black text-[#BEFA46]">{formatCurrency(total)}</span>
+            <span className="text-2xl font-black text-[#BEFA46]">
+              {formatCurrency(finalOrderTotal)}
+            </span>
           </div>
         </aside>
       </div>
     </div>
   );
 }
-

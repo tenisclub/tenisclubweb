@@ -1,4 +1,4 @@
-import { revalidateTag } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase/server';
@@ -33,6 +33,7 @@ export async function PATCH(request: Request) {
       'privacy_policy',
       'terms_of_use',
       'about_text',
+      'checkout_delivery_config',
     ];
 
     const updates: Record<string, unknown> = {
@@ -64,6 +65,7 @@ export async function PATCH(request: Request) {
     });
 
     revalidateTag('store-settings', { expire: 0 });
+    revalidatePath('/', 'layout');
     return NextResponse.json({ settings: data });
   } catch (err) {
     return NextResponse.json(

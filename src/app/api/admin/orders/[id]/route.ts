@@ -1,4 +1,4 @@
-import { revalidateTag } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase/server';
@@ -46,6 +46,7 @@ export async function PATCH(
     }
 
     revalidateTag('catalog', { expire: 0 });
+    revalidatePath('/admin', 'layout');
     return NextResponse.json({ result: data });
   } catch (err) {
     return NextResponse.json(
