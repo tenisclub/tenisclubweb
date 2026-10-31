@@ -110,3 +110,115 @@ AS $$
 DECLARE
   v_uid UUID;
 BEGIN
+  v_uid := CASE
+    WHEN current_user IN ('anon', 'authenticated') THEN auth.uid()
+    ELSE check_user_id
+  END;
+  IF v_uid IS NULL THEN
+    RETURN FALSE;
+  END IF;
+  RETURN EXISTS (
+    SELECT 1
+    FROM public.user_roles ur
+    JOIN public.roles r ON r.id = ur.role_id
+    JOIN public.user_profiles up ON up.id = ur.user_id
+    WHERE ur.user_id = v_uid
+      AND up.is_active = TRUE
+      AND r.name = 'super_admin'
+  );
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_user_role(check_user_id UUID DEFAULT auth.uid())
+RETURNS TEXT
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_role TEXT;
+BEGIN
+  IF check_user_id IS NULL THEN
+    RETURN 'visitor';
+  END IF;
+  SELECT r.name INTO v_role
+  FROM public.user_roles ur
+  JOIN public.roles r ON r.id = ur.role_id
+  JOIN public.user_profiles up ON up.id = ur.user_id
+  WHERE ur.user_id = check_user_id
+    AND up.is_active = TRUE
+  ORDER BY
+    CASE r.name
+      WHEN 'super_admin' THEN 1
+      WHEN 'admin_operational' THEN 2
+      ELSE 3
+    END
+  LIMIT 1;
+
+  RETURN COALESCE(v_role, 'customer');
+END;
+$$;
+
+-- ----------------------------------------------------------------------------
+-- 3. CATEGORIES, BRANDS, PRODUCTS, IMAGES, VARIANTS & INVENTORY
+-- ----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.categories (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  description TEXT DEFAULT '',
+  image_url TEXT,
+  sort_order INT NOT NULL DEFAULT 0,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.brands (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  logo_url TEXT,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.products (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  sku TEXT UNIQUE,
+  brand_id UUID REFERENCES public.brands(id) ON DELETE SET NULL,
+  category_id UUID REFERENCES public.categories(id) ON DELETE SET NULL,
+  gender TEXT NOT NULL DEFAULT 'unissex' CHECK (gender IN ('masculino', 'feminino', 'infantil', 'unissex')),
+  short_description TEXT DEFAULT '',
+  description TEXT DEFAULT '',
+  additional_info JSONB NOT NULL DEFAULT '{}'::jsonb,
+  cost_price NUMERIC(10, 2) NOT NULL DEFAULT 0 CHECK (cost_price >= 0),
+  base_price NUMERIC(10, 2) NOT NULL CHECK (base_price >= 0),
+  promo_price NUMERIC(10, 2) CHECK (promo_price IS NULL OR promo_price >= 0),
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  is_featured BOOLEAN NOT NULL DEFAULT FALSE,
+  is_new_release BOOLEAN NOT NULL DEFAULT FALSE,
+  allow_backorder BOOLEAN NOT NULL DEFAULT FALSE,
+  sold_count INT NOT NULL DEFAULT 0,
+  views_count INT NOT NULL DEFAULT 0,
+  meta_title TEXT,
+  meta_description TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.product_images (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  product_id UUID NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
+  url TEXT NOT NULL,
+  alt_text TEXT DEFAULT '',
+  is_primary BOOLEAN NOT NULL DEFAULT FALSE,
+  sort_order INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.product_variants (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
