@@ -671,3 +671,116 @@ BEGIN
 
   IF v_custom_card IS NOT NULL THEN
     IF COALESCE(v_custom_card->>'fee_mode', 'to_combine') = 'fixed' THEN
+      BEGIN
+        v_fee := GREATEST(COALESCE(NULLIF(v_custom_card->>'fee', '')::NUMERIC(10, 2), 0), 0);
+        v_free_min := GREATEST(COALESCE(NULLIF(v_custom_card->>'free_threshold', '')::NUMERIC(10, 2), 0), 0);
+      EXCEPTION WHEN OTHERS THEN
+        v_fee := 0;
+        v_free_min := 0;
+      END;
+      IF v_free_min > 0 AND v_items_total >= v_free_min THEN
+        v_shipping_cost := 0;
+      ELSE
+        v_shipping_cost := v_fee;
+      END IF;
+    ELSE
+      v_shipping_cost := 0;
+    END IF;
+  ELSIF p_delivery_method = 'local_delivery'
+    AND NOT COALESCE((v_delivery_cfg->>'delivery_removed')::boolean, FALSE)
+    AND COALESCE((v_delivery_cfg->>'delivery_enabled')::boolean, TRUE)
+    AND COALESCE(v_delivery_cfg->>'delivery_fee_mode', 'to_combine') = 'fixed'
+  THEN
+    BEGIN
+      v_fee := GREATEST(COALESCE(NULLIF(v_delivery_cfg->>'delivery_fee', '')::NUMERIC(10, 2), 0), 0);
+      v_free_min := GREATEST(COALESCE(NULLIF(v_delivery_cfg->>'free_delivery_threshold', '')::NUMERIC(10, 2), 0), 0);
+    EXCEPTION WHEN OTHERS THEN
+      v_fee := 0;
+      v_free_min := 0;
+    END;
+    IF v_free_min > 0 AND v_items_total >= v_free_min THEN
+      v_shipping_cost := 0;
+    ELSE
+      v_shipping_cost := v_fee;
+    END IF;
+  ELSIF p_delivery_method = 'pickup'
+    AND NOT COALESCE((v_delivery_cfg->>'pickup_removed')::boolean, FALSE)
+    AND COALESCE((v_delivery_cfg->>'pickup_enabled')::boolean, TRUE)
+  THEN
+    BEGIN
+      v_shipping_cost := GREATEST(COALESCE(NULLIF(v_delivery_cfg->>'pickup_fee', '')::NUMERIC(10, 2), 0), 0);
+    EXCEPTION WHEN OTHERS THEN
+      v_shipping_cost := 0;
+    END;
+  END IF;
+
+  v_total := v_items_total + v_shipping_cost;
+
+  -- Create Order record
+  INSERT INTO public.orders (
+    order_number,
+    user_id,
+    customer_name,
+    customer_email,
+    customer_phone,
+    delivery_method,
+    shipping_address,
+    subtotal,
+    discount_total,
+    shipping_cost,
+    total,
+    status,
+    payment_status,
+    customer_notes,
+    stock_deducted
+  ) VALUES (
+    v_order_number,
+    p_user_id,
+    TRIM(p_customer_name),
+    LOWER(TRIM(p_customer_email)),
+    TRIM(p_customer_phone),
+    p_delivery_method,
+    p_shipping_address,
+    v_subtotal,
+    v_discount_total,
+    v_shipping_cost,
+    v_total,
+    'received',
+    'pending',
+    COALESCE(p_customer_notes, ''),
+    TRUE
+  ) RETURNING id INTO v_order_id;
+
+  -- Second pass: insert immutable order_items, deduct inventory, log movements
+  FOR v_item IN
+    SELECT
+      ci.quantity AS cart_qty,
+      p.id AS product_id,
+      p.name AS product_name,
+      p.sku AS product_sku,
+      p.base_price,
+      p.promo_price AS product_promo_price,
+      COALESCE(p.allow_backorder, FALSE) AS allow_backorder,
+      b.name AS brand_name,
+      pv.id AS variant_id,
+      pv.color,
+      pv.size,
+      inv.quantity AS stock_qty,
+      inv.low_stock_threshold
+    FROM public.cart_items ci
+    JOIN public.products p ON p.id = ci.product_id
+    LEFT JOIN public.brands b ON b.id = p.brand_id
+    JOIN public.product_variants pv ON pv.id = ci.variant_id
+    JOIN public.inventory inv ON inv.variant_id = pv.id
+    WHERE ci.cart_id = v_cart_id
+  LOOP
+    SELECT pr.promo_price INTO v_promo_price
+    FROM public.promotions pr
+    WHERE pr.product_id = v_item.product_id
+      AND pr.is_active = TRUE
+      AND (pr.starts_at IS NULL OR pr.starts_at <= NOW())
+      AND (pr.ends_at IS NULL OR pr.ends_at >= NOW())
+    ORDER BY pr.promo_price ASC
+    LIMIT 1;
+
+    v_unit_price := COALESCE(v_promo_price, v_item.product_promo_price, v_item.base_price);
