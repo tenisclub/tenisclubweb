@@ -1682,3 +1682,115 @@ $$;
 GRANT EXECUTE ON FUNCTION internal.trg_sync_global() TO postgres, service_role, authenticated, anon;
 GRANT EXECUTE ON FUNCTION internal.trg_sync_by_user_col() TO postgres, service_role, authenticated, anon;
 GRANT EXECUTE ON FUNCTION internal.trg_sync_cart_items() TO postgres, service_role, authenticated, anon;
+REVOKE ALL ON FUNCTION internal.emit_site_sync(TEXT, TEXT, UUID) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION internal.emit_site_sync(TEXT, TEXT, UUID) TO postgres, service_role;
+
+DROP TRIGGER IF EXISTS trg_realtime_products_ins_del ON public.products;
+CREATE TRIGGER trg_realtime_products_ins_del
+  AFTER INSERT OR DELETE ON public.products
+  FOR EACH STATEMENT
+  EXECUTE FUNCTION internal.trg_sync_global('catalog');
+
+DROP TRIGGER IF EXISTS trg_realtime_products_upd ON public.products;
+CREATE TRIGGER trg_realtime_products_upd
+  AFTER UPDATE ON public.products
+  FOR EACH ROW
+  WHEN ((to_jsonb(OLD) - 'views_count' - 'updated_at') IS DISTINCT FROM (to_jsonb(NEW) - 'views_count' - 'updated_at'))
+  EXECUTE FUNCTION internal.trg_sync_global('catalog');
+
+DROP TRIGGER IF EXISTS trg_realtime_product_variants ON public.product_variants;
+CREATE TRIGGER trg_realtime_product_variants
+  AFTER INSERT OR UPDATE OR DELETE ON public.product_variants
+  FOR EACH STATEMENT
+  EXECUTE FUNCTION internal.trg_sync_global('catalog');
+
+DROP TRIGGER IF EXISTS trg_realtime_product_images ON public.product_images;
+CREATE TRIGGER trg_realtime_product_images
+  AFTER INSERT OR UPDATE OR DELETE ON public.product_images
+  FOR EACH STATEMENT
+  EXECUTE FUNCTION internal.trg_sync_global('catalog');
+
+DROP TRIGGER IF EXISTS trg_realtime_inventory ON public.inventory;
+CREATE TRIGGER trg_realtime_inventory
+  AFTER INSERT OR UPDATE OR DELETE ON public.inventory
+  FOR EACH STATEMENT
+  EXECUTE FUNCTION internal.trg_sync_global('catalog');
+
+DROP TRIGGER IF EXISTS trg_realtime_promotions ON public.promotions;
+CREATE TRIGGER trg_realtime_promotions
+  AFTER INSERT OR UPDATE OR DELETE ON public.promotions
+  FOR EACH STATEMENT
+  EXECUTE FUNCTION internal.trg_sync_global('catalog');
+
+DROP TRIGGER IF EXISTS trg_realtime_categories ON public.categories;
+CREATE TRIGGER trg_realtime_categories
+  AFTER INSERT OR UPDATE OR DELETE ON public.categories
+  FOR EACH STATEMENT
+  EXECUTE FUNCTION internal.trg_sync_global('catalog');
+
+DROP TRIGGER IF EXISTS trg_realtime_brands ON public.brands;
+CREATE TRIGGER trg_realtime_brands
+  AFTER INSERT OR UPDATE OR DELETE ON public.brands
+  FOR EACH STATEMENT
+  EXECUTE FUNCTION internal.trg_sync_global('catalog');
+
+DROP TRIGGER IF EXISTS trg_realtime_store_settings ON public.store_settings;
+CREATE TRIGGER trg_realtime_store_settings
+  AFTER INSERT OR UPDATE OR DELETE ON public.store_settings
+  FOR EACH STATEMENT
+  EXECUTE FUNCTION internal.trg_sync_global('settings');
+
+DROP TRIGGER IF EXISTS trg_realtime_orders ON public.orders;
+CREATE TRIGGER trg_realtime_orders
+  AFTER INSERT OR UPDATE OR DELETE ON public.orders
+  FOR EACH ROW
+  EXECUTE FUNCTION internal.trg_sync_by_user_col('orders', 'user_id');
+
+DROP TRIGGER IF EXISTS trg_realtime_notifications ON public.notifications;
+CREATE TRIGGER trg_realtime_notifications
+  AFTER INSERT OR UPDATE OR DELETE ON public.notifications
+  FOR EACH ROW
+  EXECUTE FUNCTION internal.trg_sync_by_user_col('notifications', 'user_id');
+
+DROP TRIGGER IF EXISTS trg_realtime_user_profiles ON public.user_profiles;
+CREATE TRIGGER trg_realtime_user_profiles
+  AFTER INSERT OR UPDATE OR DELETE ON public.user_profiles
+  FOR EACH ROW
+  EXECUTE FUNCTION internal.trg_sync_by_user_col('users', 'id');
+
+DROP TRIGGER IF EXISTS trg_realtime_user_roles ON public.user_roles;
+CREATE TRIGGER trg_realtime_user_roles
+  AFTER INSERT OR UPDATE OR DELETE ON public.user_roles
+  FOR EACH ROW
+  EXECUTE FUNCTION internal.trg_sync_by_user_col('users', 'user_id');
+
+DROP TRIGGER IF EXISTS trg_realtime_cart_items ON public.cart_items;
+CREATE TRIGGER trg_realtime_cart_items
+  AFTER INSERT OR UPDATE OR DELETE ON public.cart_items
+  FOR EACH ROW
+  EXECUTE FUNCTION internal.trg_sync_cart_items();
+
+DROP TRIGGER IF EXISTS trg_realtime_favorites ON public.favorites;
+CREATE TRIGGER trg_realtime_favorites
+  AFTER INSERT OR UPDATE OR DELETE ON public.favorites
+  FOR EACH ROW
+  EXECUTE FUNCTION internal.trg_sync_by_user_col('user_private', 'user_id');
+
+DROP TRIGGER IF EXISTS trg_realtime_user_addresses ON public.user_addresses;
+CREATE TRIGGER trg_realtime_user_addresses
+  AFTER INSERT OR UPDATE OR DELETE ON public.user_addresses
+  FOR EACH ROW
+  EXECUTE FUNCTION internal.trg_sync_by_user_col('user_private', 'user_id');
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime'
+      AND schemaname = 'public'
+      AND tablename = 'site_sync_state'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.site_sync_state;
+  END IF;
+END $$;
