@@ -222,3 +222,115 @@ CREATE TABLE IF NOT EXISTS public.product_images (
 
 CREATE TABLE IF NOT EXISTS public.product_variants (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  product_id UUID NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
+  color TEXT NOT NULL DEFAULT 'Padrão',
+  color_hex TEXT NOT NULL DEFAULT '#18181B',
+  size TEXT NOT NULL,
+  variant_sku TEXT,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (product_id, color, size)
+);
+
+CREATE TABLE IF NOT EXISTS public.inventory (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  variant_id UUID UNIQUE NOT NULL REFERENCES public.product_variants(id) ON DELETE CASCADE,
+  quantity INT NOT NULL DEFAULT 0 CHECK (quantity >= 0),
+  low_stock_threshold INT NOT NULL DEFAULT 3 CHECK (low_stock_threshold >= 0),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.inventory_movements (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  variant_id UUID NOT NULL REFERENCES public.product_variants(id) ON DELETE CASCADE,
+  product_id UUID NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
+  previous_quantity INT NOT NULL,
+  moved_quantity INT NOT NULL,
+  new_quantity INT NOT NULL,
+  movement_type TEXT NOT NULL CHECK (movement_type IN ('in', 'out', 'adjustment', 'order_reserve', 'order_cancel_return')),
+  reason TEXT NOT NULL,
+  order_id UUID,
+  performed_by UUID REFERENCES public.user_profiles(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ----------------------------------------------------------------------------
+-- 4. PROMOTIONS
+-- ----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.promotions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  description TEXT DEFAULT '',
+  product_id UUID NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
+  discount_percent NUMERIC(5, 2),
+  promo_price NUMERIC(10, 2) NOT NULL CHECK (promo_price >= 0),
+  starts_at TIMESTAMPTZ,
+  ends_at TIMESTAMPTZ,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  highlight_home BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ----------------------------------------------------------------------------
+-- 5. CARTS, CART ITEMS & FAVORITES
+-- ----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.carts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID UNIQUE NOT NULL REFERENCES public.user_profiles(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.cart_items (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  cart_id UUID NOT NULL REFERENCES public.carts(id) ON DELETE CASCADE,
+  product_id UUID NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
+  variant_id UUID NOT NULL REFERENCES public.product_variants(id) ON DELETE CASCADE,
+  quantity INT NOT NULL DEFAULT 1 CHECK (quantity > 0),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (cart_id, variant_id)
+);
+
+CREATE TABLE IF NOT EXISTS public.favorites (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES public.user_profiles(id) ON DELETE CASCADE,
+  product_id UUID NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (user_id, product_id)
+);
+
+-- ----------------------------------------------------------------------------
+-- 6. ORDERS, ORDER ITEMS & ORDER STATUS HISTORY
+-- ----------------------------------------------------------------------------
+CREATE SEQUENCE IF NOT EXISTS public.order_number_seq START 1001;
+
+CREATE TABLE IF NOT EXISTS public.orders (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_number TEXT UNIQUE NOT NULL,
+  user_id UUID NOT NULL REFERENCES public.user_profiles(id) ON DELETE RESTRICT,
+  customer_name TEXT NOT NULL,
+  customer_email TEXT NOT NULL,
+  customer_phone TEXT NOT NULL,
+  delivery_method TEXT NOT NULL CHECK (delivery_method IN ('pickup', 'local_delivery')),
+  shipping_address JSONB,
+  subtotal NUMERIC(10, 2) NOT NULL CHECK (subtotal >= 0),
+  discount_total NUMERIC(10, 2) NOT NULL DEFAULT 0 CHECK (discount_total >= 0),
+  shipping_cost NUMERIC(10, 2) NOT NULL DEFAULT 0 CHECK (shipping_cost >= 0),
+  total NUMERIC(10, 2) NOT NULL CHECK (total >= 0),
+  status TEXT NOT NULL DEFAULT 'received' CHECK (status IN (
+    'received',
+    'awaiting_confirmation',
+    'confirmed',
+    'separating',
+    'ready_for_pickup',
+    'out_for_delivery',
+    'completed',
+    'cancelled'
+  )),
+  payment_status TEXT NOT NULL DEFAULT 'pending' CHECK (payment_status IN ('pending', 'paid_manual', 'refunded_manual')),
+  payment_method_note TEXT DEFAULT '',
+  paid_at TIMESTAMPTZ,
+  customer_notes TEXT DEFAULT '',
+  store_notes TEXT DEFAULT '',
