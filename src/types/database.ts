@@ -103,3 +103,55 @@ export interface Product {
   category?: Category | null;
   images: ProductImage[];
   primary_image: string;
+  variants: EnrichedVariant[];
+  available_sizes: string[];
+  all_sizes: string[];
+  total_stock: number;
+  size_range_label: string;
+}
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  full_name: string;
+  phone: string;
+  avatar_url: string | null;
+  auth_provider: string;
+  is_active: boolean;
+  created_at: string;
+  role?: UserRole;
+}
+
+export interface UserAddress {
+  id: string;
+  user_id: string;
+  label: string;
+  recipient_name: string;
+  zip_code: string;
+  street: string;
+  number: string;
+  complement: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+  reference: string;
+  is_default: boolean;
+}
+
+export interface CartItemView {
+  id: string;
+  cart_id: string;
+  product_id: string;
+  variant_id: string;
+  quantity: number;
+  product_name: string;
+  product_slug: string;
+  product_sku: string;
+  product_image: string;
+  brand_name: string;
+  color: string;
+  color_hex: string;
+  size: string;
+  base_price: number;
+  unit_price: number;
+  available_stock: number;
