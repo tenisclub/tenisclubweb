@@ -447,3 +447,115 @@ CREATE TABLE IF NOT EXISTS public.store_settings (
 -- ----------------------------------------------------------------------------
 CREATE INDEX IF NOT EXISTS idx_products_slug ON public.products(slug);
 CREATE INDEX IF NOT EXISTS idx_products_active ON public.products(is_active, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_products_gender ON public.products(gender);
+CREATE INDEX IF NOT EXISTS idx_products_category ON public.products(category_id);
+CREATE INDEX IF NOT EXISTS idx_products_brand ON public.products(brand_id);
+CREATE INDEX IF NOT EXISTS idx_variants_product ON public.product_variants(product_id);
+CREATE INDEX IF NOT EXISTS idx_variants_size ON public.product_variants(size);
+CREATE INDEX IF NOT EXISTS idx_inventory_variant ON public.inventory(variant_id);
+CREATE INDEX IF NOT EXISTS idx_orders_user ON public.orders(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_orders_status ON public.orders(status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON public.notifications(user_id, is_read, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_notifications_admin ON public.notifications(target_audience, is_read, created_at DESC);
+
+-- ----------------------------------------------------------------------------
+-- 9. AUTH USER CREATION & SYNC TRIGGER (RN01 & RN16)
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_customer_role_id UUID;
+  v_full_name TEXT;
+  v_phone TEXT;
+  v_avatar TEXT;
+  v_provider TEXT;
+BEGIN
+  v_full_name := COALESCE(
+    NULLIF(TRIM(NEW.raw_user_meta_data->>'full_name'), ''),
+    NULLIF(TRIM(NEW.raw_user_meta_data->>'name'), ''),
+    SPLIT_PART(NEW.email, '@', 1)
+  );
+  v_phone := COALESCE(NEW.raw_user_meta_data->>'phone', '');
+  v_avatar := COALESCE(NEW.raw_user_meta_data->>'avatar_url', NEW.raw_user_meta_data->>'picture');
+  v_provider := COALESCE(NEW.raw_app_meta_data->>'provider', 'email');
+
+  INSERT INTO public.user_profiles (id, email, full_name, phone, avatar_url, auth_provider, is_active, accepted_terms_at)
+  VALUES (NEW.id, LOWER(NEW.email), v_full_name, v_phone, v_avatar, v_provider, TRUE, NOW())
+  ON CONFLICT (id) DO UPDATE SET
+    email = EXCLUDED.email,
+    full_name = CASE WHEN public.user_profiles.full_name = '' THEN EXCLUDED.full_name ELSE public.user_profiles.full_name END,
+    avatar_url = COALESCE(public.user_profiles.avatar_url, EXCLUDED.avatar_url),
+    updated_at = NOW();
+
+  -- RN01: Every new account is created strictly as customer
+  SELECT id INTO v_customer_role_id FROM public.roles WHERE name = 'customer' LIMIT 1;
+  IF v_customer_role_id IS NOT NULL THEN
+    INSERT INTO public.user_roles (user_id, role_id)
+    VALUES (NEW.id, v_customer_role_id)
+    ON CONFLICT (user_id, role_id) DO NOTHING;
+  END IF;
+
+  -- Ensure persistent cart exists
+  INSERT INTO public.carts (user_id)
+  VALUES (NEW.id)
+  ON CONFLICT (user_id) DO NOTHING;
+
+  -- Customer welcome notification
+  INSERT INTO public.notifications (user_id, target_audience, type, title, message, link)
+  VALUES (
+    NEW.id,
+    'customer',
+    'welcome',
+    'Bem-vindo(a) à Tênis Club!',
+    'Seu cadastro foi realizado com sucesso. Explore nosso catálogo e garanta seu próximo par!',
+    '/produtos'
+  );
+
+  -- Admin notification
+  INSERT INTO public.notifications (user_id, target_audience, type, title, message, link)
+  VALUES (
+    NULL,
+    'admin',
+    'new_customer',
+    'Novo cliente cadastrado',
+    v_full_name || ' (' || NEW.email || ') acabou de criar uma conta.',
+    '/admin/clientes'
+  );
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- ----------------------------------------------------------------------------
+-- 10. TRANSACTIONAL ORDER CREATION RPC (RN04, RN05, RN07, RN08, RN09, RN10, RN13, RN18)
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.create_order_from_cart(
+  p_user_id UUID,
+  p_customer_name TEXT,
+  p_customer_email TEXT,
+  p_customer_phone TEXT,
+  p_delivery_method TEXT,
+  p_shipping_address JSONB DEFAULT NULL,
+  p_customer_notes TEXT DEFAULT ''
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_cart_id UUID;
+  v_item RECORD;
+  v_subtotal NUMERIC(10, 2) := 0;
+  v_discount_total NUMERIC(10, 2) := 0;
+  v_shipping_cost NUMERIC(10, 2) := 0;
+  v_items_total NUMERIC(10, 2) := 0;
