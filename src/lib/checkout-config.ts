@@ -463,3 +463,69 @@ export function getSelectableCheckoutOptions(
     });
   }
 
+  return options;
+}
+
+export function resolveDefaultOptionKey(cfg: CheckoutDeliveryConfig): string {
+  const options = getSelectableCheckoutOptions(cfg, '', 0);
+  return options[0]?.key ?? 'pickup';
+}
+
+export function resolveDefaultDeliveryMethod(
+  cfg: CheckoutDeliveryConfig
+): DeliveryMethod {
+  const options = getSelectableCheckoutOptions(cfg, '', 0);
+  return options[0]?.deliveryMethod ?? 'pickup';
+}
+
+export function calculateCheckoutShipping(
+  cfg: CheckoutDeliveryConfig,
+  selectedKeyOrMethod: string,
+  itemsTotal: number
+): {
+  shippingCost: number;
+  summaryLabel: string;
+  pickupCardBadge: string;
+  deliveryCardBadge: string;
+} {
+  const pickupFee = safeNum(cfg.pickup_fee, 0);
+  const pickupCardBadge =
+    pickupFee > 0 ? formatCurrency(pickupFee) : cfg.pickup_badge || 'Grátis';
+
+  const deliveryFeeCalc = computeOptionFee(
+    cfg.delivery_fee_mode,
+    cfg.delivery_fee,
+    cfg.free_delivery_threshold,
+    cfg.delivery_badge,
+    itemsTotal
+  );
+
+  const options = getSelectableCheckoutOptions(cfg, '', itemsTotal);
+  const matched = options.find((o) => o.key === selectedKeyOrMethod);
+
+  if (matched) {
+    return {
+      shippingCost: matched.shippingCost,
+      summaryLabel: matched.summaryLabel,
+      pickupCardBadge,
+      deliveryCardBadge: deliveryFeeCalc.badgeLabel,
+    };
+  }
+
+  if (options.length === 0) {
+    return {
+      shippingCost: 0,
+      summaryLabel: 'A combinar',
+      pickupCardBadge,
+      deliveryCardBadge: deliveryFeeCalc.badgeLabel,
+    };
+  }
+
+  const fallback = options[0];
+  return {
+    shippingCost: fallback.shippingCost,
+    summaryLabel: fallback.summaryLabel,
+    pickupCardBadge,
+    deliveryCardBadge: deliveryFeeCalc.badgeLabel,
+  };
+}
