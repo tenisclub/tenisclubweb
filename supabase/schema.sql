@@ -79,8 +79,14 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
 AS $$
+DECLARE
+  v_uid UUID;
 BEGIN
-  IF check_user_id IS NULL THEN
+  v_uid := CASE
+    WHEN current_user IN ('anon', 'authenticated') THEN auth.uid()
+    ELSE check_user_id
+  END;
+  IF v_uid IS NULL THEN
     RETURN FALSE;
   END IF;
   RETURN EXISTS (
@@ -88,7 +94,7 @@ BEGIN
     FROM public.user_roles ur
     JOIN public.roles r ON r.id = ur.role_id
     JOIN public.user_profiles up ON up.id = ur.user_id
-    WHERE ur.user_id = check_user_id
+    WHERE ur.user_id = v_uid
       AND up.is_active = TRUE
       AND r.name IN ('admin_operational', 'super_admin')
   );
@@ -101,8 +107,14 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
 AS $$
+DECLARE
+  v_uid UUID;
 BEGIN
-  IF check_user_id IS NULL THEN
+  v_uid := CASE
+    WHEN current_user IN ('anon', 'authenticated') THEN auth.uid()
+    ELSE check_user_id
+  END;
+  IF v_uid IS NULL THEN
     RETURN FALSE;
   END IF;
   RETURN EXISTS (
@@ -110,7 +122,7 @@ BEGIN
     FROM public.user_roles ur
     JOIN public.roles r ON r.id = ur.role_id
     JOIN public.user_profiles up ON up.id = ur.user_id
-    WHERE ur.user_id = check_user_id
+    WHERE ur.user_id = v_uid
       AND up.is_active = TRUE
       AND r.name = 'super_admin'
   );
@@ -1285,3 +1297,22 @@ CREATE POLICY "store_settings_public_read" ON public.store_settings
   FOR SELECT USING (TRUE);
 CREATE POLICY "store_settings_admin_write" ON public.store_settings
   FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+-- ----------------------------------------------------------------------------
+-- 14. HARDEN SECURITY DEFINER RPC EXECUTE PERMISSIONS
+-- ----------------------------------------------------------------------------
+REVOKE ALL ON FUNCTION public.adjust_stock_atomic(uuid, text, integer, text, integer, uuid) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.adjust_stock_atomic(uuid, text, integer, text, integer, uuid) TO postgres, service_role;
+
+REVOKE ALL ON FUNCTION public.change_order_status_atomic(uuid, text, text, text, text, text, text, uuid) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.change_order_status_atomic(uuid, text, text, text, text, text, text, uuid) TO postgres, service_role;
+
+REVOKE ALL ON FUNCTION public.create_order_from_cart(uuid, text, text, text, text, jsonb, text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.create_order_from_cart(uuid, text, text, text, text, jsonb, text) TO postgres, service_role;
+
+REVOKE ALL ON FUNCTION public.handle_new_user() FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.handle_new_user() TO postgres, service_role, supabase_auth_admin;
+
+REVOKE ALL ON FUNCTION public.get_user_role(uuid) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.get_user_role(uuid) TO postgres, service_role;
+
