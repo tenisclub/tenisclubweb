@@ -208,3 +208,55 @@ export interface Order {
   discount_total: number;
   shipping_cost: number;
   total: number;
+  status: OrderStatus;
+  payment_status: PaymentStatus;
+  payment_method_note: string;
+  paid_at: string | null;
+  customer_notes: string;
+  store_notes: string;
+  internal_notes?: string;
+  stock_deducted: boolean;
+  created_at: string;
+  updated_at: string;
+  items?: OrderItem[];
+  history?: OrderStatusHistory[];
+}
+
+export interface NotificationItem {
+  id: string;
+  user_id: string | null;
+  target_audience: 'customer' | 'admin';
+  type: string;
+  title: string;
+  message: string;
+  link: string | null;
+  is_read: boolean;
+  created_at: string;
+}
+
+export interface StoreSettings {
+  id: number;
+  store_name: string;
+  tagline: string;
+  hero_badge: string;
+  hero_title: string;
+  hero_subtitle: string;
+  hero_banner_url: string | null;
+  logo_url: string | null;
+  whatsapp: string;
+  phone: string;
+  email: string;
+  address: string;
+  business_hours: string;
+  instagram_url: string;
+  facebook_url: string;
+  tiktok_url: string;
+  pickup_info: string;
+  delivery_info: string;
+  exchange_policy: string;
+  privacy_policy: string;
+  terms_of_use: string;
+  about_text: string;
+  checkout_delivery_config?: unknown;
+}
+
