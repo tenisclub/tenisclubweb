@@ -264,3 +264,69 @@ export function normalizeCheckoutDeliveryConfig(
       typeof obj.delivery_info_card_title === 'string'
         ? obj.delivery_info_card_title
         : d.delivery_info_card_title,
+
+    extra_cards: extraCardsRaw
+      .filter((item): item is Record<string, unknown> => Boolean(item && typeof item === 'object'))
+      .map((item, idx) => ({
+        id: typeof item.id === 'string' && item.id ? item.id : `card-${idx}`,
+        enabled: item.enabled !== false,
+        card_type: item.card_type === 'option' ? 'option' : 'info',
+        icon: safeIcon(item.icon, item.card_type === 'option' ? 'truck' : 'info'),
+        title: typeof item.title === 'string' ? item.title : '',
+        description: typeof item.description === 'string' ? item.description : '',
+        badge: typeof item.badge === 'string' ? item.badge : '',
+        fee_mode:
+          item.fee_mode === 'fixed' ||
+          item.fee_mode === 'free' ||
+          item.fee_mode === 'to_combine'
+            ? item.fee_mode
+            : 'to_combine',
+        fee: safeNum(item.fee, 0),
+        free_threshold: safeNum(item.free_threshold, 0),
+        require_address: Boolean(item.require_address),
+        visibility:
+          item.visibility === 'pickup' || item.visibility === 'local_delivery'
+            ? item.visibility
+            : 'always',
+      })),
+
+    custom_buttons: customButtonsRaw
+      .filter((item): item is Record<string, unknown> => Boolean(item && typeof item === 'object'))
+      .map((item, idx) => ({
+        id: typeof item.id === 'string' && item.id ? item.id : `btn-${idx}`,
+        label: typeof item.label === 'string' ? item.label : '',
+        url: typeof item.url === 'string' ? item.url : '',
+        icon: safeIcon(item.icon, 'external-link'),
+        variant:
+          item.variant === 'volt' ||
+          item.variant === 'whatsapp' ||
+          item.variant === 'subtle'
+            ? item.variant
+            : 'outline',
+        visibility:
+          item.visibility === 'pickup' || item.visibility === 'local_delivery'
+            ? item.visibility
+            : 'always',
+      })),
+
+    always_require_address:
+      typeof obj.always_require_address === 'boolean'
+        ? obj.always_require_address
+        : d.always_require_address,
+
+    next_button_label:
+      typeof obj.next_button_label === 'string'
+        ? obj.next_button_label.trim() === 'Revisar Confirmação'
+          ? d.next_button_label
+          : obj.next_button_label
+        : d.next_button_label,
+  };
+}
+
+export function shouldRequireCheckoutAddress(
+  cfg: CheckoutDeliveryConfig,
+  activeOption: SelectableCheckoutOption | null,
+  effectiveDeliveryMethod: DeliveryMethod = 'pickup'
+): boolean {
+  if (cfg.always_require_address) {
+    return true;
