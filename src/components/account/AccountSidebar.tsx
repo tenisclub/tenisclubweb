@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -12,7 +12,6 @@ import {
   LogOut,
   ShieldCheck,
 } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
 import { useStore } from '@/components/providers/StoreProvider';
 import { cn } from '@/lib/utils';
 
@@ -27,15 +26,18 @@ const ACCOUNT_LINKS = [
 export function AccountSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, isAdmin, refreshSession, toast } = useStore();
+  const { user, isAdmin, logout, toast } = useStore();
+  const [loggingOut, setLoggingOut] = useState(false);
 
-  const handleLogout = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    await refreshSession();
+  useEffect(() => {
+    router.prefetch('/');
+  }, [router]);
+
+  const handleLogout = () => {
+    if (loggingOut) return;
+    setLoggingOut(true);
     toast('Sessão encerrada com segurança.', 'info');
-    router.push('/');
-    router.refresh();
+    logout('/');
   };
 
   return (
@@ -88,10 +90,11 @@ export function AccountSidebar() {
         <button
           type="button"
           onClick={handleLogout}
-          className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-red-400 hover:bg-red-500/10 transition"
+          disabled={loggingOut}
+          className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-red-400 hover:bg-red-500/10 transition disabled:opacity-60 cursor-pointer"
         >
           <LogOut className="w-4 h-4" />
-          Encerrar Sessão
+          {loggingOut ? 'Encerrando...' : 'Encerrar Sessão'}
         </button>
       </div>
     </aside>

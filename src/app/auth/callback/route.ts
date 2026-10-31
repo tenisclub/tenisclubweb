@@ -16,7 +16,16 @@ export async function GET(request: Request) {
         await supabase.auth.signOut();
         return NextResponse.redirect(`${origin}/login?error=account_disabled`);
       }
-      if (next && next.startsWith('/') && !next.startsWith('//')) {
+      const isSafeCustomTarget =
+        next &&
+        next.startsWith('/') &&
+        !next.startsWith('//') &&
+        next !== '/minha-conta' &&
+        !next.startsWith('/minha-conta?') &&
+        !next.startsWith('/login') &&
+        !next.startsWith('/cadastro');
+
+      if (isSafeCustomTarget) {
         return NextResponse.redirect(`${origin}${next}`);
       }
       return NextResponse.redirect(`${origin}/`);

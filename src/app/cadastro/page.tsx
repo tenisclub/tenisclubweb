@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Suspense, useMemo, useState } from 'react';
+import React, { Suspense, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { User, Mail, Phone, Lock, ArrowRight } from 'lucide-react';
@@ -9,11 +9,28 @@ import { createClient } from '@/lib/supabase/client';
 import { useStore } from '@/components/providers/StoreProvider';
 import { cn } from '@/lib/utils';
 
+function resolvePostSignupTarget(raw: string): string {
+  if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return '/';
+  if (
+    raw === '/minha-conta' ||
+    raw.startsWith('/minha-conta?') ||
+    raw.startsWith('/login') ||
+    raw.startsWith('/cadastro')
+  ) {
+    return '/';
+  }
+  return raw;
+}
+
 function CadastroForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectParam = searchParams.get('redirect') || '';
   const { refreshSession, toast } = useStore();
+
+  useEffect(() => {
+    router.prefetch('/');
+  }, [router]);
 
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -82,13 +99,7 @@ function CadastroForm() {
 
       await refreshSession();
       toast('Cadastro realizado com sucesso! Bem-vindo(a) à Tênis Club!', 'success');
-
-      if (redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')) {
-        router.push(redirectParam);
-      } else {
-        router.push('/');
-      }
-      router.refresh();
+      router.replace(resolvePostSignupTarget(redirectParam));
     } catch {
       setErrorMsg('Falha de comunicação ao realizar cadastro.');
       setLoading(false);
@@ -97,8 +108,9 @@ function CadastroForm() {
 
   const handleGoogleSignup = async () => {
     const supabase = createClient();
+    const nextTarget = resolvePostSignupTarget(redirectParam);
     const callbackUrl = `${window.location.origin}/auth/callback${
-      redirectParam ? `?next=${encodeURIComponent(redirectParam)}` : ''
+      nextTarget !== '/' ? `?next=${encodeURIComponent(nextTarget)}` : ''
     }`;
     await supabase.auth.signInWithOAuth({
       provider: 'google',

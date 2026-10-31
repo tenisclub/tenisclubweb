@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -23,7 +23,6 @@ import {
 } from 'lucide-react';
 import { TenisClubLogo } from '@/components/brand/TenisClubLogo';
 import { useStore } from '@/components/providers/StoreProvider';
-import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 import type { UserProfile, UserRole } from '@/types/database';
 
@@ -57,12 +56,20 @@ export function AdminShell({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { refreshSession } = useStore();
+  const { logout, toast } = useStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const [livePendingOrders, setLivePendingOrders] = useState(pendingOrdersCount);
   const [liveUnreadNotifs, setLiveUnreadNotifs] = useState(unreadAdminNotifs);
+  const loggingOutRef = useRef(false);
+  const didMountRef = useRef(false);
+  const lastStatsFetchRef = useRef(Date.now());
 
   const isSuper = role === 'super_admin';
+
+  useEffect(() => {
+    router.prefetch('/login');
+  }, [router]);
 
   useEffect(() => {
     setLivePendingOrders(pendingOrdersCount);
@@ -72,10 +79,15 @@ export function AdminShell({
     setLiveUnreadNotifs(unreadAdminNotifs);
   }, [unreadAdminNotifs]);
 
-  const fetchAdminStats = useCallback(async () => {
+  const fetchAdminStats = useCallback(async (force = false) => {
+    if (loggingOutRef.current) return;
+    const now = Date.now();
+    if (!force && now - lastStatsFetchRef.current < 8000) return;
+    lastStatsFetchRef.current = now;
+
     try {
       const res = await fetch('/api/admin/stats', { cache: 'no-store' });
-      if (!res.ok) return;
+      if (!res.ok || loggingOutRef.current) return;
       const data = await res.json();
       if (typeof data.pendingOrdersCount === 'number') {
         setLivePendingOrders(data.pendingOrdersCount);
@@ -90,7 +102,12 @@ export function AdminShell({
 
   // Keep sidebar order count & notifications fresh across admin route transitions and tab focus
   useEffect(() => {
-    void fetchAdminStats();
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+    if (!pathname.startsWith('/admin')) return;
+    void fetchAdminStats(false);
   }, [pathname, fetchAdminStats]);
 
   useEffect(() => {
@@ -99,12 +116,12 @@ export function AdminShell({
       if (typeof custom.detail?.pendingOrdersCount === 'number') {
         setLivePendingOrders(custom.detail.pendingOrdersCount);
       } else {
-        void fetchAdminStats();
+        void fetchAdminStats(true);
       }
     };
     const onFocus = () => {
       if (document.visibilityState === 'visible') {
-        void fetchAdminStats();
+        void fetchAdminStats(false);
       }
     };
 
@@ -116,12 +133,13 @@ export function AdminShell({
     };
   }, [fetchAdminStats]);
 
-  const handleLogout = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    await refreshSession();
-    router.push('/login');
-    router.refresh();
+  const handleLogout = () => {
+    if (loggingOutRef.current) return;
+    loggingOutRef.current = true;
+    setLoggingOut(true);
+    setSidebarOpen(false);
+    toast('Sessão encerrada com segurança.', 'info');
+    logout('/login');
   };
 
   const visibleLinks = ADMIN_NAV.filter((item) => !item.superOnly || isSuper);
@@ -196,10 +214,11 @@ export function AdminShell({
             <button
               type="button"
               onClick={handleLogout}
-              className="h-9 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-xs font-bold text-red-400 inline-flex items-center justify-center gap-1.5"
+              disabled={loggingOut}
+              className="h-9 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-xs font-bold text-red-400 inline-flex items-center justify-center gap-1.5 disabled:opacity-60 cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" />
-              Sair
+              {loggingOut ? 'Saindo...' : 'Sair'}
             </button>
           </div>
         </div>
@@ -317,10 +336,11 @@ export function AdminShell({
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="h-9 rounded-xl bg-red-500/10 text-xs font-bold text-red-400 inline-flex items-center justify-center gap-1.5"
+                  disabled={loggingOut}
+                  className="h-9 rounded-xl bg-red-500/10 text-xs font-bold text-red-400 inline-flex items-center justify-center gap-1.5 disabled:opacity-60 cursor-pointer"
                 >
                   <LogOut className="w-3.5 h-3.5" />
-                  Sair
+                  {loggingOut ? 'Saindo...' : 'Sair'}
                 </button>
               </div>
             </div>

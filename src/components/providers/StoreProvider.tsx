@@ -3,6 +3,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 import type { UserProfile, UserRole } from '@/types/database';
 
 interface ToastItem {
@@ -35,7 +36,8 @@ interface StoreContextValue {
   cartCount: number;
   favoriteIds: string[];
   unreadNotifications: number;
-  refreshSession: () => Promise<void>;
+  refreshSession: () => Promise<SessionSnapshot | null>;
+  logout: (redirectTo?: string) => void;
   addToCart: (params: {
     productId: string;
     variantId: string;
@@ -52,6 +54,33 @@ const StoreContext = createContext<StoreContextValue | null>(null);
 const PENDING_CART_KEY = 'tc_pending_cart_intent';
 const SESSION_CACHE_KEY = 'tc_session_cache_v1';
 const EMPTY_FAVORITES: string[] = [];
+
+function clearClientAuthStorage() {
+  if (typeof window === 'undefined') return;
+  sessionStorage.removeItem(SESSION_CACHE_KEY);
+  sessionStorage.removeItem(PENDING_CART_KEY);
+
+  const rawCookies = document.cookie ? document.cookie.split(';') : [];
+  for (const part of rawCookies) {
+    const eq = part.indexOf('=');
+    const name = (eq > -1 ? part.slice(0, eq) : part).trim();
+    if (name.startsWith('sb-')) {
+      document.cookie = `${name}=; Path=/; Max-Age=0; SameSite=Lax`;
+      document.cookie = `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+    }
+  }
+
+  try {
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('sb-')) {
+        localStorage.removeItem(key);
+      }
+    }
+  } catch {
+    // Ignore restricted storage environments
+  }
+}
 
 export function StoreProvider({
   children,
@@ -115,42 +144,70 @@ export function StoreProvider({
     }
   }, [toast]);
 
-  const refreshSession = useCallback(async () => {
+  const refreshSession = useCallback(async (): Promise<SessionSnapshot | null> => {
     try {
       const res = await fetch('/api/auth/me', { cache: 'no-store' });
-      if (!res.ok) return;
+      if (!res.ok) return null;
       const data = await res.json();
       const isAuth = Boolean(data.authenticated);
-      setAuthenticated(isAuth);
-      setUser(data.user || null);
-      setRole(data.role || 'visitor');
-      setCartCount(data.cartCount || 0);
-      setFavoriteIds(data.favoriteIds || []);
-      setUnreadNotifications(data.unreadNotifications || 0);
+      const snap: SessionSnapshot = {
+        authenticated: isAuth,
+        user: data.user || null,
+        role: data.role || 'visitor',
+        cartCount: data.cartCount || 0,
+        favoriteIds: data.favoriteIds || [],
+        unreadNotifications: data.unreadNotifications || 0,
+      };
+
+      setAuthenticated(snap.authenticated);
+      setUser(snap.user);
+      setRole(snap.role);
+      setCartCount(snap.cartCount);
+      setFavoriteIds(snap.favoriteIds);
+      setUnreadNotifications(snap.unreadNotifications);
 
       if (typeof window !== 'undefined') {
         if (isAuth) {
-          const snap: SessionSnapshot = {
-            authenticated: true,
-            user: data.user || null,
-            role: data.role || 'visitor',
-            cartCount: data.cartCount || 0,
-            favoriteIds: data.favoriteIds || [],
-            unreadNotifications: data.unreadNotifications || 0,
-          };
           sessionStorage.setItem(SESSION_CACHE_KEY, JSON.stringify(snap));
         } else {
-          sessionStorage.removeItem(SESSION_CACHE_KEY);
+          clearClientAuthStorage();
         }
       }
 
       if (isAuth) {
         await replayPendingCartIntent();
       }
+      return snap;
     } catch {
-      // Ignore transient fetch errors
+      return null;
     }
   }, [replayPendingCartIntent]);
+
+  const logout = useCallback(
+    (redirectTo = '/') => {
+      // 1. Instant 0ms state + cookie wipe
+      setAuthenticated(false);
+      setUser(null);
+      setRole('visitor');
+      setCartCount(0);
+      setFavoriteIds(EMPTY_FAVORITES);
+      setUnreadNotifications(0);
+      clearClientAuthStorage();
+
+      // 2. Non-blocking cleanup of in-memory GoTrue state and server cookies
+      try {
+        const supabase = createClient();
+        void supabase.auth.signOut({ scope: 'local' }).catch(() => {});
+      } catch {
+        // Ignore
+      }
+      void fetch('/api/auth/logout', { method: 'POST', keepalive: true }).catch(() => {});
+
+      // 3. Immediate client transition without competing router.refresh() race
+      router.replace(redirectTo);
+    },
+    [router]
+  );
 
   // Hydrate navbar session once on mount (zero requests for anonymous visitors; instant cache restore + background sync for logged-in users)
   useEffect(() => {
@@ -354,6 +411,7 @@ export function StoreProvider({
         favoriteIds,
         unreadNotifications,
         refreshSession,
+        logout,
         addToCart,
         toggleFavorite,
         toast,

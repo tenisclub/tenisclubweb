@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Bell,
   Tag,
+  LogOut,
 } from 'lucide-react';
 import { TenisClubLogo } from '@/components/brand/TenisClubLogo';
 import { useStore } from '@/components/providers/StoreProvider';
@@ -32,7 +33,8 @@ const NAV_LINKS = [
 export function Navbar({ settings }: { settings: StoreSettings }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { authenticated, user, isAdmin, cartCount, favoriteIds, unreadNotifications } = useStore();
+  const { authenticated, user, isAdmin, cartCount, favoriteIds, unreadNotifications, logout, toast } =
+    useStore();
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -224,6 +226,20 @@ export function Navbar({ settings }: { settings: StoreSettings }) {
               {unreadNotifications > 0 && <Bell className="w-4 h-4 text-[#BEFA46]" />}
               {authenticated ? `Minha Conta (${user?.full_name})` : 'Entrar ou Criar Conta'}
             </Link>
+            {authenticated && (
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileOpen(false);
+                  toast('Sessão encerrada com segurança.', 'info');
+                  logout('/');
+                }}
+                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-bold"
+              >
+                <LogOut className="w-4 h-4" />
+                Sair da Conta
+              </button>
+            )}
           </div>
         </div>
       )}

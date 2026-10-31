@@ -1,12 +1,25 @@
 'use client';
 
-import React, { Suspense, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { TenisClubLogo } from '@/components/brand/TenisClubLogo';
 import { createClient } from '@/lib/supabase/client';
 import { useStore } from '@/components/providers/StoreProvider';
+
+function resolvePostLoginTarget(raw: string): string {
+  if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return '/';
+  if (
+    raw === '/minha-conta' ||
+    raw.startsWith('/minha-conta?') ||
+    raw.startsWith('/login') ||
+    raw.startsWith('/cadastro')
+  ) {
+    return '/';
+  }
+  return raw;
+}
 
 function LoginForm() {
   const router = useRouter();
@@ -20,6 +33,10 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+
+  useEffect(() => {
+    router.prefetch('/');
+  }, [router]);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,26 +56,18 @@ function LoginForm() {
         return;
       }
 
-      // Verify active account status and load session profile
-      const meRes = await fetch('/api/auth/me', { cache: 'no-store' });
-      const meData = await meRes.json();
+      // Single round-trip to verify active account status and hydrate session state
+      const snap = await refreshSession();
 
-      if (!meData.authenticated) {
-        await supabase.auth.signOut();
+      if (!snap?.authenticated) {
+        void supabase.auth.signOut({ scope: 'local' });
         setErrorMsg('Esta conta está temporariamente desativada. Entre em contato com a loja.');
         setLoading(false);
         return;
       }
 
-      await refreshSession();
-      toast(`Bem-vindo(a) de volta, ${meData.user?.full_name?.split(' ')[0] || ''}!`, 'success');
-
-      if (redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')) {
-        router.push(redirectParam);
-      } else {
-        router.push('/');
-      }
-      router.refresh();
+      toast(`Bem-vindo(a) de volta, ${snap.user?.full_name?.split(' ')[0] || ''}!`, 'success');
+      router.replace(resolvePostLoginTarget(redirectParam));
     } catch {
       setErrorMsg('Ocorreu um erro ao realizar login. Tente novamente.');
       setLoading(false);
@@ -70,9 +79,9 @@ function LoginForm() {
     setGoogleLoading(true);
     try {
       const supabase = createClient();
-      const nextTarget = redirectParam && redirectParam.startsWith('/') ? redirectParam : '';
+      const nextTarget = resolvePostLoginTarget(redirectParam);
       const callbackUrl = `${window.location.origin}/auth/callback${
-        nextTarget ? `?next=${encodeURIComponent(nextTarget)}` : ''
+        nextTarget !== '/' ? `?next=${encodeURIComponent(nextTarget)}` : ''
       }`;
 
       const { error } = await supabase.auth.signInWithOAuth({
