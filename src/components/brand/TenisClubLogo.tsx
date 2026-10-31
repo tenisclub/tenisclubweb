@@ -12,7 +12,7 @@ interface TenisClubLogoProps {
 export function TenisClubLogo({
   size = 'md',
   showTagline = false,
-  tagline = 'ESTILO PARA TODA A FAMÍLIA',
+  tagline = '',
   logoUrl,
   className,
 }: TenisClubLogoProps) {
@@ -138,3 +138,4 @@ export function TenisClubLogo({
     </div>
   );
 }
+

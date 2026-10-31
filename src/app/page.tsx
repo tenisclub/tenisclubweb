@@ -43,8 +43,6 @@ export default async function HomePage() {
 
           <TenisClubLogo
             size="hero"
-            showTagline
-            tagline={settings.tagline || 'ESTILO PARA TODA A FAMÍLIA'}
             logoUrl={settings.logo_url}
           />
 
