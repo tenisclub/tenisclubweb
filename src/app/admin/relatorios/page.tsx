@@ -118,3 +118,43 @@ export default async function AdminRelatoriosPage() {
         <div className="lg:col-span-5 rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-3">
           <h2 className="text-base font-black text-white">Pedidos por Status</h2>
           <div className="divide-y divide-zinc-800/80 text-xs sm:text-sm">
+            {statusBreakdown.map((st) => (
+              <div key={st.key} className="py-2.5 flex justify-between items-center gap-2">
+                <span className="text-zinc-300">{st.label}</span>
+                <strong className="text-white">{st.count}</strong>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="lg:col-span-7 rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-3">
+          <h2 className="text-base font-black text-white">
+            Margem Estimada por Produto
+          </h2>
+
+          {/* Mobile Margin Cards */}
+          <div className="sm:hidden divide-y divide-zinc-800/70">
+            {products.slice(0, 10).map((p) => {
+              const cost = p.cost_price || 0;
+              const margin = p.effective_price - cost;
+              return (
+                <div key={p.id} className="py-3 space-y-1 text-xs">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-bold text-white truncate">{p.name}</span>
+                    <span className="font-black text-[#BEFA46] shrink-0">
+                      {p.sold_count} vend.
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-zinc-400">
+                    <span>Custo: {formatCurrency(cost)}</span>
+                    <span>Venda: {formatCurrency(p.effective_price)}</span>
+                    <span className="font-extrabold text-emerald-400">
+                      Margem: {formatCurrency(margin)}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop Table */}
