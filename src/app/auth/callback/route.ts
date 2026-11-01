@@ -33,3 +33,38 @@ export async function GET(request: Request) {
           'Cliente';
         const { data: inserted } = await service
           .from('user_profiles')
+          .upsert({
+            id: userId,
+            email,
+            full_name: fullName,
+            phone: typeof userMeta.phone === 'string' ? userMeta.phone : '',
+            avatar_url:
+              (typeof userMeta.avatar_url === 'string' && userMeta.avatar_url) ||
+              (typeof userMeta.picture === 'string' && userMeta.picture) ||
+              null,
+            auth_provider: typeof appMeta.provider === 'string' ? appMeta.provider : 'google',
+            is_active: true,
+          })
+          .select('*')
+          .single();
+        profile = inserted as UserProfile;
+      }
+
+      if (!profile?.is_active) {
+        await supabase.auth.signOut({ scope: 'local' });
+        return NextResponse.redirect(`${origin}/login?error=account_disabled`);
+      }
+
+      const roleNames = (userRoles || [])
+        .map((ur: { roles?: { name?: string } | { name?: string }[] | null }) => {
+          if (Array.isArray(ur.roles)) return ur.roles[0]?.name;
+          return ur.roles?.name;
+        })
+        .filter(Boolean) as UserRole[];
+
+      let role: UserRole = 'customer';
+      if (roleNames.includes('super_admin')) role = 'super_admin';
+      else if (roleNames.includes('admin_operational')) role = 'admin_operational';
+
+      const isSafeCustomTarget =
+        next &&
