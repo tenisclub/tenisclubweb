@@ -92,4 +92,28 @@ export function TenisClubLogo({
           'text-white mb-1',
           size === 'lg' ? 'w-36 h-11' : 'w-48 md:w-60 h-14 md:h-16'
         )}
-// step 4/6
+      >
+        <path
+          d="M28 56L114 14C120 11 125 13 130 21C135 28 144 30 154 22C160 17 166 18 170 26L186 56"
+          stroke="currentColor"
+          strokeWidth="6.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M54 55C88 45 128 45 174 55"
+          stroke="#BEFA46"
+          strokeWidth="4.5"
+          strokeLinecap="round"
+        />
+      </svg>
+
+      <span
+        className={cn(
+          'font-black italic tracking-tight text-white uppercase leading-[0.88]',
+          size === 'lg' ? 'text-4xl' : 'text-5xl md:text-7xl'
+        )}
+      >
+        TÊNIS
+      </span>
+// step 5/6
