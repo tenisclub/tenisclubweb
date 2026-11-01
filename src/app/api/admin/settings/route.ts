@@ -39,3 +39,44 @@ export async function PATCH(request: Request) {
 
     const updates: Record<string, unknown> = {
       id: 1,
+      updated_at: new Date().toISOString(),
+    };
+
+    for (const key of allowedFields) {
+      if (body[key] !== undefined) {
+        updates[key] = body[key];
+      }
+    }
+
+    const supabase = createServiceClient();
+    const { data, error } = await supabase
+      .from('store_settings')
+      .upsert(updates)
+      .select('*')
+      .single();
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+    revalidateStoreData('settings');
+    primeStoreSettingsCache(data);
+
+    void supabase
+      .from('admin_logs')
+      .insert({
+        admin_id: session.userId,
+        action: 'settings.update',
+        entity_type: 'store_settings',
+        entity_id: '1',
+        details: { store_name: data.store_name, whatsapp: data.whatsapp },
+      })
+      .then(() => {});
+
+    return NextResponse.json({ settings: data });
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Erro ao salvar configurações.' },
+      { status: 500 }
+    );
+  }
+}
+
