@@ -209,4 +209,39 @@ export async function PATCH(
                 .from('product_variants')
                 .update({
                   color,
-// step 6/12
+                  color_hex: colorHex,
+                  size,
+                  is_active: true,
+                })
+                .eq('id', existing.id)
+            );
+          }
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const inv: any = Array.isArray(existing.inventory)
+            ? existing.inventory[0]
+            : existing.inventory;
+          const prevQty = Number(inv?.quantity ?? 0);
+
+          if (prevQty !== desiredQty) {
+            parallelOps.push(
+              supabase
+                .from('inventory')
+                .update({
+                  quantity: desiredQty,
+                  updated_at: nowIso,
+                })
+                .eq('variant_id', existing.id)
+            );
+
+            movementsToInsert.push({
+              variant_id: existing.id,
+              product_id: id,
+              previous_quantity: prevQty,
+              moved_quantity: desiredQty - prevQty,
+              new_quantity: desiredQty,
+              movement_type: 'adjustment',
+              reason: 'Atualização via edição de produto',
+              performed_by: session.userId,
+            });
+// step 7/12
