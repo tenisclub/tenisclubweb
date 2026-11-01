@@ -28,4 +28,19 @@ export async function PATCH(request: Request) {
         .update(updates)
         .eq('id', session.userId);
 
-// step 2/5
+      if (profErr) {
+        return NextResponse.json({ error: profErr.message }, { status: 400 });
+      }
+    }
+
+    let emailMessage = '';
+    if (email && email.trim().toLowerCase() !== session.email.toLowerCase()) {
+      const { error: emailErr } = await supabase.auth.updateUser({
+        email: email.trim().toLowerCase(),
+      });
+      if (emailErr) {
+        return NextResponse.json({ error: emailErr.message }, { status: 400 });
+      }
+      emailMessage = ' Enviamos um link de confirmação para o novo e-mail.';
+    }
+// step 3/5
