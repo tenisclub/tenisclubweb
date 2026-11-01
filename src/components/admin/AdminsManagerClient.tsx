@@ -150,4 +150,35 @@ export function AdminsManagerClient({
             <option value="super_admin">Admin Principal</option>
           </select>
           <button
-// step 5/8
+            type="submit"
+            disabled={submitting}
+            className="h-10 rounded-xl bg-[#BEFA46] text-[#09090B] text-xs font-black sm:col-span-2 lg:col-span-1"
+          >
+            {submitting ? 'Salvando...' : 'Conceder Acesso'}
+          </button>
+        </div>
+      </form>
+
+      {/* Active Admins List */}
+      <div className="rounded-3xl border border-zinc-800 bg-[#121216] divide-y divide-zinc-800">
+        {initialAdmins.map((adm) => (
+          <div
+            key={adm.id}
+            className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+          >
+            <div className="min-w-0">
+              <p className="text-sm font-extrabold text-white truncate">{adm.full_name}</p>
+              <p className="text-xs text-zinc-400 truncate">{adm.email}</p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+              <select
+                value={adm.role}
+                onChange={(e) => updateRoleOrStatus(adm.id, { roleName: e.target.value })}
+                className="flex-1 sm:flex-initial h-9 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs font-bold text-white"
+              >
+                <option value="super_admin">Administrador Principal</option>
+                <option value="admin_operational">Administrador Operacional</option>
+                <option value="customer">Revogar (Tornar Cliente)</option>
+              </select>
+// step 6/8
