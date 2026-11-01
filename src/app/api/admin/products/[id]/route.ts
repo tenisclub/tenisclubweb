@@ -261,3 +261,56 @@ export async function PATCH(
           (async () => {
             const { data: createdVars } = await supabase
               .from('product_variants')
+              .insert(
+                newVariantsSpec.map((nv) => ({
+                  product_id: id,
+                  color: nv.color,
+                  color_hex: nv.color_hex,
+                  size: nv.size,
+                  variant_sku: nv.variant_sku,
+                  is_active: true,
+                }))
+              )
+              .select('id, color, size');
+
+            if (createdVars && createdVars.length > 0) {
+              const invRows: Record<string, unknown>[] = [];
+              const newMovements: Record<string, unknown>[] = [];
+
+              for (const cv of createdVars) {
+                const match = newVariantsSpec.find(
+                  (nv) => nv.color === cv.color && nv.size === String(cv.size)
+                );
+                const qty = match?.desiredQty ?? 0;
+                invRows.push({
+                  variant_id: cv.id,
+                  quantity: qty,
+                  low_stock_threshold: 3,
+                });
+                if (qty > 0) {
+                  newMovements.push({
+                    variant_id: cv.id,
+                    product_id: id,
+                    previous_quantity: 0,
+                    moved_quantity: qty,
+                    new_quantity: qty,
+                    movement_type: 'in',
+                    reason: 'Nova numeração adicionada na edição do produto',
+                    performed_by: session.userId,
+                  });
+                }
+              }
+
+              await Promise.all([
+                supabase.from('inventory').insert(invRows),
+                newMovements.length > 0
+                  ? supabase.from('inventory_movements').insert(newMovements)
+                  : Promise.resolve(),
+              ]);
+            }
+          })()
+        );
+      }
+
+      if (movementsToInsert.length > 0) {
+        parallelOps.push(supabase.from('inventory_movements').insert(movementsToInsert));
