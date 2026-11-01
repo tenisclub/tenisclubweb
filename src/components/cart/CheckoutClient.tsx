@@ -1127,4 +1127,52 @@ export function CheckoutClient({
                   />
                   <div className="min-w-0">
                     <p className="text-xs font-bold text-white truncate">
-// step 23/24
+                      {item.product_name}
+                    </p>
+                    <p className="text-[11px] text-zinc-400">
+                      Tam. {item.size} • {item.quantity}x
+                    </p>
+                  </div>
+                </div>
+                <span className="text-xs font-extrabold text-white shrink-0">
+                  {formatCurrency(item.subtotal)}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-2 text-xs border-y border-zinc-800 py-3.5">
+            <div className="flex justify-between text-zinc-400">
+              <span>Subtotal</span>
+              <span className="text-zinc-200">{formatCurrency(subtotal)}</span>
+            </div>
+            {subtotal > total && (
+              <div className="flex justify-between text-emerald-400 font-semibold">
+                <span>Economia em ofertas</span>
+                <span>-{formatCurrency(subtotal - total)}</span>
+              </div>
+            )}
+            <div className="flex justify-between text-zinc-400">
+              <span>Frete / Entrega</span>
+              <span
+                className={cn(
+                  shippingCalc.summaryLabel === 'Grátis' && 'text-emerald-400 font-bold',
+                  shippingCalc.shippingCost > 0 && 'text-white font-bold'
+                )}
+              >
+                {shippingCalc.summaryLabel}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex justify-between items-baseline">
+            <span className="text-sm font-bold text-white">Total do Pedido</span>
+            <span className="text-2xl font-black text-[#BEFA46]">
+              {formatCurrency(finalOrderTotal)}
+            </span>
+          </div>
+        </aside>
+      </div>
+    </div>
+  );
+}
