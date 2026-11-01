@@ -225,4 +225,35 @@ export const ORDER_STATUS_CONFIG: Record<
     step: 0,
   },
 };
-// step 7/8
+
+export const GENDER_LABELS: Record<ProductGender, string> = {
+  masculino: 'Masculino',
+  feminino: 'Feminino',
+  infantil: 'Infantil',
+  unissex: 'Unissex',
+};
+
+export const STANDARD_SHOE_SIZES = [
+  '33',
+  '34',
+  '35',
+  '36',
+  '37',
+  '38',
+  '39',
+  '40',
+  '41',
+  '42',
+  '43',
+  '44',
+];
+
+export function sortShoeSizes(sizes: string[]): string[] {
+  return [...new Set(sizes)].sort((a, b) => {
+    const na = Number(a);
+    const nb = Number(b);
+    if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;
+    return a.localeCompare(b);
+  });
+}
+
