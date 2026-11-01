@@ -89,4 +89,21 @@ export default function RedefinirSenhaPage() {
                 required
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
-// step 5/6
+                className="w-full h-11 pl-10 pr-4 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full h-12 rounded-xl bg-[#BEFA46] text-[#09090B] font-black text-sm"
+          >
+            {loading ? 'Salvando...' : 'Salvar Nova Senha'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
