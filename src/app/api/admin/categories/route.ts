@@ -74,3 +74,40 @@ export async function PATCH(request: Request) {
     .from('admin_logs')
     .insert({
       admin_id: session.userId,
+      action: 'category.update',
+      entity_type: 'category',
+      entity_id: id,
+      details: updates,
+    })
+    .then(() => {});
+
+  return NextResponse.json({ category: data });
+}
+
+export async function DELETE(request: Request) {
+  const session = await getAuthSession();
+  if (!session?.isAdmin) return NextResponse.json({ error: 'Acesso negado.' }, { status: 403 });
+
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get('id');
+  if (!id) return NextResponse.json({ error: 'ID inválido.' }, { status: 400 });
+
+  const supabase = createServiceClient();
+  const { error } = await supabase.from('categories').delete().eq('id', id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  revalidateStoreData('catalog');
+  void supabase
+    .from('admin_logs')
+    .insert({
+      admin_id: session.userId,
+      action: 'category.delete',
+      entity_type: 'category',
+      entity_id: id,
+      details: {},
+    })
+    .then(() => {});
+
+  return NextResponse.json({ success: true });
+}
+
