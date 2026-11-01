@@ -16,4 +16,13 @@ export default async function AdminClientesPage() {
       .order('created_at', { ascending: false }),
     supabase
       .from('orders')
-// step 2/4
+      .select('id, user_id, total, status, created_at')
+      .order('created_at', { ascending: false }),
+  ]);
+
+  const customers: CustomerSummary[] = (profiles || []).map((p) => {
+    const userOrders = (orders || []).filter((o) => o.user_id === p.id);
+    const validOrders = userOrders.filter((o) => o.status !== 'cancelled');
+    return {
+      ...p,
+// step 3/4
