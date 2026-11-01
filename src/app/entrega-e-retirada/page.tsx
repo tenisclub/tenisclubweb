@@ -49,3 +49,54 @@ export default async function EntregaRetiradaPage() {
                   className={cn(
                     'text-xs font-extrabold',
                     opt.badgeLabel === 'Grátis' ? 'text-emerald-400' : 'text-zinc-200'
+                  )}
+                >
+                  {opt.badgeLabel}
+                </span>
+              </div>
+              <h2 className="text-lg font-black text-white">{opt.title}</h2>
+              {opt.kind === 'pickup' && settings.pickup_info && (
+                <p className="text-sm text-zinc-300 leading-relaxed">{settings.pickup_info}</p>
+              )}
+              {opt.kind === 'local_delivery' && settings.delivery_info && (
+                <p className="text-sm text-zinc-300 leading-relaxed">
+                  {settings.delivery_info}
+                </p>
+              )}
+              {opt.freeThreshold > 0 && (
+                <p className="text-xs font-bold text-emerald-400">
+                  Frete grátis em compras acima de {formatCurrency(opt.freeThreshold)}!
+                </p>
+              )}
+              {opt.subtitle && (
+                <p className="text-xs text-zinc-400 pt-1">
+                  {opt.kind === 'pickup' ? (
+                    <>
+                      <strong>Endereço:</strong> {opt.subtitle}
+                      {cfg.show_pickup_hours && settings.business_hours && (
+                        <>
+                          <br />
+                          <strong>Horários:</strong> {settings.business_hours}
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    opt.subtitle
+                  )}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {infoCards.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {infoCards.map((card) => (
+            <div
+              key={card.id}
+              className="rounded-2xl border border-zinc-800 bg-[#121216] p-5 space-y-1.5"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  {card.icon !== 'none' && (
