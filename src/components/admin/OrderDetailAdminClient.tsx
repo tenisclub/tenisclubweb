@@ -144,4 +144,53 @@ export function OrderDetailAdminClient({ initialOrder }: { initialOrder: Order }
             Chamar Cliente no WhatsApp
           </a>
 
-// step 3/8
+          {initialOrder.status === 'received' && (
+            <button
+              type="button"
+              disabled={saving}
+              onClick={() => handleSave('confirmed', 'Pedido confirmado pela loja!')}
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#BEFA46] text-[#09090B] text-xs font-black"
+            >
+              <CheckCircle2 className="w-4 h-4 shrink-0" />
+              Confirmar Pedido Rápido
+            </button>
+          )}
+
+          {initialOrder.status !== 'cancelled' && (
+            <button
+              type="button"
+              disabled={saving}
+              onClick={() => handleSave('cancelled', 'Pedido cancelado administrativamente.')}
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-red-500/15 border border-red-500/30 text-red-400 text-xs font-bold"
+            >
+              <XCircle className="w-4 h-4 shrink-0" />
+              Cancelar Pedido
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Left: Items & Customer */}
+        <div className="lg:col-span-7 space-y-6">
+          <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-4">
+            <h2 className="text-base font-black text-white">Itens Solicitados</h2>
+            <div className="divide-y divide-zinc-800">
+              {(initialOrder.items || []).map((item) => (
+                <div key={item.id} className="py-3 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    {item.product_image && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={item.product_image}
+                        alt={item.product_name}
+                        className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl object-cover bg-[#EAE0D5] shrink-0"
+                      />
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm font-extrabold text-white line-clamp-2">
+                        {item.product_name}
+                      </p>
+                      <p className="text-xs text-zinc-400">
+                        Cor: {item.color} • Tam. <strong>{item.size}</strong> • Qtd:{' '}
+// step 4/8
