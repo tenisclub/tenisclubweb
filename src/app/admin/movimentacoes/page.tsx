@@ -49,4 +49,29 @@ export default async function AdminMovimentacoesPage() {
       {/* Mobile Movement Cards */}
       <div className="md:hidden space-y-3">
         {(movements || []).map((m) => {
-// step 2/8
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const prod: any = Array.isArray(m.products) ? m.products[0] : m.products;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const pv: any = Array.isArray(m.product_variants)
+            ? m.product_variants[0]
+            : m.product_variants;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const user: any = Array.isArray(m.user_profiles)
+            ? m.user_profiles[0]
+            : m.user_profiles;
+          const badge = MOVE_TYPE_LABELS[m.movement_type] || {
+            label: m.movement_type,
+            cls: 'bg-zinc-800 text-zinc-300',
+          };
+
+          return (
+            <div
+              key={m.id}
+              className="rounded-2xl border border-zinc-800 bg-[#121216] p-4 space-y-2.5 text-xs"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="font-extrabold text-white truncate">
+                    {prod?.name || 'Produto'}
+                  </p>
+// step 3/8
