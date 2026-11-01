@@ -160,4 +160,37 @@ export function buildOrderWhatsAppUrl(
     ? [`*Observações:* ${order.customer_notes.trim()}`, ``]
     : [];
 
-// step 5/8
+  const msg = [
+    `Olá, *${storeName || 'Tênis Club'}*! Acabei de finalizar meu pedido pelo site:`,
+    ``,
+    `*Pedido:* #${order.order_number}`,
+    ...customerLines,
+    ``,
+    `*Itens do pedido:*`,
+    itemsLines,
+    ``,
+    ...receiptLines,
+    ``,
+    ...financialLines,
+    ``,
+    ...notesBlock,
+    `Aguardo retorno para alinharmos o pagamento e a confirmação!`,
+  ].join('\n');
+
+  return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+}
+
+export const ORDER_STATUS_CONFIG: Record<
+  OrderStatus,
+  { label: string; colorClass: string; step: number }
+> = {
+  received: {
+    label: 'Pedido recebido',
+    colorClass: 'bg-sky-500/15 text-sky-400 border-sky-500/30',
+    step: 1,
+  },
+  awaiting_confirmation: {
+    label: 'Aguardando confirmação',
+    colorClass: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+    step: 2,
+// step 6/8
