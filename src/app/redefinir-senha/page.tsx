@@ -34,4 +34,23 @@ export default function RedefinirSenhaPage() {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) {
         setErrorMsg(error.message);
-// step 2/6
+        setLoading(false);
+        return;
+      }
+
+      toast('Nova senha definida com sucesso!', 'success');
+      router.push('/');
+    } catch {
+      setErrorMsg('Erro ao redefinir senha.');
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-[75vh] flex items-center justify-center px-4 py-8 sm:py-12">
+      <div className="w-full max-w-md rounded-3xl border border-zinc-800 bg-[#111116] p-5 sm:p-9 shadow-2xl space-y-6">
+        <div className="text-center space-y-2">
+          <TenisClubLogo size="md" />
+          <h1 className="text-xl sm:text-2xl font-black text-white pt-2">
+            Definir Nova Senha
+// step 3/6
