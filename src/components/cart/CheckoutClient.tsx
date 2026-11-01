@@ -734,3 +734,77 @@ export function CheckoutClient({
                             key={opt.key}
                             type="button"
                             onClick={() => setSelectedOptionKey(opt.key)}
+                            className={cn(
+                              'rounded-2xl border p-3.5 sm:p-4 text-left space-y-2 transition cursor-pointer',
+                              selected
+                                ? 'border-[#BEFA46] bg-[#BEFA46]/[0.08]'
+                                : 'border-zinc-800 bg-[#0D0D11] hover:border-zinc-700'
+                            )}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span
+                                  className={cn(
+                                    'w-4 h-4 rounded-full border flex items-center justify-center shrink-0',
+                                    selected
+                                      ? 'border-[#BEFA46] bg-[#BEFA46]'
+                                      : 'border-zinc-600 bg-transparent'
+                                  )}
+                                >
+                                  {selected && (
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#09090B]" />
+                                  )}
+                                </span>
+                                {opt.icon !== 'none' && (
+                                  <CheckoutIcon
+                                    name={opt.icon}
+                                    className="w-4 h-4 text-[#BEFA46] shrink-0"
+                                  />
+                                )}
+                                <span className="text-xs sm:text-sm font-extrabold text-white truncate">
+                                  {opt.title}
+                                </span>
+                              </div>
+
+                              <span
+                                className={cn(
+                                  'px-2 py-0.5 rounded-md text-[11px] font-extrabold shrink-0',
+                                  opt.badgeLabel === 'Grátis'
+                                    ? 'bg-emerald-500/15 text-emerald-400'
+                                    : selected
+                                      ? 'bg-[#BEFA46]/20 text-[#BEFA46]'
+                                      : 'bg-zinc-800 text-zinc-200'
+                                )}
+                              >
+                                {opt.badgeLabel}
+                              </span>
+                            </div>
+
+                            {opt.subtitle && (
+                              <p className="text-xs text-zinc-400 pl-6 leading-relaxed">
+                                {opt.subtitle}
+                              </p>
+                            )}
+                            {opt.freeThreshold > 0 && total < opt.freeThreshold && (
+                              <p className="text-[11px] font-semibold text-[#BEFA46] pl-6">
+                                Frete grátis acima de {formatCurrency(opt.freeThreshold)}
+                              </p>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* 3. Distinct Info Callouts (Left Accent Bar so they never blend with inputs/options) */}
+              {effectiveDeliveryMethod === 'pickup' &&
+                !deliveryCfg.pickup_info_removed &&
+                deliveryCfg.pickup_info_card_enabled &&
+                (settings.pickup_info ||
+                  (deliveryCfg.show_pickup_hours && settings.business_hours)) && (
+                  <div className="rounded-xl border border-zinc-800/90 border-l-[3px] border-l-[#BEFA46] bg-[#16161E] px-4 py-3 text-xs text-zinc-300 space-y-1">
+                    {deliveryCfg.pickup_info_card_title && (
+                      <div className="flex items-center gap-1.5 font-extrabold text-white">
+                        {deliveryCfg.pickup_info_card_icon !== 'none' && (
