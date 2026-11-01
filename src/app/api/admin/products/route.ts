@@ -159,4 +159,35 @@ export async function POST(request: Request) {
             reason: 'Cadastro inicial do produto',
             performed_by: session.userId,
           });
-// step 5/6
+        }
+      }
+
+      await Promise.all([
+        supabase.from('inventory').insert(invRows),
+        movRows.length > 0
+          ? supabase.from('inventory_movements').insert(movRows)
+          : Promise.resolve(),
+      ]);
+    }
+
+    revalidateStoreData('catalog');
+
+    void supabase
+      .from('admin_logs')
+      .insert({
+        admin_id: session.userId,
+        action: 'product.create',
+        entity_type: 'product',
+        entity_id: product.id,
+        details: { name: product.name, sku: product.sku, base_price: product.base_price },
+      })
+      .then(() => {});
+
+    return NextResponse.json({ product });
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Erro ao cadastrar produto.' },
+      { status: 500 }
+    );
+  }
+}
