@@ -21,4 +21,10 @@ export default async function PrivacidadePage() {
         </p>
         <h2 className="text-base font-extrabold text-white pt-2">3. Seus Direitos (LGPD)</h2>
         <p className="text-zinc-400">
-// step 3/4
+          Você pode consultar e atualizar seus dados diretamente em &ldquo;Minha Conta&rdquo; ou solicitar correção e exclusão entrando em contato pelo e-mail {settings.email}.
+        </p>
+      </div>
+    </div>
+  );
+}
+
