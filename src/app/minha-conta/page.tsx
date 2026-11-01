@@ -86,4 +86,33 @@ export default async function MinhaContaDashboardPage() {
           <p className="text-2xl sm:text-3xl font-black text-[#BEFA46] mt-1">{activeOrders.length}</p>
         </div>
         <div className="rounded-2xl border border-zinc-800 bg-[#121216] p-3.5 sm:p-5">
-// step 3/6
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-[11px] sm:text-xs font-semibold text-zinc-400 truncate">
+              Concluídos
+            </span>
+            <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400 shrink-0" />
+          </div>
+          <p className="text-2xl sm:text-3xl font-black text-white mt-1">{completedOrders.length}</p>
+        </div>
+      </div>
+
+      {/* Latest Order Highlight */}
+      <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-4">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-base sm:text-lg font-black text-white">
+            Último Pedido Realizado
+          </h2>
+          <Link
+            href="/minha-conta/pedidos"
+            className="text-xs font-bold text-[#BEFA46] hover:underline inline-flex items-center gap-1 shrink-0"
+          >
+            Ver todos <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+
+        {!latestOrder ? (
+          <div className="rounded-2xl border border-zinc-800/80 bg-[#17171E] p-6 text-center space-y-3">
+            <p className="text-sm text-zinc-300 font-semibold">
+              Você ainda não realizou nenhum pedido.
+            </p>
+// step 4/6
