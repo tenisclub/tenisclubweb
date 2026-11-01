@@ -190,3 +190,67 @@ export function CartClient({
                   <strong className="text-zinc-200">{formatCurrency(item.unit_price)}</strong>
                 </div>
                 {!item.is_available && (
+                  <span className="inline-block text-xs font-bold text-red-400">
+                    Indisponível no estoque atual
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between sm:justify-end gap-4 pt-2 sm:pt-0 border-t sm:border-t-0 border-zinc-800/80">
+              {item.is_available && (
+                <div className="flex items-center gap-2 rounded-xl border border-zinc-800 bg-[#18181F] px-2 py-1">
+                  <button
+                    type="button"
+                    disabled={loadingId === item.id || item.quantity <= 1}
+                    onClick={() => updateQty(item.id, item.quantity - 1)}
+                    className="w-7 h-7 rounded-lg hover:bg-zinc-800 text-white flex items-center justify-center disabled:opacity-40"
+                  >
+                    <Minus className="w-3.5 h-3.5" />
+                  </button>
+                  <span className="w-6 text-center text-xs font-extrabold text-white">
+                    {item.quantity}
+                  </span>
+                  <button
+                    type="button"
+                    disabled={
+                      loadingId === item.id ||
+                      item.quantity >= (item.allow_backorder ? 99 : item.available_stock)
+                    }
+                    onClick={() => updateQty(item.id, item.quantity + 1)}
+                    className="w-7 h-7 rounded-lg hover:bg-zinc-800 text-white flex items-center justify-center disabled:opacity-40"
+                    title={
+                      item.allow_backorder && item.available_stock <= 0
+                        ? 'Disponível para pedido'
+                        : `Estoque disponível: ${item.available_stock}`
+                    }
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+
+              <div className="text-right min-w-[95px]">
+                <div className="text-base sm:text-lg font-black text-[#BEFA46]">
+                  {formatCurrency(item.subtotal)}
+                </div>
+                <button
+                  type="button"
+                  disabled={loadingId === item.id}
+                  onClick={() => removeItem(item.id)}
+                  className="mt-1 inline-flex items-center gap-1 text-xs text-zinc-500 hover:text-red-400 transition"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Remover
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        <div className="pt-2">
+          <Link
+            href="/produtos"
+            className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-zinc-300 hover:text-[#BEFA46]"
+          >
+            <ArrowLeft className="w-4 h-4" />
