@@ -33,4 +33,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: 'weekly',
     priority: 0.7,
   }));
-// step 3/4
+
+  const productRoutes: MetadataRoute.Sitemap = allMatching.map((p) => ({
+    url: `${baseUrl}/produto/${p.slug}`,
+    lastModified: new Date(p.created_at),
+    changeFrequency: 'daily',
+    priority: 0.9,
+  }));
+
+  return [...staticRoutes, ...categoryRoutes, ...productRoutes];
+}
+
