@@ -22,4 +22,28 @@ export async function POST(request: Request) {
   }
 
   try {
-// step 1/6
+    const body = await request.json();
+    const { productId, variantId, quantity = 1 } = body;
+
+    if (!productId || !variantId || Number(quantity) < 1) {
+      return NextResponse.json({ error: 'Selecione a numeração desejada.' }, { status: 400 });
+    }
+
+    const supabase = createServiceClient();
+    const { data, error } = await supabase.rpc('add_to_cart_fast', {
+      p_user_id: userId,
+      p_product_id: productId,
+      p_variant_id: variantId,
+      p_quantity: Number(quantity),
+    });
+
+    if (error) {
+      const msg = error.message || 'Não foi possível adicionar ao carrinho.';
+      const status = msg.includes('inativa') ? 401 : 400;
+      return NextResponse.json({ error: msg }, { status });
+    }
+
+    return NextResponse.json(data || { totalItems: 0 });
+  } catch (err) {
+    return NextResponse.json(
+// step 2/6
