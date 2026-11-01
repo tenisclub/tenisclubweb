@@ -1297,4 +1297,85 @@ export function CheckoutStep3Customizer({
                         </button>
                         <button
                           type="button"
-// step 16/24
+                          onClick={() => toggleExpand('main:pickup_info')}
+                          className={cn(
+                            'px-2.5 py-1.5 rounded-lg border text-[11px] font-bold inline-flex items-center gap-1 transition cursor-pointer',
+                            expandedCardId === 'main:pickup_info'
+                              ? 'border-[#BEFA46]/40 bg-[#BEFA46]/10 text-[#BEFA46]'
+                              : 'border-zinc-800 bg-[#18181F] text-zinc-300 hover:text-white'
+                          )}
+                        >
+                          <SlidersHorizontal className="w-3 h-3" />
+                          <span className="hidden sm:inline">Editar</span>
+                          <ChevronDown
+                            className={cn(
+                              'w-3.5 h-3.5 transition-transform',
+                              expandedCardId === 'main:pickup_info' && 'rotate-180'
+                            )}
+                          />
+                        </button>
+                        <button
+                          type="button"
+                          title="Excluir quadro de retirada"
+                          onClick={() =>
+                            updateDeliveryCfg({
+                              pickup_info_removed: true,
+                              pickup_info_card_enabled: false,
+                            })
+                          }
+                          className="p-2 rounded-lg text-zinc-500 hover:text-red-400 hover:bg-red-500/10 transition cursor-pointer"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {expandedCardId === 'main:pickup_info' && (
+                      <div className="border-t border-zinc-800/80 p-3.5 sm:p-4 bg-[#15151B] space-y-3.5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <label className="text-[11px] font-semibold text-zinc-400">
+                              Título do Quadro
+                            </label>
+                            <input
+                              type="text"
+                              value={deliveryCfg.pickup_info_card_title}
+                              onChange={(e) =>
+                                updateDeliveryCfg({
+                                  pickup_info_card_title: e.target.value,
+                                })
+                              }
+                              placeholder="Informações de retirada:"
+                              className="mt-1 w-full h-10 px-3 rounded-xl bg-[#121216] border border-zinc-800 text-xs text-white"
+                            />
+                          </div>
+                          <CheckoutIconPicker
+                            label="Ícone do Quadro"
+                            value={deliveryCfg.pickup_info_card_icon}
+                            onChange={(pickup_info_card_icon) =>
+                              updateDeliveryCfg({ pickup_info_card_icon })
+                            }
+                          />
+                        </div>
+
+                        <label className="inline-flex items-center gap-2 text-xs text-zinc-200 cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            checked={deliveryCfg.show_pickup_hours}
+                            onChange={(e) =>
+                              updateDeliveryCfg({ show_pickup_hours: e.target.checked })
+                            }
+                            className="accent-[#BEFA46] w-4 h-4 rounded shrink-0"
+                          />
+                          <span>Mostrar horário de funcionamento da loja automaticamente</span>
+                        </label>
+
+                        <div>
+                          <label className="text-[11px] font-semibold text-zinc-400">
+                            Texto de Informações de Retirada
+                          </label>
+                          <textarea
+                            rows={2}
+                            value={form.pickup_info}
+                            onChange={(e) => setField('pickup_info', e.target.value)}
+// step 17/24
