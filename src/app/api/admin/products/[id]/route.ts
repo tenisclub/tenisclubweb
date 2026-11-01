@@ -156,3 +156,56 @@ export async function PATCH(
                   url: img.url,
                   alt_text: product.name,
                   is_primary: img.is_primary,
+                  sort_order: img.sort_order,
+                }))
+              );
+            }
+          })()
+        );
+      }
+    }
+
+    // Sync variants & inventory with zero sequential N+1 loops
+    if (Array.isArray(variants)) {
+      const existingVars = existingVarsRes.data || [];
+      const existingById = new Map(existingVars.map((ev) => [ev.id, ev]));
+      const existingByKey = new Map(
+        existingVars.map((ev) => [`${ev.color}::${ev.size}`, ev])
+      );
+      const keptIds = new Set<string>();
+
+      const movementsToInsert: Record<string, unknown>[] = [];
+      const newVariantsSpec: {
+        color: string;
+        color_hex: string;
+        size: string;
+        variant_sku: string;
+        desiredQty: number;
+      }[] = [];
+
+      const nowIso = new Date().toISOString();
+
+      for (const v of variants) {
+        if (!v.size) continue;
+        const color = v.color?.trim() || 'Padrão';
+        const colorHex = v.color_hex || '#18181B';
+        const size = String(v.size).trim();
+        const key = `${color}::${size}`;
+        const existing = v.id ? existingById.get(v.id) : existingByKey.get(key);
+        const desiredQty = Math.max(0, Number(v.stock ?? 0));
+
+        if (existing) {
+          keptIds.add(existing.id);
+
+          // Only touch product_variants if attributes or active flag actually changed
+          if (
+            existing.color !== color ||
+            (existing.color_hex || '#18181B') !== colorHex ||
+            String(existing.size) !== size ||
+            existing.is_active !== true
+          ) {
+            parallelOps.push(
+              supabase
+                .from('product_variants')
+                .update({
+                  color,
