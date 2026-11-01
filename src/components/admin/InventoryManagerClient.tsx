@@ -72,4 +72,41 @@ export function InventoryManagerClient({ initialRows }: { initialRows: StockRowI
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-// step 2/12
+          variantId: activeRow.variantId,
+          operation,
+          amount: Number(amount),
+          lowStockThreshold: Number(threshold),
+          reason,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        toast(data.error || 'Erro ao movimentar estoque.', 'error');
+        return;
+      }
+
+      const nextQty = Number(data.result?.new_quantity ?? activeRow.quantity);
+      setRows((prev) =>
+        prev.map((r) =>
+          r.variantId === activeRow.variantId
+            ? { ...r, quantity: nextQty, lowStockThreshold: Number(threshold) }
+            : r
+        )
+      );
+      toast('Movimentação registrada com sucesso!', 'success');
+      setActiveRow(null);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-black text-white">
+            Controle de Estoque por Numeração
+          </h1>
+          <p className="text-xs sm:text-sm text-zinc-400">
+// step 3/12
