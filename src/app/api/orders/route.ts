@@ -139,4 +139,33 @@ export async function POST(request: Request) {
       supabase.rpc('create_order_from_cart', {
         p_user_id: session.userId,
         p_customer_name: customerName.trim(),
-// step 5/8
+        p_customer_email: customerEmail.trim(),
+        p_customer_phone: customerPhone.trim(),
+        p_delivery_method: effectiveDeliveryMethod,
+        p_shipping_address: finalShippingAddress,
+        p_customer_notes: customerNotes || '',
+      }),
+      phoneUpdatePromise,
+    ]);
+
+    if (rpcError) {
+      return NextResponse.json({ error: rpcError.message }, { status: 400 });
+    }
+
+    const r = rpcResult as { order_id?: string; order_number?: string } | null;
+    const orderId = r?.order_id;
+    const { data: fullOrder } = await supabase
+      .from('orders')
+      .select('*, order_items(*)')
+      .eq('id', orderId!)
+      .single();
+
+    let orderData = fullOrder as Record<string, unknown> | null;
+
+    if (orderData && orderId) {
+      const itemsTotalAfterDiscount = Number(orderData.total) || 0;
+      const resolvedOptions = getSelectableCheckoutOptions(
+        deliveryCfg,
+        settings.address,
+        itemsTotalAfterDiscount
+// step 6/8
