@@ -368,4 +368,51 @@ export function SettingsClient({ initialSettings }: { initialSettings: StoreSett
                     Remover
                   </button>
                 )}
-// step 8/12
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2. Contact & Physical Address */}
+      {(activeTab === 'all' || activeTab === 'contact') && (
+        <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-4">
+          <div className="border-b border-zinc-800/80 pb-4">
+            <span className="text-[11px] font-black uppercase tracking-widest text-[#BEFA46] block">
+              Atendimento & Localização
+            </span>
+            <h2 className="text-base sm:text-lg font-black text-white">
+              WhatsApp, Endereço Físico & Redes Sociais
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+            <div>
+              <label className="text-[11px] font-semibold text-zinc-400">
+                WhatsApp da Loja (com DDI 55)
+              </label>
+              <input
+                type="text"
+                value={form.whatsapp}
+                onChange={(e) => setField('whatsapp', e.target.value)}
+                placeholder="5511999999999"
+                className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-zinc-400">Telefone Exibido</label>
+              <input
+                type="text"
+                value={form.phone}
+                onChange={(e) => setField('phone', e.target.value)}
+                className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-zinc-400">E-mail de Contato</label>
+              <input
+                type="email"
+                value={form.email}
+                onChange={(e) => setField('email', e.target.value)}
+                className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white"
+// step 9/12
