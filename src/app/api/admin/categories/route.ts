@@ -36,4 +36,23 @@ export async function POST(request: Request) {
       action: 'category.create',
       entity_type: 'category',
       entity_id: data.id,
-// step 2/6
+      details: { name: data.name },
+    })
+    .then(() => {});
+
+  return NextResponse.json({ category: data });
+}
+
+export async function PATCH(request: Request) {
+  const session = await getAuthSession();
+  if (!session?.isAdmin) return NextResponse.json({ error: 'Acesso negado.' }, { status: 403 });
+
+  const { id, name, description, sort_order, is_active } = await request.json();
+  if (!id) return NextResponse.json({ error: 'ID inválido.' }, { status: 400 });
+
+  const supabase = createServiceClient();
+  const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  if (name !== undefined) {
+    updates.name = name.trim();
+    updates.slug = slugify(name);
+// step 3/6
