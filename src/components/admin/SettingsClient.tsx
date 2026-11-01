@@ -229,4 +229,51 @@ export function SettingsClient({ initialSettings }: { initialSettings: StoreSett
               <div>
                 <label className="text-[11px] font-semibold text-zinc-400">
                   Slogan (Título no Link)
-// step 5/12
+                </label>
+                <input
+                  type="text"
+                  value={form.tagline}
+                  onChange={(e) => setField('tagline', e.target.value)}
+                  className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white"
+                />
+              </div>
+              <div>
+                <label className="text-[11px] font-semibold text-zinc-400">
+                  Selo Superior (Hero Badge)
+                </label>
+                <input
+                  type="text"
+                  value={form.hero_badge}
+                  onChange={(e) => setField('hero_badge', e.target.value)}
+                  className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white"
+                />
+              </div>
+              <div>
+                <label className="text-[11px] font-semibold text-zinc-400">
+                  Frase Principal do Banner
+                </label>
+                <input
+                  type="text"
+                  value={form.hero_title}
+                  onChange={(e) => setField('hero_title', e.target.value)}
+                  className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="text-[11px] font-semibold text-zinc-400">
+                  Descrição do Site / Texto da Prévia no WhatsApp e Google
+                </label>
+                <input
+                  type="text"
+                  value={form.hero_subtitle}
+                  onChange={(e) => setField('hero_subtitle', e.target.value)}
+                  className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white"
+                />
+              </div>
+            </div>
+
+            {/* WhatsApp Link Preview Box */}
+            <div className="lg:col-span-5 rounded-2xl border border-zinc-800 bg-[#18181F] p-4 space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="text-xs font-extrabold uppercase tracking-wider text-[#BEFA46]">
+// step 6/12
