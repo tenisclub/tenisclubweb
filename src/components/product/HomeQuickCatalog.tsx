@@ -190,4 +190,36 @@ export function HomeQuickCatalog({
                   const active = selectedSize === sz;
                   return (
                     <button
-// step 6/8
+                      key={sz}
+                      type="button"
+                      onClick={() => setSelectedSize(active ? '' : sz)}
+                      className={cn(
+                        'h-9 sm:min-w-[42px] sm:px-3 rounded-xl sm:rounded-full text-xs font-extrabold border transition text-center cursor-pointer',
+                        active
+                          ? 'bg-[#BEFA46] text-[#09090B] border-[#BEFA46] shadow-[0_2px_10px_rgba(190,250,70,0.18)]'
+                          : 'bg-[#17171E] text-zinc-300 border-zinc-800/90 hover:border-zinc-600 hover:text-white'
+                      )}
+                    >
+                      {sz}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Results Grid */}
+        {filtered.length === 0 ? (
+          <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-6 sm:p-12 text-center space-y-3">
+            <p className="text-base sm:text-lg font-bold text-white">
+              Nenhum calçado encontrado com esses filtros.
+            </p>
+            <p className="text-xs sm:text-sm text-zinc-400">
+              Experimente selecionar outra numeração ou limpar os filtros ativos.
+            </p>
+            <button
+              type="button"
+              onClick={resetFilters}
+              className="mt-2 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#BEFA46] text-[#09090B] text-xs font-extrabold"
+// step 7/8
