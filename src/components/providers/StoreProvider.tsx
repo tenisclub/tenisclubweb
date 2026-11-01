@@ -275,4 +275,73 @@ export function StoreProvider({
     (snap: SessionSnapshot) => {
       setAuthenticated(snap.authenticated);
       setUser(snap.user);
-// step 4/12
+      setRole(snap.role);
+      setSyncTag(snap.syncTag || null);
+      setCartCount(snap.cartCount);
+      setFavoriteIds(snap.favoriteIds);
+      setUnreadNotifications(snap.unreadNotifications);
+      if (typeof window !== 'undefined' && snap.authenticated) {
+        sessionStorage.setItem(SESSION_CACHE_KEY, JSON.stringify(snap));
+      }
+      if (snap.authenticated) {
+        void replayPendingCartIntent();
+      }
+    },
+    [replayPendingCartIntent]
+  );
+
+  const logout = useCallback(
+    (redirectTo = '/') => {
+      // 1. Instant 0ms state + cookie wipe
+      setAuthenticated(false);
+      setUser(null);
+      setRole('visitor');
+      setSyncTag(null);
+      setCartCount(0);
+      setFavoriteIds(EMPTY_FAVORITES);
+      setUnreadNotifications(0);
+      clearClientAuthStorage();
+
+      // 2. Non-blocking cleanup of in-memory GoTrue state and server cookies
+      try {
+        const supabase = createClient();
+        void supabase.auth.signOut({ scope: 'local' }).catch(() => {});
+      } catch {
+        // Ignore
+      }
+      void fetch('/api/auth/logout', { method: 'POST', keepalive: true }).catch(() => {});
+
+      // 3. Immediate client transition without competing router.refresh() race
+      router.replace(redirectTo);
+    },
+    [router]
+  );
+
+  // Hydrate navbar session once on mount (zero requests for anonymous visitors; instant cache restore + background sync for logged-in users)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const hasAuthCookie = document.cookie.includes('-auth-token');
+    if (!hasAuthCookie) {
+      sessionStorage.removeItem(SESSION_CACHE_KEY);
+      setHydratedCache(true);
+      return;
+    }
+
+    // Check for instant OAuth callback bootstrap cookie (0ms first-frame Google login hydration)
+    try {
+      const bootMatch = document.cookie.match(/(?:^|;\s*)tc_oauth_bootstrap=([^;]+)/);
+      if (bootMatch?.[1]) {
+        const parsed = JSON.parse(decodeURIComponent(bootMatch[1]));
+        document.cookie = 'tc_oauth_bootstrap=; Path=/; Max-Age=0; SameSite=Lax';
+        if (parsed?.authenticated && parsed?.user) {
+          const bootSnap: SessionSnapshot = {
+            authenticated: true,
+            user: parsed.user,
+            role: parsed.role || 'customer',
+            syncTag: parsed.syncTag || null,
+            cartCount: 0,
+            favoriteIds: EMPTY_FAVORITES,
+            unreadNotifications: 0,
+          };
+// step 5/12
