@@ -30,4 +30,36 @@ export async function POST(request: Request) {
       allow_backorder,
       images = [],
       variants = [],
-// step 1/6
+    } = body;
+
+    if (!name?.trim() || base_price === undefined || Number(base_price) < 0) {
+      return NextResponse.json(
+        { error: 'Informe o nome comercial e um preço de venda válido.' },
+        { status: 400 }
+      );
+    }
+
+    const supabase = createServiceClient();
+    let slug = slugify(name);
+
+    // Ensure unique slug
+    const { data: slugCheck } = await supabase
+      .from('products')
+      .select('id')
+      .eq('slug', slug)
+      .maybeSingle();
+    if (slugCheck) {
+      slug = `${slug}-${Math.floor(100 + Math.random() * 900)}`;
+    }
+
+    const parsedPromo =
+      promo_price !== null && promo_price !== '' && Number(promo_price) > 0
+        ? Number(promo_price)
+        : null;
+
+    const { data: product, error: prodError } = await supabase
+      .from('products')
+      .insert({
+        name: name.trim(),
+        slug,
+// step 2/6
