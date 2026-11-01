@@ -29,4 +29,15 @@ export default function FaqPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-14 space-y-8">
       <div>
-// step 3/5
+        <span className="text-xs font-extrabold uppercase tracking-widest text-[#BEFA46]">
+          Central de Ajuda
+        </span>
+        <h1 className="text-3xl font-black text-white mt-1">Dúvidas Frequentes</h1>
+      </div>
+
+      <div className="space-y-4">
+        {FAQS.map((item) => (
+          <div
+            key={item.q}
+            className="rounded-2xl border border-zinc-800 bg-[#121216] p-5 sm:p-6 space-y-2"
+// step 4/5
