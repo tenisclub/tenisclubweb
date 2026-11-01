@@ -17,4 +17,9 @@ export default function CartLoading() {
         </div>
         <div className="lg:col-span-4">
           <div className="h-64 rounded-3xl border border-zinc-800 bg-[#121216]" />
-// step 3/4
+        </div>
+      </div>
+    </div>
+  );
+}
+
