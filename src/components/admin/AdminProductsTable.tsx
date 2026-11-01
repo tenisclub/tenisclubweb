@@ -202,3 +202,54 @@ export function AdminProductsTable({ initialProducts }: { initialProducts: Produ
                     'p-1.5 rounded-lg border transition',
                     p.is_featured
                       ? 'border-[#BEFA46] bg-[#BEFA46]/15 text-[#BEFA46]'
+                      : 'border-zinc-800 text-zinc-500'
+                  )}
+                  title="Destacar na Home"
+                >
+                  <Star className={cn('w-3.5 h-3.5', p.is_featured && 'fill-current')} />
+                </button>
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                <Link
+                  href={`/produto/${p.slug}`}
+                  target="_blank"
+                  className="p-2 rounded-lg bg-zinc-800/80 text-zinc-300"
+                  title="Visualizar na loja"
+                >
+                  <Eye className="w-4 h-4" />
+                </Link>
+                <Link
+                  href={`/admin/produtos/${p.id}`}
+                  prefetch={true}
+                  onTouchStart={() => router.prefetch(`/admin/produtos/${p.id}`)}
+                  onClick={() => setOpeningId(p.id)}
+                  className="px-3 py-1.5 rounded-lg bg-zinc-800 text-[#BEFA46] text-xs font-bold inline-flex items-center gap-1"
+                >
+                  {openingId === p.id ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Edit2 className="w-3.5 h-3.5" />
+                  )}
+                  {openingId === p.id ? 'Abrindo...' : 'Editar'}
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => handleDelete(p)}
+                  className="p-2 rounded-lg bg-zinc-800/80 text-zinc-400 hover:text-red-400"
+                  title="Excluir / Arquivar"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+        {filtered.length === 0 && (
+          <div className="rounded-2xl border border-zinc-800 bg-[#121216] p-8 text-center text-xs text-zinc-500">
+            Nenhum produto encontrado.
+          </div>
+        )}
+      </div>
+
+      {/* Desktop Table */}
