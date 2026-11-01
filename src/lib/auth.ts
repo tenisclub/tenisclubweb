@@ -137,4 +137,30 @@ export async function requireUserId(redirectTo = '/minha-conta'): Promise<string
   }
   return userId;
 }
-// step 5/6
+
+export async function requireAuth(redirectTo = '/minha-conta'): Promise<AuthSession> {
+  const session = await getAuthSession();
+  if (!session) {
+    redirect(`/login?redirect=${encodeURIComponent(redirectTo)}`);
+  }
+  return session;
+}
+
+export async function requireAdmin(): Promise<AuthSession> {
+  const session = await getAuthSession();
+  if (!session) {
+    redirect('/login?redirect=/admin');
+  }
+  if (!session.isAdmin) {
+    redirect('/minha-conta');
+  }
+  return session;
+}
+
+export async function requireSuperAdmin(): Promise<AuthSession> {
+  const session = await requireAdmin();
+  if (!session.isSuperAdmin) {
+    redirect('/admin');
+  }
+  return session;
+}
