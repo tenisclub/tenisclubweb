@@ -254,3 +254,66 @@ export function CartClient({
             className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-zinc-300 hover:text-[#BEFA46]"
           >
             <ArrowLeft className="w-4 h-4" />
+            Continuar comprando
+          </Link>
+        </div>
+      </div>
+
+      {/* Order Summary Box */}
+      <aside className="lg:col-span-4 rounded-3xl border border-zinc-800 bg-[#121216] p-5 sm:p-6 space-y-5 lg:sticky lg:top-28">
+        <h2 className="text-lg font-black text-white">Resumo do Carrinho</h2>
+
+        <div className="space-y-2.5 text-sm border-b border-zinc-800 pb-4">
+          <div className="flex justify-between text-zinc-400">
+            <span>Quantidade de pares</span>
+            <strong className="text-white">{totalItems}</strong>
+          </div>
+          <div className="flex justify-between text-zinc-400">
+            <span>Subtotal</span>
+            <span>{formatCurrency(subtotal)}</span>
+          </div>
+          {savings > 0 && (
+            <div className="flex justify-between text-emerald-400">
+              <span>Descontos aplicados</span>
+              <span>-{formatCurrency(savings)}</span>
+            </div>
+          )}
+          <div className="flex justify-between text-zinc-400">
+            <span>Entrega / Retirada</span>
+            <span className="text-xs">Definir na próxima etapa</span>
+          </div>
+        </div>
+
+        <div className="flex items-baseline justify-between">
+          <span className="text-sm font-bold text-white">Valor Total</span>
+          <span className="text-2xl font-black text-[#BEFA46]">
+            {formatCurrency(total)}
+          </span>
+        </div>
+
+        {hasUnavailable || totalItems === 0 ? (
+          <button
+            type="button"
+            disabled
+            className="w-full h-12 rounded-2xl bg-zinc-800 text-zinc-500 font-bold text-sm cursor-not-allowed"
+          >
+            Remova os itens indisponíveis
+          </button>
+        ) : (
+          <Link
+            href="/checkout"
+            className="w-full h-12 rounded-2xl bg-[#BEFA46] hover:bg-[#d1ff70] text-[#09090B] font-black text-sm inline-flex items-center justify-center gap-2 shadow-[0_6px_24px_rgba(190,250,70,0.22)] transition"
+          >
+            Prosseguir com o Pedido
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        )}
+
+        <p className="text-[11px] text-zinc-500 text-center leading-relaxed">
+          Sem cobrança online nesta etapa. Confirme sua reserva e combine o pagamento com nossa equipe.
+        </p>
+      </aside>
+    </div>
+  );
+}
+
