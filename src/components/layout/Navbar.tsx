@@ -104,4 +104,40 @@ export function Navbar({ settings }: { settings: StoreSettings }) {
           >
             <Search className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
-// step 3/8
+              type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Buscar tênis, marca, cor ou código..."
+              className="w-full h-10 pl-10 pr-4 rounded-full bg-[#15151A] border border-zinc-800 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-[#BEFA46] transition"
+            />
+          </form>
+
+          {/* Actions */}
+          <div className="flex items-center gap-1 sm:gap-2.5 shrink-0">
+            {isAdmin && (
+              <Link
+                href="/admin"
+                prefetch={true}
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#BEFA46]/15 border border-[#BEFA46]/40 text-[#BEFA46] text-xs font-bold hover:bg-[#BEFA46]/25 transition"
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>Painel Admin</span>
+              </Link>
+            )}
+
+            <Link
+              href={authenticated ? '/minha-conta/favoritos' : '/login?redirect=/minha-conta/favoritos'}
+              prefetch={true}
+              className="relative p-2 sm:p-2.5 rounded-full text-zinc-300 hover:text-white hover:bg-zinc-800/70 transition"
+              title="Meus favoritos"
+            >
+              <Heart className="w-5 h-5" />
+              {favoriteIds.length > 0 && (
+                <span className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-zinc-700 text-[10px] font-bold text-white flex items-center justify-center">
+                  {favoriteIds.length}
+                </span>
+              )}
+            </Link>
+
+            <Link
+// step 4/8
