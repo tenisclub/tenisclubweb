@@ -56,4 +56,33 @@ export async function POST(request: Request) {
     }
 
     const { data: roleRow } = await supabase
-// step 2/6
+      .from('roles')
+      .select('id')
+      .eq('name', roleName)
+      .single();
+
+    if (!roleRow) {
+      return NextResponse.json({ error: 'Função administrativa não encontrada.' }, { status: 400 });
+    }
+
+    // Remove previous admin roles and assign the chosen admin role
+    const { data: adminRoles } = await supabase
+      .from('roles')
+      .select('id')
+      .in('name', ['admin_operational', 'super_admin']);
+
+    const adminRoleIds = (adminRoles || []).map((r) => r.id);
+    if (adminRoleIds.length > 0) {
+      await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', targetUserId)
+        .in('role_id', adminRoleIds);
+    }
+
+    await supabase.from('user_roles').insert({
+      user_id: targetUserId,
+      role_id: roleRow.id,
+      assigned_by: session.userId,
+    });
+// step 3/6
