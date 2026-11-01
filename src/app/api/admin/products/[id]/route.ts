@@ -314,3 +314,56 @@ export async function PATCH(
 
       if (movementsToInsert.length > 0) {
         parallelOps.push(supabase.from('inventory_movements').insert(movementsToInsert));
+      }
+
+      // Batch-deactivate removed active variants in a single query
+      const removedActiveIds = existingVars
+        .filter((ev) => !keptIds.has(ev.id) && ev.is_active !== false)
+        .map((ev) => ev.id);
+
+      if (removedActiveIds.length > 0) {
+        parallelOps.push(
+          supabase
+            .from('product_variants')
+            .update({ is_active: false })
+            .in('id', removedActiveIds)
+        );
+      }
+    }
+
+    if (parallelOps.length > 0) {
+      await Promise.all(parallelOps);
+    }
+
+    revalidateStoreData('catalog');
+
+    void supabase
+      .from('admin_logs')
+      .insert({
+        admin_id: session.userId,
+        action: 'product.update',
+        entity_type: 'product',
+        entity_id: id,
+        details: { name: product.name, base_price: product.base_price },
+      })
+      .then(() => {});
+
+    return NextResponse.json({ product });
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Erro ao salvar produto.' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await getAuthSession();
+  if (!session?.isAdmin) {
+    return NextResponse.json({ error: 'Acesso negado.' }, { status: 403 });
+  }
+
+  const { id } = await params;
