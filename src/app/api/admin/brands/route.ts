@@ -16,4 +16,22 @@ export async function POST(request: Request) {
     .from('brands')
     .insert({
       name: name.trim(),
-// step 1/6
+      slug: slugify(name),
+      is_active: is_active !== false,
+    })
+    .select('*')
+    .single();
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  revalidateStoreData('catalog');
+  void supabase
+    .from('admin_logs')
+    .insert({
+      admin_id: session.userId,
+      action: 'brand.create',
+      entity_type: 'brand',
+      entity_id: data.id,
+      details: { name: data.name },
+    })
+// step 2/6
