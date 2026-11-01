@@ -28,4 +28,19 @@ export async function POST(request: Request) {
     }
 
     if (!ALLOWED_TYPES.includes(file.type)) {
-// step 2/5
+      return NextResponse.json(
+        { error: 'Formato inválido. Utilize JPG, PNG, WEBP, AVIF ou SVG.' },
+        { status: 400 }
+      );
+    }
+
+    if (file.size > MAX_SIZE_BYTES) {
+      return NextResponse.json(
+        { error: 'Arquivo muito grande. O tamanho máximo permitido é 5 MB.' },
+        { status: 400 }
+      );
+    }
+
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'webp';
+    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${ext}`;
+// step 3/5
