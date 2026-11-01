@@ -33,4 +33,22 @@ export async function GET(request: Request) {
           'Cliente';
         const { data: inserted } = await service
           .from('user_profiles')
-// step 2/6
+          .upsert({
+            id: userId,
+            email,
+            full_name: fullName,
+            phone: typeof userMeta.phone === 'string' ? userMeta.phone : '',
+            avatar_url:
+              (typeof userMeta.avatar_url === 'string' && userMeta.avatar_url) ||
+              (typeof userMeta.picture === 'string' && userMeta.picture) ||
+              null,
+            auth_provider: typeof appMeta.provider === 'string' ? appMeta.provider : 'google',
+            is_active: true,
+          })
+          .select('*')
+          .single();
+        profile = inserted as UserProfile;
+      }
+
+      if (!profile?.is_active) {
+// step 3/6
