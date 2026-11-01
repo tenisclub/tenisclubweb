@@ -1,21 +1,15 @@
 import { ProductForm } from '@/components/admin/ProductForm';
-import { createServiceClient } from '@/lib/supabase/server';
-import type { Brand, Category } from '@/types/database';
+import { getAdminCategoriesAndBrands } from '@/lib/catalog';
 
 export const dynamic = 'force-dynamic';
 
 export default async function NovoProdutoAdminPage() {
-  const supabase = createServiceClient();
-  const [{ data: categories }, { data: brands }] = await Promise.all([
-    supabase.from('categories').select('*').order('sort_order', { ascending: true }),
-    supabase.from('brands').select('*').order('name', { ascending: true }),
-  ]);
+  const { categories, brands } = await getAdminCategoriesAndBrands();
 
   return (
     <ProductForm
-      categories={(categories || []) as Category[]}
-      brands={(brands || []) as Brand[]}
+      categories={categories}
+      brands={brands}
     />
   );
 }
-
