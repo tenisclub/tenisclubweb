@@ -113,23 +113,8 @@ export async function POST(request: Request) {
           deliveryCfg.pickup_subtitle.trim() || settings.address;
       }
     } else {
-      const primaryInfoCard = deliveryCfg.extra_cards.find(
-        (c) =>
-          c.enabled &&
-          c.card_type === 'info' &&
-          (c.title.trim() || c.description.trim())
-      );
-      if (primaryInfoCard) {
-        if (primaryInfoCard.title.trim()) {
-          optionMetadata.custom_option_title = primaryInfoCard.title.trim();
-        }
-        if (primaryInfoCard.badge.trim()) {
-          optionMetadata.shipping_label = primaryInfoCard.badge.trim();
-        }
-      }
-      if (!optionMetadata.shipping_label) {
-        optionMetadata.shipping_label = 'A combinar';
-      }
+      optionMetadata.custom_option_title = 'A combinar';
+      optionMetadata.shipping_label = 'A combinar';
     }
 
     const finalShippingAddress =
