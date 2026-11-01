@@ -68,4 +68,39 @@ export async function PATCH(
       allow_backorder,
       images,
       variants,
-// step 2/12
+    } = body;
+
+    const parsedPromo =
+      promo_price !== null && promo_price !== '' && Number(promo_price) > 0
+        ? Number(promo_price)
+        : null;
+
+    // Wave 1: Update product row + fetch existing images & variants in parallel
+    const [prodRes, existingImagesRes, existingVarsRes] = await Promise.all([
+      supabase
+        .from('products')
+        .update({
+          name: name?.trim(),
+          sku: sku?.trim() || null,
+          brand_id: brand_id || null,
+          category_id: category_id || null,
+          gender: gender || 'unissex',
+          short_description: short_description?.trim() || '',
+          description: description?.trim() || '',
+          additional_info: additional_info || {},
+          cost_price: Number(cost_price || 0),
+          base_price: Number(base_price || 0),
+          promo_price: parsedPromo,
+          is_active: is_active !== false,
+          is_featured: Boolean(is_featured),
+          is_new_release: Boolean(is_new_release),
+          allow_backorder: Boolean(allow_backorder),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+        .select('*')
+        .single(),
+      Array.isArray(images)
+        ? supabase
+            .from('product_images')
+// step 3/12
