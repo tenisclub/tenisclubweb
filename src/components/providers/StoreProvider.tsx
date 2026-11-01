@@ -413,4 +413,73 @@ export function StoreProvider({
   };
 
   // Global Real-Time Sync across ALL open tabs, devices, visitors, customers & admins
-// step 6/12
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const supabase = createClient();
+    let lastSeenVersion = 0;
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+    let pendingScope: string | null = null;
+    const pending = {
+      public: false,
+      admin: false,
+      user: false,
+    };
+
+    const flushPendingSync = async () => {
+      debounceTimer = null;
+      const snap = { ...pending };
+      const scopeSnapshot = pendingScope || 'all';
+      const versionSnapshot = lastSeenVersion;
+      pending.public = false;
+      pending.admin = false;
+      pending.user = false;
+      pendingScope = null;
+
+      if (!snap.public && !snap.admin && !snap.user) return;
+
+      const cur = liveRefs.current;
+
+      // Ensure server memory cache is busted if change originated outside this server process
+      if (snap.public || snap.admin) {
+        try {
+          await fetch('/api/sync/bust', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ scope: scopeSnapshot, version: versionSnapshot }),
+          });
+        } catch {
+          // Ignore transient network errors
+        }
+      }
+
+      startTransition(() => {
+        cur.router.refresh();
+      });
+
+      window.dispatchEvent(new CustomEvent('tc:realtime-sync', { detail: snap }));
+
+      // Only re-fetch admin badge stats when orders or notifications actually changed
+      if (cur.isAdmin && snap.admin) {
+        window.dispatchEvent(new CustomEvent('tc:admin-stats-sync'));
+      }
+
+      // Only re-fetch /api/auth/me when user-scoped data (cart/favorites/profile/roles) changed
+      if (cur.authenticated && snap.user) {
+        void cur.refreshSession();
+      }
+    };
+
+    const scheduleFlush = () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        void flushPendingSync();
+      }, 280);
+    };
+
+    const checkLatestVersionOnWake = async () => {
+      try {
+        const { data } = await supabase
+          .from('site_sync_state')
+          .select('version')
+// step 7/12
