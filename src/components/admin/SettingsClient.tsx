@@ -90,4 +90,51 @@ export function SettingsClient({ initialSettings }: { initialSettings: StoreSett
     const file = e.target.files?.[0];
     if (!file) return;
     setUploadingField(field);
-// step 2/12
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('bucket', 'store');
+
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!res.ok) {
+        toast(data.error || 'Falha no upload.', 'error');
+        return;
+      }
+      setField(field, data.url);
+      toast('Imagem enviada! Clique em Salvar Configurações para publicar.', 'success');
+    } finally {
+      setUploadingField(null);
+      e.target.value = '';
+    }
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const payload: StoreSettings = {
+        ...form,
+        checkout_delivery_config: deliveryCfg,
+      };
+      const res = await fetch('/api/admin/settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast(data.error || 'Erro ao salvar configurações.', 'error');
+        return;
+      }
+      isDirtyRef.current = false;
+      router.refresh();
+      toast('Configurações da loja atualizadas em tempo real em todo o site!', 'success');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const copyFreshShareLink = async () => {
+    const origin =
+// step 3/12
