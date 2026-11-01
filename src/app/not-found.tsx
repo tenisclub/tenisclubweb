@@ -28,4 +28,13 @@ export default function NotFound() {
         </Link>
         <Link
           href="/produtos"
-// step 3/4
+          className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-[#18181F] border border-zinc-800 text-sm font-bold text-white hover:border-zinc-700"
+        >
+          <Search className="w-4 h-4 text-[#BEFA46]" />
+          Ver Catálogo
+        </Link>
+      </div>
+    </div>
+  );
+}
+
