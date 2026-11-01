@@ -127,4 +127,36 @@ export async function POST(request: Request) {
               )
             )
             .select('id, color, size')
-// step 4/6
+        : Promise.resolve({ data: null }),
+    ]);
+
+    // Wave 3: Bulk-insert inventory & initial movements in parallel
+    const createdVars = createdVarsRes?.data || [];
+    if (createdVars.length > 0) {
+      const invRows: Record<string, unknown>[] = [];
+      const movRows: Record<string, unknown>[] = [];
+
+      for (const cv of createdVars) {
+        const spec = validVariants.find(
+          (v: { color?: string; size: string | number }) =>
+            (v.color?.trim() || 'Padrão') === cv.color &&
+            String(v.size).trim() === String(cv.size)
+        );
+        const initialQty = Math.max(0, Number(spec?.stock || 0));
+        invRows.push({
+          variant_id: cv.id,
+          quantity: initialQty,
+          low_stock_threshold: Number(spec?.low_stock_threshold ?? 3),
+        });
+        if (initialQty > 0) {
+          movRows.push({
+            variant_id: cv.id,
+            product_id: product.id,
+            previous_quantity: 0,
+            moved_quantity: initialQty,
+            new_quantity: initialQty,
+            movement_type: 'in',
+            reason: 'Cadastro inicial do produto',
+            performed_by: session.userId,
+          });
+// step 5/6
