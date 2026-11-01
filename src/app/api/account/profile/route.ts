@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
+import { revalidateStoreData } from '@/lib/revalidate-store';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 
 export async function PATCH(request: Request) {
@@ -34,39 +35,3 @@ export async function PATCH(request: Request) {
 
     let emailMessage = '';
     if (email && email.trim().toLowerCase() !== session.email.toLowerCase()) {
-      const { error: emailErr } = await supabase.auth.updateUser({
-        email: email.trim().toLowerCase(),
-      });
-      if (emailErr) {
-        return NextResponse.json({ error: emailErr.message }, { status: 400 });
-      }
-      emailMessage = ' Enviamos um link de confirmação para o novo e-mail.';
-    }
-
-    if (newPassword) {
-      if (String(newPassword).length < 6) {
-        return NextResponse.json(
-          { error: 'A nova senha deve conter pelo menos 6 caracteres.' },
-          { status: 400 }
-        );
-      }
-      const { error: pwdErr } = await supabase.auth.updateUser({
-        password: String(newPassword),
-      });
-      if (pwdErr) {
-        return NextResponse.json({ error: pwdErr.message }, { status: 400 });
-      }
-    }
-
-    return NextResponse.json({
-      success: true,
-      message: `Dados atualizados com sucesso!${emailMessage}`,
-    });
-  } catch (err) {
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'Erro ao atualizar perfil.' },
-      { status: 500 }
-    );
-  }
-}
-
