@@ -21,4 +21,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/privacidade',
     '/termos',
   ].map((route) => ({
-// step 2/4
+    url: `${baseUrl}${route}`,
+    lastModified: new Date(),
+    changeFrequency: 'daily',
+    priority: route === '' ? 1 : 0.8,
+  }));
+
+  const categoryRoutes: MetadataRoute.Sitemap = categories.map((c) => ({
+    url: `${baseUrl}/categoria/${c.slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly',
+    priority: 0.7,
+  }));
+// step 3/4
