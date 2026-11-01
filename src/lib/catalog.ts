@@ -210,4 +210,57 @@ export async function getAdminProductById(id: string): Promise<Product | null> {
   const cached = all.find((p) => p.id === id);
   if (cached) return cached;
 
-// step 4/12
+  const supabase = createServiceClient();
+  const { data: row } = await supabase
+    .from('products')
+    .select(PRODUCT_SELECT_QUERY)
+    .eq('id', id)
+    .maybeSingle();
+
+  return row ? enrichProductRow(row, true) : null;
+}
+
+const getActiveProductsMemo = cache(async (): Promise<Product[]> => {
+  const all = await getAdminProducts();
+  return all
+    .filter((p) => p.is_active)
+    .map((p) => {
+      // Strip internal cost_price before passing to storefront components
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { cost_price: _cost, ...publicProduct } = p;
+      return publicProduct;
+    });
+});
+
+export async function getCatalogProducts(filters: CatalogFilters = {}) {
+  let products = [...(await getActiveProductsMemo())];
+
+  // Search query (name, brand, category, color, sku, description)
+  if (filters.q && filters.q.trim()) {
+    const terms = filters.q
+      .toLowerCase()
+      .trim()
+      .split(/\s+/);
+    products = products.filter((p) => {
+      const haystack = [
+        p.name,
+        p.sku || '',
+        p.brand?.name || '',
+        p.category?.name || '',
+        p.gender,
+        p.short_description,
+        ...p.variants.map((v) => v.color),
+      ]
+        .join(' ')
+        .toLowerCase();
+      return terms.every((t) => haystack.includes(t));
+    });
+  }
+
+  if (filters.gender && filters.gender !== 'todos') {
+    const g = filters.gender.toLowerCase();
+    products = products.filter((p) =>
+      g === 'unissex'
+        ? p.gender === 'unissex'
+        : p.gender === g || (p.gender === 'unissex' && (g === 'masculino' || g === 'feminino'))
+// step 5/12
