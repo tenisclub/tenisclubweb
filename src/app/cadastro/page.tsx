@@ -286,3 +286,74 @@ function CadastroForm() {
                             ? 'bg-amber-400'
                             : 'bg-[#BEFA46]'
                         : 'bg-zinc-800'
+                    )}
+                  />
+                ))}
+              </div>
+              <p className="text-[11px] text-zinc-400">
+                Segurança da senha:{' '}
+                <strong className="text-zinc-200">
+                  {pwdStrength <= 1
+                    ? 'Fraca'
+                    : pwdStrength === 2
+                      ? 'Média'
+                      : pwdStrength === 3
+                        ? 'Boa'
+                        : 'Excelente'}
+                </strong>
+              </p>
+            </div>
+          )}
+
+          <label className="flex items-start gap-2.5 cursor-pointer pt-1">
+            <input
+              type="checkbox"
+              checked={acceptedTerms}
+              onChange={(e) => setAcceptedTerms(e.target.checked)}
+              className="mt-0.5 w-4 h-4 accent-[#BEFA46] rounded"
+            />
+            <span className="text-xs text-zinc-400 leading-relaxed">
+              Li e concordo com os{' '}
+              <Link href="/termos" className="text-[#BEFA46] hover:underline">
+                Termos de Uso
+              </Link>{' '}
+              e a{' '}
+              <Link href="/privacidade" className="text-[#BEFA46] hover:underline">
+                Política de Privacidade (LGPD)
+              </Link>
+              .
+            </span>
+          </label>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full h-12 rounded-xl bg-[#BEFA46] hover:bg-[#d1ff70] text-[#09090B] font-black text-sm inline-flex items-center justify-center gap-2 transition disabled:opacity-60"
+          >
+            {loading ? 'Criando sua conta...' : 'Criar Conta'}
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </form>
+
+        <p className="text-center text-xs text-zinc-400">
+          Já possui cadastro?{' '}
+          <Link
+            href={`/login${redirectParam ? `?redirect=${encodeURIComponent(redirectParam)}` : ''}`}
+            className="font-bold text-[#BEFA46] hover:underline"
+          >
+            Entrar na minha conta
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export default function CadastroPage() {
+  return (
+    <Suspense fallback={<div className="min-h-[75vh]" />}>
+      <CadastroForm />
+    </Suspense>
+  );
+}
+
