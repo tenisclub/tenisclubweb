@@ -7,4 +7,14 @@ export async function POST(request: Request) {
   if (!userId) {
     return NextResponse.json(
       { error: 'Faça login para salvar favoritos.', code: 'UNAUTHENTICATED' },
-// step 1/4
+      { status: 401 }
+    );
+  }
+
+  const { productId } = await request.json();
+  if (!productId) {
+    return NextResponse.json({ error: 'Produto inválido.' }, { status: 400 });
+  }
+
+  const supabase = createServiceClient();
+// step 2/4
