@@ -134,3 +134,71 @@ export function CatalogExplorer({
         case 'bestsellers':
           return b.sold_count - a.sold_count;
         case 'popular':
+          return b.views_count + b.sold_count * 2 - (a.views_count + a.sold_count * 2);
+        case 'newest':
+        default:
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
+    });
+
+    return list;
+  }, [
+    products,
+    search,
+    gender,
+    category,
+    brand,
+    size,
+    color,
+    minPrice,
+    maxPrice,
+    onlyAvailable,
+    onlyPromo,
+    onlyNew,
+    sort,
+  ]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredAndSorted.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const pageItems = filteredAndSorted.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  const resetAll = () => {
+    setSearch('');
+    setGender('todos');
+    setCategory('todos');
+    setBrand('todas');
+    setSize('');
+    setColor('todas');
+    setMinPrice('');
+    setMaxPrice('');
+    setOnlyAvailable(false);
+    setOnlyPromo(false);
+    setOnlyNew(false);
+    setSort('newest');
+    setPage(1);
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      {/* Header & Top Toolbar */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-zinc-800 pb-6">
+        <div>
+          <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
+            {heading}
+          </h1>
+          <p className="mt-1.5 text-sm text-zinc-400">{subheading}</p>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between md:justify-end gap-2.5 w-full md:w-auto">
+          <button
+            type="button"
+            onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
+            className="lg:hidden inline-flex items-center gap-2 h-10 px-3.5 rounded-xl bg-[#16161C] border border-zinc-800 text-xs font-bold text-white shrink-0"
+          >
+            <SlidersHorizontal className="w-4 h-4 text-[#BEFA46]" />
+            {mobileFiltersOpen ? 'Ocultar Filtros' : 'Filtrar'}
+          </button>
+
+          <div className="flex items-center gap-2 flex-1 sm:flex-initial justify-end min-w-0">
+            <label htmlFor="sort-select" className="text-xs font-semibold text-zinc-400 hidden min-[380px]:inline shrink-0">
+              Ordenar:
