@@ -193,4 +193,53 @@ export function OrderDetailAdminClient({ initialOrder }: { initialOrder: Order }
                       </p>
                       <p className="text-xs text-zinc-400">
                         Cor: {item.color} • Tam. <strong>{item.size}</strong> • Qtd:{' '}
-// step 4/8
+                        <strong>{item.quantity}</strong>
+                      </p>
+                      <p className="text-[11px] text-zinc-500">
+                        Unitário: {formatCurrency(item.unit_price)}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-xs sm:text-sm font-black text-[#BEFA46] shrink-0">
+                    {formatCurrency(item.subtotal)}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className="border-t border-zinc-800 pt-4 flex justify-between items-baseline gap-2">
+              <span className="text-xs sm:text-sm font-bold text-white">Valor Total do Pedido</span>
+              <span className="text-lg sm:text-xl font-black text-[#BEFA46] shrink-0">
+                {formatCurrency(initialOrder.total)}
+              </span>
+            </div>
+          </div>
+
+          {/* Customer & Delivery Info */}
+          <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-3 text-xs sm:text-sm break-words">
+            <h2 className="text-base font-black text-white">Dados do Cliente & Entrega</h2>
+            <p className="text-zinc-300">
+              <strong className="text-white">Nome:</strong> {initialOrder.customer_name}
+            </p>
+            <p className="text-zinc-300">
+              <strong className="text-white">E-mail:</strong> {initialOrder.customer_email}
+            </p>
+            <p className="text-zinc-300">
+              <strong className="text-white">Telefone/WhatsApp:</strong>{' '}
+              {initialOrder.customer_phone}
+            </p>
+            {initialOrder.payment_method_note && (
+              <p className="text-zinc-300">
+                <strong className="text-white">Forma de Pagamento (informada):</strong>{' '}
+                <span className="px-2 py-0.5 rounded-md bg-[#BEFA46]/15 text-[#BEFA46] font-extrabold text-xs">
+                  {initialOrder.payment_method_note}
+                </span>
+              </p>
+            )}
+            <p className="text-zinc-300">
+              <strong className="text-white">Modalidade:</strong>{' '}
+              {formatOrderModalityLabel(initialOrder)}
+            </p>
+            {initialOrder.shipping_address?.street && (
+              <div className="rounded-xl bg-[#18181F] p-3 text-zinc-300">
+// step 5/8
