@@ -55,4 +55,23 @@ export default async function CategoriaPage({
   ]);
 
   const isGender = Boolean(GENDER_SLUGS[cleanSlug]);
-// step 3/5
+  const matchedCat = categories.find((c) => c.slug.toLowerCase() === cleanSlug);
+
+  const heading = isGender
+    ? GENDER_SLUGS[cleanSlug].title
+    : matchedCat?.name || `Categoria: ${slug}`;
+
+  const subheading = isGender
+    ? GENDER_SLUGS[cleanSlug].subtitle
+    : matchedCat?.description || 'Explore os pares selecionados nesta categoria.';
+
+  return (
+    <div>
+      {/* Breadcrumbs */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+        <nav className="flex items-center gap-1.5 text-xs text-zinc-400">
+          <Link href="/" className="hover:text-[#BEFA46]">Início</Link>
+          <ChevronRight className="w-3.5 h-3.5 text-zinc-600" />
+          <Link href="/produtos" className="hover:text-[#BEFA46]">Catálogo</Link>
+          <ChevronRight className="w-3.5 h-3.5 text-zinc-600" />
+// step 4/5
