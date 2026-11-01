@@ -25,4 +25,18 @@ export default async function CheckoutPage() {
       .select('*')
       .eq('user_id', userId)
       .order('is_default', { ascending: false }),
-// step 2/5
+  ]);
+
+  if (!session) {
+    redirect('/login?redirect=/checkout');
+  }
+
+  const activeItems = cart.items.filter((i) => i.is_available);
+  if (activeItems.length === 0) {
+    redirect('/carrinho');
+  }
+
+  const totalUnits = activeItems.reduce((acc, item) => acc + item.quantity, 0);
+
+  return (
+// step 3/5
