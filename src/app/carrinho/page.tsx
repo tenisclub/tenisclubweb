@@ -25,4 +25,12 @@ export default async function CarrinhoPage() {
       </div>
 
       <CartClient
-// step 3/4
+        initialItems={cart.items}
+        initialTotalItems={cart.totalItems}
+        initialSubtotal={cart.subtotal}
+        initialTotal={cart.total}
+      />
+    </div>
+  );
+}
+
