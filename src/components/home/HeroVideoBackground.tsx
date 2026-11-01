@@ -353,4 +353,40 @@ function DesktopRandomWall() {
     }, 680);
   };
 
-// step 10/12
+  return (
+    <div className="grid h-full w-full grid-cols-4 lg:grid-cols-5 gap-2 opacity-90">
+      {columns.map((col, colIdx) => (
+        <div
+          key={colIdx}
+          className={cn(
+            'relative h-full w-full overflow-hidden bg-[#09090C]',
+            colIdx === 4 && 'hidden lg:block'
+          )}
+        >
+          {([0, 1] as const).map((slot) => {
+            const isActive = col.activeSlot === slot;
+            const src = ALL_HERO_VIDEOS[col.slots[slot]];
+            return (
+              <video
+                key={slot}
+                ref={bindVideoRef(colIdx, slot)}
+                src={src}
+                muted
+                playsInline
+                autoPlay={isActive}
+                preload={isActive ? 'auto' : 'metadata'}
+                onEnded={() => handleColumnEnded(colIdx, slot)}
+                aria-hidden="true"
+                tabIndex={-1}
+                className={cn(
+                  'absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-in-out',
+                  isActive ? 'opacity-100' : 'opacity-0'
+                )}
+              />
+            );
+          })}
+        </div>
+      ))}
+    </div>
+  );
+// step 11/12
