@@ -133,4 +133,38 @@ export function OrdersListClient({ initialOrders }: { initialOrders: Order[] }) 
                 </div>
                 <span className="text-base font-black text-[#BEFA46] shrink-0">
                   {formatCurrency(o.total)}
-// step 4/8
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-2.5 border-t border-zinc-800/80 text-[11px]">
+                <span className="text-zinc-300 font-semibold">{deliveryLabel}</span>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {o.payment_method_note && (
+                    <span className="px-2 py-0.5 rounded-full bg-[#BEFA46]/15 text-[#BEFA46] font-bold">
+                      {o.payment_method_note}
+                    </span>
+                  )}
+                  <span
+                    className={cn(
+                      'px-2 py-0.5 rounded-full font-bold',
+                      o.payment_status === 'paid_manual'
+                        ? 'bg-emerald-500/15 text-emerald-400'
+                        : 'bg-zinc-800 text-zinc-400'
+                    )}
+                  >
+                    {o.payment_status === 'paid_manual' ? 'Pago (Manual)' : 'Pgto. Pendente'}
+                  </span>
+                </div>
+              </div>
+
+              <Link
+                href={`/admin/pedidos/${o.id}`}
+                prefetch={true}
+                className="w-full h-10 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-white inline-flex items-center justify-center gap-1.5"
+              >
+                <Eye className="w-3.5 h-3.5 text-[#BEFA46]" />
+                Gerenciar Pedido
+              </Link>
+            </div>
+          );
+// step 5/8
