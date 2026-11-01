@@ -2,6 +2,14 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  experimental: {
+    turbopackFileSystemCacheForDev: false,
+    optimizePackageImports: ['lucide-react'],
+    staleTimes: {
+      dynamic: 30,
+      static: 180,
+    },
+  },
   images: {
     remotePatterns: [
       {
@@ -21,4 +29,3 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
-
