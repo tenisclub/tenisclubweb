@@ -369,4 +369,41 @@ export function InventoryManagerClient({ initialRows }: { initialRows: StockRowI
                     'py-2 px-1.5 rounded-xl text-[11px] sm:text-xs font-bold border',
                     operation === op.v
                       ? 'bg-[#BEFA46] text-[#09090B] border-[#BEFA46]'
-// step 10/12
+                      : 'bg-[#18181F] text-zinc-300 border-zinc-800'
+                  )}
+                >
+                  {op.l}
+                </button>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-zinc-300 font-semibold">
+                  {operation === 'adjustment' ? 'Novo Saldo Final *' : 'Quantidade *'}
+                </label>
+                <input
+                  type="number"
+                  min={operation === 'adjustment' ? 0 : 1}
+                  required
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  className="mt-1 w-full h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-sm font-bold text-white"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs text-zinc-300 font-semibold">
+                  Alerta Estoque Baixo
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={threshold}
+                  onChange={(e) => setThreshold(e.target.value)}
+                  className="mt-1 w-full h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white"
+                />
+              </div>
+            </div>
+
+// step 11/12
