@@ -345,3 +345,73 @@ export function SettingsClient({ initialSettings }: { initialSettings: StoreSett
                   Miniatura de Compartilhamento (opcional)
                 </span>
                 <p className="text-[11px] text-zinc-400">
+                  Usada como imagem OpenGraph ao compartilhar o link.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-[#BEFA46] transition cursor-pointer">
+                  <Upload className="w-3.5 h-3.5" />
+                  {uploadingField === 'hero_banner_url' ? 'Enviando...' : 'Enviar Imagem'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleUploadAsset(e, 'hero_banner_url')}
+                    className="hidden"
+                  />
+                </label>
+                {form.hero_banner_url && (
+                  <button
+                    type="button"
+                    onClick={() => setField('hero_banner_url', null)}
+                    className="text-xs text-red-400 hover:underline cursor-pointer"
+                  >
+                    Remover
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2. Contact & Physical Address */}
+      {(activeTab === 'all' || activeTab === 'contact') && (
+        <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-4">
+          <div className="border-b border-zinc-800/80 pb-4">
+            <span className="text-[11px] font-black uppercase tracking-widest text-[#BEFA46] block">
+              Atendimento & Localização
+            </span>
+            <h2 className="text-base sm:text-lg font-black text-white">
+              WhatsApp, Endereço Físico & Redes Sociais
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+            <div>
+              <label className="text-[11px] font-semibold text-zinc-400">
+                WhatsApp da Loja (com DDI 55)
+              </label>
+              <input
+                type="text"
+                value={form.whatsapp}
+                onChange={(e) => setField('whatsapp', e.target.value)}
+                placeholder="5511999999999"
+                className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-zinc-400">Telefone Exibido</label>
+              <input
+                type="text"
+                value={form.phone}
+                onChange={(e) => setField('phone', e.target.value)}
+                className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-zinc-400">E-mail de Contato</label>
+              <input
+                type="email"
+                value={form.email}
+                onChange={(e) => setField('email', e.target.value)}
+                className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white"
