@@ -44,4 +44,27 @@ export function AccountSidebar() {
     if (loggingOut) return;
     setLoggingOut(true);
     toast('Sessão encerrada com segurança.', 'info');
-// step 2/6
+    logout('/');
+  };
+
+  return (
+    <aside className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-5 space-y-3.5 lg:space-y-5">
+      <div className="flex items-center justify-between gap-3 border-b border-zinc-800 pb-3.5 lg:pb-4">
+        <div className="min-w-0">
+          <p className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest text-[#BEFA46]">
+            Área do Cliente
+          </p>
+          <p className="text-sm sm:text-base font-black text-white truncate mt-0.5">
+            {user?.full_name || 'Minha Conta'}
+          </p>
+          <p className="text-xs text-zinc-400 truncate">{user?.email}</p>
+        </div>
+
+        {/* Compact Mobile Logout & Admin Action */}
+        <div className="flex items-center gap-1.5 lg:hidden shrink-0">
+          {isAdmin && (
+            <Link
+              href="/admin"
+              className="inline-flex items-center gap-1 px-2.5 py-2 rounded-xl text-[11px] font-bold text-[#BEFA46] bg-[#BEFA46]/10 border border-[#BEFA46]/30"
+              title="Painel Administrativo"
+// step 3/6
