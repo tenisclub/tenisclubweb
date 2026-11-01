@@ -247,4 +247,39 @@ function DesktopRandomWall() {
       const el = videoRefs.current[c][active];
       if (el) {
         el.muted = true;
-// step 7/12
+        el.play().catch(() => {});
+      }
+    }
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        for (let c = 0; c < colCount; c++) {
+          const active = columnsRef.current[c].activeSlot;
+          const el = videoRefs.current[c][active];
+          if (el && el.paused) {
+            el.muted = true;
+            el.play().catch(() => {});
+          }
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, []);
+
+  const handleColumnEnded = (colIdx: number, finishedSlot: 0 | 1) => {
+    const snapshot = columnsRef.current;
+    const currentCol = snapshot[colIdx];
+    if (!currentCol || currentCol.activeSlot !== finishedSlot) return;
+
+    const finishedVid = currentCol.slots[finishedSlot];
+    const nextSlot: 0 | 1 = finishedSlot === 0 ? 1 : 0;
+    const incomingVid = currentCol.slots[nextSlot];
+
+    // Start playing the preloaded slot immediately
+    const nextEl = videoRefs.current[colIdx][nextSlot];
+    if (nextEl) {
+      nextEl.muted = true;
+      nextEl.currentTime = 0;
+// step 8/12
