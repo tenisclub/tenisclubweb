@@ -42,3 +42,48 @@ export async function POST(request: Request) {
       highlight_home: Boolean(highlight_home),
     })
     .select('*')
+    .single();
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  if (highlight_home) {
+    await supabase.from('products').update({ is_featured: true }).eq('id', product_id);
+  }
+
+  revalidateStoreData('catalog');
+  void supabase
+    .from('admin_logs')
+    .insert({
+      admin_id: session.userId,
+      action: 'promotion.create',
+      entity_type: 'promotion',
+      entity_id: data.id,
+      details: { name: data.name, promo_price: promoNum },
+    })
+    .then(() => {});
+
+  return NextResponse.json({ promotion: data });
+}
+
+export async function PATCH(request: Request) {
+  const session = await getAuthSession();
+  if (!session?.isAdmin) return NextResponse.json({ error: 'Acesso negado.' }, { status: 403 });
+
+  const { id, is_active, highlight_home, promo_price, starts_at, ends_at, name } = await request.json();
+  if (!id) return NextResponse.json({ error: 'ID inválido.' }, { status: 400 });
+
+  const supabase = createServiceClient();
+  const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  if (is_active !== undefined) updates.is_active = Boolean(is_active);
+  if (highlight_home !== undefined) updates.highlight_home = Boolean(highlight_home);
+  if (promo_price !== undefined) updates.promo_price = Number(promo_price);
+  if (starts_at !== undefined) updates.starts_at = starts_at || null;
+  if (ends_at !== undefined) updates.ends_at = ends_at || null;
+  if (name !== undefined) updates.name = name.trim();
+
+  const { data, error } = await supabase
+    .from('promotions')
+    .update(updates)
+    .eq('id', id)
+    .select('*')
+    .single();
