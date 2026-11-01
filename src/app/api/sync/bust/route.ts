@@ -28,4 +28,12 @@ export async function POST(request: Request) {
       }
       if (scope === 'all' || scope === 'settings') {
         revalidateTag('store-settings', { expire: 0 });
-// step 3/4
+      }
+    }
+
+    return NextResponse.json({ busted: didBust });
+  } catch {
+    return NextResponse.json({ busted: false });
+  }
+}
+
