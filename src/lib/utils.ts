@@ -95,4 +95,37 @@ export function buildOrderWhatsAppUrl(
       const title = brand && !nameHasBrand ? `${brand} ${item.product_name}` : item.product_name;
       const skuInfo = item.product_sku?.trim() ? ` [SKU: ${item.product_sku.trim()}]` : '';
       const colorInfo = item.color?.trim() ? `Cor: ${item.color.trim()} | ` : '';
-// step 3/8
+      const unitInfo =
+        item.quantity > 1 ? ` (${formatCurrency(item.unit_price)} un.)` : '';
+      return `• *${item.quantity}x ${title}*${skuInfo}\n  ${colorInfo}Tam: *${item.size}* — *${formatCurrency(item.subtotal)}*${unitInfo}`;
+    })
+    .join('\n');
+
+  const addr = order.shipping_address;
+  const hasStreet = Boolean(addr?.street?.trim());
+  const modalityLabel = formatOrderModalityLabel(order);
+
+  const customerLines = [`*Cliente:* ${order.customer_name}`];
+  if (order.customer_phone?.trim()) {
+    customerLines.push(`*WhatsApp / Telefone:* ${order.customer_phone.trim()}`);
+  }
+  if (order.customer_email?.trim()) {
+    customerLines.push(`*E-mail:* ${order.customer_email.trim()}`);
+  }
+
+  const receiptLines = [`*Recebimento:* ${modalityLabel}`];
+  if (hasStreet) {
+    const streetLine = `${addr?.street?.trim() || ''}, Nº ${addr?.number?.trim() || 'S/N'}${
+      addr?.complement?.trim() ? ` (${addr.complement.trim()})` : ''
+    }`;
+    const cityState = [addr?.city?.trim(), addr?.state?.trim()].filter(Boolean).join('/');
+    const districtLine = [addr?.neighborhood?.trim(), cityState]
+      .filter(Boolean)
+      .join(' — ');
+    receiptLines.push(`*Endereço:* ${streetLine}`);
+    if (districtLine) {
+      receiptLines.push(`*Bairro / Cidade:* ${districtLine}`);
+    }
+    if (addr?.zip_code?.trim()) {
+      receiptLines.push(`*CEP:* ${addr.zip_code.trim()}`);
+// step 4/8
