@@ -1540,4 +1540,86 @@ export function CheckoutStep3Customizer({
                           <select
                             value={btn.variant}
                             onChange={(e) =>
-// step 19/24
+                              updateCustomButton(btn.id, {
+                                variant: e.target.value as CheckoutCustomButton['variant'],
+                              })
+                            }
+                            className="mt-1 w-full h-10 px-2.5 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+                          >
+                            <option value="whatsapp">Verde WhatsApp</option>
+                            <option value="volt">Destaque Volt</option>
+                            <option value="outline">Borda Discreta</option>
+                            <option value="subtle">Sutil Escuro</option>
+                          </select>
+                        </div>
+
+                        <div className="sm:col-span-8">
+                          <div className="flex items-center justify-between gap-1">
+                            <label className="text-[11px] font-semibold text-zinc-400">
+                              Link (URL)
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                updateCustomButton(btn.id, { url: buildStoreWhatsAppLink() })
+                              }
+                              className="text-[10px] font-bold text-[#BEFA46] hover:underline cursor-pointer"
+                            >
+                              Usar WhatsApp da loja
+                            </button>
+                          </div>
+                          <input
+                            type="text"
+                            value={btn.url}
+                            onChange={(e) =>
+                              updateCustomButton(btn.id, { url: e.target.value })
+                            }
+                            placeholder="https://wa.me/5511999999999"
+                            className="mt-1 w-full h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+                          />
+                        </div>
+
+                        <div className="sm:col-span-3">
+                          <label className="text-[11px] font-semibold text-zinc-400">
+                            Exibir em
+                          </label>
+                          <select
+                            value={btn.visibility}
+                            onChange={(e) =>
+                              updateCustomButton(btn.id, {
+                                visibility: e.target.value as CheckoutCustomButton['visibility'],
+                              })
+                            }
+                            className="mt-1 w-full h-10 px-2.5 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+                          >
+                            <option value="always">Sempre</option>
+                            <option value="pickup">Só Retirada</option>
+                            <option value="local_delivery">Só Entrega</option>
+                          </select>
+                        </div>
+
+                        <div className="sm:col-span-1 flex justify-end">
+                          <button
+                            type="button"
+                            title="Remover botão"
+                            onClick={() => removeCustomButton(btn.id)}
+                            className="h-10 w-10 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 inline-flex items-center justify-center cursor-pointer"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN: STICKY LIVE INTERACTIVE PREVIEW */}
+        <div className="xl:col-span-5 xl:sticky xl:top-24 space-y-3 min-w-0">
+          <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#BEFA46] animate-pulse" />
+// step 20/24
