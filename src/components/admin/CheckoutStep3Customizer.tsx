@@ -1581,3 +1581,125 @@ export function CheckoutStep3Customizer({
 
                         <div className="sm:col-span-3">
                           <label className="text-[11px] font-semibold text-zinc-400">
+                            Exibir em
+                          </label>
+                          <select
+                            value={btn.visibility}
+                            onChange={(e) =>
+                              updateCustomButton(btn.id, {
+                                visibility: e.target.value as CheckoutCustomButton['visibility'],
+                              })
+                            }
+                            className="mt-1 w-full h-10 px-2.5 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+                          >
+                            <option value="always">Sempre</option>
+                            <option value="pickup">Só Retirada</option>
+                            <option value="local_delivery">Só Entrega</option>
+                          </select>
+                        </div>
+
+                        <div className="sm:col-span-1 flex justify-end">
+                          <button
+                            type="button"
+                            title="Remover botão"
+                            onClick={() => removeCustomButton(btn.id)}
+                            className="h-10 w-10 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 inline-flex items-center justify-center cursor-pointer"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN: STICKY LIVE INTERACTIVE PREVIEW */}
+        <div className="xl:col-span-5 xl:sticky xl:top-24 space-y-3 min-w-0">
+          <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#BEFA46] animate-pulse" />
+              <span className="text-xs font-extrabold uppercase tracking-wider text-[#BEFA46]">
+                Prévia ao Vivo — Visão do Cliente
+              </span>
+            </div>
+
+            <span
+              className={cn(
+                'px-2 py-0.5 rounded-md text-[10px] font-bold inline-flex items-center gap-1',
+                previewRequiresAddress
+                  ? 'bg-[#BEFA46]/15 text-[#BEFA46] border border-[#BEFA46]/30'
+                  : 'bg-zinc-800/90 text-zinc-400'
+              )}
+            >
+              <MapPin className="w-3 h-3" />
+              {previewRequiresAddress ? 'Pede Endereço' : 'Sem Endereço'}
+            </span>
+          </div>
+
+          {/* Simulated Checkout Etapa 3 Frame */}
+          <div className="rounded-3xl border border-zinc-800 bg-[#0E0E12] p-4 sm:p-5 space-y-4 shadow-2xl">
+            {/* Simulated 3-Step Bar */}
+            <div className="grid grid-cols-3 gap-1.5">
+              <div className="rounded-lg border border-[#BEFA46]/30 bg-[#BEFA46]/10 px-2 py-1.5 flex items-center justify-center gap-1 text-[10px] font-extrabold text-[#BEFA46]">
+                <Check className="w-3 h-3 stroke-[3]" />
+                <span>1. Itens</span>
+              </div>
+              <div className="rounded-lg border border-[#BEFA46]/30 bg-[#BEFA46]/10 px-2 py-1.5 flex items-center justify-center gap-1 text-[10px] font-extrabold text-[#BEFA46]">
+                <Check className="w-3 h-3 stroke-[3]" />
+                <span>2. Dados</span>
+              </div>
+              <div className="rounded-lg border border-[#BEFA46] bg-[#BEFA46] px-2 py-1.5 flex items-center justify-center gap-1 text-[10px] font-black text-[#09090B]">
+                <span>3. Finalizar</span>
+              </div>
+            </div>
+
+            {/* Compact Buyer Strip Preview */}
+            <div className="rounded-2xl border border-zinc-800/90 bg-[#14141A] px-3 py-2.5 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0">
+                  <User className="w-3.5 h-3.5 text-[#BEFA46]" />
+                </div>
+                <div className="min-w-0 space-y-0.5">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <p className="text-xs font-extrabold text-white truncate">
+                      Cliente Exemplo
+                    </p>
+                    <span className="px-1.5 py-0.5 rounded-md bg-[#BEFA46]/15 text-[9px] font-extrabold text-[#BEFA46]">
+                      Pgto: Pix
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-zinc-400 truncate">
+                    (11) 99999-9999 · cliente@email.com
+                  </p>
+                </div>
+              </div>
+              <span className="px-2 py-1 rounded-lg bg-[#1C1C24] border border-zinc-800 text-[10px] font-bold text-zinc-300 inline-flex items-center gap-1 shrink-0">
+                <Pencil className="w-2.5 h-2.5" />
+                Editar
+              </span>
+            </div>
+
+            {deliveryCfg.step_title && (
+              <h3 className="text-sm sm:text-base font-black text-white flex items-center gap-2">
+                {deliveryCfg.step_icon !== 'none' && (
+                  <CheckoutIcon
+                    name={deliveryCfg.step_icon}
+                    className="w-4 h-4 text-[#BEFA46] shrink-0"
+                  />
+                )}
+                <span>{deliveryCfg.step_title}</span>
+              </h3>
+            )}
+
+            {/* Selectable Option Cards Preview */}
+            {previewSelectableOptions.length > 0 && (
+              <div
+                className={cn(
+                  'grid grid-cols-1 gap-2',
+                  previewSelectableOptions.length >= 2 && 'sm:grid-cols-2'
+                )}
+              >
