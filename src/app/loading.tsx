@@ -10,4 +10,7 @@ export default function Loading() {
           />
         ))}
       </div>
-// step 3/4
+    </div>
+  );
+}
+
