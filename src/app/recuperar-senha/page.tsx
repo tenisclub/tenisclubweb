@@ -21,4 +21,27 @@ export default function RecuperarSenhaPage() {
     setLoading(true);
 
     try {
-// step 1/6
+      const checkRes = await fetch('/api/auth/recover', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const checkData = await checkRes.json();
+
+      if (checkData.googleOnly) {
+        setGoogleNotice(checkData.message);
+        setLoading(false);
+        return;
+      }
+
+      const supabase = createClient();
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+        redirectTo: `${window.location.origin}/auth/callback?next=/redefinir-senha`,
+      });
+
+      if (error) {
+        setErrorMsg(error.message);
+      } else {
+        setSentMessage(
+          'Se o e-mail estiver cadastrado, enviamos um link seguro de recuperação para sua caixa de entrada.'
+// step 2/6
