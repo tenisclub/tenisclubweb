@@ -276,3 +276,59 @@ export function InventoryManagerClient({ initialRows }: { initialRows: StockRowI
                           )}
                         </div>
                       </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-zinc-300">{r.color}</td>
+                  <td className="px-4 py-3">
+                    <span className="px-2.5 py-1 rounded-lg bg-zinc-800 font-black text-white">
+                      {r.size}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={cn(
+                        'px-2.5 py-1 rounded-full text-xs font-extrabold',
+                        r.quantity === 0
+                          ? r.allowBackorder
+                            ? 'bg-sky-500/15 text-sky-300'
+                            : 'bg-red-500/15 text-red-400'
+                          : r.quantity <= r.lowStockThreshold
+                            ? 'bg-amber-500/15 text-amber-300'
+                            : 'bg-emerald-500/15 text-emerald-400'
+                      )}
+                    >
+                      {r.quantity} un.
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-zinc-400">{r.lowStockThreshold} un.</td>
+                  <td className="px-4 py-3 text-right">
+                    <div className="inline-flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => openModal(r, 'in')}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 text-xs font-bold"
+                      >
+                        <PlusCircle className="w-3.5 h-3.5" />
+                        Entrada
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => openModal(r, 'out')}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-500/15 hover:bg-red-500/25 text-red-300 text-xs font-bold"
+                      >
+                        <MinusCircle className="w-3.5 h-3.5" />
+                        Saída
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => openModal(r, 'adjustment')}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold"
+                      >
+                        <Sliders className="w-3.5 h-3.5" />
+                        Corrigir
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
