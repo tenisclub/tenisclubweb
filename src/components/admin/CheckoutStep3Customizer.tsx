@@ -728,4 +728,86 @@ export function CheckoutStep3Customizer({
                                     }
                                     className="accent-[#BEFA46] w-4 h-4 rounded shrink-0"
                                   />
-// step 9/24
+                                  <span>
+                                    Pedir endereço (CEP, Rua, Número e Bairro) junto com este quadro de aviso
+                                  </span>
+                                </label>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* MAIN CARD 1: PICKUP */}
+                {!deliveryCfg.pickup_removed && (
+                  <div
+                    className={cn(
+                      'rounded-xl border transition overflow-hidden',
+                      deliveryCfg.pickup_enabled
+                        ? expandedCardId === 'main:pickup'
+                          ? 'border-[#BEFA46]/50 bg-[#121216]'
+                          : 'border-zinc-800 bg-[#121216] hover:border-zinc-700'
+                        : 'border-zinc-800/60 bg-[#121216]/60 opacity-75'
+                    )}
+                  >
+                    <div className="px-3.5 py-3 flex items-center justify-between gap-2">
+                      <button
+                        type="button"
+                        onClick={() => toggleExpand('main:pickup')}
+                        className="flex items-center gap-3 min-w-0 flex-1 text-left cursor-pointer"
+                      >
+                        <div
+                          className={cn(
+                            'w-8 h-8 rounded-lg border flex items-center justify-center shrink-0',
+                            deliveryCfg.pickup_enabled
+                              ? 'border-[#BEFA46]/30 bg-[#BEFA46]/10 text-[#BEFA46]'
+                              : 'border-zinc-800 bg-zinc-900 text-zinc-500'
+                          )}
+                        >
+                          <CheckoutIcon
+                            name={
+                              deliveryCfg.pickup_icon === 'none'
+                                ? 'store'
+                                : deliveryCfg.pickup_icon
+                            }
+                            className="w-4 h-4"
+                          />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <span className="text-xs sm:text-sm font-extrabold text-white truncate">
+                              {deliveryCfg.pickup_title || 'Retirar na Loja'}
+                            </span>
+                            <span className="px-1.5 py-0.5 rounded bg-zinc-800 text-[10px] font-bold text-zinc-300">
+                              Card Principal
+                            </span>
+                            {!deliveryCfg.pickup_enabled && (
+                              <span className="px-1.5 py-0.5 rounded bg-zinc-800 text-[10px] font-semibold text-zinc-400">
+                                Oculto
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-zinc-400 truncate mt-0.5">
+                            {deliveryCfg.pickup_subtitle || form.address || 'Retirada física na loja'}
+                          </p>
+                        </div>
+                      </button>
+
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          type="button"
+                          title={deliveryCfg.pickup_enabled ? 'Ocultar card' : 'Mostrar card'}
+                          onClick={() =>
+                            updateDeliveryCfg({ pickup_enabled: !deliveryCfg.pickup_enabled })
+                          }
+                          className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition cursor-pointer"
+                        >
+                          {deliveryCfg.pickup_enabled ? (
+                            <Eye className="w-4 h-4 text-[#BEFA46]" />
+                          ) : (
+                            <EyeOff className="w-4 h-4 text-zinc-500" />
+                          )}
+// step 10/24
