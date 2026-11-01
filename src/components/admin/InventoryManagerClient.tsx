@@ -109,4 +109,41 @@ export function InventoryManagerClient({ initialRows }: { initialRows: StockRowI
             Controle de Estoque por Numeração
           </h1>
           <p className="text-xs sm:text-sm text-zinc-400">
-// step 3/12
+            Adicione entradas, baixe saídas, corrija quantidades e defina alertas mínimos com rastreabilidade.
+          </p>
+        </div>
+
+        <Link
+          href="/admin/movimentacoes"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#16161D] border border-zinc-800 text-xs sm:text-sm font-bold text-[#BEFA46] hover:border-zinc-600 shrink-0"
+        >
+          <History className="w-4 h-4" />
+          Ver Histórico de Movimentações
+        </Link>
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Filtrar por produto, código, cor ou numeração..."
+            className="w-full h-11 pl-10 pr-4 rounded-xl bg-[#121216] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+          />
+        </div>
+        <div className="grid grid-cols-3 sm:flex gap-1.5 sm:gap-2">
+          {[
+            { v: 'all', l: 'Todos' },
+            { v: 'low', l: 'Estoque Baixo' },
+            { v: 'zero', l: 'Sem Estoque' },
+          ].map((btn) => (
+            <button
+              key={btn.v}
+              type="button"
+              onClick={() => setStockFilter(btn.v as typeof stockFilter)}
+              className={cn(
+                'px-2 sm:px-4 h-11 rounded-xl text-[11px] sm:text-xs font-bold border transition text-center',
+// step 4/12
