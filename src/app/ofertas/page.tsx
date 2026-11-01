@@ -22,4 +22,10 @@ export default async function OfertasPage() {
       categories={categories}
       brands={brands}
       whatsapp={settings.whatsapp}
-// step 3/4
+      initialOnlyPromo={true}
+      heading="Ofertas & Promoções"
+      subheading="Pares originais com preços promocionais por tempo limitado."
+    />
+  );
+}
+
