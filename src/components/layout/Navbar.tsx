@@ -105,3 +105,57 @@ export function Navbar({ settings }: { settings: StoreSettings }) {
                 prefetch={true}
                 className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#BEFA46]/15 border border-[#BEFA46]/40 text-[#BEFA46] text-xs font-bold hover:bg-[#BEFA46]/25 transition"
               >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>Painel Admin</span>
+              </Link>
+            )}
+
+            <Link
+              href={authenticated ? '/minha-conta/favoritos' : '/login?redirect=/minha-conta/favoritos'}
+              prefetch={true}
+              className="relative p-2 sm:p-2.5 rounded-full text-zinc-300 hover:text-white hover:bg-zinc-800/70 transition"
+              title="Meus favoritos"
+            >
+              <Heart className="w-5 h-5" />
+              {favoriteIds.length > 0 && (
+                <span className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-zinc-700 text-[10px] font-bold text-white flex items-center justify-center">
+                  {favoriteIds.length}
+                </span>
+              )}
+            </Link>
+
+            <Link
+              href={authenticated ? '/minha-conta' : '/login'}
+              prefetch={true}
+              className="inline-flex items-center gap-2 px-2.5 sm:px-3 py-2 rounded-full bg-[#15151A] border border-zinc-800 hover:border-zinc-700 text-xs sm:text-sm font-medium text-zinc-200 hover:text-white transition"
+            >
+              <div className="relative">
+                <User className="w-4 h-4 text-[#BEFA46]" />
+                {unreadNotifications > 0 && (
+                  <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#BEFA46]" />
+                )}
+              </div>
+              <span className="hidden sm:inline max-w-[110px] truncate">
+                {authenticated ? user?.full_name?.split(' ')[0] || 'Minha Conta' : 'Entrar'}
+              </span>
+            </Link>
+
+            <Link
+              href="/carrinho"
+              prefetch={true}
+              className="relative inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-2 rounded-full bg-[#BEFA46] hover:bg-[#d0ff6b] text-[#09090B] font-bold text-xs sm:text-sm transition shadow-[0_0_20px_rgba(190,250,70,0.2)]"
+              aria-label="Carrinho de compras"
+            >
+              <ShoppingBag className="w-4 h-4 stroke-[2.4]" />
+              <span className="hidden sm:inline">Carrinho</span>
+              <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-[#09090B] text-[#BEFA46] text-[11px] font-extrabold">
+                {cartCount}
+              </span>
+            </Link>
+          </div>
+        </div>
+
+        {/* Desktop Secondary Category Nav */}
+        <nav className="hidden lg:flex items-center justify-center gap-1 pb-2.5">
+          {NAV_LINKS.map((link) => {
+            const active =
