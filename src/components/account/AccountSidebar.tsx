@@ -67,4 +67,27 @@ export function AccountSidebar() {
               href="/admin"
               className="inline-flex items-center gap-1 px-2.5 py-2 rounded-xl text-[11px] font-bold text-[#BEFA46] bg-[#BEFA46]/10 border border-[#BEFA46]/30"
               title="Painel Administrativo"
-// step 3/6
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Admin</span>
+            </Link>
+          )}
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={loggingOut}
+            className="inline-flex items-center gap-1 px-2.5 py-2 rounded-xl text-[11px] font-bold text-red-400 bg-red-500/10 border border-red-500/20 disabled:opacity-60 cursor-pointer"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>{loggingOut ? '...' : 'Sair'}</span>
+          </button>
+        </div>
+      </div>
+
+      <nav className="flex lg:flex-col gap-1.5 lg:gap-1 overflow-x-auto pb-1 lg:pb-0 -mx-1 px-1 lg:mx-0 lg:px-0">
+        {ACCOUNT_LINKS.map((link) => {
+          const Icon = link.icon;
+          const active = link.exact
+            ? effectivePath === link.href
+            : effectivePath === link.href || effectivePath.startsWith(`${link.href}/`);
+// step 4/6
