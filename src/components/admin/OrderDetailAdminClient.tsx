@@ -242,4 +242,53 @@ export function OrderDetailAdminClient({ initialOrder }: { initialOrder: Order }
             </p>
             {initialOrder.shipping_address?.street && (
               <div className="rounded-xl bg-[#18181F] p-3 text-zinc-300">
-// step 5/8
+                {initialOrder.shipping_address.street}, {initialOrder.shipping_address.number}
+                {initialOrder.shipping_address.complement
+                  ? ` - ${initialOrder.shipping_address.complement}`
+                  : ''}
+                <br />
+                {initialOrder.shipping_address.neighborhood} •{' '}
+                {initialOrder.shipping_address.city}/{initialOrder.shipping_address.state}
+                {initialOrder.shipping_address.reference && (
+                  <>
+                    <br />
+                    Ref: {initialOrder.shipping_address.reference}
+                  </>
+                )}
+              </div>
+            )}
+            {initialOrder.customer_notes && (
+              <p className="text-amber-300 pt-1">
+                <strong>Nota do cliente:</strong> {initialOrder.customer_notes}
+              </p>
+            )}
+          </div>
+
+          {/* Status History */}
+          <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-3">
+            <h3 className="text-base font-black text-white flex items-center gap-2">
+              <Clock className="w-4 h-4 text-[#BEFA46]" />
+              Linha do Tempo de Status
+            </h3>
+            <div className="space-y-2.5">
+              {(initialOrder.history || []).map((h) => (
+                <div key={h.id} className="text-xs border-l-2 border-zinc-700 pl-3 py-0.5">
+                  <p className="font-bold text-white">
+                    {ORDER_STATUS_CONFIG[h.new_status as OrderStatus]?.label || h.new_status}
+                  </p>
+                  {h.note && <p className="text-zinc-400">{h.note}</p>}
+                  <span className="text-[11px] text-zinc-500">
+                    {formatDateTime(h.created_at)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Administrative Controls */}
+        <div className="lg:col-span-5 space-y-6">
+          <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-4">
+            <h2 className="text-base font-black text-white">Controle Operacional</h2>
+
+// step 6/8
