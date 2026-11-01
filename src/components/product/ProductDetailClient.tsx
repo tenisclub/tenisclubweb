@@ -125,4 +125,47 @@ export function ProductDetailClient({
       await addToCart({
         productId: product.id,
         variantId: selectedVariant.id,
-// step 3/12
+        quantity,
+        redirectToCart,
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleShare = async () => {
+    const url = typeof window !== 'undefined' ? window.location.href : '';
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${product.name} | Tênis Club`,
+          text: product.short_description || product.name,
+          url,
+        });
+        return;
+      } catch {
+        // Fallback to copy
+      }
+    }
+    if (url && navigator.clipboard) {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      toast('Link do produto copiado!', 'info');
+      setTimeout(() => setCopied(false), 2500);
+    }
+  };
+
+  const waUrl = buildProductWhatsAppUrl({
+    whatsapp,
+    productName: product.name,
+    sku: product.sku,
+    size: selectedVariant?.size,
+    price: product.effective_price,
+  });
+
+  const additionalSpecs = Object.entries(product.additional_info || {});
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+      {/* Left: Image Gallery */}
+// step 4/12
