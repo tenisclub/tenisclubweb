@@ -168,4 +168,32 @@ export async function POST(request: Request) {
         deliveryCfg,
         settings.address,
         itemsTotalAfterDiscount
-// step 6/8
+      );
+      const resolvedOption =
+        resolvedOptions.find((opt) => opt.key === requestedKey) ??
+        resolvedOptions[0] ??
+        null;
+
+      const orderUpdates: Record<string, unknown> = {};
+      if (cleanPaymentMethod) {
+        orderUpdates.payment_method_note = cleanPaymentMethod;
+      }
+
+      if (resolvedOption) {
+        const resolvedShippingCost = Number(resolvedOption.shippingCost) || 0;
+        const labelChanged =
+          resolvedOption.summaryLabel !== (optionMetadata.shipping_label as string | undefined);
+
+        if (resolvedShippingCost > 0 || labelChanged) {
+          const updatedShippingAddress = {
+            ...(finalShippingAddress || {}),
+            shipping_label: resolvedOption.summaryLabel,
+          };
+          const updatedTotal = itemsTotalAfterDiscount + resolvedShippingCost;
+          orderUpdates.shipping_cost = resolvedShippingCost;
+          orderUpdates.total = updatedTotal;
+          orderUpdates.shipping_address = updatedShippingAddress;
+        }
+      }
+
+// step 7/8
