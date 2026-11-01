@@ -88,4 +88,49 @@ function CadastroForm() {
       const regData = await regRes.json();
       if (!regRes.ok) {
         setErrorMsg(regData.error || 'Erro ao criar conta.');
-// step 2/8
+        setLoading(false);
+        return;
+      }
+
+      if (regData.sessionSnapshot) {
+        hydrateSession(regData.sessionSnapshot);
+      } else {
+        const supabase = createClient();
+        await supabase.auth.signInWithPassword({
+          email: email.trim().toLowerCase(),
+          password,
+        });
+        await refreshSession();
+      }
+
+      toast('Cadastro realizado com sucesso! Bem-vindo(a) à Tênis Club!', 'success');
+      router.replace(resolvePostSignupTarget(redirectParam));
+    } catch {
+      setErrorMsg('Falha de comunicação ao realizar cadastro.');
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignup = async () => {
+    setErrorMsg('');
+    setGoogleLoading(true);
+    try {
+      const supabase = createClient();
+      const nextTarget = resolvePostSignupTarget(redirectParam);
+      const callbackUrl = `${window.location.origin}/auth/callback${
+        nextTarget !== '/' ? `?next=${encodeURIComponent(nextTarget)}` : ''
+      }`;
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: callbackUrl },
+      });
+      if (error) {
+        setErrorMsg('Não foi possível conectar ao Google. Tente novamente.');
+        setGoogleLoading(false);
+      }
+    } catch {
+      setErrorMsg('Falha ao iniciar autenticação com Google.');
+      setGoogleLoading(false);
+    }
+  };
+// step 3/8
