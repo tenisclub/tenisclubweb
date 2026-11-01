@@ -10,4 +10,7 @@ export default async function AdminPedidosPage() {
     .from('orders')
     .select('*')
     .order('created_at', { ascending: false });
-// step 3/4
+
+  return <OrdersListClient initialOrders={(data || []) as Order[]} />;
+}
+
