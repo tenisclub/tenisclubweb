@@ -39,4 +39,25 @@ export function BrandsClient({ initialBrands }: { initialBrands: Brand[] }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: brand.id, is_active: !brand.is_active }),
     });
-// step 2/6
+    if (res.ok) {
+      setBrands((prev) =>
+        prev.map((b) => (b.id === brand.id ? { ...b, is_active: !b.is_active } : b))
+      );
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Deseja excluir esta marca?')) return;
+    const res = await fetch(`/api/admin/brands?id=${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    });
+    if (res.ok) {
+      setBrands((prev) => prev.filter((b) => b.id !== id));
+      toast('Marca excluída.', 'info');
+    }
+  };
+
+  return (
+    <div className="space-y-6 max-w-3xl">
+      <div>
+// step 3/6
