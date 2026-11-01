@@ -34,3 +34,39 @@ export async function POST(request: Request) {
       entity_id: data.id,
       details: { name: data.name },
     })
+    .then(() => {});
+
+  return NextResponse.json({ brand: data });
+}
+
+export async function PATCH(request: Request) {
+  const session = await getAuthSession();
+  if (!session?.isAdmin) return NextResponse.json({ error: 'Acesso negado.' }, { status: 403 });
+
+  const { id, name, is_active } = await request.json();
+  if (!id) return NextResponse.json({ error: 'ID inválido.' }, { status: 400 });
+
+  const supabase = createServiceClient();
+  const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  if (name !== undefined) {
+    updates.name = name.trim();
+    updates.slug = slugify(name);
+  }
+  if (is_active !== undefined) updates.is_active = Boolean(is_active);
+
+  const { data, error } = await supabase
+    .from('brands')
+    .update(updates)
+    .eq('id', id)
+    .select('*')
+    .single();
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  revalidateStoreData('catalog');
+  void supabase
+    .from('admin_logs')
+    .insert({
+      admin_id: session.userId,
+      action: 'brand.update',
+      entity_type: 'brand',
