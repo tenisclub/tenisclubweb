@@ -131,4 +131,37 @@ export function PromotionsClient({
           </div>
 
           <div>
-// step 4/8
+            <label className="text-xs text-zinc-400">Produto *</label>
+            <select
+              value={productId}
+              onChange={(e) => setProductId(e.target.value)}
+              className="mt-1 w-full h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+            >
+              {productsList.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name} ({formatCurrency(p.base_price)})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="text-xs text-zinc-400">Preço Promocional (R$) *</label>
+            <input
+              type="number"
+              step="0.01"
+              min="1"
+              required
+              value={promoPrice}
+              onChange={(e) => setPromoPrice(e.target.value)}
+              placeholder="Ex: 199.90"
+              className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs text-zinc-400">Início Programado (Opcional)</label>
+            <input
+              type="datetime-local"
+              value={startsAt}
+// step 5/8
