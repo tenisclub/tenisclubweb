@@ -83,4 +83,32 @@ export async function POST(request: Request) {
       }
     }
 
-// step 3/8
+    const addressPayload =
+      requiresAddress && shippingAddress && typeof shippingAddress === 'object'
+        ? {
+            zip_code: shippingAddress.zip_code || '',
+            street: shippingAddress.street || '',
+            number: shippingAddress.number || '',
+            complement: shippingAddress.complement || '',
+            neighborhood: shippingAddress.neighborhood || '',
+            city: shippingAddress.city || '',
+            state: shippingAddress.state || 'SP',
+            reference: shippingAddress.reference || '',
+          }
+        : null;
+
+    const optionMetadata: Record<string, unknown> = {};
+    if (matchedOption) {
+      if (matchedOption.customCardId) {
+        optionMetadata.custom_option_id = matchedOption.customCardId;
+      }
+      if (matchedOption.title) {
+        optionMetadata.custom_option_title = matchedOption.title;
+      }
+      if (matchedOption.summaryLabel) {
+        optionMetadata.shipping_label = matchedOption.summaryLabel;
+      }
+      if (matchedOption.kind === 'pickup' && !requiresAddress) {
+        optionMetadata.pickup_address =
+          deliveryCfg.pickup_subtitle.trim() || settings.address;
+// step 4/8
