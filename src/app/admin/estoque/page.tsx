@@ -23,4 +23,11 @@ export default async function AdminEstoquePage() {
         color: v.color,
         size: v.size,
         quantity: v.stock,
-// step 3/4
+        lowStockThreshold: v.low_stock_threshold,
+        allowBackorder: prod.allow_backorder,
+      });
+    }
+  }
+
+  return <InventoryManagerClient initialRows={stockRows} />;
+}
