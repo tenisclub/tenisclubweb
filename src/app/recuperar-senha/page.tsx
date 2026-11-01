@@ -68,4 +68,27 @@ export default function RecuperarSenhaPage() {
 
         {errorMsg && (
           <div className="rounded-xl border border-red-500/40 bg-red-500/10 p-3.5 text-xs text-red-300">
-// step 3/6
+            {errorMsg}
+          </div>
+        )}
+
+        {googleNotice && (
+          <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-xs text-amber-200 space-y-2">
+            <p>{googleNotice}</p>
+            <Link
+              href="/login"
+              className="inline-block font-bold text-[#BEFA46] hover:underline"
+            >
+              Ir para Login com Google →
+            </Link>
+          </div>
+        )}
+
+        {sentMessage ? (
+          <div className="rounded-2xl border border-[#BEFA46]/40 bg-[#BEFA46]/10 p-5 text-center space-y-3">
+            <CheckCircle2 className="w-8 h-8 text-[#BEFA46] mx-auto" />
+            <p className="text-xs sm:text-sm text-zinc-200 leading-relaxed">{sentMessage}</p>
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#BEFA46] hover:underline"
+// step 4/6
