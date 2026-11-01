@@ -22,4 +22,16 @@ export default async function FavoritosPage() {
 
   return (
     <div className="space-y-6">
-// step 2/5
+      <div>
+        <h1 className="text-xl sm:text-2xl font-black text-white">Meus Favoritos</h1>
+        <p className="text-xs sm:text-sm text-zinc-400">
+          Seus modelos salvos para acompanhar preço e disponibilidade.
+        </p>
+      </div>
+
+      {favProducts.length === 0 ? (
+        <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-6 sm:p-12 text-center space-y-3">
+          <Heart className="w-10 h-10 text-zinc-600 mx-auto" />
+          <p className="text-base font-bold text-white">Sua lista de favoritos está vazia</p>
+          <p className="text-xs text-zinc-400">
+// step 3/5
