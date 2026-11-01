@@ -128,4 +128,36 @@ export function buildOrderWhatsAppUrl(
     }
     if (addr?.zip_code?.trim()) {
       receiptLines.push(`*CEP:* ${addr.zip_code.trim()}`);
-// step 4/8
+    }
+    if (addr?.reference?.trim()) {
+      receiptLines.push(`*Referência:* ${addr.reference.trim()}`);
+    }
+  } else if (order.delivery_method === 'pickup' && addr?.pickup_address?.trim()) {
+    receiptLines.push(`*Local de Retirada:* ${addr.pickup_address.trim()}`);
+  }
+
+  const shippingCost = Number(order.shipping_cost) || 0;
+  const discountTotal = Number(order.discount_total) || 0;
+  const totalValue = Number(order.total) || 0;
+  const itemsSubtotal = Number(order.subtotal) || Math.max(0, totalValue - shippingCost);
+
+  const financialLines: string[] = [];
+  if (discountTotal > 0 || shippingCost > 0) {
+    financialLines.push(`*Subtotal:* ${formatCurrency(itemsSubtotal)}`);
+  }
+  if (discountTotal > 0) {
+    financialLines.push(`*Desconto em ofertas:* -${formatCurrency(discountTotal)}`);
+  }
+  if (shippingCost > 0) {
+    financialLines.push(`*Taxa de entrega:* ${formatCurrency(shippingCost)}`);
+  }
+  financialLines.push(`*Total do Pedido:* *${formatCurrency(totalValue)}*`);
+  if (order.payment_method_note?.trim()) {
+    financialLines.push(`*Forma de pagamento:* ${order.payment_method_note.trim()}`);
+  }
+
+  const notesBlock = order.customer_notes?.trim()
+    ? [`*Observações:* ${order.customer_notes.trim()}`, ``]
+    : [];
+
+// step 5/8
