@@ -6,4 +6,12 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Novidades & Drop Novo',
-// step 1/4
+  description: 'Confira os tênis e calçados recém-cadastrados na Tênis Club.',
+};
+
+export default async function NovidadesPage() {
+  const [{ allMatching }, { categories, brands }, settings] = await Promise.all([
+    getCatalogProducts({ pageSize: 200 }),
+    getCategoriesAndBrands(),
+    getStoreSettings(),
+// step 2/4
