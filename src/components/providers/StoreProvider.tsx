@@ -344,4 +344,73 @@ export function StoreProvider({
             favoriteIds: EMPTY_FAVORITES,
             unreadNotifications: 0,
           };
-// step 5/12
+          setAuthenticated(true);
+          setUser(bootSnap.user);
+          setRole(bootSnap.role);
+          setSyncTag(bootSnap.syncTag || null);
+          sessionStorage.setItem(SESSION_CACHE_KEY, JSON.stringify(bootSnap));
+        }
+      }
+    } catch {
+      // Ignore malformed bootstrap cookie
+    }
+
+    try {
+      const raw = sessionStorage.getItem(SESSION_CACHE_KEY);
+      if (raw) {
+        const cached = JSON.parse(raw) as SessionSnapshot;
+        if (cached.authenticated) {
+          setAuthenticated(true);
+          setUser(cached.user);
+          setRole(cached.role);
+          setSyncTag(cached.syncTag || null);
+          setCartCount(cached.cartCount);
+          setFavoriteIds(cached.favoriteIds);
+          setUnreadNotifications(cached.unreadNotifications);
+        }
+      }
+    } catch {
+      // Ignore corrupt cache
+    }
+
+    setHydratedCache(true);
+    void refreshSession();
+  }, [refreshSession]);
+
+  // Keep sessionStorage snapshot synced with optimistic cart/favorite updates
+  useEffect(() => {
+    if (!hydratedCache || typeof window === 'undefined') return;
+    if (!authenticated) {
+      sessionStorage.removeItem(SESSION_CACHE_KEY);
+      return;
+    }
+    const snap: SessionSnapshot = {
+      authenticated,
+      user,
+      role,
+      syncTag,
+      cartCount,
+      favoriteIds,
+      unreadNotifications,
+    };
+    sessionStorage.setItem(SESSION_CACHE_KEY, JSON.stringify(snap));
+  }, [hydratedCache, authenticated, user, role, syncTag, cartCount, favoriteIds, unreadNotifications]);
+
+  // Live reactive references for the persistent Supabase Realtime channel
+  const liveRefs = useRef({
+    authenticated,
+    isAdmin,
+    syncTag,
+    router,
+    refreshSession,
+  });
+  liveRefs.current = {
+    authenticated,
+    isAdmin,
+    syncTag,
+    router,
+    refreshSession,
+  };
+
+  // Global Real-Time Sync across ALL open tabs, devices, visitors, customers & admins
+// step 6/12
