@@ -20,4 +20,26 @@ export async function POST(request: Request) {
     .select('base_price')
     .eq('id', product_id)
     .single();
-// step 1/6
+
+  const basePrice = Number(prod?.base_price || 0);
+  const promoNum = Number(promo_price);
+  const discountPct =
+    basePrice > 0 && promoNum < basePrice
+      ? Math.round(((basePrice - promoNum) / basePrice) * 100)
+      : 0;
+
+  const { data, error } = await supabase
+    .from('promotions')
+    .insert({
+      name: name.trim(),
+      description: description?.trim() || '',
+      product_id,
+      discount_percent: discountPct,
+      promo_price: promoNum,
+      starts_at: starts_at || null,
+      ends_at: ends_at || null,
+      is_active: is_active !== false,
+      highlight_home: Boolean(highlight_home),
+    })
+    .select('*')
+// step 2/6
