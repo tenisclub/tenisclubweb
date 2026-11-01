@@ -34,4 +34,22 @@ export async function GET() {
       supabase
         .from('notifications')
         .select('target_audience, user_id')
-// step 2/6
+        .eq('is_read', false)
+        .or(`and(target_audience.eq.customer,user_id.eq.${userId}),target_audience.eq.admin`),
+    ]);
+
+  let resolvedProfile = profileRow as UserProfile | null;
+  if (!resolvedProfile) {
+    const fullName =
+      (typeof userMeta.full_name === 'string' && userMeta.full_name) ||
+      (typeof userMeta.name === 'string' && userMeta.name) ||
+      claimEmail.split('@')[0] ||
+      'Cliente';
+    const { data: inserted } = await supabase
+      .from('user_profiles')
+      .upsert({
+        id: userId,
+        email: claimEmail.toLowerCase(),
+        full_name: fullName,
+        phone: typeof userMeta.phone === 'string' ? userMeta.phone : '',
+// step 3/6
