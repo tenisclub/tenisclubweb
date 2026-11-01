@@ -440,3 +440,76 @@ export function CheckoutClient({
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* MAIN STEP CARD */}
+        <div className="lg:col-span-8 rounded-3xl border border-zinc-800/90 bg-[#121216] p-4 sm:p-7">
+          {/* STEP 1: REVIEW ITEMS */}
+          {step === 1 && (
+            <div className="space-y-5">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="text-base sm:text-xl font-black text-white flex items-center gap-2">
+                  <ShoppingBag className="w-5 h-5 text-[#BEFA46] shrink-0" />
+                  <span>Confira sua sacola</span>
+                </h2>
+                <Link
+                  href="/carrinho"
+                  className="text-xs font-bold text-zinc-400 hover:text-white inline-flex items-center gap-1 shrink-0"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                  Editar
+                </Link>
+              </div>
+
+              <div className="space-y-2.5">
+                {items.map((item) => (
+                  <div
+                    key={item.id}
+                    className="rounded-2xl border border-zinc-800/80 bg-[#0D0D11] p-3 sm:p-3.5 flex items-center justify-between gap-3"
+                  >
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={item.product_image}
+                        alt={item.product_name}
+                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl object-cover bg-[#EAE0D5] shrink-0"
+                      />
+                      <div className="min-w-0 space-y-1.5">
+                        <p className="text-xs sm:text-sm font-extrabold text-white line-clamp-2 leading-snug">
+                          {item.product_name}
+                        </p>
+                        <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+                          <span className="px-2 py-0.5 rounded-md bg-zinc-800/90 text-zinc-200 font-bold">
+                            Tam. {item.size}
+                          </span>
+                          {item.color && (
+                            <span className="px-2 py-0.5 rounded-md bg-zinc-900 border border-zinc-800 text-zinc-400 truncate max-w-[120px]">
+                              {item.color}
+                            </span>
+                          )}
+                          <span className="px-2 py-0.5 rounded-md bg-zinc-900 border border-zinc-800 text-zinc-300 font-semibold">
+                            {item.quantity} {item.quantity === 1 ? 'par' : 'pares'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="text-sm sm:text-base font-black text-[#BEFA46] block">
+                        {formatCurrency(item.subtotal)}
+                      </span>
+                      {item.quantity > 1 && (
+                        <span className="text-[10px] text-zinc-500 block">
+                          {formatCurrency(item.unit_price)} cada
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Mobile Inline Total Strip */}
+              <div className="lg:hidden rounded-2xl border border-zinc-800/90 bg-[#0B0B0E] px-4 py-3 flex items-center justify-between gap-2">
+                <div>
+                  <span className="text-[11px] text-zinc-400 block">Subtotal dos itens</span>
+                  {subtotal > total && (
+                    <span className="text-[11px] font-bold text-emerald-400">
+                      Economia de {formatCurrency(subtotal - total)}
+                    </span>
+                  )}
