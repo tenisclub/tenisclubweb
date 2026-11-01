@@ -191,3 +191,51 @@ function LoginForm() {
               <Lock className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type={showPwd ? 'text' : 'password'}
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full h-11 pl-10 pr-10 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#BEFA46]"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPwd(!showPwd)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+              >
+                {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full h-12 rounded-xl bg-[#BEFA46] hover:bg-[#d1ff70] text-[#09090B] font-black text-sm inline-flex items-center justify-center gap-2 transition disabled:opacity-60"
+          >
+            {loading ? 'Entrando...' : 'Entrar'}
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </form>
+
+        <p className="text-center text-xs text-zinc-400">
+          Ainda não tem cadastro?{' '}
+          <Link
+            href={`/cadastro${redirectParam ? `?redirect=${encodeURIComponent(redirectParam)}` : ''}`}
+            className="font-bold text-[#BEFA46] hover:underline"
+          >
+            Criar minha conta grátis
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-[70vh]" />}>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
