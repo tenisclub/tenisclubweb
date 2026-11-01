@@ -108,4 +108,24 @@ export default async function ProdutoDetailPage({
       {/* Main Product View */}
       <ProductDetailClient product={product} whatsapp={settings.whatsapp} />
 
-// step 5/6
+      {/* Related Products */}
+      {related.length > 0 && (
+        <section className="space-y-6 pt-8 border-t border-zinc-800">
+          <h2 className="text-xl sm:text-2xl font-black text-white">
+            Produtos Relacionados
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {related.map((item) => (
+              <ProductCard
+                key={item.id}
+                product={item}
+                whatsapp={settings.whatsapp}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}
+
