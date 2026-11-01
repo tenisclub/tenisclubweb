@@ -415,3 +415,72 @@ export function SettingsClient({ initialSettings }: { initialSettings: StoreSett
                 value={form.email}
                 onChange={(e) => setField('email', e.target.value)}
                 className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white"
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="text-[11px] font-semibold text-zinc-400">
+                Endereço Físico Completo
+              </label>
+              <input
+                type="text"
+                value={form.address}
+                onChange={(e) => setField('address', e.target.value)}
+                className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-zinc-400">
+                Horários de Funcionamento
+              </label>
+              <input
+                type="text"
+                value={form.business_hours}
+                onChange={(e) => setField('business_hours', e.target.value)}
+                className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-zinc-400">Instagram URL</label>
+              <input
+                type="text"
+                value={form.instagram_url || ''}
+                onChange={(e) => setField('instagram_url', e.target.value)}
+                className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-zinc-400">Facebook URL</label>
+              <input
+                type="text"
+                value={form.facebook_url || ''}
+                onChange={(e) => setField('facebook_url', e.target.value)}
+                className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-zinc-400">TikTok URL</label>
+              <input
+                type="text"
+                value={form.tiktok_url || ''}
+                onChange={(e) => setField('tiktok_url', e.target.value)}
+                className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. Checkout Etapa 3 Customizer + Live Preview */}
+      {(activeTab === 'all' || activeTab === 'checkout') && (
+        <CheckoutStep3Customizer
+          form={form}
+          deliveryCfg={deliveryCfg}
+          setField={setField}
+          updateDeliveryCfg={updateDeliveryCfg}
+          onResetDefault={resetEtapa3ToDefault}
+        />
+      )}
+
+      {/* 4. Institutional Policies */}
+      {(activeTab === 'all' || activeTab === 'policies') && (
+        <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-4">
