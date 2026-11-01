@@ -28,4 +28,34 @@ function LoginForm() {
   const { refreshSession, toast } = useStore();
 
   const [email, setEmail] = useState('');
-// step 1/8
+  const [password, setPassword] = useState('');
+  const [showPwd, setShowPwd] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  useEffect(() => {
+    router.prefetch('/');
+    // Pre-warm singleton Supabase auth client so clicking Google/Email has zero init delay
+    void createClient().auth.getSession();
+  }, [router]);
+
+  const handleEmailLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg('');
+    setLoading(true);
+
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password,
+      });
+
+      if (error) {
+        setErrorMsg('E-mail ou senha incorretos. Verifique seus dados ou use o login Google.');
+        setLoading(false);
+        return;
+      }
+
+// step 2/8
