@@ -115,3 +115,61 @@ export default async function MinhaContaDashboardPage() {
             <p className="text-sm text-zinc-300 font-semibold">
               Você ainda não realizou nenhum pedido.
             </p>
+            <Link
+              href="/produtos"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#BEFA46] text-[#09090B] text-xs font-extrabold"
+            >
+              Conferir Catálogo
+            </Link>
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-zinc-800 bg-[#17171E] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm font-black text-white">
+                  #{latestOrder.order_number}
+                </span>
+                <span
+                  className={cn(
+                    'px-2.5 py-0.5 rounded-full text-[11px] font-bold border',
+                    ORDER_STATUS_CONFIG[latestOrder.status as OrderStatus]?.colorClass
+                  )}
+                >
+                  {ORDER_STATUS_CONFIG[latestOrder.status as OrderStatus]?.label}
+                </span>
+              </div>
+              <p className="text-xs text-zinc-400">
+                Data: {formatDate(latestOrder.created_at)} •{' '}
+                {latestOrder.delivery_method === 'pickup'
+                  ? 'Retirada na Loja'
+                  : 'Entrega Local'}
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between sm:justify-end gap-4 pt-3 sm:pt-0 border-t sm:border-t-0 border-zinc-800/80">
+              <div className="sm:text-right">
+                <span className="text-xs text-zinc-400 block">Total</span>
+                <strong className="text-lg font-black text-[#BEFA46]">
+                  {formatCurrency(latestOrder.total)}
+                </strong>
+              </div>
+              <Link
+                href={`/minha-conta/pedidos/${latestOrder.id}`}
+                className="px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-white transition"
+              >
+                Detalhes
+              </Link>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Customer Notifications */}
+      <NotificationsPanel
+        initialNotifications={(notificationsRaw || []) as NotificationItem[]}
+        scope="customer"
+      />
+    </div>
+  );
+}
+
