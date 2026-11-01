@@ -22,4 +22,16 @@ export default function ProductLoading() {
             <div className="h-9 w-4/5 rounded-2xl bg-zinc-900" />
             <div className="h-8 w-40 rounded-xl bg-zinc-800/80" />
           </div>
-// step 2/4
+
+          <div className="space-y-3 pt-2">
+            <div className="h-4 w-32 rounded-full bg-zinc-900" />
+            <div className="grid grid-cols-5 gap-2">
+              {Array.from({ length: 10 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="h-11 rounded-xl bg-[#121216] border border-zinc-800/70"
+                />
+              ))}
+            </div>
+          </div>
+// step 3/4
