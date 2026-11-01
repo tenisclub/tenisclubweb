@@ -88,4 +88,50 @@ export function CatalogExplorer({
 
       if (category !== 'todos' && p.category?.slug !== category) {
         return false;
-// step 2/12
+      }
+
+      if (brand !== 'todas' && p.brand?.slug !== brand) {
+        return false;
+      }
+
+      if (size && !p.available_sizes.includes(size)) {
+        return false;
+      }
+
+      if (color !== 'todas' && !p.variants.some((v) => v.color === color)) {
+        return false;
+      }
+
+      if (minPrice !== '' && p.effective_price < Number(minPrice)) {
+        return false;
+      }
+
+      if (maxPrice !== '' && p.effective_price > Number(maxPrice)) {
+        return false;
+      }
+
+      if (onlyAvailable && p.total_stock <= 0 && !p.allow_backorder) {
+        return false;
+      }
+
+      if (onlyPromo && p.discount_percent <= 0) {
+        return false;
+      }
+
+      if (onlyNew && !p.is_new_release) {
+        return false;
+      }
+
+      return true;
+    });
+
+    list = [...list].sort((a, b) => {
+      switch (sort) {
+        case 'price_asc':
+          return a.effective_price - b.effective_price;
+        case 'price_desc':
+          return b.effective_price - a.effective_price;
+        case 'bestsellers':
+          return b.sold_count - a.sold_count;
+        case 'popular':
+// step 3/12
