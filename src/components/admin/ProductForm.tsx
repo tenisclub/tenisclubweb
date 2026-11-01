@@ -491,3 +491,102 @@ export function ProductForm({
               checked={isActive}
               onChange={(e) => setIsActive(e.target.checked)}
               className="w-4 h-4 accent-[#BEFA46]"
+            />
+            Produto Ativo na Loja
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isFeatured}
+              onChange={(e) => setIsFeatured(e.target.checked)}
+              className="w-4 h-4 accent-[#BEFA46]"
+            />
+            Destaque na Página Inicial
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isNewRelease}
+              onChange={(e) => setIsNewRelease(e.target.checked)}
+              className="w-4 h-4 accent-[#BEFA46]"
+            />
+            Marcar como Lançamento / Novidade
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer text-[#BEFA46]">
+            <input
+              type="checkbox"
+              checked={allowBackorder}
+              onChange={(e) => setAllowBackorder(e.target.checked)}
+              className="w-4 h-4 accent-[#BEFA46]"
+            />
+            Vender mesmo sem estoque
+          </label>
+        </div>
+      </div>
+
+      {/* 2. Multi-Image Gallery Manager */}
+      <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 className="text-base font-black text-white">2. Fotos do Produto</h2>
+            <p className="text-xs text-zinc-400">
+              Envie do computador/celular (JPG, PNG, WEBP até 5 MB), defina a principal e ordene.
+            </p>
+          </div>
+
+          <label className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#BEFA46] text-[#09090B] text-xs font-black cursor-pointer shrink-0">
+            <Upload className="w-4 h-4" />
+            {uploading ? 'Enviando...' : 'Enviar Imagens'}
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/avif"
+              multiple
+              disabled={uploading}
+              onChange={handleFileUpload}
+              className="hidden"
+            />
+          </label>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-2">
+          <input
+            type="url"
+            value={externalImageUrl}
+            onChange={(e) => setExternalImageUrl(e.target.value)}
+            placeholder="Ou cole o link de uma foto (https://...)"
+            className="flex-1 h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+          />
+          <button
+            type="button"
+            onClick={addExternalUrl}
+            className="w-full sm:w-auto px-4 h-10 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-white shrink-0"
+          >
+            Adicionar URL
+          </button>
+        </div>
+
+        {images.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {images.map((img, idx) => (
+              <div
+                key={`${img.url}-${idx}`}
+                className={cn(
+                  'rounded-2xl border p-2.5 bg-[#18181F] space-y-2',
+                  img.is_primary ? 'border-[#BEFA46]' : 'border-zinc-800'
+                )}
+              >
+                <div className="relative aspect-square rounded-xl overflow-hidden bg-[#EAE0D5]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={img.url} alt="" className="w-full h-full object-cover" />
+                  {img.is_primary && (
+                    <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-[#BEFA46] text-[#09090B] text-[10px] font-black">
+                      Principal
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center justify-between gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setPrimaryImage(idx)}
+                    className={cn(
+                      'p-1.5 rounded-lg text-xs',
