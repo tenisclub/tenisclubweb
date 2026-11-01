@@ -43,4 +43,49 @@ export function CatalogExplorer({
   const [color, setColor] = useState('todas');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
-// step 1/12
+  const [onlyAvailable, setOnlyAvailable] = useState(false);
+  const [onlyPromo, setOnlyPromo] = useState(initialOnlyPromo);
+  const [onlyNew, setOnlyNew] = useState(initialOnlyNew);
+  const [sort, setSort] = useState<'newest' | 'price_asc' | 'price_desc' | 'bestsellers' | 'popular'>('newest');
+  const [page, setPage] = useState(1);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  // Extract distinct colors dynamically
+  const availableColors = useMemo(() => {
+    const set = new Set<string>();
+    products.forEach((p) => p.variants.forEach((v) => v.color && set.add(v.color)));
+    return Array.from(set).sort();
+  }, [products]);
+
+  const filteredAndSorted = useMemo(() => {
+    let list = products.filter((p) => {
+      if (search.trim()) {
+        const terms = search.toLowerCase().trim().split(/\s+/);
+        const hay = [
+          p.name,
+          p.sku || '',
+          p.brand?.name || '',
+          p.category?.name || '',
+          p.gender,
+          p.short_description,
+          ...p.variants.map((v) => v.color),
+        ]
+          .join(' ')
+          .toLowerCase();
+        if (!terms.every((t) => hay.includes(t))) return false;
+      }
+
+      if (gender !== 'todos') {
+        if (gender === 'unissex') {
+          if (p.gender !== 'unissex') return false;
+        } else if (
+          p.gender !== gender &&
+          !(p.gender === 'unissex' && (gender === 'masculino' || gender === 'feminino'))
+        ) {
+          return false;
+        }
+      }
+
+      if (category !== 'todos' && p.category?.slug !== category) {
+        return false;
+// step 2/12
