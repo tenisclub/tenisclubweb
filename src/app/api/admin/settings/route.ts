@@ -64,4 +64,19 @@ export async function PATCH(request: Request) {
       .from('admin_logs')
       .insert({
         admin_id: session.userId,
-// step 4/5
+        action: 'settings.update',
+        entity_type: 'store_settings',
+        entity_id: '1',
+        details: { store_name: data.store_name, whatsapp: data.whatsapp },
+      })
+      .then(() => {});
+
+    return NextResponse.json({ settings: data });
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Erro ao salvar configurações.' },
+      { status: 500 }
+    );
+  }
+}
+
