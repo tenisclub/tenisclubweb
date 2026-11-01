@@ -16,4 +16,13 @@ export default async function CarrinhoPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-5 sm:space-y-6">
       <div>
-// step 2/4
+        <span className="text-xs font-extrabold uppercase tracking-widest text-[#BEFA46]">
+          Sua Sacola
+        </span>
+        <h1 className="text-2xl sm:text-4xl font-black text-white mt-0.5">
+          Carrinho de Compras
+        </h1>
+      </div>
+
+      <CartClient
+// step 3/4
