@@ -51,4 +51,57 @@ const DEFAULT_SETTINGS: StoreSettings = {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-// step 1/12
+export function enrichProductRow(row: any, includeCost = false): Product {
+  const images: ProductImage[] = [...(row.product_images || [])].sort((a, b) => {
+    if (a.is_primary !== b.is_primary) return a.is_primary ? -1 : 1;
+    return (a.sort_order ?? 0) - (b.sort_order ?? 0);
+  });
+
+  const primaryImage = images[0]?.url || FALLBACK_SHOE_IMAGE;
+
+  const variants: EnrichedVariant[] = [...(row.product_variants || [])]
+    .filter((v) => v.is_active !== false)
+    .map((v) => {
+      const inv = Array.isArray(v.inventory) ? v.inventory[0] : v.inventory;
+      return {
+        id: v.id,
+        product_id: v.product_id,
+        color: v.color || 'Padrão',
+        color_hex: v.color_hex || '#18181B',
+        size: String(v.size),
+        variant_sku: v.variant_sku || null,
+        is_active: v.is_active !== false,
+        stock: Number(inv?.quantity ?? 0),
+        low_stock_threshold: Number(inv?.low_stock_threshold ?? 3),
+      };
+    })
+    .sort((a, b) => {
+      const na = Number(a.size);
+      const nb = Number(b.size);
+      if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;
+      return a.size.localeCompare(b.size);
+    });
+
+  const allowBackorder = Boolean(row.allow_backorder);
+  const totalStock = variants.reduce((acc, v) => acc + v.stock, 0);
+  const allSizes = sortShoeSizes(variants.map((v) => v.size));
+  const availableSizes = allowBackorder
+    ? allSizes
+    : sortShoeSizes(variants.filter((v) => v.stock > 0).map((v) => v.size));
+
+  let sizeRangeLabel = 'Sob consulta';
+  if (allSizes.length === 1) {
+    sizeRangeLabel = allSizes[0];
+  } else if (allSizes.length > 1) {
+    sizeRangeLabel = `${allSizes[0]} ao ${allSizes[allSizes.length - 1]}`;
+  }
+
+  const basePrice = Number(row.base_price ?? 0);
+  let activePromoPrice = row.promo_price != null ? Number(row.promo_price) : null;
+
+  const now = Date.now();
+  const activePromos = (row.promotions || []).filter(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (pr: any) =>
+      pr.is_active &&
+// step 2/12
