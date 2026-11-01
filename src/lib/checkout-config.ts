@@ -308,4 +308,48 @@ export function normalizeCheckoutDeliveryConfig(
             ? item.visibility
             : 'always',
       })),
-// step 7/12
+
+    always_require_address:
+      typeof obj.always_require_address === 'boolean'
+        ? obj.always_require_address
+        : d.always_require_address,
+
+    next_button_label:
+      typeof obj.next_button_label === 'string'
+        ? obj.next_button_label.trim() === 'Revisar Confirmação'
+          ? d.next_button_label
+          : obj.next_button_label
+        : d.next_button_label,
+  };
+}
+
+export function shouldRequireCheckoutAddress(
+  cfg: CheckoutDeliveryConfig,
+  activeOption: SelectableCheckoutOption | null,
+  effectiveDeliveryMethod: DeliveryMethod = 'pickup'
+): boolean {
+  if (cfg.always_require_address) {
+    return true;
+  }
+  if (activeOption?.requiresAddress) {
+    return true;
+  }
+  return cfg.extra_cards.some(
+    (c) =>
+      c.enabled &&
+      c.card_type === 'info' &&
+      c.require_address &&
+      (c.visibility === 'always' || c.visibility === effectiveDeliveryMethod)
+  );
+}
+
+function computeOptionFee(
+  feeMode: DeliveryFeeMode,
+  rawFee: number,
+  rawThreshold: number,
+  rawBadge: string,
+  itemsTotal: number
+): { shippingCost: number; badgeLabel: string; summaryLabel: string } {
+  const fallbackBadge = rawBadge.trim() || (feeMode === 'free' ? 'Grátis' : 'A combinar');
+
+// step 8/12
