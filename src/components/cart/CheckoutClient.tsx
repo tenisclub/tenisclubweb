@@ -194,4 +194,53 @@ export function CheckoutClient({
     }
   };
 
-// step 4/24
+  const applySavedAddress = (addr: UserAddress) => {
+    setZipCode(addr.zip_code || '');
+    setStreet(addr.street || '');
+    setNumber(addr.number || '');
+    setComplement(addr.complement || '');
+    setNeighborhood(addr.neighborhood || '');
+    setCity(addr.city || '');
+    setStateUf(addr.state || 'SP');
+    setReference(addr.reference || '');
+  };
+
+  const handleContinueFromStep2 = () => {
+    if (!customerName.trim() || !customerPhone.trim() || !customerEmail.trim()) {
+      setErrorMsg('Preencha seu nome, WhatsApp e e-mail para continuar.');
+      return;
+    }
+    if (!paymentChoice) {
+      setErrorMsg('Selecione como pretende pagar (Pix, Cartão, Dinheiro ou Outro).');
+      return;
+    }
+    if (paymentChoice === 'other' && !customPaymentMethod.trim()) {
+      setErrorMsg('Digite qual forma de pagamento você pretende usar em "Outro".');
+      return;
+    }
+    goToStep(3);
+  };
+
+  const handleConfirmOrder = async () => {
+    if (!customerName.trim() || !customerPhone.trim() || !customerEmail.trim()) {
+      setErrorMsg('Preencha nome, WhatsApp e e-mail na Etapa 2 antes de finalizar.');
+      return;
+    }
+    if (!resolvedPaymentMethod) {
+      setErrorMsg('Informe a forma de pagamento na Etapa 2 antes de finalizar.');
+      return;
+    }
+
+    if (
+      showAddressForm &&
+      (!street.trim() || !number.trim() || !neighborhood.trim() || !city.trim())
+    ) {
+      setErrorMsg('Informe rua, número, bairro e cidade para entrega.');
+      return;
+    }
+
+    setErrorMsg('');
+    setSubmitting(true);
+
+    // Open blank window synchronously during click gesture so mobile/desktop browsers never block WhatsApp
+// step 5/24
