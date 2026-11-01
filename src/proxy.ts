@@ -36,4 +36,17 @@ export async function proxy(request: NextRequest) {
         },
       },
     }
-// step 3/5
+  );
+
+  const jwks = await getSupabaseJwks();
+  const { data, error } = await supabase.auth.getClaims(undefined, jwks ? { jwks } : undefined);
+
+  if (error || !data?.claims?.sub) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = '/login';
+    loginUrl.searchParams.set('redirect', pathname + request.nextUrl.search);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  return supabaseResponse;
+// step 4/5
