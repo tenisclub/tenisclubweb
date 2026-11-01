@@ -12,4 +12,11 @@ export default function AdminLoading() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="h-24 rounded-2xl border border-zinc-800/80 bg-[#121216]" />
         <div className="h-24 rounded-2xl border border-zinc-800/80 bg-[#121216]" />
-// step 2/4
+        <div className="h-24 rounded-2xl border border-zinc-800/80 bg-[#121216]" />
+      </div>
+
+      <div className="rounded-3xl border border-zinc-800/80 bg-[#121216] p-5 space-y-3">
+        <div className="h-10 w-full rounded-xl bg-zinc-800/50" />
+        <div className="h-14 w-full rounded-xl bg-zinc-800/40" />
+        <div className="h-14 w-full rounded-xl bg-zinc-800/40" />
+// step 3/4
