@@ -338,4 +338,46 @@ export function ProductDetailClient({
                 )}
               >
                 {selectedVariant.stock === 0
-// step 8/12
+                  ? allowBackorder
+                    ? 'Disponível para pedido'
+                    : 'Esgotado nesta numeração'
+                  : selectedVariant.stock <= selectedVariant.low_stock_threshold
+                    ? `Últimas ${selectedVariant.stock} unidade(s)!`
+                    : `${selectedVariant.stock} unidades em estoque`}
+              </span>
+            )}
+          </div>
+
+          <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+            {colorVariants.map((v) => {
+              const out = !allowBackorder && v.stock <= 0;
+              const selected = selectedVariantId === v.id;
+              return (
+                <button
+                  key={v.id}
+                  type="button"
+                  disabled={out}
+                  onClick={() => handleSelectSize(v.id, v.stock)}
+                  className={cn(
+                    'h-12 rounded-xl border flex flex-col items-center justify-center transition',
+                    out
+                      ? 'border-zinc-800/60 bg-zinc-900/40 text-zinc-600 line-through cursor-not-allowed'
+                      : selected
+                        ? 'border-[#BEFA46] bg-[#BEFA46] text-[#09090B] font-black shadow-[0_0_18px_rgba(190,250,70,0.28)]'
+                        : 'border-zinc-800 bg-[#15151B] text-white font-bold hover:border-zinc-600'
+                  )}
+                >
+                  <span className="text-sm leading-none">{v.size}</span>
+                  <span
+                    className={cn(
+                      'text-[9px] mt-0.5',
+                      selected ? 'text-[#09090B]/80 font-bold' : 'text-zinc-500'
+                    )}
+                  >
+                    {out ? '0 un' : v.stock > 0 ? `${v.stock} un` : 'Disponível'}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+// step 9/12
