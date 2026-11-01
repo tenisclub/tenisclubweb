@@ -1103,3 +1103,76 @@ export function CheckoutClient({
 
         {/* DESKTOP STICKY SIDEBAR SUMMARY (Hidden on mobile so nothing duplicates below the buttons) */}
         <aside className="hidden lg:block lg:col-span-4 rounded-3xl border border-zinc-800/90 bg-[#121216] p-6 space-y-4 lg:sticky lg:top-28">
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="text-sm font-black uppercase tracking-wider text-white">
+              Resumo do Pedido
+            </h3>
+            <Link
+              href="/carrinho"
+              className="text-xs font-bold text-zinc-400 hover:text-[#BEFA46]"
+            >
+              Editar
+            </Link>
+          </div>
+
+          <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+            {items.map((item) => (
+              <div key={item.id} className="flex items-center justify-between gap-2.5">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={item.product_image}
+                    alt={item.product_name}
+                    className="w-11 h-11 rounded-xl object-cover bg-[#EAE0D5] shrink-0"
+                  />
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-white truncate">
+                      {item.product_name}
+                    </p>
+                    <p className="text-[11px] text-zinc-400">
+                      Tam. {item.size} • {item.quantity}x
+                    </p>
+                  </div>
+                </div>
+                <span className="text-xs font-extrabold text-white shrink-0">
+                  {formatCurrency(item.subtotal)}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-2 text-xs border-y border-zinc-800 py-3.5">
+            <div className="flex justify-between text-zinc-400">
+              <span>Subtotal</span>
+              <span className="text-zinc-200">{formatCurrency(subtotal)}</span>
+            </div>
+            {subtotal > total && (
+              <div className="flex justify-between text-emerald-400 font-semibold">
+                <span>Economia em ofertas</span>
+                <span>-{formatCurrency(subtotal - total)}</span>
+              </div>
+            )}
+            <div className="flex justify-between text-zinc-400">
+              <span>Frete / Entrega</span>
+              <span
+                className={cn(
+                  shippingCalc.summaryLabel === 'Grátis' && 'text-emerald-400 font-bold',
+                  shippingCalc.shippingCost > 0 && 'text-white font-bold'
+                )}
+              >
+                {shippingCalc.summaryLabel}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex justify-between items-baseline">
+            <span className="text-sm font-bold text-white">Total do Pedido</span>
+            <span className="text-2xl font-black text-[#BEFA46]">
+              {formatCurrency(finalOrderTotal)}
+            </span>
+          </div>
+        </aside>
+      </div>
+    </div>
+  );
+}
