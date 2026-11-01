@@ -270,4 +270,38 @@ export function AdminProductsTable({ initialProducts }: { initialProducts: Produ
             <tbody className="divide-y divide-zinc-800/80">
               {filtered.map((p) => (
                 <tr key={p.id} className="hover:bg-zinc-900/40">
-// step 8/12
+                  <td className="px-4 py-3.5">
+                    <div className="flex items-center gap-3">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={p.primary_image}
+                        alt={p.name}
+                        className="w-12 h-12 rounded-xl object-cover bg-[#EAE0D5] shrink-0"
+                      />
+                      <div>
+                        <p className="font-extrabold text-white">{p.name}</p>
+                        <p className="text-[11px] text-zinc-500">
+                          {p.sku || 'Sem SKU'} • Tam. {p.size_range_label}
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3.5 text-zinc-300">
+                    <p className="font-semibold">{p.brand?.name || '—'}</p>
+                    <p className="text-[11px] text-zinc-500">
+                      {GENDER_LABELS[p.gender]} • {p.category?.name || 'Geral'}
+                    </p>
+                  </td>
+                  <td className="px-4 py-3.5">
+                    {p.promo_price !== null && p.promo_price < p.base_price && (
+                      <span className="block text-[11px] text-zinc-500 line-through">
+                        {formatCurrency(p.base_price)}
+                      </span>
+                    )}
+                    <span className="font-black text-[#BEFA46]">
+                      {formatCurrency(p.effective_price)}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <div className="flex flex-wrap items-center gap-1.5">
+// step 9/12
