@@ -120,3 +120,44 @@ export default async function AdminMovimentacoesPage() {
           </div>
         )}
       </div>
+
+      {/* Desktop Table */}
+      <div className="hidden md:block rounded-3xl border border-zinc-800 bg-[#121216] overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-[#17171E] text-zinc-400 uppercase tracking-wider text-[11px]">
+              <tr>
+                <th className="px-4 py-3.5">Data / Hora</th>
+                <th className="px-4 py-3.5">Produto</th>
+                <th className="px-4 py-3.5">Variação</th>
+                <th className="px-4 py-3.5">Operação</th>
+                <th className="px-4 py-3.5">Anterior</th>
+                <th className="px-4 py-3.5">Movimentado</th>
+                <th className="px-4 py-3.5">Saldo Final</th>
+                <th className="px-4 py-3.5">Responsável</th>
+                <th className="px-4 py-3.5">Motivo</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-800/80">
+              {(movements || []).map((m) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const prod: any = Array.isArray(m.products) ? m.products[0] : m.products;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const pv: any = Array.isArray(m.product_variants)
+                  ? m.product_variants[0]
+                  : m.product_variants;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const user: any = Array.isArray(m.user_profiles)
+                  ? m.user_profiles[0]
+                  : m.user_profiles;
+                const badge = MOVE_TYPE_LABELS[m.movement_type] || {
+                  label: m.movement_type,
+                  cls: 'bg-zinc-800 text-zinc-300',
+                };
+
+                return (
+                  <tr key={m.id} className="hover:bg-zinc-900/40">
+                    <td className="px-4 py-3 text-zinc-400 whitespace-nowrap">
+                      {formatDateTime(m.created_at)}
+                    </td>
+                    <td className="px-4 py-3 font-bold text-white">
