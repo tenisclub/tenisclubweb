@@ -73,4 +73,42 @@ export default function MeusEnderecosPage() {
     setComplement('');
     setNeighborhood('');
     setReference('');
-// step 2/8
+    loadAddresses();
+  };
+
+  const handleSetDefault = async (id: string) => {
+    await fetch('/api/account/addresses', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, is_default: true }),
+    });
+    loadAddresses();
+    toast('Endereço principal atualizado.', 'info');
+  };
+
+  const handleDelete = async (id: string) => {
+    await fetch(`/api/account/addresses?id=${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    });
+    loadAddresses();
+    toast('Endereço removido.', 'info');
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-black text-white">Meus Endereços</h1>
+          <p className="text-xs sm:text-sm text-zinc-400">
+            Cadastre seus endereços para agilizar pedidos com entrega local.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setShowForm(!showForm)}
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#BEFA46] text-[#09090B] text-xs font-black"
+        >
+          <Plus className="w-4 h-4" />
+          {showForm ? 'Cancelar' : 'Novo Endereço'}
+// step 3/8
