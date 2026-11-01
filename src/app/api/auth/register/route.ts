@@ -60,4 +60,25 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: 'Este e-mail já está cadastrado. Faça login ou recupere sua senha.' },
         { status: 409 }
-// step 3/6
+      );
+    }
+
+    // Single GoTrue round-trip: signs up, hashes password ONCE, runs handle_new_user trigger,
+    // and writes the SSR auth session cookie directly onto the response!
+    const supabaseServer = await createClient();
+    const { data: signUpData, error: signUpError } = await supabaseServer.auth.signUp({
+      email: cleanEmail,
+      password: String(password),
+      options: {
+        data: {
+          full_name: fullName.trim(),
+          phone: cleanPhone,
+        },
+      },
+    });
+
+    if (signUpError || !signUpData.user) {
+      return NextResponse.json(
+        { error: signUpError?.message || 'Erro ao criar conta.' },
+        { status: 400 }
+// step 4/6
