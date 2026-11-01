@@ -423,4 +423,46 @@ export function ProductDetailClient({
               canBuySelected
                 ? 'bg-[#BEFA46] hover:bg-[#d1ff70] text-[#09090B] shadow-[0_6px_26px_rgba(190,250,70,0.25)]'
                 : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
-// step 10/12
+            )}
+          >
+            <ShoppingBag className="w-5 h-5 stroke-[2.3]" />
+            {submitting
+              ? 'Adicionando...'
+              : canBuySelected && selectedVariant
+                ? `Comprar Agora — Tam. ${selectedVariant.size}`
+                : 'Numeração Indisponível'}
+          </button>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <button
+              type="button"
+              disabled={!canBuySelected || submitting}
+              onClick={() => handleAdd(false)}
+              className="h-11 rounded-xl bg-[#18181F] hover:bg-zinc-800 border border-zinc-700 text-xs sm:text-sm font-bold text-white disabled:opacity-40 transition"
+            >
+              Adicionar ao Carrinho
+            </button>
+
+            <a
+              href={waUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="h-11 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-xs sm:text-sm font-bold text-emerald-300 inline-flex items-center justify-center gap-2 transition"
+            >
+              <MessageCircle className="w-4 h-4" />
+              Consultar no WhatsApp
+            </a>
+          </div>
+        </div>
+
+        {/* Store Guarantees */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 text-xs text-zinc-400">
+          <div className="rounded-xl border border-zinc-800/80 bg-[#111116] p-3 flex items-center gap-2">
+            <Store className="w-4 h-4 text-[#BEFA46] shrink-0" />
+            <span>Retirada rápida na loja</span>
+          </div>
+          <div className="rounded-xl border border-zinc-800/80 bg-[#111116] p-3 flex items-center gap-2">
+            <Truck className="w-4 h-4 text-[#BEFA46] shrink-0" />
+            <span>Entrega local ágil</span>
+          </div>
+// step 11/12
