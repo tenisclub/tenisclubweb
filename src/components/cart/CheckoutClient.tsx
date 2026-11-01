@@ -391,4 +391,53 @@ export function CheckoutClient({
                   mobileItemsOpen && 'rotate-180'
                 )}
               />
-// step 8/24
+            </div>
+          </button>
+
+          {mobileItemsOpen && (
+            <div className="px-3.5 pb-3.5 pt-1 border-t border-zinc-800/80 space-y-2.5 bg-[#0D0D11]">
+              {items.map((item) => (
+                <div key={item.id} className="flex items-center justify-between gap-2.5">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={item.product_image}
+                      alt={item.product_name}
+                      className="w-10 h-10 rounded-lg object-cover bg-[#EAE0D5] shrink-0"
+                    />
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-white truncate">
+                        {item.product_name}
+                      </p>
+                      <p className="text-[11px] text-zinc-400">
+                        Tam. {item.size} • Qtd {item.quantity}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-extrabold text-white shrink-0">
+                    {formatCurrency(item.subtotal)}
+                  </span>
+                </div>
+              ))}
+              <div className="pt-1 flex justify-end">
+                <Link
+                  href="/carrinho"
+                  className="text-[11px] font-bold text-[#BEFA46] hover:underline"
+                >
+                  Editar sacola
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {errorMsg && (
+        <div className="rounded-2xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-xs sm:text-sm text-red-300 font-semibold">
+          {errorMsg}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* MAIN STEP CARD */}
+// step 9/24
