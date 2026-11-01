@@ -109,4 +109,25 @@ export async function DELETE(request: Request) {
   const session = await getAuthSession();
   if (!session?.isAdmin) return NextResponse.json({ error: 'Acesso negado.' }, { status: 403 });
 
-// step 5/6
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get('id');
+  if (!id) return NextResponse.json({ error: 'ID inválido.' }, { status: 400 });
+
+  const supabase = createServiceClient();
+  await supabase.from('promotions').delete().eq('id', id);
+
+  revalidateStoreData('catalog');
+  void supabase
+    .from('admin_logs')
+    .insert({
+      admin_id: session.userId,
+      action: 'promotion.delete',
+      entity_type: 'promotion',
+      entity_id: id,
+      details: {},
+    })
+    .then(() => {});
+
+  return NextResponse.json({ success: true });
+}
+
