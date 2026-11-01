@@ -26,3 +26,31 @@ export function Footer({ settings }: { settings: StoreSettings }) {
         <p>
           © {new Date().getFullYear()}{' '}
           <strong className="text-zinc-300 font-semibold">{settings.store_name}</strong>. Todos os
+          direitos reservados.
+        </p>
+
+        <div className="flex items-center gap-4 text-zinc-500">
+          <Link href="/privacidade" className="hover:text-zinc-300 transition">
+            Privacidade
+          </Link>
+          <span>·</span>
+          <Link href="/termos" className="hover:text-zinc-300 transition">
+            Termos
+          </Link>
+        </div>
+      </div>
+
+      {showTop && (
+        <button
+          type="button"
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="fixed bottom-5 left-5 z-40 p-3 rounded-full bg-[#18181F] border border-zinc-700 hover:border-[#BEFA46] text-[#BEFA46] shadow-xl transition"
+          aria-label="Voltar ao topo"
+          title="Voltar ao topo"
+        >
+          <ArrowUp className="w-4 h-4" />
+        </button>
+      )}
+    </footer>
+  );
+}
