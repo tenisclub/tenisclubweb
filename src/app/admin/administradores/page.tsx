@@ -54,4 +54,17 @@ export default async function AdminAdministradoresPage() {
       action: l.action,
       entity_type: l.entity_type,
       entity_id: l.entity_id,
-// step 4/5
+      details: (l.details as Record<string, unknown>) || {},
+      created_at: l.created_at,
+      admin_name: prof?.full_name || prof?.email || 'Admin',
+    };
+  });
+
+  return (
+    <AdminsManagerClient
+      initialAdmins={Array.from(adminMap.values())}
+      logs={logs}
+    />
+  );
+}
+
