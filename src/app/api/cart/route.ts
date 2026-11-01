@@ -46,4 +46,29 @@ export async function POST(request: Request) {
     return NextResponse.json(data || { totalItems: 0 });
   } catch (err) {
     return NextResponse.json(
-// step 2/6
+      { error: err instanceof Error ? err.message : 'Erro ao atualizar carrinho.' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(request: Request) {
+  const userId = await getAuthenticatedUserId();
+  if (!userId) {
+    return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 });
+  }
+
+  try {
+    const { itemId, quantity } = await request.json();
+    const supabase = createServiceClient();
+
+    const { data: item } = await supabase
+      .from('cart_items')
+      .select(
+        'id, cart_id, variant_id, carts!inner(user_id), products(allow_backorder), product_variants(size, inventory(quantity))'
+      )
+      .eq('id', itemId)
+      .maybeSingle();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+// step 3/6
