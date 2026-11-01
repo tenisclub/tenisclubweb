@@ -45,4 +45,28 @@ export function TenisClubLogo({
             xmlns="http://www.w3.org/2000/svg"
             className="w-7 h-5 text-[#BEFA46]"
           >
-// step 2/6
+            <path
+              d="M8 31L39 11C42 9.2 45 10.5 47.5 14C49.5 16.8 53 17.5 57.5 14.5C60.5 12.5 63.5 13 65 16.5L72 31H8Z"
+              stroke="currentColor"
+              strokeWidth="4.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M6 36H74"
+              stroke="white"
+              strokeWidth="3.5"
+              strokeLinecap="round"
+            />
+          </svg>
+        </div>
+        <div className="flex flex-col leading-none">
+          <span
+            className={cn(
+              'font-black italic tracking-tight text-white uppercase',
+              size === 'sm' ? 'text-lg' : 'text-xl'
+            )}
+          >
+            TÊNIS
+          </span>
+// step 3/6
