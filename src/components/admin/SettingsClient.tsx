@@ -276,4 +276,50 @@ export function SettingsClient({ initialSettings }: { initialSettings: StoreSett
             <div className="lg:col-span-5 rounded-2xl border border-zinc-800 bg-[#18181F] p-4 space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="text-xs font-extrabold uppercase tracking-wider text-[#BEFA46]">
-// step 6/12
+                  Prévia ao colar no WhatsApp
+                </span>
+                <button
+                  type="button"
+                  onClick={copyFreshShareLink}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-[11px] font-bold text-white transition cursor-pointer"
+                >
+                  <Copy className="w-3 h-3 text-[#BEFA46]" />
+                  Copiar link atualizado
+                </button>
+              </div>
+
+              <div className="rounded-xl border-l-4 border-[#25D366] bg-[#1F2C34] p-3 space-y-1">
+                <p className="text-xs font-bold text-white line-clamp-1">
+                  {form.store_name || 'Tênis Club'} — {form.tagline || 'Estilo para toda a família'}
+                </p>
+                <p className="text-[11px] text-zinc-300 line-clamp-2">
+                  {form.hero_subtitle || 'Descrição da loja'}
+                </p>
+                <p className="text-[10px] text-zinc-400">tenisclub.vercel.app</p>
+              </div>
+
+              <p className="text-[11px] text-zinc-400 leading-relaxed">
+                <strong className="text-zinc-200">Dica sobre cache do WhatsApp:</strong> use o
+                botão <strong>Copiar link atualizado</strong> após salvar para forçar o celular a
+                buscar o texto novo imediatamente.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+            <div className="rounded-2xl border border-zinc-800 bg-[#18181F] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="space-y-0.5">
+                <span className="text-xs font-bold text-white block">
+                  Logotipo Personalizado (opcional)
+                </span>
+                <p className="text-[11px] text-zinc-400">
+                  Em branco, usa o logotipo vetorial oficial TÊNIS CLUB.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-[#BEFA46] transition cursor-pointer">
+                  <Upload className="w-3.5 h-3.5" />
+                  {uploadingField === 'logo_url' ? 'Enviando...' : 'Enviar Logo'}
+                  <input
+                    type="file"
+// step 7/12
