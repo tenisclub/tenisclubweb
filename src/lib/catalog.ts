@@ -582,4 +582,56 @@ export const getUserCartView = cache(
         ? Math.min(row.quantity, 99)
         : stock > 0
           ? Math.min(row.quantity, stock)
-// step 11/12
+          : row.quantity;
+
+      if (!allowBackorder && stock > 0 && row.quantity > stock) {
+        clampUpdates.push(
+          supabase.from('cart_items').update({ quantity: stock }).eq('id', row.id)
+        );
+      }
+
+      items.push({
+        id: row.id,
+        cart_id: row.cart_id,
+        product_id: row.product_id,
+        variant_id: row.variant_id,
+        quantity: clampedQty,
+        product_name: enrichedProd.name,
+        product_slug: enrichedProd.slug,
+        product_sku: enrichedProd.sku || '',
+        product_image: enrichedProd.primary_image,
+        brand_name: enrichedProd.brand?.name || '',
+        color: varRaw.color || 'Padrão',
+        color_hex: varRaw.color_hex || '#18181B',
+        size: String(varRaw.size),
+        base_price: enrichedProd.base_price,
+        unit_price: enrichedProd.effective_price,
+        available_stock: stock,
+        allow_backorder: allowBackorder,
+        is_available: isAvailable,
+        subtotal: enrichedProd.effective_price * clampedQty,
+      });
+    }
+
+    if (clampUpdates.length > 0) {
+      Promise.all(clampUpdates).catch(() => {});
+    }
+
+    const activeItems = items.filter((i) => i.is_available);
+    const totalItems = activeItems.reduce((acc, i) => acc + i.quantity, 0);
+    const subtotal = activeItems.reduce((acc, i) => acc + i.base_price * i.quantity, 0);
+    const total = activeItems.reduce((acc, i) => acc + i.subtotal, 0);
+
+    return { items, totalItems, subtotal, total };
+  }
+);
+
+export async function getUserFavoriteIds(userId: string): Promise<string[]> {
+  const supabase = createServiceClient();
+  const { data } = await supabase
+    .from('favorites')
+    .select('product_id')
+    .eq('user_id', userId);
+  return (data || []).map((f) => f.product_id);
+}
+
