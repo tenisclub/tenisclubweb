@@ -168,4 +168,46 @@ export function ProductDetailClient({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
       {/* Left: Image Gallery */}
-// step 4/12
+      <div className="lg:col-span-7 space-y-4">
+        <div className="relative aspect-square sm:aspect-[4/3.5] rounded-3xl overflow-hidden bg-[#EAE0D5] border border-zinc-800">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={activeImage}
+            alt={product.name}
+            className="w-full h-full object-cover object-center"
+          />
+
+          <div className="absolute top-4 left-4 flex flex-wrap gap-2">
+            {product.discount_percent > 0 && (
+              <span className="px-3 py-1 rounded-full bg-[#BEFA46] text-[#09090B] text-xs font-black">
+                -{product.discount_percent}% OFF
+              </span>
+            )}
+            {product.is_new_release && (
+              <span className="px-3 py-1 rounded-full bg-[#09090B]/85 text-white text-xs font-bold uppercase tracking-wider">
+                Lançamento
+              </span>
+            )}
+          </div>
+        </div>
+
+        {product.images.length > 1 && (
+          <div className="flex items-center gap-3 overflow-x-auto pb-1">
+            {product.images.map((img) => (
+              <button
+                key={img.id}
+                type="button"
+                onClick={() => setActiveImage(img.url)}
+                className={cn(
+                  'relative w-20 h-20 rounded-2xl overflow-hidden bg-[#EAE0D5] border-2 shrink-0 transition',
+                  activeImage === img.url
+                    ? 'border-[#BEFA46]'
+                    : 'border-zinc-800 opacity-70 hover:opacity-100'
+                )}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={img.url} alt={img.alt_text || product.name} className="w-full h-full object-cover" />
+              </button>
+            ))}
+          </div>
+// step 5/12
