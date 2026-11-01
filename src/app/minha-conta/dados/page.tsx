@@ -76,4 +76,30 @@ export default function MeusDadosPage() {
                 className="w-full h-11 px-4 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
               />
             </div>
-// step 3/6
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-zinc-300">Telefone / WhatsApp</label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="(11) 99999-9999"
+                className="w-full h-11 px-4 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-zinc-300">E-mail de acesso</label>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full h-11 px-4 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+              />
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-zinc-800 space-y-4">
+            <div className="flex items-center gap-2">
+// step 4/6
