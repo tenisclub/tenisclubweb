@@ -137,4 +137,50 @@ export function SettingsClient({ initialSettings }: { initialSettings: StoreSett
 
   const copyFreshShareLink = async () => {
     const origin =
-// step 3/12
+      typeof window !== 'undefined'
+        ? window.location.origin
+        : 'https://tenisclub.vercel.app';
+    const freshUrl = `${origin}/?v=${Math.floor(Date.now() / 1000)}`;
+    try {
+      await navigator.clipboard.writeText(freshUrl);
+      toast('Link com atualização de prévia copiado para colar no WhatsApp!', 'success');
+    } catch {
+      toast(freshUrl, 'info');
+    }
+  };
+
+  const sectionTabs: { id: SettingsSectionTab; label: string; icon: React.ReactNode }[] = [
+    { id: 'all', label: 'Todas as Seções', icon: <LayoutGrid className="w-3.5 h-3.5" /> },
+    { id: 'checkout', label: 'Checkout (Etapa 3)', icon: <Sparkles className="w-3.5 h-3.5" /> },
+    { id: 'identity', label: 'Identidade & Link', icon: <Globe className="w-3.5 h-3.5" /> },
+    { id: 'contact', label: 'Contato & Redes', icon: <Phone className="w-3.5 h-3.5" /> },
+    { id: 'policies', label: 'Políticas', icon: <FileText className="w-3.5 h-3.5" /> },
+  ];
+
+  return (
+    <form onSubmit={handleSave} className="space-y-6 max-w-7xl">
+      {/* Top Header + Sticky Quick Filter & Save Bar */}
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-black text-white">Configurações da Loja</h1>
+            <p className="text-xs sm:text-sm text-zinc-400">
+              Personalize identidade visual, prévia no WhatsApp, checkout (entrega/retirada) e políticas.
+            </p>
+          </div>
+
+          <button
+            type="submit"
+            disabled={saving}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#BEFA46] hover:bg-[#d1ff70] text-[#09090B] text-xs sm:text-sm font-black shadow-[0_4px_20px_rgba(190,250,70,0.22)] transition cursor-pointer shrink-0"
+          >
+            <Save className="w-4 h-4" />
+            {saving ? 'Salvando...' : 'Salvar Configurações'}
+          </button>
+        </div>
+
+        {/* Section Filter Bar */}
+        <div className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-zinc-800/90 bg-[#121216] p-1.5">
+          {sectionTabs.map((tab) => {
+            const active = activeTab === tab.id;
+// step 4/12
