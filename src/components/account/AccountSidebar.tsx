@@ -21,4 +21,27 @@ const ACCOUNT_LINKS = [
   { href: '/minha-conta/favoritos', label: 'Meus Favoritos', icon: Heart },
   { href: '/minha-conta/dados', label: 'Meus Dados', icon: User },
   { href: '/minha-conta/enderecos', label: 'Endereços', icon: MapPin },
-// step 1/6
+];
+
+export function AccountSidebar() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const { user, isAdmin, logout, toast } = useStore();
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [optimisticHref, setOptimisticHref] = useState<string | null>(null);
+
+  useEffect(() => {
+    setOptimisticHref(null);
+  }, [pathname]);
+
+  const effectivePath = optimisticHref || pathname;
+
+  useEffect(() => {
+    router.prefetch('/');
+  }, [router]);
+
+  const handleLogout = () => {
+    if (loggingOut) return;
+    setLoggingOut(true);
+    toast('Sessão encerrada com segurança.', 'info');
+// step 2/6
