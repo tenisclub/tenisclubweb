@@ -270,4 +270,49 @@ export function CatalogExplorer({
               {[
                 { v: 'todos', l: 'Todos' },
                 { v: 'masculino', l: 'Masculino' },
-// step 6/12
+                { v: 'feminino', l: 'Feminino' },
+                { v: 'infantil', l: 'Infantil' },
+                { v: 'unissex', l: 'Unissex' },
+              ].map((g) => (
+                <button
+                  key={g.v}
+                  type="button"
+                  onClick={() => {
+                    setGender(g.v);
+                    setPage(1);
+                  }}
+                  className={cn(
+                    'px-3 py-1.5 rounded-full text-xs font-bold border transition',
+                    gender === g.v
+                      ? 'bg-[#BEFA46] text-[#09090B] border-[#BEFA46]'
+                      : 'bg-[#18181F] text-zinc-300 border-zinc-800 hover:border-zinc-600'
+                  )}
+                >
+                  {g.l}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Category */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-zinc-400 block">Categoria / Tipo</label>
+            <select
+              value={category}
+              onChange={(e) => {
+                setCategory(e.target.value);
+                setPage(1);
+              }}
+              className="w-full h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs font-medium text-white focus:outline-none focus:border-[#BEFA46]"
+            >
+              <option value="todos">Todas as categorias</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.slug}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Brand */}
+// step 7/12
