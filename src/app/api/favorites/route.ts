@@ -17,4 +17,13 @@ export async function POST(request: Request) {
   }
 
   const supabase = createServiceClient();
-// step 2/4
+  const { data: existing } = await supabase
+    .from('favorites')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('product_id', productId)
+    .maybeSingle();
+
+  if (existing) {
+    await supabase.from('favorites').delete().eq('id', existing.id);
+// step 3/4
