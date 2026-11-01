@@ -20,4 +20,26 @@ export async function generateMetadata({
   const { slug } = await params;
   const product = await getProductBySlug(slug);
   if (!product) {
-// step 1/6
+    return { title: 'Produto não encontrado' };
+  }
+
+  const title = product.meta_title || product.name;
+  const description =
+    product.meta_description || product.short_description || product.description.slice(0, 155);
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: product.primary_image ? [{ url: product.primary_image }] : [],
+      type: 'website',
+    },
+  };
+}
+
+export default async function ProdutoDetailPage({
+  params,
+}: {
+// step 2/6
