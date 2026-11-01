@@ -32,4 +32,38 @@ export function AdminProductsTable({ initialProducts }: { initialProducts: Produ
           return false;
         }
       }
-// step 1/12
+      if (statusFilter === 'active' && !p.is_active) return false;
+      if (statusFilter === 'inactive' && p.is_active) return false;
+      if (statusFilter === 'out' && p.total_stock > 0) return false;
+      return true;
+    });
+  }, [products, search, statusFilter]);
+
+  const toggleFlag = async (id: string, field: 'is_active' | 'is_featured', nextVal: boolean) => {
+    setProducts((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, [field]: nextVal } : p))
+    );
+
+    const res = await fetch(`/api/admin/products/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ quickToggle: true, [field]: nextVal }),
+    });
+
+    if (!res.ok) {
+      toast('Erro ao atualizar produto.', 'error');
+      router.refresh();
+      return;
+    }
+    toast('Produto atualizado!', 'info');
+  };
+
+  const handleDelete = async (product: Product) => {
+    const ok = window.confirm(
+      `Deseja realmente excluir ou arquivar "${product.name}"?`
+    );
+    if (!ok) return;
+
+    const res = await fetch(`/api/admin/products/${product.id}`, {
+      method: 'DELETE',
+// step 2/12
