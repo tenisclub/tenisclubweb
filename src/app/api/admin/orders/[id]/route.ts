@@ -9,4 +9,16 @@ export async function PATCH(
 ) {
   const session = await getAuthSession();
   if (!session?.isAdmin) {
-// step 1/5
+    return NextResponse.json({ error: 'Acesso negado.' }, { status: 403 });
+  }
+
+  const { id } = await params;
+
+  try {
+    const body = await request.json();
+    const {
+      status,
+      note,
+      store_notes,
+      internal_notes,
+// step 2/5
