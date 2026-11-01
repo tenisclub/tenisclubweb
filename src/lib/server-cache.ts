@@ -73,4 +73,29 @@ export async function getOrLoadCacheSlot<K extends SlotKey>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const slot = store[key] as CacheSlot<any>;
   const now = Date.now();
-// step 3/8
+
+  if (slot.value !== null && now < slot.expiresAt) {
+    return slot.value;
+  }
+
+  if (slot.inflight) {
+    return slot.inflight;
+  }
+
+  const startGen = slot.generation;
+  const promise = loader()
+    .then((result) => {
+      // Only commit to cache if no invalidation occurred while the query was in flight
+      if (slot.generation === startGen) {
+        slot.value = result;
+        slot.expiresAt = Date.now() + ttlMs;
+      }
+      return result;
+    })
+    .finally(() => {
+      if (slot.inflight === promise) {
+        slot.inflight = null;
+      }
+    });
+
+// step 4/8
