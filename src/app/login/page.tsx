@@ -58,4 +58,34 @@ function LoginForm() {
         return;
       }
 
-// step 2/8
+      // Single round-trip to verify active account status and hydrate session state
+      const snap = await refreshSession();
+
+      if (!snap?.authenticated) {
+        void supabase.auth.signOut({ scope: 'local' });
+        setErrorMsg('Esta conta está temporariamente desativada. Entre em contato com a loja.');
+        setLoading(false);
+        return;
+      }
+
+      toast(`Bem-vindo(a) de volta, ${snap.user?.full_name?.split(' ')[0] || ''}!`, 'success');
+      router.replace(resolvePostLoginTarget(redirectParam));
+    } catch {
+      setErrorMsg('Ocorreu um erro ao realizar login. Tente novamente.');
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setErrorMsg('');
+    setGoogleLoading(true);
+    try {
+      const supabase = createClient();
+      const nextTarget = resolvePostLoginTarget(redirectParam);
+      const callbackUrl = `${window.location.origin}/auth/callback${
+        nextTarget !== '/' ? `?next=${encodeURIComponent(nextTarget)}` : ''
+      }`;
+
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+// step 3/8
