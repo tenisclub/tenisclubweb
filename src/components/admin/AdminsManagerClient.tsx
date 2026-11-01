@@ -211,4 +211,33 @@ export function AdminsManagerClient({
         <div className="divide-y divide-zinc-800/80 max-h-96 overflow-y-auto text-xs">
           {logs.map((log) => (
             <div
-// step 7/8
+              key={log.id}
+              className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+            >
+              <div className="min-w-0">
+                <p className="font-bold text-white break-words">
+                  <span className="text-[#BEFA46]">{log.admin_name}</span> executou{' '}
+                  <code className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-200">
+                    {log.action}
+                  </code>
+                </p>
+                <p className="text-zinc-500 font-mono text-[11px] truncate max-w-full sm:max-w-xl">
+                  {JSON.stringify(log.details)}
+                </p>
+              </div>
+              <span className="text-zinc-500 whitespace-nowrap text-[11px]">
+                {formatDateTime(log.created_at)}
+              </span>
+            </div>
+          ))}
+          {logs.length === 0 && (
+            <p className="py-6 text-center text-zinc-500">
+              Nenhuma atividade registrada ainda.
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
