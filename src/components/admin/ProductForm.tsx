@@ -129,4 +129,70 @@ export function ProductForm({
 
         setImages((prev) => [
           ...prev,
-// step 2/12
+          { url: data.url, is_primary: prev.length === 0 },
+        ]);
+      }
+      toast('Upload de imagem concluído!', 'success');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  };
+
+  const addExternalUrl = () => {
+    const trimmed = externalImageUrl.trim();
+    if (!trimmed.startsWith('http')) {
+      toast('Informe uma URL válida começando com http/https.', 'error');
+      return;
+    }
+    setImages((prev) => [...prev, { url: trimmed, is_primary: prev.length === 0 }]);
+    setExternalImageUrl('');
+  };
+
+  const setPrimaryImage = (idx: number) => {
+    setImages((prev) =>
+      prev.map((img, i) => ({ ...img, is_primary: i === idx }))
+    );
+  };
+
+  const moveImage = (idx: number, dir: -1 | 1) => {
+    const target = idx + dir;
+    if (target < 0 || target >= images.length) return;
+    setImages((prev) => {
+      const next = [...prev];
+      const [item] = next.splice(idx, 1);
+      next.splice(target, 0, item);
+      return next;
+    });
+  };
+
+  const removeImage = (idx: number) => {
+    setImages((prev) => {
+      const next = prev.filter((_, i) => i !== idx);
+      if (next.length > 0 && !next.some((i) => i.is_primary)) {
+        next[0].is_primary = true;
+      }
+      return next;
+    });
+  };
+
+  const generateStandardSizes = (from = 37, to = 43, defaultQty = 3) => {
+    const existingKeys = new Set(variants.map((v) => `${v.color}::${v.size}`));
+    const additions: EditableVariant[] = [];
+    for (let s = from; s <= to; s++) {
+      const key = `${defaultColor}::${s}`;
+      if (!existingKeys.has(key)) {
+        additions.push({
+          color: defaultColor,
+          color_hex: defaultColorHex,
+          size: String(s),
+          stock: defaultQty,
+        });
+      }
+    }
+    setVariants((prev) => [...prev, ...additions]);
+  };
+
+  const addSingleVariant = () => {
+    setVariants((prev) => [
+// step 3/12
