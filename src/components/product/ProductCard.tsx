@@ -49,3 +49,55 @@ export function ProductCard({ product, whatsapp = '5511999999999' }: ProductCard
     setAdding(true);
     try {
       await addToCart({
+        productId: product.id,
+        variantId: targetVar.id,
+        quantity: 1,
+      });
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  const waUrl = buildProductWhatsAppUrl({
+    whatsapp,
+    productName: product.name,
+    sku: product.sku,
+    size: selectedVariant?.size,
+    price: product.effective_price,
+  });
+
+  return (
+    <article
+      onMouseEnter={() => {
+        if (!prefetchedRef.current) {
+          prefetchedRef.current = true;
+          router.prefetch(`/produto/${product.slug}`);
+        }
+      }}
+      className="group relative flex flex-col rounded-2xl bg-[#121216] border border-zinc-800/90 hover:border-[#BEFA46]/50 overflow-hidden transition-all duration-300 shadow-lg hover:shadow-[0_12px_36px_rgba(0,0,0,0.65)]"
+    >
+      {/* Top Studio Image Container */}
+      <div className="relative aspect-[4/3.6] w-full bg-[#EAE0D5] overflow-hidden">
+        <Link href={`/produto/${product.slug}`} className="block w-full h-full">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={product.primary_image}
+            alt={product.name}
+            loading="lazy"
+            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+          />
+        </Link>
+
+        {/* Top Badges */}
+        <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 pointer-events-none">
+          {product.discount_percent > 0 && (
+            <span className="px-2.5 py-1 rounded-full bg-[#BEFA46] text-[#09090B] text-[11px] font-black tracking-wide shadow">
+              -{product.discount_percent}%
+            </span>
+          )}
+          {product.is_new_release && (
+            <span className="px-2.5 py-1 rounded-full bg-[#09090B]/85 backdrop-blur text-white text-[10px] font-bold uppercase tracking-wider">
+              Novo
+            </span>
+          )}
+          {!canPurchase && (
