@@ -120,4 +120,34 @@ export function AdminsManagerClient({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           <input
-// step 4/8
+            type="text"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            placeholder="Nome completo"
+            className="h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+          />
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="E-mail *"
+            className="h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+          />
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Senha (para novos)"
+            className="h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+          />
+          <select
+            value={roleName}
+            onChange={(e) => setRoleName(e.target.value as typeof roleName)}
+            className="h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs font-bold text-white"
+          >
+            <option value="admin_operational">Admin Operacional</option>
+            <option value="super_admin">Admin Principal</option>
+          </select>
+          <button
+// step 5/8
