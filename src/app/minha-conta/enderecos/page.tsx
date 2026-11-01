@@ -263,4 +263,40 @@ export default function MeusEnderecosPage() {
                   {addr.street}, {addr.number}
                   {addr.complement ? ` - ${addr.complement}` : ''}
                 </p>
-// step 7/8
+                <p className="text-xs text-zinc-400">
+                  {addr.neighborhood} • {addr.city}/{addr.state}{' '}
+                  {addr.zip_code ? `• CEP ${addr.zip_code}` : ''}
+                </p>
+                {addr.reference && (
+                  <p className="text-xs text-zinc-500">Ref: {addr.reference}</p>
+                )}
+              </div>
+
+              <div className="flex items-center gap-3 pt-2 border-t border-zinc-800/80 text-xs">
+                {!addr.is_default && (
+                  <button
+                    type="button"
+                    onClick={() => handleSetDefault(addr.id)}
+                    className="inline-flex items-center gap-1 font-bold text-[#BEFA46] hover:underline"
+                  >
+                    <Star className="w-3.5 h-3.5" />
+                    Tornar principal
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => handleDelete(addr.id)}
+                  className="inline-flex items-center gap-1 font-semibold text-zinc-400 hover:text-red-400 ml-auto"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Excluir
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
