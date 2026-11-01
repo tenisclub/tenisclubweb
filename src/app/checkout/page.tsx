@@ -11,4 +11,18 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'Finalizar Pedido',
 };
-// step 1/5
+
+export default async function CheckoutPage() {
+  const userId = await requireUserId('/checkout');
+  const supabase = createServiceClient();
+
+  const [session, cart, settings, { data: addresses }] = await Promise.all([
+    getAuthSession(),
+    getUserCartView(userId),
+    getStoreSettings(),
+    supabase
+      .from('user_addresses')
+      .select('*')
+      .eq('user_id', userId)
+      .order('is_default', { ascending: false }),
+// step 2/5
