@@ -158,3 +158,56 @@ function MobileRandomPlayer() {
             key={slot}
             ref={bindRef(slot)}
             src={src}
+            muted
+            playsInline
+            autoPlay={isActive}
+            preload={isActive ? 'auto' : 'metadata'}
+            onEnded={() => handleEnded(slot)}
+            aria-hidden="true"
+            tabIndex={-1}
+            className={cn(
+              'absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-600 ease-in-out',
+              isActive ? 'opacity-100' : 'opacity-0'
+            )}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+interface ColumnSlotState {
+  activeSlot: 0 | 1;
+  slots: [number, number];
+}
+
+/**
+ * Desktop / Tablet (>= 640px):
+ * - Coordinates 5 columns simultaneously from the 10-video pool.
+ * - Every page refresh shuffles all 10 videos (guaranteed different opener permutation).
+ * - Whenever any column's video finishes, it crossfades to its preloaded random video and
+ *   queues a new random video that is NEITHER its previous video NOR any video currently playing
+ *   in ANY column on screen.
+ */
+function DesktopRandomWall() {
+  const total = ALL_HERO_VIDEOS.length;
+  const colCount = 5;
+
+  const [columns, setColumns] = useState<ColumnSlotState[]>(() => {
+    let prevSignature = '';
+    if (typeof window !== 'undefined') {
+      try {
+        prevSignature = sessionStorage.getItem(LAST_HERO_START_KEY) || '';
+      } catch {
+        // Ignore
+      }
+    }
+
+    let deck = shuffleIndices(total);
+    if (deck.slice(0, colCount).join(',') === prevSignature) {
+      deck = shuffleIndices(total);
+    }
+
+    if (typeof window !== 'undefined') {
+      try {
+        sessionStorage.setItem(LAST_HERO_START_KEY, deck.slice(0, colCount).join(','));
