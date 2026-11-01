@@ -140,4 +140,39 @@ function MobileRandomPlayer() {
 
     setActiveSlot(nextSlot);
 
-// step 4/12
+    // Preload the newly chosen random video into the inactive slot after crossfade finishes
+    setTimeout(() => {
+      setSlotIndices((prev) =>
+        finishedSlot === 0 ? [upcomingIdx, prev[1]] : [prev[0], upcomingIdx]
+      );
+    }, 650);
+  };
+
+  return (
+    <div className="relative h-full w-full overflow-hidden bg-[#09090C] opacity-95">
+      {([0, 1] as const).map((slot) => {
+        const isActive = activeSlot === slot;
+        const src = ALL_HERO_VIDEOS[slotIndices[slot]];
+        return (
+          <video
+            key={slot}
+            ref={bindRef(slot)}
+            src={src}
+            muted
+            playsInline
+            autoPlay={isActive}
+            preload={isActive ? 'auto' : 'metadata'}
+            onEnded={() => handleEnded(slot)}
+            aria-hidden="true"
+            tabIndex={-1}
+            className={cn(
+              'absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-600 ease-in-out',
+              isActive ? 'opacity-100' : 'opacity-0'
+            )}
+          />
+        );
+      })}
+    </div>
+  );
+}
+// step 5/12
