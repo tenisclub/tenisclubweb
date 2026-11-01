@@ -18,4 +18,25 @@ export async function POST(request: Request) {
 
     const cleanPhone = (phone || '').trim();
     if (cleanPhone.replace(/\D/g, '').length < 10) {
-// step 1/6
+      return NextResponse.json(
+        { error: 'Informe um telefone/WhatsApp válido com DDD.' },
+        { status: 400 }
+      );
+    }
+
+    if (!password || String(password).length < 8) {
+      return NextResponse.json(
+        { error: 'A senha deve ter no mínimo 8 caracteres.' },
+        { status: 400 }
+      );
+    }
+
+    if (!acceptedTerms) {
+      return NextResponse.json(
+        { error: 'É necessário aceitar os Termos de Uso e a Política de Privacidade.' },
+        { status: 400 }
+      );
+    }
+
+    const service = createServiceClient();
+// step 2/6
