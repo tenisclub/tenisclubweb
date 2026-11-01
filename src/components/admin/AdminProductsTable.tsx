@@ -355,3 +355,53 @@ export function AdminProductsTable({ initialProducts }: { initialProducts: Produ
                     </button>
                   </td>
                   <td className="px-4 py-3.5 text-right">
+                    <div className="inline-flex items-center gap-1.5">
+                      <Link
+                        href={`/produto/${p.slug}`}
+                        target="_blank"
+                        className="p-2 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300"
+                        title="Visualizar na loja"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Link>
+                      <Link
+                        href={`/admin/produtos/${p.id}`}
+                        prefetch={true}
+                        onMouseEnter={() => router.prefetch(`/admin/produtos/${p.id}`)}
+                        onClick={() => setOpeningId(p.id)}
+                        className="p-2 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-[#BEFA46]"
+                        title="Editar produto"
+                      >
+                        {openingId === p.id ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Edit2 className="w-4 h-4" />
+                        )}
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(p)}
+                        className="p-2 rounded-lg bg-zinc-800/80 hover:bg-red-500/20 text-zinc-400 hover:text-red-400"
+                        title="Excluir / Arquivar"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="px-4 py-10 text-center text-zinc-500">
+                    Nenhum produto encontrado.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
