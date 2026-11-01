@@ -74,4 +74,21 @@ export default async function CategoriaPage({
           <ChevronRight className="w-3.5 h-3.5 text-zinc-600" />
           <Link href="/produtos" className="hover:text-[#BEFA46]">Catálogo</Link>
           <ChevronRight className="w-3.5 h-3.5 text-zinc-600" />
-// step 4/5
+          <span className="text-zinc-200 font-semibold">{heading}</span>
+        </nav>
+      </div>
+
+      <CatalogExplorer
+        products={allMatching}
+        categories={categories}
+        brands={brands}
+        whatsapp={settings.whatsapp}
+        initialGender={isGender ? cleanSlug : 'todos'}
+        initialCategory={!isGender && matchedCat ? matchedCat.slug : 'todos'}
+        heading={heading}
+        subheading={subheading}
+      />
+    </div>
+  );
+}
+
