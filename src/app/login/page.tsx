@@ -209,4 +209,33 @@ function LoginForm() {
 
           <button
             type="submit"
-// step 7/8
+            disabled={loading}
+            className="w-full h-12 rounded-xl bg-[#BEFA46] hover:bg-[#d1ff70] text-[#09090B] font-black text-sm inline-flex items-center justify-center gap-2 transition disabled:opacity-60"
+          >
+            {loading ? 'Entrando...' : 'Entrar'}
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </form>
+
+        <p className="text-center text-xs text-zinc-400">
+          Ainda não tem cadastro?{' '}
+          <Link
+            href={`/cadastro${redirectParam ? `?redirect=${encodeURIComponent(redirectParam)}` : ''}`}
+            className="font-bold text-[#BEFA46] hover:underline"
+          >
+            Criar minha conta grátis
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-[70vh]" />}>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
