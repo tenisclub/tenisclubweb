@@ -155,3 +155,81 @@ export function OrderDetailAdminClient({ initialOrder }: { initialOrder: Order }
             </button>
           )}
 
+          {initialOrder.status !== 'cancelled' && (
+            <button
+              type="button"
+              disabled={saving}
+              onClick={() => handleSave('cancelled', 'Pedido cancelado administrativamente.')}
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-red-500/15 border border-red-500/30 text-red-400 text-xs font-bold"
+            >
+              <XCircle className="w-4 h-4 shrink-0" />
+              Cancelar Pedido
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Left: Items & Customer */}
+        <div className="lg:col-span-7 space-y-6">
+          <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-4">
+            <h2 className="text-base font-black text-white">Itens Solicitados</h2>
+            <div className="divide-y divide-zinc-800">
+              {(initialOrder.items || []).map((item) => (
+                <div key={item.id} className="py-3 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    {item.product_image && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={item.product_image}
+                        alt={item.product_name}
+                        className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl object-cover bg-[#EAE0D5] shrink-0"
+                      />
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm font-extrabold text-white line-clamp-2">
+                        {item.product_name}
+                      </p>
+                      <p className="text-xs text-zinc-400">
+                        Cor: {item.color} • Tam. <strong>{item.size}</strong> • Qtd:{' '}
+                        <strong>{item.quantity}</strong>
+                      </p>
+                      <p className="text-[11px] text-zinc-500">
+                        Unitário: {formatCurrency(item.unit_price)}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-xs sm:text-sm font-black text-[#BEFA46] shrink-0">
+                    {formatCurrency(item.subtotal)}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className="border-t border-zinc-800 pt-4 flex justify-between items-baseline gap-2">
+              <span className="text-xs sm:text-sm font-bold text-white">Valor Total do Pedido</span>
+              <span className="text-lg sm:text-xl font-black text-[#BEFA46] shrink-0">
+                {formatCurrency(initialOrder.total)}
+              </span>
+            </div>
+          </div>
+
+          {/* Customer & Delivery Info */}
+          <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-3 text-xs sm:text-sm break-words">
+            <h2 className="text-base font-black text-white">Dados do Cliente & Entrega</h2>
+            <p className="text-zinc-300">
+              <strong className="text-white">Nome:</strong> {initialOrder.customer_name}
+            </p>
+            <p className="text-zinc-300">
+              <strong className="text-white">E-mail:</strong> {initialOrder.customer_email}
+            </p>
+            <p className="text-zinc-300">
+              <strong className="text-white">Telefone/WhatsApp:</strong>{' '}
+              {initialOrder.customer_phone}
+            </p>
+            {initialOrder.payment_method_note && (
+              <p className="text-zinc-300">
+                <strong className="text-white">Forma de Pagamento (informada):</strong>{' '}
+                <span className="px-2 py-0.5 rounded-md bg-[#BEFA46]/15 text-[#BEFA46] font-extrabold text-xs">
+                  {initialOrder.payment_method_note}
+                </span>
