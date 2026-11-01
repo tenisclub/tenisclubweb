@@ -808,3 +808,77 @@ export function CheckoutClient({
                     {deliveryCfg.pickup_info_card_title && (
                       <div className="flex items-center gap-1.5 font-extrabold text-white">
                         {deliveryCfg.pickup_info_card_icon !== 'none' && (
+                          <CheckoutIcon
+                            name={deliveryCfg.pickup_info_card_icon}
+                            className="w-4 h-4 text-[#BEFA46] shrink-0"
+                          />
+                        )}
+                        <span>{deliveryCfg.pickup_info_card_title}</span>
+                      </div>
+                    )}
+                    {settings.pickup_info && (
+                      <p className="whitespace-pre-line text-zinc-300 leading-relaxed">
+                        {settings.pickup_info}
+                      </p>
+                    )}
+                    {deliveryCfg.show_pickup_hours && settings.business_hours && (
+                      <p className="text-zinc-400">Horário: {settings.business_hours}</p>
+                    )}
+                  </div>
+                )}
+
+              {effectiveDeliveryMethod === 'local_delivery' &&
+                !deliveryCfg.delivery_removed &&
+                deliveryCfg.delivery_info_card_enabled &&
+                settings.delivery_info && (
+                  <div className="rounded-xl border border-zinc-800/90 border-l-[3px] border-l-[#BEFA46] bg-[#16161E] px-4 py-3 text-xs text-zinc-300 space-y-1">
+                    {deliveryCfg.delivery_info_card_title && (
+                      <div className="flex items-center gap-1.5 font-extrabold text-white">
+                        {deliveryCfg.delivery_info_card_icon !== 'none' && (
+                          <CheckoutIcon
+                            name={deliveryCfg.delivery_info_card_icon}
+                            className="w-4 h-4 text-[#BEFA46] shrink-0"
+                          />
+                        )}
+                        <span>{deliveryCfg.delivery_info_card_title}</span>
+                      </div>
+                    )}
+                    <p className="whitespace-pre-line text-zinc-300 leading-relaxed">
+                      {settings.delivery_info}
+                    </p>
+                  </div>
+                )}
+
+              {visibleInfoCards.length > 0 && (
+                <div className="space-y-2.5">
+                  {visibleInfoCards.map((card) => (
+                    <div
+                      key={card.id}
+                      className="rounded-xl border border-zinc-800/90 border-l-[3px] border-l-[#BEFA46] bg-[#16161E] px-4 py-3 text-xs space-y-1"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 font-extrabold text-white">
+                          {card.icon !== 'none' && (
+                            <CheckoutIcon
+                              name={card.icon}
+                              className="w-4 h-4 text-[#BEFA46] shrink-0"
+                            />
+                          )}
+                          <span>{card.title}</span>
+                        </div>
+                        {card.badge && (
+                          <span className="px-2 py-0.5 rounded-md bg-[#BEFA46]/15 text-[11px] font-extrabold text-[#BEFA46] shrink-0">
+                            {card.badge}
+                          </span>
+                        )}
+                      </div>
+                      {card.description && (
+                        <p className="whitespace-pre-line text-zinc-400 leading-relaxed">
+                          {card.description}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
