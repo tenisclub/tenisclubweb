@@ -380,3 +380,67 @@ export function ProductDetailClient({
               );
             })}
           </div>
+        </div>
+
+        {/* Quantity Selector */}
+        {canBuySelected && (
+          <div className="flex items-center justify-between rounded-2xl border border-zinc-800 bg-[#131318] px-4 py-3">
+            <span className="text-xs font-bold uppercase tracking-wider text-zinc-300">
+              Quantidade
+            </span>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                disabled={quantity <= 1}
+                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                className="w-8 h-8 rounded-lg bg-zinc-800 text-white flex items-center justify-center disabled:opacity-40"
+              >
+                <Minus className="w-3.5 h-3.5" />
+              </button>
+              <span className="w-6 text-center text-sm font-extrabold text-white">
+                {quantity}
+              </span>
+              <button
+                type="button"
+                disabled={quantity >= maxStock}
+                onClick={() => setQuantity((q) => Math.min(maxStock, q + 1))}
+                className="w-8 h-8 rounded-lg bg-zinc-800 text-white flex items-center justify-center disabled:opacity-40"
+              >
+                <Plus className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Primary & Secondary CTAs */}
+        <div className="space-y-2.5 pt-1">
+          <button
+            type="button"
+            disabled={!canBuySelected || submitting}
+            onClick={() => handleAdd(true)}
+            className={cn(
+              'w-full h-13 rounded-2xl font-black text-sm sm:text-base inline-flex items-center justify-center gap-2.5 transition',
+              canBuySelected
+                ? 'bg-[#BEFA46] hover:bg-[#d1ff70] text-[#09090B] shadow-[0_6px_26px_rgba(190,250,70,0.25)]'
+                : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
+            )}
+          >
+            <ShoppingBag className="w-5 h-5 stroke-[2.3]" />
+            {submitting
+              ? 'Adicionando...'
+              : canBuySelected && selectedVariant
+                ? `Comprar Agora — Tam. ${selectedVariant.size}`
+                : 'Numeração Indisponível'}
+          </button>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <button
+              type="button"
+              disabled={!canBuySelected || submitting}
+              onClick={() => handleAdd(false)}
+              className="h-11 rounded-xl bg-[#18181F] hover:bg-zinc-800 border border-zinc-700 text-xs sm:text-sm font-bold text-white disabled:opacity-40 transition"
+            >
+              Adicionar ao Carrinho
+            </button>
+
+            <a
