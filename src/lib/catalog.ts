@@ -157,4 +157,57 @@ export function enrichProductRow(row: any, includeCost = false): Product {
     all_sizes: allSizes,
     total_stock: totalStock,
     size_range_label: sizeRangeLabel,
-// step 3/12
+  };
+
+  if (includeCost) {
+    product.cost_price = Number(row.cost_price ?? 0);
+  }
+
+  return product;
+}
+
+const PRODUCT_SELECT_QUERY = `
+  *,
+  brands(*),
+  categories(*),
+  product_images(*),
+  product_variants(*, inventory(*)),
+  promotions(*)
+`;
+
+export interface CatalogFilters {
+  q?: string;
+  gender?: string;
+  category?: string;
+  brand?: string;
+  size?: string;
+  color?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  onlyAvailable?: boolean;
+  onlyPromo?: boolean;
+  onlyNew?: boolean;
+  onlyFeatured?: boolean;
+  sort?: 'price_asc' | 'price_desc' | 'newest' | 'bestsellers' | 'popular';
+  page?: number;
+  pageSize?: number;
+}
+
+export const getAdminProducts = cache(async (): Promise<Product[]> => {
+  return getOrLoadCacheSlot('allProductsAdmin', 45_000, async () => {
+    const supabase = createServiceClient();
+    const { data: rows } = await supabase
+      .from('products')
+      .select(PRODUCT_SELECT_QUERY)
+      .order('created_at', { ascending: false });
+
+    return (rows || []).map((r) => enrichProductRow(r, true));
+  });
+});
+
+export async function getAdminProductById(id: string): Promise<Product | null> {
+  const all = await getAdminProducts();
+  const cached = all.find((p) => p.id === id);
+  if (cached) return cached;
+
+// step 4/12
