@@ -146,4 +146,41 @@ export function InventoryManagerClient({ initialRows }: { initialRows: StockRowI
               onClick={() => setStockFilter(btn.v as typeof stockFilter)}
               className={cn(
                 'px-2 sm:px-4 h-11 rounded-xl text-[11px] sm:text-xs font-bold border transition text-center',
-// step 4/12
+                stockFilter === btn.v
+                  ? 'bg-[#BEFA46] text-[#09090B] border-[#BEFA46]'
+                  : 'bg-[#121216] text-zinc-300 border-zinc-800'
+              )}
+            >
+              {btn.l}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Mobile Stock Cards */}
+      <div className="md:hidden space-y-3">
+        {filtered.map((r) => (
+          <div
+            key={r.variantId}
+            className="rounded-2xl border border-zinc-800 bg-[#121216] p-4 space-y-3"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={r.image}
+                  alt={r.productName}
+                  className="w-12 h-12 rounded-xl object-cover bg-[#EAE0D5] shrink-0"
+                />
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-white truncate">{r.productName}</p>
+                  <p className="text-[11px] text-zinc-400">
+                    Cor: {r.color} • Tam. <strong className="text-white">{r.size}</strong>
+                  </p>
+                  <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                    <span className="text-[10px] text-zinc-500">
+                      Alerta mín.: {r.lowStockThreshold} un.
+                    </span>
+                    {r.allowBackorder && (
+                      <span className="px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 text-[9px] font-bold">
+// step 5/12
