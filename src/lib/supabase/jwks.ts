@@ -48,4 +48,15 @@ export async function getSupabaseJwks(): Promise<JwksOption | undefined> {
       if (data && Array.isArray(data.keys) && data.keys.length > 0) {
         state.cachedJwks = data;
         state.cachedAt = Date.now();
-// step 4/5
+        return data;
+      }
+      return state.cachedJwks ?? undefined;
+    } catch {
+      return state.cachedJwks ?? undefined;
+    } finally {
+      state.inflight = null;
+    }
+  })();
+
+  return state.inflight;
+}
