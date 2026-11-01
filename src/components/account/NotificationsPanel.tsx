@@ -34,4 +34,22 @@ export function NotificationsPanel({
 
   return (
     <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-4">
-// step 2/5
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <Bell className="w-4 h-4 text-[#BEFA46]" />
+          <h3 className="text-base font-black text-white">Notificações</h3>
+          {unreadCount > 0 && (
+            <span className="px-2 py-0.5 rounded-full bg-[#BEFA46] text-[#09090B] text-[10px] font-black">
+              {unreadCount} nova(s)
+            </span>
+          )}
+        </div>
+        {unreadCount > 0 && (
+          <button
+            type="button"
+            onClick={markAllRead}
+            className="inline-flex items-center gap-1 text-xs font-bold text-[#BEFA46] hover:underline"
+          >
+            <CheckCheck className="w-3.5 h-3.5" />
+            Marcar todas como lidas
+// step 3/5
