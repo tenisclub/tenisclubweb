@@ -485,4 +485,47 @@ export function calculateCheckoutShipping(
 ): {
   shippingCost: number;
   summaryLabel: string;
-// step 11/12
+  pickupCardBadge: string;
+  deliveryCardBadge: string;
+} {
+  const pickupFee = safeNum(cfg.pickup_fee, 0);
+  const pickupCardBadge =
+    pickupFee > 0 ? formatCurrency(pickupFee) : cfg.pickup_badge || 'Grátis';
+
+  const deliveryFeeCalc = computeOptionFee(
+    cfg.delivery_fee_mode,
+    cfg.delivery_fee,
+    cfg.free_delivery_threshold,
+    cfg.delivery_badge,
+    itemsTotal
+  );
+
+  const options = getSelectableCheckoutOptions(cfg, '', itemsTotal);
+  const matched = options.find((o) => o.key === selectedKeyOrMethod);
+
+  if (matched) {
+    return {
+      shippingCost: matched.shippingCost,
+      summaryLabel: matched.summaryLabel,
+      pickupCardBadge,
+      deliveryCardBadge: deliveryFeeCalc.badgeLabel,
+    };
+  }
+
+  if (options.length === 0) {
+    return {
+      shippingCost: 0,
+      summaryLabel: 'A combinar',
+      pickupCardBadge,
+      deliveryCardBadge: deliveryFeeCalc.badgeLabel,
+    };
+  }
+
+  const fallback = options[0];
+  return {
+    shippingCost: fallback.shippingCost,
+    summaryLabel: fallback.summaryLabel,
+    pickupCardBadge,
+    deliveryCardBadge: deliveryFeeCalc.badgeLabel,
+  };
+}
