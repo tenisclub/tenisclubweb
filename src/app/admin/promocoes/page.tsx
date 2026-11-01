@@ -25,3 +25,30 @@ export default async function AdminPromocoesPage() {
       id: pr.id,
       name: pr.name,
       description: pr.description || '',
+      product_id: pr.product_id,
+      product_name: prod?.name || 'Produto',
+      base_price: Number(prod?.base_price || 0),
+      promo_price: Number(pr.promo_price),
+      discount_percent: Number(pr.discount_percent || 0),
+      starts_at: pr.starts_at,
+      ends_at: pr.ends_at,
+      is_active: Boolean(pr.is_active),
+      highlight_home: Boolean(pr.highlight_home),
+    };
+  });
+
+  const sortedProductsList = [...products]
+    .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
+    .map((p) => ({
+      id: p.id,
+      name: p.name,
+      base_price: Number(p.base_price),
+    }));
+
+  return (
+    <PromotionsClient
+      initialPromos={promos}
+      productsList={sortedProductsList}
+    />
+  );
+}
