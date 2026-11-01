@@ -292,4 +292,53 @@ export function CheckoutClient({
         setErrorMsg(data.error || 'Não foi possível criar o pedido.');
         setSubmitting(false);
         return;
-// step 6/24
+      }
+
+      const created = data.order as Order | null;
+      const orderNumber = data.orderNumber || created?.order_number || '';
+      const waUrl = created
+        ? buildOrderWhatsAppUrl(settings.whatsapp, created, settings.store_name)
+        : undefined;
+
+      setCartCount(0);
+      showOrderConfirmedPopup({ orderNumber, waUrl });
+      router.replace('/');
+
+      if (waUrl) {
+        if (waPopup && !waPopup.closed) {
+          waPopup.location.href = waUrl;
+        } else {
+          window.setTimeout(() => {
+            window.location.href = waUrl;
+          }, 80);
+        }
+      }
+    } catch {
+      if (waPopup && !waPopup.closed) waPopup.close();
+      setErrorMsg('Falha ao confirmar pedido. Verifique sua conexão.');
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div ref={topAnchorRef} className="space-y-4 sm:space-y-6">
+      {/* Interactive 3-Step Progress Bar */}
+      <div className="grid grid-cols-3 gap-2">
+        {(
+          [
+            { n: 1 as const, short: 'Itens', full: 'Revisão' },
+            { n: 2 as const, short: 'Dados', full: 'Seus Dados' },
+            { n: 3 as const, short: 'Finalizar', full: 'Finalizar' },
+          ] as const
+        ).map((s) => {
+          const isActive = step === s.n;
+          const isCompleted = step > s.n;
+          return (
+            <button
+              key={s.n}
+              type="button"
+              disabled={!isCompleted}
+              onClick={() => isCompleted && goToStep(s.n)}
+              className={cn(
+                'rounded-xl border px-2.5 py-2.5 flex items-center justify-center gap-1.5 text-xs font-extrabold transition min-w-0',
+// step 7/24
