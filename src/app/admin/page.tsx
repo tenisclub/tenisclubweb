@@ -95,4 +95,53 @@ export default async function AdminDashboardPage() {
     if (bucket) {
       bucket.ordersCount += 1;
       bucket.salesTotal += Number(o.total || 0);
-// step 2/8
+    }
+  }
+
+  const maxOrdersDay = Math.max(1, ...days.map((d) => d.ordersCount));
+  const maxSalesDay = Math.max(1, ...days.map((d) => d.salesTotal));
+
+  const topSelling = [...products]
+    .sort((a, b) => b.sold_count - a.sold_count)
+    .slice(0, 5);
+
+  return (
+    <div className="space-y-8">
+      {/* Header & Quick Shortcuts */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <span className="text-xs font-extrabold uppercase tracking-widest text-[#BEFA46]">
+            Visão Executiva
+          </span>
+          <h1 className="text-2xl sm:text-3xl font-black text-white mt-0.5">
+            Dashboard Administrativo
+          </h1>
+        </div>
+
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
+          <Link
+            href="/admin/produtos/novo"
+            className="col-span-2 sm:col-span-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#BEFA46] text-[#09090B] text-xs font-black"
+          >
+            <Plus className="w-4 h-4" />
+            Cadastrar Produto
+          </Link>
+          <Link
+            href="/admin/estoque"
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2.5 rounded-xl bg-[#16161D] border border-zinc-800 text-xs font-bold text-white hover:border-zinc-600"
+          >
+            <Boxes className="w-4 h-4 text-[#BEFA46] shrink-0" />
+            Ajustar Estoque
+          </Link>
+          <Link
+            href="/admin/promocoes"
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2.5 rounded-xl bg-[#16161D] border border-zinc-800 text-xs font-bold text-white hover:border-zinc-600"
+          >
+            <Tag className="w-4 h-4 text-[#BEFA46] shrink-0" />
+            Promoções
+          </Link>
+        </div>
+      </div>
+
+      {/* Primary KPI Grid */}
+// step 3/8
