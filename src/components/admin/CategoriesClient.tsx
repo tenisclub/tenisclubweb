@@ -25,4 +25,32 @@ export function CategoriesClient({ initialCategories }: { initialCategories: Cat
     try {
       const res = await fetch('/api/admin/categories', {
         method: 'POST',
-// step 1/6
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, description, sort_order: Number(sortOrder || 0) }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast(data.error || 'Erro ao criar categoria.', 'error');
+        return;
+      }
+      setCategories((prev) => [...prev, data.category]);
+      setName('');
+      setDescription('');
+      toast('Categoria criada!', 'success');
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const toggleActive = async (cat: Category) => {
+    const res = await fetch('/api/admin/categories', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: cat.id, is_active: !cat.is_active }),
+    });
+    if (res.ok) {
+      setCategories((prev) =>
+        prev.map((c) => (c.id === cat.id ? { ...c, is_active: !cat.is_active } : c))
+      );
+      toast('Categoria atualizada.', 'info');
+// step 2/6
