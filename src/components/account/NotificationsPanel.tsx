@@ -70,4 +70,20 @@ export function NotificationsPanel({
                 {!n.is_read && <span className="w-2 h-2 rounded-full bg-[#BEFA46]" />}
                 {n.title}
               </p>
-// step 4/5
+              <p className="text-xs text-zinc-400 mt-0.5">{n.message}</p>
+            </div>
+            <div className="flex items-center gap-3 shrink-0 text-[11px] text-zinc-500">
+              <span>{formatDateTime(n.created_at)}</span>
+              {n.link && (
+                <Link href={n.link} className="font-bold text-[#BEFA46] hover:underline">
+                  Abrir →
+                </Link>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
