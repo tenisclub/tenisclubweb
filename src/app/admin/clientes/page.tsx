@@ -25,4 +25,12 @@ export default async function AdminClientesPage() {
     const validOrders = userOrders.filter((o) => o.status !== 'cancelled');
     return {
       ...p,
-// step 3/4
+      ordersCount: userOrders.length,
+      totalSpent: validOrders.reduce((acc, o) => acc + Number(o.total || 0), 0),
+      lastOrderId: userOrders[0]?.id || null,
+    };
+  });
+
+  return <CustomersClient initialCustomers={customers} />;
+}
+
