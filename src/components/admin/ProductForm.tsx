@@ -722,4 +722,68 @@ export function ProductForm({
             {allowBackorder ? 'Ativado' : 'Desativado'}
           </span>
         </label>
-// step 11/12
+
+        {variants.length === 0 ? (
+          <p className="text-xs text-zinc-500 text-center py-6">
+            Nenhuma numeração adicionada. Use os botões acima para gerar a grade de tamanhos.
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {variants.map((v, idx) => (
+              <div
+                key={`${v.id || idx}`}
+                className="rounded-2xl border border-zinc-800 bg-[#18181F] p-3 flex flex-wrap sm:flex-nowrap items-center gap-2"
+              >
+                <input
+                  type="color"
+                  value={v.color_hex}
+                  onChange={(e) => updateVariant(idx, { color_hex: e.target.value })}
+                  className="w-7 h-7 rounded bg-transparent shrink-0"
+                />
+                <input
+                  type="text"
+                  value={v.color}
+                  onChange={(e) => updateVariant(idx, { color: e.target.value })}
+                  placeholder="Cor"
+                  className="flex-1 min-w-[78px] sm:w-24 h-9 px-2.5 rounded-lg bg-[#111116] border border-zinc-800 text-xs text-white"
+                />
+                <select
+                  value={v.size}
+                  onChange={(e) => updateVariant(idx, { size: e.target.value })}
+                  className="w-16 h-9 px-1.5 rounded-lg bg-[#111116] border border-zinc-800 text-xs font-bold text-white shrink-0"
+                >
+                  {STANDARD_SHOE_SIZES.map((sz) => (
+                    <option key={sz} value={sz}>
+                      {sz}
+                    </option>
+                  ))}
+                  {!STANDARD_SHOE_SIZES.includes(v.size) && (
+                    <option value={v.size}>{v.size}</option>
+                  )}
+                </select>
+                <div className="w-16 sm:flex-1 shrink-0">
+                  <input
+                    type="number"
+                    min="0"
+                    value={v.stock}
+                    onChange={(e) => updateVariant(idx, { stock: Number(e.target.value) })}
+                    className="w-full h-9 px-2 rounded-lg bg-[#111116] border border-zinc-800 text-xs font-extrabold text-[#BEFA46]"
+                    title="Quantidade em estoque"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeVariant(idx)}
+                  className="p-1.5 text-zinc-500 hover:text-red-400 shrink-0"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </form>
+  );
+}
+
