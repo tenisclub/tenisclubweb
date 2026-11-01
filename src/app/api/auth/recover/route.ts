@@ -20,4 +20,10 @@ export async function POST(request: Request) {
     return NextResponse.json({
       googleOnly: true,
       message:
-// step 3/4
+        'Esta conta foi criada exclusivamente com o Google. Utilize o botão "Continuar com Google" na tela de login para entrar com segurança.',
+    });
+  }
+
+  return NextResponse.json({ googleOnly: false });
+}
+
