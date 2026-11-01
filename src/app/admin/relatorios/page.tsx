@@ -23,4 +23,29 @@ export default async function AdminRelatoriosPage() {
   const registeredTotal = validOrders.reduce((acc, o) => acc + Number(o.total || 0), 0);
   const manualPaidTotal = paidOrders.reduce((acc, o) => acc + Number(o.total || 0), 0);
   const averageTicket = validOrders.length > 0 ? registeredTotal / validOrders.length : 0;
-// step 1/8
+
+  const totalUnitsInStock = products.reduce((acc, p) => acc + p.total_stock, 0);
+  const stockCostValuation = products.reduce(
+    (acc, p) => acc + (p.cost_price || 0) * p.total_stock,
+    0
+  );
+  const stockSaleValuation = products.reduce(
+    (acc, p) => acc + p.effective_price * p.total_stock,
+    0
+  );
+
+  const pickupCount = validOrders.filter((o) => o.delivery_method === 'pickup').length;
+  const deliveryCount = validOrders.filter((o) => o.delivery_method === 'local_delivery').length;
+
+  const statusBreakdown = Object.entries(ORDER_STATUS_CONFIG).map(([key, cfg]) => ({
+    key,
+    label: cfg.label,
+    count: orders.filter((o) => o.status === key).length,
+  }));
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <span className="text-xs font-extrabold uppercase tracking-widest text-[#BEFA46]">
+          Inteligência Comercial
+// step 2/8
