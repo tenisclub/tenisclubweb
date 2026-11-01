@@ -9,4 +9,9 @@ export default function CheckoutLoading() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-7 space-y-5">
           <div className="h-44 rounded-3xl border border-zinc-800 bg-[#121216]" />
-// step 2/4
+          <div className="h-56 rounded-3xl border border-zinc-800 bg-[#121216]" />
+        </div>
+        <div className="lg:col-span-5">
+          <div className="h-72 rounded-3xl border border-zinc-800 bg-[#121216]" />
+        </div>
+// step 3/4
