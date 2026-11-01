@@ -90,3 +90,48 @@ export function AccountSidebar() {
           const active = link.exact
             ? effectivePath === link.href
             : effectivePath === link.href || effectivePath.startsWith(`${link.href}/`);
+          return (
+            <Link
+              key={link.href}
+              href={link.href}
+              prefetch={true}
+              onClick={() => setOptimisticHref(link.href)}
+              className={cn(
+                'flex items-center gap-2 lg:gap-3 px-3 lg:px-3.5 py-2 lg:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition whitespace-nowrap shrink-0',
+                active
+                  ? 'bg-[#BEFA46] text-[#09090B]'
+                  : 'bg-[#18181F] lg:bg-transparent text-zinc-300 hover:text-white hover:bg-zinc-800/70'
+              )}
+            >
+              <Icon className="w-4 h-4 shrink-0" />
+              {link.label}
+            </Link>
+          );
+        })}
+
+        {isAdmin && (
+          <Link
+            href="/admin"
+            className="hidden lg:flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-[#BEFA46] bg-[#BEFA46]/10 border border-[#BEFA46]/30 mt-2"
+          >
+            <ShieldCheck className="w-4 h-4 shrink-0" />
+            Painel Administrativo
+          </Link>
+        )}
+      </nav>
+
+      <div className="hidden lg:block pt-3 border-t border-zinc-800">
+        <button
+          type="button"
+          onClick={handleLogout}
+          disabled={loggingOut}
+          className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-red-400 hover:bg-red-500/10 transition disabled:opacity-60 cursor-pointer"
+        >
+          <LogOut className="w-4 h-4" />
+          {loggingOut ? 'Encerrando...' : 'Encerrar Sessão'}
+        </button>
+      </div>
+    </aside>
+  );
+}
+
