@@ -8,4 +8,14 @@ export default function NotFound() {
       <TenisClubLogo size="lg" />
       <div className="space-y-2 max-w-md">
         <p className="text-xs font-extrabold tracking-[0.3em] uppercase text-[#BEFA46]">
-// step 1/4
+          Erro 404
+        </p>
+        <h1 className="text-3xl sm:text-4xl font-black text-white">
+          Página não encontrada
+        </h1>
+        <p className="text-sm text-zinc-400">
+          O endereço que você procurou não existe ou o modelo já saiu do ar. Que tal conferir os lançamentos disponíveis?
+        </p>
+      </div>
+
+// step 2/4
