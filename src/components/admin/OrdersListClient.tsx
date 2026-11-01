@@ -99,4 +99,38 @@ export function OrdersListClient({ initialOrders }: { initialOrders: Order[] }) 
           onChange={(e) => setDateFilter(e.target.value)}
           className="h-11 px-3.5 rounded-xl bg-[#121216] border border-zinc-800 text-xs sm:text-sm text-white"
         />
-// step 3/8
+      </div>
+
+      {/* Mobile Cards */}
+      <div className="md:hidden space-y-3">
+        {filtered.map((o) => {
+          const st = ORDER_STATUS_CONFIG[o.status as OrderStatus];
+          const deliveryLabel = formatOrderModalityLabel(o);
+          return (
+            <div
+              key={o.id}
+              className="rounded-2xl border border-zinc-800 bg-[#121216] p-4 space-y-3"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm font-black text-white">#{o.order_number}</span>
+                    <span
+                      className={cn(
+                        'px-2 py-0.5 rounded-full text-[10px] font-bold border',
+                        st?.colorClass
+                      )}
+                    >
+                      {st?.label || o.status}
+                    </span>
+                  </div>
+                  <p className="text-xs font-bold text-zinc-200 mt-1 truncate">
+                    {o.customer_name}
+                  </p>
+                  <p className="text-[11px] text-zinc-500">
+                    {o.customer_phone} • {formatDateTime(o.created_at)}
+                  </p>
+                </div>
+                <span className="text-base font-black text-[#BEFA46] shrink-0">
+                  {formatCurrency(o.total)}
+// step 4/8
