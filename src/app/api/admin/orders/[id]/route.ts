@@ -21,4 +21,15 @@ export async function PATCH(
       note,
       store_notes,
       internal_notes,
-// step 2/5
+      payment_status,
+      payment_method_note,
+    } = body;
+
+    if (!status) {
+      return NextResponse.json({ error: 'Informe o status do pedido.' }, { status: 400 });
+    }
+
+    const supabase = createServiceClient();
+    const { data, error } = await supabase.rpc('change_order_status_atomic', {
+      p_order_id: id,
+// step 3/5
