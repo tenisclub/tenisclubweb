@@ -46,4 +46,15 @@ export default async function SobrePage() {
         </div>
       </div>
 
-// step 4/5
+      <div className="text-center">
+        <Link
+          href="/produtos"
+          className="inline-flex px-6 py-3 rounded-full bg-[#BEFA46] text-[#09090B] text-sm font-black"
+        >
+          Conhecer Nosso Catálogo
+        </Link>
+      </div>
+    </div>
+  );
+}
+
