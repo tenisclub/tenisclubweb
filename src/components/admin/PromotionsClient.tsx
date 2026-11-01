@@ -104,3 +104,56 @@ export function PromotionsClient({
   };
 
   return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-black text-white">Gerenciar Promoções</h1>
+        <p className="text-xs sm:text-sm text-zinc-400">
+          Crie descontos, programe campanhas de início/término e destaque produtos na página inicial.
+        </p>
+      </div>
+
+      <form
+        onSubmit={handleCreate}
+        className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-4"
+      >
+        <h2 className="text-base font-black text-white">Nova Campanha Promocional</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div>
+            <label className="text-xs text-zinc-400">Nome da Campanha *</label>
+            <input
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Ex: Semana do Sneaker"
+              className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs text-zinc-400">Produto *</label>
+            <select
+              value={productId}
+              onChange={(e) => setProductId(e.target.value)}
+              className="mt-1 w-full h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+            >
+              {productsList.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name} ({formatCurrency(p.base_price)})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="text-xs text-zinc-400">Preço Promocional (R$) *</label>
+            <input
+              type="number"
+              step="0.01"
+              min="1"
+              required
+              value={promoPrice}
+              onChange={(e) => setPromoPrice(e.target.value)}
+              placeholder="Ex: 199.90"
+              className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+            />
