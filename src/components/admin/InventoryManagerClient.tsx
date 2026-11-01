@@ -221,4 +221,41 @@ export function InventoryManagerClient({ initialRows }: { initialRows: StockRowI
               >
                 <MinusCircle className="w-3.5 h-3.5" />
                 Saída
-// step 6/12
+              </button>
+              <button
+                type="button"
+                onClick={() => openModal(r, 'adjustment')}
+                className="h-9 rounded-xl bg-zinc-800 text-zinc-200 text-xs font-bold inline-flex items-center justify-center gap-1"
+              >
+                <Sliders className="w-3.5 h-3.5" />
+                Corrigir
+              </button>
+            </div>
+          </div>
+        ))}
+        {filtered.length === 0 && (
+          <div className="rounded-2xl border border-zinc-800 bg-[#121216] p-8 text-center text-xs text-zinc-500">
+            Nenhuma numeração encontrada.
+          </div>
+        )}
+      </div>
+
+      {/* Desktop Inventory Table */}
+      <div className="hidden md:block rounded-3xl border border-zinc-800 bg-[#121216] overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs sm:text-sm">
+            <thead className="bg-[#17171E] text-zinc-400 text-[11px] uppercase tracking-wider">
+              <tr>
+                <th className="px-4 py-3.5">Modelo</th>
+                <th className="px-4 py-3.5">Cor</th>
+                <th className="px-4 py-3.5">Numeração</th>
+                <th className="px-4 py-3.5">Quantidade</th>
+                <th className="px-4 py-3.5">Alerta Mín.</th>
+                <th className="px-4 py-3.5 text-right">Operações</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-800/80">
+              {filtered.map((r) => (
+                <tr key={r.variantId} className="hover:bg-zinc-900/40">
+                  <td className="px-4 py-3">
+// step 7/12
