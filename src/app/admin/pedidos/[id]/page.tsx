@@ -15,4 +15,13 @@ export default async function AdminPedidoDetailPage({
 
   const { data: row } = await supabase
     .from('orders')
-// step 2/4
+    .select('*, order_items(*), order_status_history(*)')
+    .eq('id', id)
+    .maybeSingle();
+
+  if (!row) notFound();
+
+  const order: Order = {
+    ...(row as unknown as Order),
+    items: row.order_items || [],
+// step 3/4
