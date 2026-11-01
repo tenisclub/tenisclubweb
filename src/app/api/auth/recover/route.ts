@@ -13,4 +13,11 @@ export async function POST(request: Request) {
   const { data: profile } = await supabase
     .from('user_profiles')
     .select('auth_provider')
-// step 2/4
+    .eq('email', cleanEmail)
+    .maybeSingle();
+
+  if (profile?.auth_provider === 'google') {
+    return NextResponse.json({
+      googleOnly: true,
+      message:
+// step 3/4
