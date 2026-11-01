@@ -131,4 +131,48 @@ export const DEFAULT_CHECKOUT_DELIVERY_CONFIG: CheckoutDeliveryConfig = {
 
   pickup_info_removed: false,
   pickup_info_card_enabled: true,
-// step 3/12
+  pickup_info_card_icon: 'none',
+  pickup_info_card_title: 'Informações de retirada:',
+  show_pickup_hours: true,
+
+  delivery_info_card_enabled: false,
+  delivery_info_card_icon: 'info',
+  delivery_info_card_title: 'Informações de entrega:',
+
+  extra_cards: [],
+  custom_buttons: [],
+
+  always_require_address: false,
+
+  next_button_label: 'Finalizar Pedido no WhatsApp',
+};
+
+const VALID_ICONS = new Set<CheckoutIconKey>([
+  'map-pin',
+  'store',
+  'truck',
+  'package',
+  'clock',
+  'zap',
+  'shield-check',
+  'sparkles',
+  'message-circle',
+  'navigation',
+  'gift',
+  'external-link',
+  'info',
+  'none',
+]);
+
+function safeIcon(val: unknown, fallback: CheckoutIconKey): CheckoutIconKey {
+  return typeof val === 'string' && VALID_ICONS.has(val as CheckoutIconKey)
+    ? (val as CheckoutIconKey)
+    : fallback;
+}
+
+function safeNum(val: unknown, fallback = 0): number {
+  const n = Number(val);
+  return Number.isFinite(n) && n >= 0 ? n : fallback;
+}
+
+// step 4/12
