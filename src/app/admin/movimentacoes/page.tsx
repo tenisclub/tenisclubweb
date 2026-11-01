@@ -176,4 +176,28 @@ export default async function AdminMovimentacoesPage() {
                         {badge.label}
                       </span>
                     </td>
-// step 7/8
+                    <td className="px-4 py-3 text-zinc-400">{m.previous_quantity}</td>
+                    <td
+                      className={cn(
+                        'px-4 py-3 font-extrabold',
+                        m.moved_quantity >= 0 ? 'text-emerald-400' : 'text-red-400'
+                      )}
+                    >
+                      {m.moved_quantity > 0 ? `+${m.moved_quantity}` : m.moved_quantity}
+                    </td>
+                    <td className="px-4 py-3 font-black text-white">{m.new_quantity}</td>
+                    <td className="px-4 py-3 text-zinc-300">
+                      {user?.full_name || user?.email || 'Sistema'}
+                    </td>
+                    <td className="px-4 py-3 text-zinc-400 max-w-xs">{m.reason}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
