@@ -81,4 +81,31 @@ export function CategoriesClient({ initialCategories }: { initialCategories: Cat
       <form
         onSubmit={handleCreate}
         className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-4 gap-3 items-end"
-// step 3/6
+      >
+        <div>
+          <label className="text-xs text-zinc-400">Nome *</label>
+          <input
+            type="text"
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Ex: Chuteira, Botina..."
+            className="mt-1 w-full h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+          />
+        </div>
+        <div className="sm:col-span-2">
+          <label className="text-xs text-zinc-400">Descrição</label>
+          <input
+            type="text"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Breve descrição da linha"
+            className="mt-1 w-full h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+          />
+        </div>
+        <div className="flex gap-2">
+          <input
+            type="number"
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+// step 4/6
