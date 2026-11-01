@@ -18,4 +18,25 @@ export function BrandsClient({ initialBrands }: { initialBrands: Brand[] }) {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
-// step 1/6
+    const res = await fetch('/api/admin/brands', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      toast(data.error || 'Erro ao criar marca.', 'error');
+      return;
+    }
+    setBrands((prev) => [...prev, data.brand]);
+    setName('');
+    toast('Marca cadastrada!', 'success');
+  };
+
+  const toggleActive = async (brand: Brand) => {
+    const res = await fetch('/api/admin/brands', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: brand.id, is_active: !brand.is_active }),
+    });
+// step 2/6
