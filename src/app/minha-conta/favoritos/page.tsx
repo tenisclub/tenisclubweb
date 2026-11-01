@@ -34,4 +34,16 @@ export default async function FavoritosPage() {
           <Heart className="w-10 h-10 text-zinc-600 mx-auto" />
           <p className="text-base font-bold text-white">Sua lista de favoritos está vazia</p>
           <p className="text-xs text-zinc-400">
-// step 3/5
+            Clique no ícone de coração nos calçados do catálogo para salvá-los aqui.
+          </p>
+          <Link
+            href="/produtos"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#BEFA46] text-[#09090B] text-xs font-black"
+          >
+            Ver Produtos
+          </Link>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+          {favProducts.map((product) => (
+// step 4/5
