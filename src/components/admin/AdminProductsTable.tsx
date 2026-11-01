@@ -134,4 +134,38 @@ export function AdminProductsTable({ initialProducts }: { initialProducts: Produ
           <div
             key={p.id}
             className="rounded-2xl border border-zinc-800 bg-[#121216] p-4 space-y-3"
-// step 4/12
+          >
+            <div className="flex items-start gap-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={p.primary_image}
+                alt={p.name}
+                className="w-14 h-14 rounded-xl object-cover bg-[#EAE0D5] shrink-0"
+              />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-extrabold text-white line-clamp-2 leading-snug">
+                  {p.name}
+                </p>
+                <p className="text-[11px] text-zinc-400 mt-0.5 truncate">
+                  {p.brand?.name || 'Sem marca'} • {GENDER_LABELS[p.gender]} • Tam. {p.size_range_label}
+                </p>
+                <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                  <span className="text-sm font-black text-[#BEFA46]">
+                    {formatCurrency(p.effective_price)}
+                  </span>
+                  {p.promo_price !== null && p.promo_price < p.base_price && (
+                    <span className="text-[11px] text-zinc-500 line-through">
+                      {formatCurrency(p.base_price)}
+                    </span>
+                  )}
+                  <span
+                    className={cn(
+                      'px-2 py-0.5 rounded-full text-[11px] font-extrabold',
+                      p.total_stock === 0
+                        ? p.allow_backorder
+                          ? 'bg-sky-500/15 text-sky-300'
+                          : 'bg-red-500/15 text-red-400'
+                        : p.total_stock <= 5
+                          ? 'bg-amber-500/15 text-amber-300'
+                          : 'bg-emerald-500/15 text-emerald-400'
+// step 5/12
