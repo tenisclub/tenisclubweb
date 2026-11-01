@@ -175,4 +175,40 @@ export function Navbar({ settings }: { settings: StoreSettings }) {
           {NAV_LINKS.map((link) => {
             const active =
               link.href === '/'
-// step 5/8
+                ? effectivePath === '/'
+                : effectivePath === link.href || effectivePath.startsWith(`${link.href}/`);
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                prefetch={true}
+                onClick={() => setOptimisticHref(link.href)}
+                className={cn(
+                  'px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide transition inline-flex items-center gap-1',
+                  active
+                    ? 'bg-[#BEFA46] text-[#09090B] font-bold'
+                    : link.highlight
+                      ? 'text-[#BEFA46] hover:bg-[#BEFA46]/10'
+                      : 'text-zinc-300 hover:text-white hover:bg-zinc-800/60'
+                )}
+              >
+                {link.highlight && <Tag className="w-3 h-3" />}
+                {link.label}
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
+
+      {/* Mobile Drawer */}
+      {mobileOpen && (
+        <div className="lg:hidden border-t border-zinc-800 bg-[#0E0E12] px-4 pt-3 pb-6 space-y-4 max-h-[calc(100dvh-4rem)] overflow-y-auto">
+          <form onSubmit={handleSearch} className="relative">
+            <Search className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Buscar produto, marca ou numeração..."
+              className="w-full h-11 pl-10 pr-4 rounded-full bg-[#18181F] border border-zinc-700 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#BEFA46]"
+// step 6/8
