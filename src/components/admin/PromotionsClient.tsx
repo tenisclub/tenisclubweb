@@ -230,4 +230,36 @@ export function PromotionsClient({
               )}
             </div>
 
-// step 7/8
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => togglePromo(pr)}
+                className={cn(
+                  'px-3 py-1 rounded-full text-xs font-bold',
+                  pr.is_active
+                    ? 'bg-emerald-500/15 text-emerald-400'
+                    : 'bg-zinc-800 text-zinc-400'
+                )}
+              >
+                {pr.is_active ? 'Ativa' : 'Pausada'}
+              </button>
+              <button
+                type="button"
+                onClick={() => deletePromo(pr.id)}
+                className="p-2 text-zinc-500 hover:text-red-400"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        ))}
+        {promos.length === 0 && (
+          <p className="p-8 text-center text-xs text-zinc-500">
+            Nenhuma campanha promocional cadastrada.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
