@@ -70,3 +70,75 @@ function CadastroForm() {
       setErrorMsg('Aceite os Termos de Uso e a Política de Privacidade para continuar.');
       return;
     }
+
+    setLoading(true);
+    try {
+      const regRes = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName,
+          email,
+          phone,
+          password,
+          acceptedTerms,
+        }),
+      });
+
+      const regData = await regRes.json();
+      if (!regRes.ok) {
+        setErrorMsg(regData.error || 'Erro ao criar conta.');
+        setLoading(false);
+        return;
+      }
+
+      if (regData.sessionSnapshot) {
+        hydrateSession(regData.sessionSnapshot);
+      } else {
+        const supabase = createClient();
+        await supabase.auth.signInWithPassword({
+          email: email.trim().toLowerCase(),
+          password,
+        });
+        await refreshSession();
+      }
+
+      toast('Cadastro realizado com sucesso! Bem-vindo(a) à Tênis Club!', 'success');
+      router.replace(resolvePostSignupTarget(redirectParam));
+    } catch {
+      setErrorMsg('Falha de comunicação ao realizar cadastro.');
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignup = async () => {
+    setErrorMsg('');
+    setGoogleLoading(true);
+    try {
+      const supabase = createClient();
+      const nextTarget = resolvePostSignupTarget(redirectParam);
+      const callbackUrl = `${window.location.origin}/auth/callback${
+        nextTarget !== '/' ? `?next=${encodeURIComponent(nextTarget)}` : ''
+      }`;
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: callbackUrl },
+      });
+      if (error) {
+        setErrorMsg('Não foi possível conectar ao Google. Tente novamente.');
+        setGoogleLoading(false);
+      }
+    } catch {
+      setErrorMsg('Falha ao iniciar autenticação com Google.');
+      setGoogleLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-[85vh] flex items-center justify-center px-4 py-8 sm:py-12">
+      <div className="w-full max-w-lg rounded-3xl border border-zinc-800 bg-[#111116] p-5 sm:p-9 shadow-2xl space-y-6">
+        <div className="text-center space-y-2">
+          <Link href="/" className="inline-block">
+            <TenisClubLogo size="md" />
+          </Link>
+          <h1 className="text-xl sm:text-2xl font-black text-white pt-1">
