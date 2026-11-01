@@ -64,4 +64,37 @@ export function PromotionsClient({
       toast(data.error || 'Erro ao criar promoção.', 'error');
       return;
     }
-// step 2/8
+
+    setPromos((prev) => [
+      {
+        ...data.promotion,
+        product_name: selectedProd?.name || 'Produto',
+        base_price: selectedProd?.base_price || 0,
+      },
+      ...prev,
+    ]);
+    setName('');
+    setPromoPrice('');
+    toast('Promoção programada com sucesso!', 'success');
+  };
+
+  const togglePromo = async (promo: PromotionRow) => {
+    const res = await fetch('/api/admin/promotions', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: promo.id, is_active: !promo.is_active }),
+    });
+    if (res.ok) {
+      setPromos((prev) =>
+        prev.map((p) => (p.id === promo.id ? { ...p, is_active: !p.is_active } : p))
+      );
+      toast('Status da promoção atualizado!', 'info');
+    }
+  };
+
+  const deletePromo = async (id: string) => {
+    if (!window.confirm('Excluir esta promoção?')) return;
+    const res = await fetch(`/api/admin/promotions?id=${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    });
+// step 3/8
