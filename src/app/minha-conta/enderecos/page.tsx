@@ -187,4 +187,42 @@ export default function MeusEnderecosPage() {
                 required
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
-// step 5/8
+                className="mt-1 w-full h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-zinc-400">UF</label>
+              <input
+                type="text"
+                maxLength={2}
+                value={stateUf}
+                onChange={(e) => setStateUf(e.target.value.toUpperCase())}
+                className="mt-1 w-full h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+              />
+            </div>
+            <div className="sm:col-span-3">
+              <label className="text-xs text-zinc-400">Referência</label>
+              <input
+                type="text"
+                value={reference}
+                onChange={(e) => setReference(e.target.value)}
+                placeholder="Ponto de referência para facilitar a entrega"
+                className="mt-1 w-full h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+              />
+            </div>
+          </div>
+
+          <label className="flex items-center gap-2 text-xs text-zinc-300">
+            <input
+              type="checkbox"
+              checked={isDefault}
+              onChange={(e) => setIsDefault(e.target.checked)}
+              className="w-4 h-4 accent-[#BEFA46]"
+            />
+            Definir como endereço padrão
+          </label>
+
+          <button
+            type="submit"
+            className="px-6 py-2.5 rounded-xl bg-[#BEFA46] text-[#09090B] text-xs font-black"
+// step 6/8
