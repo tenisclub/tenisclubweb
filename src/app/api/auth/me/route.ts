@@ -52,4 +52,22 @@ export async function GET() {
         email: claimEmail.toLowerCase(),
         full_name: fullName,
         phone: typeof userMeta.phone === 'string' ? userMeta.phone : '',
-// step 3/6
+        avatar_url:
+          (typeof userMeta.avatar_url === 'string' && userMeta.avatar_url) ||
+          (typeof userMeta.picture === 'string' && userMeta.picture) ||
+          null,
+        auth_provider: typeof appMeta.provider === 'string' ? appMeta.provider : 'email',
+        is_active: true,
+      })
+      .select('*')
+      .single();
+    resolvedProfile = inserted as UserProfile;
+  }
+
+  if (!resolvedProfile?.is_active) {
+    return NextResponse.json({
+      authenticated: false,
+      user: null,
+      role: 'visitor',
+      cartCount: 0,
+// step 4/6
