@@ -16,4 +16,22 @@ export default function RedefinirSenhaPage() {
   const [errorMsg, setErrorMsg] = useState('');
 
   const handleUpdate = async (e: React.FormEvent) => {
-// step 1/6
+    e.preventDefault();
+    setErrorMsg('');
+
+    if (password.length < 8) {
+      setErrorMsg('A nova senha deve ter no mínimo 8 caracteres.');
+      return;
+    }
+    if (password !== confirm) {
+      setErrorMsg('As senhas não coincidem.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) {
+        setErrorMsg(error.message);
+// step 2/6
