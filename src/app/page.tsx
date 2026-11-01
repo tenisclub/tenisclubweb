@@ -46,3 +46,51 @@ export default async function HomePage() {
       </section>
 
       {/* 2. INTERACTIVE QUICK FILTER BAR + CATALOG SHOWCASE */}
+      <div className="!mt-0 relative z-10">
+        <HomeQuickCatalog
+          products={allProducts}
+          categories={categories}
+          whatsapp={settings.whatsapp}
+        />
+      </div>
+
+      {/* 3. CATEGORIES SHOWCASE */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+            <Layers className="w-5 h-5 text-[#BEFA46] shrink-0" />
+            <h2 className="text-lg sm:text-2xl font-black text-white truncate">
+              Navegue por Categorias
+            </h2>
+          </div>
+          <Link
+            href="/produtos"
+            className="text-xs sm:text-sm font-bold text-[#BEFA46] hover:underline inline-flex items-center gap-1 shrink-0"
+          >
+            Ver todas <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
+          {[
+            { label: 'Masculino', slug: 'masculino', sub: 'Tênis & Sociais' },
+            { label: 'Feminino', slug: 'feminino', sub: 'Casual, Salto & Treino' },
+            { label: 'Infantil', slug: 'infantil', sub: 'Conforto e Resistência' },
+            ...categories.slice(0, 3).map((c) => ({
+              label: c.name,
+              slug: c.slug,
+              sub: c.description || 'Confira os modelos',
+            })),
+          ].map((cat) => (
+            <Link
+              key={cat.slug}
+              href={`/categoria/${cat.slug}`}
+              className="group rounded-2xl border border-zinc-800/90 bg-[#121216] hover:border-[#BEFA46]/60 p-4 flex flex-col justify-between min-h-[112px] transition"
+            >
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#BEFA46]">
+                Linha
+              </span>
+              <div>
+                <h3 className="text-base font-extrabold text-white group-hover:text-[#BEFA46] transition">
+                  {cat.label}
+                </h3>
