@@ -21,4 +21,16 @@ export async function PATCH(request: Request) {
     );
   }
 
-// step 2/4
+  const supabase = createServiceClient();
+  const { error } = await supabase
+    .from('user_profiles')
+    .update({ is_active: Boolean(is_active), updated_at: new Date().toISOString() })
+    .eq('id', userId);
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  revalidateStoreData('users');
+  void supabase
+    .from('admin_logs')
+    .insert({
+// step 3/4
