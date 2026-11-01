@@ -152,3 +152,55 @@ export function ProductCard({ product, whatsapp = '5511999999999' }: ProductCard
               'inline-flex items-center gap-1 font-medium',
               canPurchase ? 'text-emerald-400' : 'text-red-400'
             )}
+          >
+            <span
+              className={cn(
+                'w-1.5 h-1.5 rounded-full',
+                canPurchase ? 'bg-emerald-400' : 'bg-red-400'
+              )}
+            />
+            {canPurchase ? 'Disponível' : 'Indisponível'}
+          </span>
+        </div>
+
+        {/* Interactive Size Pills */}
+        {product.variants.length > 0 && (
+          <div className="mt-2.5 flex flex-wrap gap-1">
+            {product.variants.slice(0, 8).map((v) => {
+              const out = !allowBackorder && v.stock <= 0;
+              const selected = selectedVariantId === v.id;
+              return (
+                <button
+                  key={v.id}
+                  type="button"
+                  disabled={out}
+                  onClick={() => setSelectedVariantId(v.id)}
+                  className={cn(
+                    'min-w-[30px] h-7 px-1.5 rounded-lg text-[11px] font-bold border transition',
+                    out
+                      ? 'border-zinc-800/60 bg-zinc-900/40 text-zinc-600 line-through cursor-not-allowed'
+                      : selected
+                        ? 'border-[#BEFA46] bg-[#BEFA46] text-[#09090B]'
+                        : 'border-zinc-800 bg-[#1A1A20] text-zinc-300 hover:border-zinc-600'
+                  )}
+                  title={
+                    out
+                      ? `Tam. ${v.size} indisponível`
+                      : v.stock > 0
+                        ? `Tam. ${v.size} (${v.stock} un.)`
+                        : `Tam. ${v.size} disponível`
+                  }
+                >
+                  {v.size}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Pricing */}
+        <div className="mt-auto pt-4">
+          {product.promo_price !== null && product.promo_price < product.base_price && (
+            <div className="text-xs text-zinc-500 line-through">
+              {formatCurrency(product.base_price)}
+            </div>
