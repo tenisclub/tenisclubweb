@@ -725,3 +725,106 @@ export function StoreProvider({
         hydrateSession,
         logout,
         addToCart,
+        toggleFavorite,
+        toast,
+        showOrderConfirmedPopup,
+        setCartCount,
+      }}
+    >
+      {children}
+
+      {/* 5-Second Order Confirmed Popup on Home ('/') */}
+      {orderPopup && pathname === '/' && (
+        <div
+          onClick={dismissOrderPopup}
+          className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/65 backdrop-blur-[2px] animate-in fade-in duration-200"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm rounded-3xl border border-[#BEFA46]/40 bg-[#121216] p-6 text-center space-y-4 shadow-[0_24px_70px_rgba(0,0,0,0.85)] relative overflow-hidden animate-in zoom-in-95 duration-200"
+          >
+            <button
+              type="button"
+              onClick={dismissOrderPopup}
+              className="absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center cursor-pointer"
+              aria-label="Fechar confirmação"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="w-14 h-14 rounded-full bg-[#BEFA46] text-[#09090B] flex items-center justify-center mx-auto shadow-[0_0_28px_rgba(190,250,70,0.4)]">
+              <CheckCircle2 className="w-8 h-8 stroke-[2.5]" />
+            </div>
+
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#BEFA46] block">
+                Pedido Confirmado!
+              </span>
+              <h3 className="text-2xl font-black text-white">
+                Pedido #{orderPopup.orderNumber}
+              </h3>
+              <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+                Seu pedido foi enviado com sucesso! Finalize o atendimento pelo WhatsApp da loja.
+              </p>
+            </div>
+
+            {orderPopup.waUrl && (
+              <a
+                href={orderPopup.waUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-[#BEFA46]/15 hover:bg-[#BEFA46]/25 border border-[#BEFA46]/30 text-xs font-extrabold text-[#BEFA46] transition"
+              >
+                <MessageCircle className="w-3.5 h-3.5" />
+                Abrir conversa no WhatsApp
+              </a>
+            )}
+
+            {/* 5-second visual countdown bar */}
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-zinc-900">
+              <div
+                className="h-full bg-[#BEFA46] transition-[width] duration-75 ease-linear"
+                style={{ width: `${orderPopupProgress}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Toast Stack */}
+      <div className="fixed bottom-5 right-5 z-[100] flex flex-col gap-2.5 max-w-sm w-[calc(100vw-2.5rem)] pointer-events-none">
+        {toasts.map((item) => (
+          <div
+            key={item.id}
+            className="pointer-events-auto flex items-start gap-3 rounded-2xl border border-zinc-800 bg-[#141418]/95 backdrop-blur-md px-4 py-3.5 shadow-2xl text-sm text-zinc-100 animate-in fade-in slide-in-from-bottom-4 duration-200"
+          >
+            {item.type === 'success' && (
+              <CheckCircle2 className="w-5 h-5 text-[#BEFA46] shrink-0 mt-0.5" />
+            )}
+            {item.type === 'error' && (
+              <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+            )}
+            {item.type === 'info' && (
+              <Info className="w-5 h-5 text-sky-400 shrink-0 mt-0.5" />
+            )}
+            <span className="flex-1 leading-snug font-medium">{item.message}</span>
+            <button
+              type="button"
+              onClick={() => setToasts((prev) => prev.filter((t) => t.id !== item.id))}
+              className="text-zinc-500 hover:text-zinc-200"
+              aria-label="Fechar aviso"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        ))}
+      </div>
+    </StoreContext.Provider>
+  );
+}
+
+export function useStore() {
+  const ctx = useContext(StoreContext);
+  if (!ctx) throw new Error('useStore must be used inside StoreProvider');
+  return ctx;
+}
