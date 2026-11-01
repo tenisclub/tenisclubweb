@@ -153,4 +153,35 @@ export function CustomersClient({ initialCustomers }: { initialCustomers: Custom
               >
                 {c.is_active ? 'Desativar' : 'Reativar'}
               </button>
-// step 5/8
+            </div>
+          </div>
+        ))}
+        {filtered.length === 0 && (
+          <div className="rounded-2xl border border-zinc-800 bg-[#121216] p-8 text-center text-xs text-zinc-500">
+            Nenhum cliente encontrado.
+          </div>
+        )}
+      </div>
+
+      {/* Desktop Table */}
+      <div className="hidden md:block rounded-3xl border border-zinc-800 bg-[#121216] overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs sm:text-sm">
+            <thead className="bg-[#17171E] text-zinc-400 uppercase tracking-wider text-[11px]">
+              <tr>
+                <th className="px-4 py-3.5">Cliente</th>
+                <th className="px-4 py-3.5">Telefone / WhatsApp</th>
+                <th className="px-4 py-3.5">Cadastro</th>
+                <th className="px-4 py-3.5">Pedidos</th>
+                <th className="px-4 py-3.5">Total em Pedidos</th>
+                <th className="px-4 py-3.5">Status</th>
+                <th className="px-4 py-3.5 text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-800/80">
+              {filtered.map((c) => (
+                <tr key={c.id} className="hover:bg-zinc-900/40">
+                  <td className="px-4 py-3.5">
+                    <p className="font-bold text-white">{c.full_name}</p>
+                    <p className="text-[11px] text-zinc-500">
+// step 6/8
