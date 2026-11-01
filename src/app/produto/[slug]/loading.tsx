@@ -10,4 +10,16 @@ export default function ProductLoading() {
             {Array.from({ length: 4 }).map((_, i) => (
               <div
                 key={i}
-// step 1/4
+                className="aspect-square rounded-2xl bg-[#121216] border border-zinc-800/60"
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="lg:col-span-5 space-y-6">
+          <div className="space-y-3">
+            <div className="h-4 w-24 rounded-full bg-zinc-900" />
+            <div className="h-9 w-4/5 rounded-2xl bg-zinc-900" />
+            <div className="h-8 w-40 rounded-xl bg-zinc-800/80" />
+          </div>
+// step 2/4
