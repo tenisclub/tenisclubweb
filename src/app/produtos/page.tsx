@@ -16,4 +16,13 @@ export default async function ProdutosPage({
   const [{ allMatching }, { categories, brands }, settings] = await Promise.all([
     getCatalogProducts({ pageSize: 200 }),
     getCategoriesAndBrands(),
-// step 2/4
+    getStoreSettings(),
+  ]);
+
+  return (
+    <CatalogExplorer
+      products={allMatching}
+      categories={categories}
+      brands={brands}
+      whatsapp={settings.whatsapp}
+// step 3/4
