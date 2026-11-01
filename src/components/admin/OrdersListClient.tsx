@@ -105,3 +105,57 @@ export function OrdersListClient({ initialOrders }: { initialOrders: Order[] }) 
           return (
             <div
               key={o.id}
+              className="rounded-2xl border border-zinc-800 bg-[#121216] p-4 space-y-3"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm font-black text-white">#{o.order_number}</span>
+                    <span
+                      className={cn(
+                        'px-2 py-0.5 rounded-full text-[10px] font-bold border',
+                        st?.colorClass
+                      )}
+                    >
+                      {st?.label || o.status}
+                    </span>
+                  </div>
+                  <p className="text-xs font-bold text-zinc-200 mt-1 truncate">
+                    {o.customer_name}
+                  </p>
+                  <p className="text-[11px] text-zinc-500">
+                    {o.customer_phone} • {formatDateTime(o.created_at)}
+                  </p>
+                </div>
+                <span className="text-base font-black text-[#BEFA46] shrink-0">
+                  {formatCurrency(o.total)}
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-2.5 border-t border-zinc-800/80 text-[11px]">
+                <span className="text-zinc-300 font-semibold">{deliveryLabel}</span>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {o.payment_method_note && (
+                    <span className="px-2 py-0.5 rounded-full bg-[#BEFA46]/15 text-[#BEFA46] font-bold">
+                      {o.payment_method_note}
+                    </span>
+                  )}
+                  <span
+                    className={cn(
+                      'px-2 py-0.5 rounded-full font-bold',
+                      o.payment_status === 'paid_manual'
+                        ? 'bg-emerald-500/15 text-emerald-400'
+                        : 'bg-zinc-800 text-zinc-400'
+                    )}
+                  >
+                    {o.payment_status === 'paid_manual' ? 'Pago (Manual)' : 'Pgto. Pendente'}
+                  </span>
+                </div>
+              </div>
+
+              <Link
+                href={`/admin/pedidos/${o.id}`}
+                prefetch={true}
+                className="w-full h-10 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-white inline-flex items-center justify-center gap-1.5"
+              >
+                <Eye className="w-3.5 h-3.5 text-[#BEFA46]" />
