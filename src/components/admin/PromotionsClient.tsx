@@ -197,4 +197,37 @@ export function PromotionsClient({
               Criar
             </button>
           </div>
-// step 6/8
+        </div>
+      </form>
+
+      <div className="rounded-3xl border border-zinc-800 bg-[#121216] divide-y divide-zinc-800">
+        {promos.map((pr) => (
+          <div
+            key={pr.id}
+            className="p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4"
+          >
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-extrabold text-white">{pr.name}</span>
+                {pr.discount_percent > 0 && (
+                  <span className="px-2 py-0.5 rounded-full bg-[#BEFA46] text-[#09090B] text-[10px] font-black">
+                    -{pr.discount_percent}%
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-zinc-300 mt-0.5">
+                Produto: <strong>{pr.product_name}</strong> • De{' '}
+                <span className="line-through text-zinc-500">
+                  {formatCurrency(pr.base_price)}
+                </span>{' '}
+                por <strong className="text-[#BEFA46]">{formatCurrency(pr.promo_price)}</strong>
+              </p>
+              {(pr.starts_at || pr.ends_at) && (
+                <p className="text-[11px] text-zinc-500 mt-0.5">
+                  Vigência: {pr.starts_at ? formatDateTime(pr.starts_at) : 'Imediato'} até{' '}
+                  {pr.ends_at ? formatDateTime(pr.ends_at) : 'Indeterminado'}
+                </p>
+              )}
+            </div>
+
+// step 7/8
