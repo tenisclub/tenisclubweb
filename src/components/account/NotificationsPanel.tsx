@@ -43,3 +43,47 @@ export function NotificationsPanel({
               {unreadCount} nova(s)
             </span>
           )}
+        </div>
+        {unreadCount > 0 && (
+          <button
+            type="button"
+            onClick={markAllRead}
+            className="inline-flex items-center gap-1 text-xs font-bold text-[#BEFA46] hover:underline"
+          >
+            <CheckCheck className="w-3.5 h-3.5" />
+            Marcar todas como lidas
+          </button>
+        )}
+      </div>
+
+      <div className="divide-y divide-zinc-800/80 max-h-72 overflow-y-auto">
+        {items.slice(0, 8).map((n) => (
+          <div
+            key={n.id}
+            className={cn(
+              'py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2',
+              !n.is_read && 'bg-[#BEFA46]/[0.03] -mx-2 px-2 rounded-xl'
+            )}
+          >
+            <div>
+              <p className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
+                {!n.is_read && <span className="w-2 h-2 rounded-full bg-[#BEFA46]" />}
+                {n.title}
+              </p>
+              <p className="text-xs text-zinc-400 mt-0.5">{n.message}</p>
+            </div>
+            <div className="flex items-center gap-3 shrink-0 text-[11px] text-zinc-500">
+              <span>{formatDateTime(n.created_at)}</span>
+              {n.link && (
+                <Link href={n.link} className="font-bold text-[#BEFA46] hover:underline">
+                  Abrir →
+                </Link>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
