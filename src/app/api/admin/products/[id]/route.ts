@@ -367,3 +367,55 @@ export async function DELETE(
   }
 
   const { id } = await params;
+  const supabase = createServiceClient();
+
+  // Check if product is referenced in historical order_items
+  const { count } = await supabase
+    .from('order_items')
+    .select('id', { count: 'exact', head: true })
+    .eq('product_id', id);
+
+  if ((count || 0) > 0) {
+    // Archive safely to preserve order history integrity
+    await supabase
+      .from('products')
+      .update({ is_active: false, updated_at: new Date().toISOString() })
+      .eq('id', id);
+
+    revalidateStoreData('catalog');
+
+    void supabase
+      .from('admin_logs')
+      .insert({
+        admin_id: session.userId,
+        action: 'product.archive',
+        entity_type: 'product',
+        entity_id: id,
+        details: { reason: 'Produto possui pedidos históricos vinculados; arquivado como inativo.' },
+      })
+      .then(() => {});
+
+    return NextResponse.json({
+      archived: true,
+      message: 'Produto arquivado (inativado) pois possui histórico de pedidos.',
+    });
+  }
+
+  const { error } = await supabase.from('products').delete().eq('id', id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  revalidateStoreData('catalog');
+
+  void supabase
+    .from('admin_logs')
+    .insert({
+      admin_id: session.userId,
+      action: 'product.delete',
+      entity_type: 'product',
+      entity_id: id,
+      details: {},
+    })
+    .then(() => {});
+
+  return NextResponse.json({ deleted: true });
+}
