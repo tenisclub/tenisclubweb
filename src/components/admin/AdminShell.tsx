@@ -72,7 +72,20 @@ export function AdminShell({
 
   useEffect(() => {
     setOptimisticHref(null);
+    setSidebarOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const startY = window.scrollY;
+    const handleScroll = () => {
+      if (Math.abs(window.scrollY - startY) > 10) {
+        setSidebarOpen(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [sidebarOpen]);
 
   useEffect(() => {
     router.prefetch('/login');

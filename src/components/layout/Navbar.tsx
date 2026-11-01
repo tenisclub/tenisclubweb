@@ -42,7 +42,22 @@ export function Navbar({ settings }: { settings: StoreSettings }) {
 
   useEffect(() => {
     setOptimisticHref(null);
+    setMobileOpen(false);
   }, [pathname]);
+
+  // Close mobile menu automatically when scrolling the page on mobile
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const startY = window.scrollY;
+    const handleScroll = () => {
+      if (document.activeElement?.tagName === 'INPUT') return;
+      if (Math.abs(window.scrollY - startY) > 10) {
+        setMobileOpen(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [mobileOpen]);
 
   const effectivePath = optimisticHref || pathname;
 
