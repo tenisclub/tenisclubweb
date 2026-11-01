@@ -291,4 +291,53 @@ export default async function AdminDashboardPage() {
                           {st?.label || o.status}
                         </span>
                       </div>
-// step 6/8
+                      <p className="text-xs text-zinc-400 truncate">
+                        {o.customer_name} • {formatDateTime(o.created_at)}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3 ml-auto sm:ml-0">
+                      <span className="text-sm font-black text-[#BEFA46]">
+                        {formatCurrency(o.total)}
+                      </span>
+                      <Link
+                        href={`/admin/pedidos/${o.id}`}
+                        className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-white"
+                      >
+                        Abrir
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Low Stock & Top Selling */}
+        <div className="xl:col-span-5 space-y-6">
+          <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-4">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-sm sm:text-base font-black text-white flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+                Estoque Baixo / Esgotado
+              </h2>
+              <Link href="/admin/estoque" className="text-xs font-bold text-[#BEFA46] hover:underline shrink-0">
+                Repor →
+              </Link>
+            </div>
+
+            {lowStockVariants.length === 0 ? (
+              <div className="flex items-center gap-2 text-xs text-emerald-400 py-3">
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                Todas as numerações estão com estoque saudável.
+              </div>
+            ) : (
+              <div className="divide-y divide-zinc-800/80 max-h-56 overflow-y-auto">
+                {lowStockVariants.slice(0, 8).map((item, idx) => (
+                  <div
+                    key={`${item.productId}-${item.size}-${idx}`}
+                    className="py-2.5 flex items-center justify-between gap-2 text-xs"
+                  >
+                    <div className="min-w-0">
+                      <p className="font-bold text-white truncate">{item.productName}</p>
+// step 7/8
