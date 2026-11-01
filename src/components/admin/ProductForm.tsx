@@ -327,4 +327,70 @@ export function ProductForm({
           </div>
 
           <div className="space-y-1.5">
-// step 5/12
+            <label className="text-xs font-semibold text-zinc-300">Código / SKU</label>
+            <input
+              type="text"
+              value={sku}
+              onChange={(e) => setSku(e.target.value)}
+              placeholder="Ex: REF. 015"
+              className="w-full h-11 px-4 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-zinc-300">Marca</label>
+            <select
+              value={brandId}
+              onChange={(e) => setBrandId(e.target.value)}
+              className="w-full h-11 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white"
+            >
+              <option value="">Selecione...</option>
+              {brands.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-zinc-300">Categoria / Tipo</label>
+            <select
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+              className="w-full h-11 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white"
+            >
+              <option value="">Selecione...</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-zinc-300">Gênero / Público</label>
+            <select
+              value={gender}
+              onChange={(e) => setGender(e.target.value as ProductGender)}
+              className="w-full h-11 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white"
+            >
+              <option value="masculino">Masculino</option>
+              <option value="feminino">Feminino</option>
+              <option value="infantil">Infantil</option>
+              <option value="unissex">Unissex</option>
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-zinc-300">
+              Preço de Compra / Custo (R$)
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={costPrice}
+              onChange={(e) => setCostPrice(e.target.value)}
+// step 6/12
