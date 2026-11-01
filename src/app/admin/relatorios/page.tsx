@@ -38,3 +38,43 @@ export default async function AdminRelatoriosPage() {
   const deliveryCount = validOrders.filter((o) => o.delivery_method === 'local_delivery').length;
 
   const statusBreakdown = Object.entries(ORDER_STATUS_CONFIG).map(([key, cfg]) => ({
+    key,
+    label: cfg.label,
+    count: orders.filter((o) => o.status === key).length,
+  }));
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <span className="text-xs font-extrabold uppercase tracking-widest text-[#BEFA46]">
+          Inteligência Comercial
+        </span>
+        <h1 className="text-2xl sm:text-3xl font-black text-white mt-0.5">
+          Relatórios Gerenciais
+        </h1>
+        <p className="text-xs sm:text-sm text-zinc-400">
+          Indicadores consolidados de pedidos, recebimentos manuais e valoração do estoque atual.
+        </p>
+      </div>
+
+      {/* Commercial Indicators */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-5 sm:p-6 space-y-1">
+          <span className="text-xs text-zinc-400 font-semibold">
+            Volume Registrado em Pedidos Ativos
+          </span>
+          <p className="text-2xl sm:text-3xl font-black text-[#BEFA46]">
+            {formatCurrency(registeredTotal)}
+          </p>
+          <p className="text-[11px] text-zinc-500">{validOrders.length} pedido(s) não cancelados</p>
+        </div>
+
+        <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-5 sm:p-6 space-y-1">
+          <span className="text-xs text-zinc-400 font-semibold">
+            Pagamentos Confirmados Manualmente
+          </span>
+          <p className="text-2xl sm:text-3xl font-black text-emerald-400">
+            {formatCurrency(manualPaidTotal)}
+          </p>
+          <p className="text-[11px] text-zinc-500">{paidOrders.length} pedido(s) quitados</p>
+        </div>
