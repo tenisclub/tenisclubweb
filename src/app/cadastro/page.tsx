@@ -178,4 +178,49 @@ function CadastroForm() {
               fill="#34A853"
               d="M12 24c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5l-3.7 2.8C3.5 21.4 7.4 24 12 24z"
             />
-// step 4/8
+          </svg>
+          {googleLoading ? 'Conectando ao Google...' : 'Cadastrar rapidamente com Google'}
+        </button>
+
+        <div className="flex items-center gap-3">
+          <span className="flex-1 border-t border-zinc-800" />
+          <span className="shrink-0 whitespace-nowrap text-[11px] uppercase tracking-wider text-zinc-500 font-semibold">
+            ou preencha seus dados
+          </span>
+          <span className="flex-1 border-t border-zinc-800" />
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-zinc-300">Nome completo *</label>
+            <div className="relative">
+              <User className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                required
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Ex: Lucas Oliveira"
+                className="w-full h-11 pl-10 pr-4 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#BEFA46]"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-zinc-300">E-mail *</label>
+              <div className="relative">
+                <Mail className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="seu@email.com"
+                  className="w-full h-11 pl-10 pr-3 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#BEFA46]"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+// step 5/8
