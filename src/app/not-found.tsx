@@ -18,4 +18,14 @@ export default function NotFound() {
         </p>
       </div>
 
-// step 2/4
+      <div className="flex flex-wrap items-center justify-center gap-3">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-[#BEFA46] text-[#09090B] text-sm font-extrabold"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Voltar ao Início
+        </Link>
+        <Link
+          href="/produtos"
+// step 3/4
