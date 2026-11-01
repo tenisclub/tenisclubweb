@@ -12,4 +12,11 @@ export default function CategoryLoading() {
             key={i}
             className="rounded-3xl border border-zinc-800/80 bg-[#121216] overflow-hidden"
           >
-// step 2/4
+            <div className="aspect-square bg-zinc-900/80" />
+            <div className="p-4 space-y-2.5">
+              <div className="h-3 w-16 rounded-full bg-zinc-800" />
+              <div className="h-5 w-4/5 rounded-lg bg-zinc-800" />
+              <div className="h-6 w-28 rounded-lg bg-zinc-800/70" />
+            </div>
+          </div>
+// step 3/4
