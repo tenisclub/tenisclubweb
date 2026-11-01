@@ -79,4 +79,85 @@ export function CheckoutStep3Customizer({
     const nextCard: CheckoutExtraCard =
       type === 'option'
         ? {
-// step 1/24
+            id,
+            enabled: true,
+            card_type: 'option',
+            icon: 'zap',
+            title: 'Entrega Expressa',
+            description: 'Receba hoje mesmo alinhando horário pelo WhatsApp.',
+            badge: 'A combinar',
+            fee_mode: 'to_combine',
+            fee: 0,
+            free_threshold: 0,
+            require_address: true,
+            visibility: 'always',
+          }
+        : {
+            id,
+            enabled: true,
+            card_type: 'info',
+            icon: 'sparkles',
+            title: 'Confirmação de pedido',
+            description: 'Confirme seu pedido diretamente no WhatsApp da loja.',
+            badge: 'A combinar',
+            fee_mode: 'free',
+            fee: 0,
+            free_threshold: 0,
+            require_address: false,
+            visibility: 'always',
+          };
+
+    updateDeliveryCfg({ extra_cards: [...deliveryCfg.extra_cards, nextCard] });
+    setExpandedCardId(id);
+    if (type === 'option') {
+      setPreviewOptionKey(`custom:${id}`);
+    }
+  };
+
+  const updateExtraCard = (id: string, patch: Partial<CheckoutExtraCard>) => {
+    updateDeliveryCfg({
+      extra_cards: deliveryCfg.extra_cards.map((c) =>
+        c.id === id ? { ...c, ...patch } : c
+      ),
+    });
+  };
+
+  const removeExtraCard = (id: string) => {
+    updateDeliveryCfg({
+      extra_cards: deliveryCfg.extra_cards.filter((c) => c.id !== id),
+    });
+    if (expandedCardId === id) {
+      setExpandedCardId(null);
+    }
+  };
+
+  const buildStoreWhatsAppLink = () => {
+    const digits = (form.whatsapp || '').replace(/\D/g, '');
+    const text = encodeURIComponent(
+      'Olá! Gostaria de consultar a taxa e o prazo de entrega para o meu endereço.'
+    );
+    return `https://wa.me/${digits}?text=${text}`;
+  };
+
+  const addCustomButton = () => {
+    const nextBtn: CheckoutCustomButton = {
+      id: `btn-${Date.now()}`,
+      label: 'Consultar taxa no WhatsApp',
+      url: buildStoreWhatsAppLink(),
+      icon: 'message-circle',
+      variant: 'whatsapp',
+      visibility: 'always',
+    };
+    updateDeliveryCfg({ custom_buttons: [...deliveryCfg.custom_buttons, nextBtn] });
+  };
+
+  const updateCustomButton = (id: string, patch: Partial<CheckoutCustomButton>) => {
+    updateDeliveryCfg({
+      custom_buttons: deliveryCfg.custom_buttons.map((b) =>
+        b.id === id ? { ...b, ...patch } : b
+      ),
+    });
+  };
+
+  const removeCustomButton = (id: string) => {
+// step 2/24
