@@ -43,4 +43,14 @@ export function Footer({ settings }: { settings: StoreSettings }) {
       {showTop && (
         <button
           type="button"
-// step 4/5
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="fixed bottom-5 left-5 z-40 p-3 rounded-full bg-[#18181F] border border-zinc-700 hover:border-[#BEFA46] text-[#BEFA46] shadow-xl transition"
+          aria-label="Voltar ao topo"
+          title="Voltar ao topo"
+        >
+          <ArrowUp className="w-4 h-4" />
+        </button>
+      )}
+    </footer>
+  );
+}
