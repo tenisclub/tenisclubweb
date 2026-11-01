@@ -322,4 +322,50 @@ export function SettingsClient({ initialSettings }: { initialSettings: StoreSett
                   {uploadingField === 'logo_url' ? 'Enviando...' : 'Enviar Logo'}
                   <input
                     type="file"
-// step 7/12
+                    accept="image/*"
+                    onChange={(e) => handleUploadAsset(e, 'logo_url')}
+                    className="hidden"
+                  />
+                </label>
+                {form.logo_url && (
+                  <button
+                    type="button"
+                    onClick={() => setField('logo_url', null)}
+                    className="text-xs text-red-400 hover:underline cursor-pointer"
+                  >
+                    Restaurar
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-zinc-800 bg-[#18181F] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="space-y-0.5">
+                <span className="text-xs font-bold text-white block">
+                  Miniatura de Compartilhamento (opcional)
+                </span>
+                <p className="text-[11px] text-zinc-400">
+                  Usada como imagem OpenGraph ao compartilhar o link.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-[#BEFA46] transition cursor-pointer">
+                  <Upload className="w-3.5 h-3.5" />
+                  {uploadingField === 'hero_banner_url' ? 'Enviando...' : 'Enviar Imagem'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleUploadAsset(e, 'hero_banner_url')}
+                    className="hidden"
+                  />
+                </label>
+                {form.hero_banner_url && (
+                  <button
+                    type="button"
+                    onClick={() => setField('hero_banner_url', null)}
+                    className="text-xs text-red-400 hover:underline cursor-pointer"
+                  >
+                    Remover
+                  </button>
+                )}
+// step 8/12
