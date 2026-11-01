@@ -114,3 +114,60 @@ export async function PATCH(request: Request) {
   }
 
   const { userId, roleName, is_active } = await request.json();
+  if (!userId) return NextResponse.json({ error: 'Usuário inválido.' }, { status: 400 });
+
+  if (userId === session.userId && (roleName === 'customer' || is_active === false)) {
+    return NextResponse.json(
+      { error: 'Você não pode remover seu próprio acesso de Administrador Principal.' },
+      { status: 400 }
+    );
+  }
+
+  const supabase = createServiceClient();
+
+  if (is_active !== undefined) {
+    await supabase
+      .from('user_profiles')
+      .update({ is_active: Boolean(is_active), updated_at: new Date().toISOString() })
+      .eq('id', userId);
+  }
+
+  if (roleName && ['customer', 'admin_operational', 'super_admin'].includes(roleName)) {
+    const { data: adminRoles } = await supabase
+      .from('roles')
+      .select('id, name')
+      .in('name', ['admin_operational', 'super_admin']);
+
+    const adminRoleIds = (adminRoles || []).map((r) => r.id);
+    if (adminRoleIds.length > 0) {
+      await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', userId)
+        .in('role_id', adminRoleIds);
+    }
+
+    if (roleName !== 'customer') {
+      const targetRole = (adminRoles || []).find((r) => r.name === roleName);
+      if (targetRole) {
+        await supabase.from('user_roles').insert({
+          user_id: userId,
+          role_id: targetRole.id,
+          assigned_by: session.userId,
+        });
+      }
+    }
+  }
+
+  await supabase.from('admin_logs').insert({
+    admin_id: session.userId,
+    action: 'admin.update_access',
+    entity_type: 'user_profile',
+    entity_id: userId,
+    details: { roleName, is_active },
+  });
+
+  revalidateStoreData();
+  return NextResponse.json({ success: true });
+}
+
