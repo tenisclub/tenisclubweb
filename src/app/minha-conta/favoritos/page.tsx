@@ -46,4 +46,15 @@ export default async function FavoritosPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
           {favProducts.map((product) => (
-// step 4/5
+            <ProductCard
+              key={product.id}
+              product={product}
+              whatsapp={settings.whatsapp}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
