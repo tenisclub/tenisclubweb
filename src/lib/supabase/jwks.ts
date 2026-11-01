@@ -23,4 +23,16 @@ const state: JwksGlobalState =
     cachedAt: 0,
     inflight: null,
   });
-// step 2/5
+
+export async function getSupabaseJwks(): Promise<JwksOption | undefined> {
+  const now = Date.now();
+  if (state.cachedJwks && now - state.cachedAt < JWKS_TTL_MS) {
+    return state.cachedJwks;
+  }
+
+  if (state.inflight) {
+    return state.inflight;
+  }
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+// step 3/5
