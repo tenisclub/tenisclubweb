@@ -25,4 +25,12 @@ export default async function ProdutosPage({
       categories={categories}
       brands={brands}
       whatsapp={settings.whatsapp}
-// step 3/4
+      initialQuery={sp.q || ''}
+      initialGender={sp.genero || 'todos'}
+      initialCategory={sp.categoria || 'todos'}
+      heading={sp.q ? `Resultados para "${sp.q}"` : 'Todos os Tênis & Calçados'}
+      subheading="Confira numerações disponíveis em tempo real, preços promocionais e lançamentos."
+    />
+  );
+}
+
