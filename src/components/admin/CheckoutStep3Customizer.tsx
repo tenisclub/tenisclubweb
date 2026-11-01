@@ -1459,3 +1459,125 @@ export function CheckoutStep3Customizer({
                     type="text"
                     value={deliveryCfg.step_title}
                     onChange={(e) => updateDeliveryCfg({ step_title: e.target.value })}
+                    placeholder="Ex: Confirmar pedido"
+                    className="mt-1 w-full h-10 px-3 rounded-xl bg-[#121216] border border-zinc-800 text-xs sm:text-sm text-white"
+                  />
+                </div>
+                <CheckoutIconPicker
+                  label="Ícone do Título"
+                  value={deliveryCfg.step_icon}
+                  onChange={(step_icon) => updateDeliveryCfg({ step_icon })}
+                />
+                <div>
+                  <label className="text-[11px] font-semibold text-zinc-400">
+                    Texto do Botão Principal
+                  </label>
+                  <input
+                    type="text"
+                    value={deliveryCfg.next_button_label}
+                    onChange={(e) => updateDeliveryCfg({ next_button_label: e.target.value })}
+                    placeholder="Finalizar Pedido no WhatsApp"
+                    className="mt-1 w-full h-10 px-3 rounded-xl bg-[#121216] border border-zinc-800 text-xs sm:text-sm text-white"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Extra Action Buttons */}
+            <div className="rounded-2xl border border-zinc-800/90 bg-[#18181F] p-4 space-y-3.5">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <h3 className="text-sm font-black text-white">
+                    Botões Extras na Etapa 3 (Opcional)
+                  </h3>
+                  <p className="text-[11px] text-zinc-400">
+                    Links auxiliares como Google Maps da loja ou cotação de frete.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={addCustomButton}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-zinc-700 bg-[#121216] hover:bg-zinc-800 text-xs font-bold text-[#BEFA46] transition cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Adicionar Botão
+                </button>
+              </div>
+
+              {deliveryCfg.custom_buttons.length > 0 && (
+                <div className="space-y-3 pt-1">
+                  {deliveryCfg.custom_buttons.map((btn) => (
+                    <div
+                      key={btn.id}
+                      className="rounded-xl border border-zinc-800 bg-[#121216] p-3.5 space-y-3"
+                    >
+                      <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-end">
+                        <div className="sm:col-span-5">
+                          <label className="text-[11px] font-semibold text-zinc-400">
+                            Texto do Botão
+                          </label>
+                          <input
+                            type="text"
+                            value={btn.label}
+                            onChange={(e) =>
+                              updateCustomButton(btn.id, { label: e.target.value })
+                            }
+                            placeholder="Ex: Ver localização no Mapa"
+                            className="mt-1 w-full h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+                          />
+                        </div>
+                        <div className="sm:col-span-4">
+                          <CheckoutIconPicker
+                            label="Ícone"
+                            value={btn.icon}
+                            onChange={(icon) => updateCustomButton(btn.id, { icon })}
+                          />
+                        </div>
+                        <div className="sm:col-span-3">
+                          <label className="text-[11px] font-semibold text-zinc-400">
+                            Estilo
+                          </label>
+                          <select
+                            value={btn.variant}
+                            onChange={(e) =>
+                              updateCustomButton(btn.id, {
+                                variant: e.target.value as CheckoutCustomButton['variant'],
+                              })
+                            }
+                            className="mt-1 w-full h-10 px-2.5 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+                          >
+                            <option value="whatsapp">Verde WhatsApp</option>
+                            <option value="volt">Destaque Volt</option>
+                            <option value="outline">Borda Discreta</option>
+                            <option value="subtle">Sutil Escuro</option>
+                          </select>
+                        </div>
+
+                        <div className="sm:col-span-8">
+                          <div className="flex items-center justify-between gap-1">
+                            <label className="text-[11px] font-semibold text-zinc-400">
+                              Link (URL)
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                updateCustomButton(btn.id, { url: buildStoreWhatsAppLink() })
+                              }
+                              className="text-[10px] font-bold text-[#BEFA46] hover:underline cursor-pointer"
+                            >
+                              Usar WhatsApp da loja
+                            </button>
+                          </div>
+                          <input
+                            type="text"
+                            value={btn.url}
+                            onChange={(e) =>
+                              updateCustomButton(btn.id, { url: e.target.value })
+                            }
+                            placeholder="https://wa.me/5511999999999"
+                            className="mt-1 w-full h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+                          />
+                        </div>
+
+                        <div className="sm:col-span-3">
+                          <label className="text-[11px] font-semibold text-zinc-400">
