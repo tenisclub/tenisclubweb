@@ -784,4 +784,53 @@ export function CheckoutClient({
                               <p className="text-xs text-zinc-400 pl-6 leading-relaxed">
                                 {opt.subtitle}
                               </p>
-// step 16/24
+                            )}
+                            {opt.freeThreshold > 0 && total < opt.freeThreshold && (
+                              <p className="text-[11px] font-semibold text-[#BEFA46] pl-6">
+                                Frete grátis acima de {formatCurrency(opt.freeThreshold)}
+                              </p>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* 3. Distinct Info Callouts (Left Accent Bar so they never blend with inputs/options) */}
+              {effectiveDeliveryMethod === 'pickup' &&
+                !deliveryCfg.pickup_info_removed &&
+                deliveryCfg.pickup_info_card_enabled &&
+                (settings.pickup_info ||
+                  (deliveryCfg.show_pickup_hours && settings.business_hours)) && (
+                  <div className="rounded-xl border border-zinc-800/90 border-l-[3px] border-l-[#BEFA46] bg-[#16161E] px-4 py-3 text-xs text-zinc-300 space-y-1">
+                    {deliveryCfg.pickup_info_card_title && (
+                      <div className="flex items-center gap-1.5 font-extrabold text-white">
+                        {deliveryCfg.pickup_info_card_icon !== 'none' && (
+                          <CheckoutIcon
+                            name={deliveryCfg.pickup_info_card_icon}
+                            className="w-4 h-4 text-[#BEFA46] shrink-0"
+                          />
+                        )}
+                        <span>{deliveryCfg.pickup_info_card_title}</span>
+                      </div>
+                    )}
+                    {settings.pickup_info && (
+                      <p className="whitespace-pre-line text-zinc-300 leading-relaxed">
+                        {settings.pickup_info}
+                      </p>
+                    )}
+                    {deliveryCfg.show_pickup_hours && settings.business_hours && (
+                      <p className="text-zinc-400">Horário: {settings.business_hours}</p>
+                    )}
+                  </div>
+                )}
+
+              {effectiveDeliveryMethod === 'local_delivery' &&
+                !deliveryCfg.delivery_removed &&
+                deliveryCfg.delivery_info_card_enabled &&
+                settings.delivery_info && (
+                  <div className="rounded-xl border border-zinc-800/90 border-l-[3px] border-l-[#BEFA46] bg-[#16161E] px-4 py-3 text-xs text-zinc-300 space-y-1">
+                    {deliveryCfg.delivery_info_card_title && (
+// step 17/24
