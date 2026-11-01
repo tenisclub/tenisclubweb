@@ -26,4 +26,18 @@ export default async function AdminAdministradoresPage() {
 
   const adminMap = new Map<string, AdminUserItem>();
   for (const row of userRolesRaw || []) {
-// step 2/5
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const prof: any = Array.isArray(row.user_profiles) ? row.user_profiles[0] : row.user_profiles;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const role: any = Array.isArray(row.roles) ? row.roles[0] : row.roles;
+    if (!prof || !role) continue;
+
+    const existing = adminMap.get(prof.id);
+    if (!existing || role.name === 'super_admin') {
+      adminMap.set(prof.id, {
+        id: prof.id,
+        full_name: prof.full_name,
+        email: prof.email,
+        phone: prof.phone || '',
+        is_active: Boolean(prof.is_active),
+// step 3/5
