@@ -107,4 +107,24 @@ export default async function MeusPedidosPage() {
                         <img
                           src={item.product_image}
                           alt={item.product_name}
-// step 5/6
+                          className="w-12 h-12 rounded-lg object-cover bg-[#EAE0D5] shrink-0"
+                        />
+                      )}
+                      <div className="text-xs min-w-0">
+                        <p className="font-bold text-white truncate">{item.product_name}</p>
+                        <p className="text-zinc-400">
+                          {item.quantity}x • Tam. {item.size} • {formatCurrency(item.unit_price)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
