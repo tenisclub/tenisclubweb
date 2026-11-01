@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server';
-import { getAuthSession } from '@/lib/auth';
+import { getVerifiedClaims } from '@/lib/auth';
 import { getUserNavbarState } from '@/lib/catalog';
+import { computeUserSyncTag } from '@/lib/revalidate-store';
 import { createServiceClient } from '@/lib/supabase/server';
+import type { UserProfile, UserRole } from '@/types/database';
 
 export async function GET() {
-  const session = await getAuthSession();
-  if (!session) {
+  const claims = await getVerifiedClaims();
+  if (!claims?.sub) {
     return NextResponse.json({
       authenticated: false,
       user: null,
@@ -16,31 +18,19 @@ export async function GET() {
     });
   }
 
-  const supabase = createServiceClient();
-  const [navState, notifRes] = await Promise.all([
-    getUserNavbarState(session.userId),
-    session.isAdmin
-      ? supabase
-          .from('notifications')
-          .select('id', { count: 'exact', head: true })
-          .eq('target_audience', 'admin')
-          .eq('is_read', false)
-      : supabase
-          .from('notifications')
-          .select('id', { count: 'exact', head: true })
-          .eq('target_audience', 'customer')
-          .eq('user_id', session.userId)
-          .eq('is_read', false),
-  ]);
+  const userId = claims.sub;
+  const claimEmail = typeof claims.email === 'string' ? claims.email : '';
+  const userMeta = claims.user_metadata || {};
+  const appMeta = claims.app_metadata || {};
 
-  return NextResponse.json({
-    authenticated: true,
-    user: session.profile,
-    role: session.role,
-    isAdmin: session.isAdmin,
-    isSuperAdmin: session.isSuperAdmin,
-    cartCount: navState.cartCount,
-    favoriteIds: navState.favoriteIds,
-    unreadNotifications: notifRes.count || 0,
-  });
-}
+  const supabase = createServiceClient();
+
+  // Single parallel wave instead of 2 sequential round-trips to Postgres
+  const [{ data: profileRow }, { data: userRoles }, navState, { data: unreadRows }] =
+    await Promise.all([
+      supabase.from('user_profiles').select('*').eq('id', userId).maybeSingle(),
+      supabase.from('user_roles').select('roles(name)').eq('user_id', userId),
+      getUserNavbarState(userId),
+      supabase
+        .from('notifications')
+        .select('target_audience, user_id')
