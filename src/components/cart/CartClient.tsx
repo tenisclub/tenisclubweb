@@ -126,3 +126,67 @@ export function CartClient({
         <Link
           href="/produtos"
           className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#BEFA46] text-[#09090B] text-sm font-extrabold"
+        >
+          Explorar Catálogo
+          <ArrowRight className="w-4 h-4" />
+        </Link>
+      </div>
+    );
+  }
+
+  const hasUnavailable = items.some((i) => !i.is_available);
+  const savings = Math.max(0, subtotal - total);
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
+      <div className="lg:col-span-8 space-y-4">
+        {hasUnavailable && (
+          <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4 flex items-start gap-3 text-xs text-amber-200">
+            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+            <span>
+              Alguns itens no carrinho ficaram sem estoque ou inativos. Remova-os para prosseguir com o pedido.
+            </span>
+          </div>
+        )}
+
+        {items.map((item) => (
+          <div
+            key={item.id}
+            className="rounded-2xl border border-zinc-800 bg-[#121216] p-4 sm:p-5 flex flex-col sm:flex-row gap-4 sm:items-center justify-between"
+          >
+            <div className="flex items-center gap-3.5 sm:gap-4 min-w-0 flex-1">
+              <Link
+                href={`/produto/${item.product_slug}`}
+                className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-[#EAE0D5] shrink-0"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={item.product_image}
+                  alt={item.product_name}
+                  className="w-full h-full object-cover"
+                />
+              </Link>
+
+              <div className="space-y-1 min-w-0 flex-1">
+                {item.brand_name && (
+                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#BEFA46]">
+                    {item.brand_name}
+                  </span>
+                )}
+                <Link
+                  href={`/produto/${item.product_slug}`}
+                  className="block text-sm sm:text-base font-extrabold text-white hover:text-[#BEFA46] line-clamp-2 break-words"
+                >
+                  {item.product_name}
+                </Link>
+                <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-400">
+                  <span className="px-2 py-0.5 rounded-md bg-zinc-800/80 text-zinc-200 font-semibold">
+                    Tam. {item.size}
+                  </span>
+                  <span>Cor: {item.color}</span>
+                </div>
+                <div className="text-xs text-zinc-400 pt-0.5">
+                  Unitário:{' '}
+                  <strong className="text-zinc-200">{formatCurrency(item.unit_price)}</strong>
+                </div>
+                {!item.is_available && (
