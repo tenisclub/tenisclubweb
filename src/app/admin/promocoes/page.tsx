@@ -9,4 +9,15 @@ export const dynamic = 'force-dynamic';
 
 export default async function AdminPromocoesPage() {
   const supabase = createServiceClient();
-// step 1/5
+
+  const [{ data: promosRaw }, products] = await Promise.all([
+    supabase
+      .from('promotions')
+      .select('*, products(name, base_price)')
+      .order('created_at', { ascending: false }),
+    getAdminProducts(),
+  ]);
+
+  const promos: PromotionRow[] = (promosRaw || []).map((pr) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+// step 2/5
