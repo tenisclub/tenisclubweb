@@ -106,4 +106,31 @@ export function CheckoutIconPicker({
               ? 'border-[#BEFA46] text-white'
               : 'border-zinc-800 text-zinc-200 hover:border-zinc-700'
           )}
-// step 4/6
+        >
+          <span className="inline-flex items-center gap-2 min-w-0">
+            <span className="w-6 h-6 rounded-lg bg-[#18181F] border border-zinc-800 flex items-center justify-center text-[#BEFA46] shrink-0">
+              {currentOpt.key === 'none' ? (
+                <Ban className="w-3.5 h-3.5 text-zinc-500" />
+              ) : (
+                <CheckoutIcon name={currentOpt.key} className="w-3.5 h-3.5" />
+              )}
+            </span>
+            <span className="truncate">{currentOpt.label}</span>
+          </span>
+          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-zinc-400 shrink-0">
+            <span>Trocar</span>
+            <ChevronDown
+              className={cn('w-3.5 h-3.5 transition-transform', open && 'rotate-180')}
+            />
+          </span>
+        </button>
+
+        {open && (
+          <div className="rounded-xl border border-zinc-800 bg-[#121216] p-2 grid grid-cols-3 sm:grid-cols-5 gap-1.5">
+            {CHECKOUT_ICON_OPTIONS.map((opt) => {
+              const active = value === opt.key;
+              return (
+                <button
+                  key={opt.key}
+                  type="button"
+// step 5/6
