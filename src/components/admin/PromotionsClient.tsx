@@ -97,4 +97,38 @@ export function PromotionsClient({
     const res = await fetch(`/api/admin/promotions?id=${encodeURIComponent(id)}`, {
       method: 'DELETE',
     });
-// step 3/8
+    if (res.ok) {
+      setPromos((prev) => prev.filter((p) => p.id !== id));
+      toast('Promoção removida.', 'info');
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-black text-white">Gerenciar Promoções</h1>
+        <p className="text-xs sm:text-sm text-zinc-400">
+          Crie descontos, programe campanhas de início/término e destaque produtos na página inicial.
+        </p>
+      </div>
+
+      <form
+        onSubmit={handleCreate}
+        className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-4"
+      >
+        <h2 className="text-base font-black text-white">Nova Campanha Promocional</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div>
+            <label className="text-xs text-zinc-400">Nome da Campanha *</label>
+            <input
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Ex: Semana do Sneaker"
+              className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+            />
+          </div>
+
+          <div>
+// step 4/8
