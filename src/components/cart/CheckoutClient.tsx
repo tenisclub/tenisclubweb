@@ -71,3 +71,77 @@ export function CheckoutClient({
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [mobileItemsOpen, setMobileItemsOpen] = useState(false);
 
+  const deliveryCfg = useMemo(
+    () => normalizeCheckoutDeliveryConfig(settings.checkout_delivery_config),
+    [settings.checkout_delivery_config]
+  );
+
+  const selectableOptions = useMemo(
+    () => getSelectableCheckoutOptions(deliveryCfg, settings.address, total),
+    [deliveryCfg, settings.address, total]
+  );
+
+  // Step 2: Customer info & intended payment method
+  const [customerName, setCustomerName] = useState(profile.full_name || '');
+  const [customerEmail, setCustomerEmail] = useState(profile.email || '');
+  const [customerPhone, setCustomerPhone] = useState(() =>
+    formatPhoneBr(profile.phone || '')
+  );
+  const [paymentChoice, setPaymentChoice] = useState<
+    'pix' | 'card' | 'cash' | 'other' | ''
+  >('');
+  const [customPaymentMethod, setCustomPaymentMethod] = useState('');
+
+  const resolvedPaymentMethod = useMemo(() => {
+    if (paymentChoice === 'pix') return 'Pix';
+    if (paymentChoice === 'card') return 'Cartão';
+    if (paymentChoice === 'cash') return 'Dinheiro';
+    if (paymentChoice === 'other') return customPaymentMethod.trim();
+    return '';
+  }, [paymentChoice, customPaymentMethod]);
+
+  // Step 3: Delivery or Pickup (supports main cards AND custom selectable cards)
+  const [selectedOptionKey, setSelectedOptionKey] = useState<string>(() =>
+    resolveDefaultOptionKey(deliveryCfg)
+  );
+
+  // Keep selectedOptionKey valid when admin updates Etapa 3 cards in real time
+  useEffect(() => {
+    if (selectableOptions.length === 0) return;
+    if (!selectableOptions.some((o) => o.key === selectedOptionKey)) {
+      setSelectedOptionKey(selectableOptions[0].key);
+    }
+  }, [selectableOptions, selectedOptionKey]);
+
+  const activeSelectedOption =
+    selectableOptions.find((o) => o.key === selectedOptionKey) ??
+    selectableOptions[0] ??
+    null;
+
+  const effectiveDeliveryMethod: DeliveryMethod =
+    activeSelectedOption?.deliveryMethod ?? 'pickup';
+
+  const defaultAddr = savedAddresses.find((a) => a.is_default) || savedAddresses[0];
+  const [zipCode, setZipCode] = useState(defaultAddr?.zip_code || '');
+  const [street, setStreet] = useState(defaultAddr?.street || '');
+  const [number, setNumber] = useState(defaultAddr?.number || '');
+  const [complement, setComplement] = useState(defaultAddr?.complement || '');
+  const [neighborhood, setNeighborhood] = useState(defaultAddr?.neighborhood || '');
+  const [city, setCity] = useState(defaultAddr?.city || 'São Paulo');
+  const [stateUf, setStateUf] = useState(defaultAddr?.state || 'SP');
+  const [reference, setReference] = useState(defaultAddr?.reference || '');
+
+  // Notes & submission
+  const [customerNotes, setCustomerNotes] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const totalUnits = useMemo(
+    () => items.reduce((acc, item) => acc + item.quantity, 0),
+    [items]
+  );
+
+  const shippingCalc = useMemo(
+    () =>
+      calculateCheckoutShipping(
+        deliveryCfg,
