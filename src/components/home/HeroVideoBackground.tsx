@@ -318,3 +318,56 @@ function DesktopRandomWall() {
 
     columnsRef.current = nextColumns;
     setColumns(nextColumns);
+
+    // After the 650ms fade-out completes, preload a new random video into `finishedSlot`
+    // strictly excluding all currently playing videos AND `finishedVid` (the previous video)
+    setTimeout(() => {
+      setColumns((prev) => {
+        const livePlaying = new Set<number>(
+          prev.map((c) => c.slots[c.activeSlot])
+        );
+        // Also prefer avoiding videos already queued in other columns when possible
+        const alsoQueued = new Set<number>([
+          ...livePlaying,
+          finishedVid,
+          ...prev.map((c, idx) =>
+            idx === colIdx ? finishedVid : c.slots[c.activeSlot === 0 ? 1 : 0]
+          ),
+        ]);
+
+        const strictExclude = new Set<number>([...livePlaying, finishedVid]);
+        const nextPreload =
+          alsoQueued.size < total
+            ? pickRandomExcluding(total, alsoQueued)
+            : pickRandomExcluding(total, strictExclude);
+
+        return prev.map((col, idx) => {
+          if (idx !== colIdx) return col;
+          const updatedSlots: [number, number] =
+            finishedSlot === 0
+              ? [nextPreload, col.slots[1]]
+              : [col.slots[0], nextPreload];
+          return { ...col, slots: updatedSlots };
+        });
+      });
+    }, 680);
+  };
+
+  return (
+    <div className="grid h-full w-full grid-cols-4 lg:grid-cols-5 gap-2 opacity-90">
+      {columns.map((col, colIdx) => (
+        <div
+          key={colIdx}
+          className={cn(
+            'relative h-full w-full overflow-hidden bg-[#09090C]',
+            colIdx === 4 && 'hidden lg:block'
+          )}
+        >
+          {([0, 1] as const).map((slot) => {
+            const isActive = col.activeSlot === slot;
+            const src = ALL_HERO_VIDEOS[col.slots[slot]];
+            return (
+              <video
+                key={slot}
+                ref={bindVideoRef(colIdx, slot)}
+                src={src}
