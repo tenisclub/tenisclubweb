@@ -1703,4 +1703,85 @@ export function CheckoutStep3Customizer({
                   previewSelectableOptions.length >= 2 && 'sm:grid-cols-2'
                 )}
               >
-// step 21/24
+                {previewSelectableOptions.map((opt) => {
+                  const selected = activePreviewKey === opt.key;
+                  return (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      onClick={() => setPreviewOptionKey(opt.key)}
+                      className={cn(
+                        'rounded-2xl border p-3 text-left space-y-1 transition cursor-pointer',
+                        selected
+                          ? 'border-[#BEFA46] bg-[#BEFA46]/[0.08]'
+                          : 'border-zinc-800 bg-[#14141A] hover:border-zinc-700'
+                      )}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span
+                            className={cn(
+                              'w-3.5 h-3.5 rounded-full border flex items-center justify-center shrink-0',
+                              selected
+                                ? 'border-[#BEFA46] bg-[#BEFA46]'
+                                : 'border-zinc-600 bg-transparent'
+                            )}
+                          >
+                            {selected && (
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#09090B]" />
+                            )}
+                          </span>
+                          {opt.icon !== 'none' && (
+                            <CheckoutIcon
+                              name={opt.icon}
+                              className="w-3.5 h-3.5 text-[#BEFA46] shrink-0"
+                            />
+                          )}
+                          <span className="text-xs font-extrabold text-white truncate">
+                            {opt.title}
+                          </span>
+                        </div>
+                        <span
+                          className={cn(
+                            'px-1.5 py-0.5 rounded-md text-[10px] font-extrabold shrink-0',
+                            opt.badgeLabel === 'Grátis'
+                              ? 'bg-emerald-500/15 text-emerald-400'
+                              : selected
+                                ? 'bg-[#BEFA46]/20 text-[#BEFA46]'
+                                : 'bg-zinc-800 text-zinc-200'
+                          )}
+                        >
+                          {opt.badgeLabel}
+                        </span>
+                      </div>
+                      {opt.subtitle && (
+                        <p className="text-[11px] text-zinc-400 pl-5 line-clamp-2">
+                          {opt.subtitle}
+                        </p>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Pickup Info Box Preview */}
+            {activePreviewMethod === 'pickup' &&
+              !deliveryCfg.pickup_info_removed &&
+              deliveryCfg.pickup_info_card_enabled &&
+              (form.pickup_info ||
+                (deliveryCfg.show_pickup_hours && form.business_hours)) && (
+                <div className="rounded-xl border border-zinc-800/90 border-l-[3px] border-l-[#BEFA46] bg-[#16161E] px-3.5 py-2.5 text-xs text-zinc-300 space-y-1">
+                  {deliveryCfg.pickup_info_card_title && (
+                    <div className="flex items-center gap-1.5 font-extrabold text-white">
+                      {deliveryCfg.pickup_info_card_icon !== 'none' && (
+                        <CheckoutIcon
+                          name={deliveryCfg.pickup_info_card_icon}
+                          className="w-4 h-4 text-[#BEFA46] shrink-0"
+                        />
+                      )}
+                      <span>{deliveryCfg.pickup_info_card_title}</span>
+                    </div>
+                  )}
+                  {form.pickup_info && (
+// step 22/24
