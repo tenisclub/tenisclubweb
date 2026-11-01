@@ -102,3 +102,54 @@ export default function MeusDadosPage() {
 
           <div className="pt-4 border-t border-zinc-800 space-y-4">
             <div className="flex items-center gap-2">
+              <Lock className="w-4 h-4 text-[#BEFA46]" />
+              <h2 className="text-sm font-extrabold text-white">Alterar Senha (Opcional)</h2>
+            </div>
+
+            {user?.auth_provider === 'google' && (
+              <p className="text-xs text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-xl px-3.5 py-2.5">
+                Sua conta utiliza autenticação Google. Caso deseje definir também uma senha direta, preencha os campos abaixo.
+              </p>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-zinc-300">Nova senha</label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Deixe em branco para manter"
+                  className="w-full h-11 px-4 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#BEFA46]"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-zinc-300">Confirmar nova senha</label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Repita a nova senha"
+                  className="w-full h-11 px-4 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#BEFA46]"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-2">
+            <button
+              type="submit"
+              disabled={saving}
+              className="w-full sm:w-auto justify-center px-6 py-3 rounded-xl bg-[#BEFA46] hover:bg-[#d1ff70] text-[#09090B] text-sm font-black inline-flex items-center gap-2 disabled:opacity-60"
+            >
+              <Save className="w-4 h-4" />
+              {saving ? 'Salvando...' : 'Salvar Alterações'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
