@@ -16,4 +16,22 @@ export function NotificationsPanel({
   const [items, setItems] = useState<NotificationItem[]>(initialNotifications);
 
   useEffect(() => {
-// step 1/5
+    setItems(initialNotifications);
+  }, [initialNotifications]);
+
+  const unreadCount = items.filter((n) => !n.is_read).length;
+
+  const markAllRead = async () => {
+    setItems((prev) => prev.map((n) => ({ ...n, is_read: true })));
+    await fetch('/api/notifications', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ markAll: true, scope }),
+    });
+  };
+
+  if (items.length === 0) return null;
+
+  return (
+    <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-4">
+// step 2/5
