@@ -191,4 +191,36 @@ export function ProductCard({ product, whatsapp = '5511999999999' }: ProductCard
                         : `Tam. ${v.size} disponível`
                   }
                 >
-// step 6/8
+                  {v.size}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Pricing */}
+        <div className="mt-auto pt-4">
+          {product.promo_price !== null && product.promo_price < product.base_price && (
+            <div className="text-xs text-zinc-500 line-through">
+              {formatCurrency(product.base_price)}
+            </div>
+          )}
+          <div className="text-xl sm:text-2xl font-black text-[#BEFA46] tracking-tight">
+            {formatCurrency(product.effective_price)}
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="mt-3.5 flex flex-col gap-2">
+          <button
+            type="button"
+            disabled={!canPurchase || adding}
+            onClick={handleQuickAdd}
+            className={cn(
+              'w-full h-11 rounded-xl font-extrabold text-sm inline-flex items-center justify-center gap-2 transition',
+              canPurchase
+                ? 'bg-[#BEFA46] hover:bg-[#d1ff70] text-[#09090B] shadow-[0_4px_20px_rgba(190,250,70,0.18)]'
+                : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
+            )}
+          >
+// step 7/8
