@@ -15,4 +15,22 @@ export default async function ContatoPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-14 space-y-6 sm:space-y-8">
       <div>
-// step 1/5
+        <span className="text-xs font-extrabold uppercase tracking-widest text-[#BEFA46]">
+          Fale Conosco
+        </span>
+        <h1 className="text-2xl sm:text-4xl font-black text-white mt-1">
+          Canais de Atendimento
+        </h1>
+        <p className="text-xs sm:text-sm text-zinc-400 mt-1">
+          Tire dúvidas sobre tamanhos, pedidos, entregas ou retiradas na loja física.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+        <div className="rounded-3xl border border-[#BEFA46]/35 bg-[#121216] p-5 sm:p-6 flex flex-col justify-between space-y-4">
+          <div className="space-y-2">
+            <MessageCircle className="w-7 h-7 text-[#BEFA46]" />
+            <h2 className="text-lg font-black text-white">WhatsApp Oficial</h2>
+            <p className="text-xs text-zinc-400">
+              Canal rápido para consultar numerações, confirmar pedidos e combinar entrega local.
+// step 2/5
