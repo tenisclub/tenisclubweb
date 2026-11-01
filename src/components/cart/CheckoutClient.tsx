@@ -1029,3 +1029,77 @@ export function CheckoutClient({
               {/* 5. Compact Optional Notes */}
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-zinc-300">
+                  Observações para a loja{' '}
+                  <span className="font-normal text-zinc-500">(opcional)</span>
+                </label>
+                <textarea
+                  rows={2}
+                  value={customerNotes}
+                  onChange={(e) => setCustomerNotes(e.target.value)}
+                  placeholder="Ex: Prefiro retirar às 15h / Vou pagar no Pix..."
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#0D0D11] border border-zinc-800 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#BEFA46]"
+                />
+              </div>
+
+              {/* 6. Clear Total Strip + Primary WhatsApp Submit CTA */}
+              <div className="rounded-2xl border border-zinc-800/90 bg-[#0B0B0E] p-4 space-y-3.5">
+                <div className="space-y-1.5 text-xs">
+                  <div className="flex items-center justify-between text-zinc-400">
+                    <span>
+                      Subtotal ({totalUnits} {totalUnits === 1 ? 'par' : 'pares'})
+                    </span>
+                    <span className="text-zinc-200 font-semibold">
+                      {formatCurrency(total)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-zinc-400">
+                    <span>Recebimento / Frete</span>
+                    <span
+                      className={cn(
+                        'font-bold',
+                        shippingCalc.summaryLabel === 'Grátis'
+                          ? 'text-emerald-400'
+                          : 'text-zinc-200'
+                      )}
+                    >
+                      {shippingCalc.summaryLabel}
+                    </span>
+                  </div>
+                  <div className="pt-2 border-t border-zinc-800/80 flex items-baseline justify-between gap-2">
+                    <span className="text-sm font-extrabold text-white">Total do Pedido</span>
+                    <span className="text-xl sm:text-2xl font-black text-[#BEFA46]">
+                      {formatCurrency(finalOrderTotal)}
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  disabled={submitting}
+                  onClick={handleConfirmOrder}
+                  className="w-full h-12 sm:h-13 rounded-2xl bg-[#BEFA46] hover:bg-[#d1ff70] text-[#09090B] text-sm sm:text-base font-black inline-flex items-center justify-center gap-2 shadow-[0_6px_26px_rgba(190,250,70,0.28)] disabled:opacity-60 transition cursor-pointer"
+                >
+                  <MessageCircle className="w-5 h-5 stroke-[2.4] shrink-0" />
+                  <span>
+                    {submitting
+                      ? 'Registrando e abrindo WhatsApp...'
+                      : deliveryCfg.next_button_label.trim() ||
+                        'Finalizar Pedido no WhatsApp'}
+                  </span>
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => goToStep(2)}
+                className="w-full py-1.5 text-xs font-bold text-zinc-400 hover:text-white inline-flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                Voltar para Seus Dados
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* DESKTOP STICKY SIDEBAR SUMMARY (Hidden on mobile so nothing duplicates below the buttons) */}
+        <aside className="hidden lg:block lg:col-span-4 rounded-3xl border border-zinc-800/90 bg-[#121216] p-6 space-y-4 lg:sticky lg:top-28">
