@@ -114,4 +114,26 @@ export default function RecuperarSenhaPage() {
             </div>
 
             <button
-// step 5/6
+              type="submit"
+              disabled={loading}
+              className="w-full h-12 rounded-xl bg-[#BEFA46] hover:bg-[#d1ff70] text-[#09090B] font-black text-sm transition disabled:opacity-60"
+            >
+              {loading ? 'Enviando...' : 'Enviar Link de Recuperação'}
+            </button>
+          </form>
+        )}
+
+        <div className="text-center">
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-400 hover:text-white"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            Voltar ao login
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
