@@ -294,3 +294,102 @@ export function ProductForm({
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             Voltar para Produtos
+          </Link>
+          <h1 className="text-xl sm:text-3xl font-black text-white mt-1 break-words">
+            {isEditing ? `Editar: ${initialProduct?.name}` : 'Cadastrar Novo Produto'}
+          </h1>
+        </div>
+
+        <button
+          type="submit"
+          disabled={saving}
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#BEFA46] hover:bg-[#d1ff70] text-[#09090B] text-sm font-black disabled:opacity-60 shrink-0"
+        >
+          <Save className="w-4 h-4" />
+          {saving ? 'Salvando...' : 'Salvar Produto'}
+        </button>
+      </div>
+
+      {/* 1. Basic & Commercial Info */}
+      <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-5">
+        <h2 className="text-base font-black text-white">1. Dados Comerciais</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="sm:col-span-2 space-y-1.5">
+            <label className="text-xs font-semibold text-zinc-300">Nome comercial *</label>
+            <input
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Ex: Nike Air Max Pulse / Mocassim Couro Caramelo"
+              className="w-full h-11 px-4 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-zinc-300">Código / SKU</label>
+            <input
+              type="text"
+              value={sku}
+              onChange={(e) => setSku(e.target.value)}
+              placeholder="Ex: REF. 015"
+              className="w-full h-11 px-4 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-zinc-300">Marca</label>
+            <select
+              value={brandId}
+              onChange={(e) => setBrandId(e.target.value)}
+              className="w-full h-11 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white"
+            >
+              <option value="">Selecione...</option>
+              {brands.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-zinc-300">Categoria / Tipo</label>
+            <select
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+              className="w-full h-11 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white"
+            >
+              <option value="">Selecione...</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-zinc-300">Gênero / Público</label>
+            <select
+              value={gender}
+              onChange={(e) => setGender(e.target.value as ProductGender)}
+              className="w-full h-11 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white"
+            >
+              <option value="masculino">Masculino</option>
+              <option value="feminino">Feminino</option>
+              <option value="infantil">Infantil</option>
+              <option value="unissex">Unissex</option>
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-zinc-300">
+              Preço de Compra / Custo (R$)
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={costPrice}
+              onChange={(e) => setCostPrice(e.target.value)}
