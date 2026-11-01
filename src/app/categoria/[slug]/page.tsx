@@ -36,4 +36,23 @@ export async function generateMetadata({
     return { title: gInfo.title, description: gInfo.subtitle };
   }
   return {
-// step 2/5
+    title: `Categoria: ${slug.charAt(0).toUpperCase() + slug.slice(1)}`,
+  };
+}
+
+export default async function CategoriaPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const cleanSlug = slug.toLowerCase();
+
+  const [{ allMatching }, { categories, brands }, settings] = await Promise.all([
+    getCatalogProducts({ pageSize: 200 }),
+    getCategoriesAndBrands(),
+    getStoreSettings(),
+  ]);
+
+  const isGender = Boolean(GENDER_SLUGS[cleanSlug]);
+// step 3/5
