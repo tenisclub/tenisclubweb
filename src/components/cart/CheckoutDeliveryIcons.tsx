@@ -79,4 +79,31 @@ export function CheckoutIcon({
 }
 
 export function CheckoutIconPicker({
-// step 3/6
+  value,
+  onChange,
+  label,
+}: {
+  value: CheckoutIconKey;
+  onChange: (next: CheckoutIconKey) => void;
+  label?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const currentOpt =
+    CHECKOUT_ICON_OPTIONS.find((o) => o.key === value) || CHECKOUT_ICON_OPTIONS[0];
+
+  return (
+    <div className="space-y-1.5">
+      {label && (
+        <label className="text-[11px] font-semibold text-zinc-400 block">{label}</label>
+      )}
+      <div className="space-y-2">
+        <button
+          type="button"
+          onClick={() => setOpen((prev) => !prev)}
+          className={cn(
+            'w-full h-10 px-3 rounded-xl border bg-[#121216] flex items-center justify-between gap-2 text-xs font-bold transition cursor-pointer',
+            open
+              ? 'border-[#BEFA46] text-white'
+              : 'border-zinc-800 text-zinc-200 hover:border-zinc-700'
+          )}
+// step 4/6
