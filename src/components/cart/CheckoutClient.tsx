@@ -513,3 +513,77 @@ export function CheckoutClient({
                       Economia de {formatCurrency(subtotal - total)}
                     </span>
                   )}
+                </div>
+                <span className="text-lg font-black text-[#BEFA46]">
+                  {formatCurrency(total)}
+                </span>
+              </div>
+
+              <div className="space-y-2.5 pt-1">
+                <button
+                  type="button"
+                  onClick={() => goToStep(2)}
+                  className="w-full h-12 rounded-2xl bg-[#BEFA46] hover:bg-[#d1ff70] text-[#09090B] text-sm font-black inline-flex items-center justify-center gap-2 shadow-[0_6px_22px_rgba(190,250,70,0.22)] transition cursor-pointer"
+                >
+                  <span>Continuar para Seus Dados</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 2: CUSTOMER INFO */}
+          {step === 2 && (
+            <div className="space-y-5">
+              <div>
+                <h2 className="text-base sm:text-xl font-black text-white flex items-center gap-2">
+                  <User className="w-5 h-5 text-[#BEFA46] shrink-0" />
+                  <span>Quem vai receber?</span>
+                </h2>
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  Usaremos estes dados para identificar seu pedido no atendimento.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div className="sm:col-span-2 space-y-1.5">
+                  <label className="text-xs font-bold text-zinc-300">Nome completo *</label>
+                  <div className="relative">
+                    <User className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <input
+                      type="text"
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                      placeholder="Digite seu nome"
+                      className="w-full h-12 pl-10 pr-4 rounded-xl bg-[#0D0D11] border border-zinc-800 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#BEFA46]"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-zinc-300">
+                    WhatsApp / Telefone *
+                  </label>
+                  <div className="relative">
+                    <Phone className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <input
+                      type="tel"
+                      value={customerPhone}
+                      onChange={(e) => setCustomerPhone(formatPhoneBr(e.target.value))}
+                      placeholder="(11) 99999-9999"
+                      className="w-full h-12 pl-10 pr-4 rounded-xl bg-[#0D0D11] border border-zinc-800 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#BEFA46]"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-zinc-300">E-mail *</label>
+                  <div className="relative">
+                    <Mail className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <input
+                      type="email"
+                      value={customerEmail}
+                      onChange={(e) => setCustomerEmail(e.target.value)}
+                      placeholder="voce@email.com"
+                      className="w-full h-12 pl-10 pr-4 rounded-xl bg-[#0D0D11] border border-zinc-800 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#BEFA46]"
+                    />
