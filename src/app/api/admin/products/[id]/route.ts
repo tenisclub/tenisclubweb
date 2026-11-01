@@ -33,4 +33,39 @@ export async function PATCH(
         .single();
 
       if (error) return NextResponse.json({ error: error.message }, { status: 400 });
-// step 1/12
+
+      revalidateStoreData('catalog');
+
+      void supabase
+        .from('admin_logs')
+        .insert({
+          admin_id: session.userId,
+          action: 'product.toggle',
+          entity_type: 'product',
+          entity_id: id,
+          details: updates,
+        })
+        .then(() => {});
+
+      return NextResponse.json({ product: prod });
+    }
+
+    const {
+      name,
+      sku,
+      brand_id,
+      category_id,
+      gender,
+      short_description,
+      description,
+      additional_info,
+      cost_price,
+      base_price,
+      promo_price,
+      is_active,
+      is_featured,
+      is_new_release,
+      allow_backorder,
+      images,
+      variants,
+// step 2/12
