@@ -352,4 +352,49 @@ function computeOptionFee(
 ): { shippingCost: number; badgeLabel: string; summaryLabel: string } {
   const fallbackBadge = rawBadge.trim() || (feeMode === 'free' ? 'Grátis' : 'A combinar');
 
-// step 8/12
+  if (feeMode === 'free') {
+    return {
+      shippingCost: 0,
+      badgeLabel: rawBadge.trim() || 'Grátis',
+      summaryLabel: 'Grátis',
+    };
+  }
+
+  if (feeMode === 'fixed') {
+    const fixedFee = safeNum(rawFee, 0);
+    const threshold = safeNum(rawThreshold, 0);
+    if (threshold > 0 && itemsTotal >= threshold) {
+      return {
+        shippingCost: 0,
+        badgeLabel: 'Grátis',
+        summaryLabel: 'Grátis',
+      };
+    }
+    const label = fixedFee > 0 ? formatCurrency(fixedFee) : rawBadge.trim() || 'Grátis';
+    return {
+      shippingCost: fixedFee,
+      badgeLabel: label,
+      summaryLabel: fixedFee > 0 ? formatCurrency(fixedFee) : 'Grátis',
+    };
+  }
+
+  return {
+    shippingCost: 0,
+    badgeLabel: fallbackBadge,
+    summaryLabel: fallbackBadge,
+  };
+}
+
+export function getSelectableCheckoutOptions(
+  cfg: CheckoutDeliveryConfig,
+  storeAddress: string,
+  itemsTotal: number
+): SelectableCheckoutOption[] {
+  const options: SelectableCheckoutOption[] = [];
+
+  if (!cfg.pickup_removed && cfg.pickup_enabled) {
+    const pickupFee = safeNum(cfg.pickup_fee, 0);
+    const badgeLabel =
+      pickupFee > 0 ? formatCurrency(pickupFee) : cfg.pickup_badge || 'Grátis';
+
+// step 9/12
