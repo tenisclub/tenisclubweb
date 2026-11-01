@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Search, History, PlusCircle, MinusCircle, Sliders } from 'lucide-react';
 import { useStore } from '@/components/providers/StoreProvider';
@@ -16,6 +16,7 @@ export interface StockRowItem {
   size: string;
   quantity: number;
   lowStockThreshold: number;
+  allowBackorder?: boolean;
 }
 
 export function InventoryManagerClient({ initialRows }: { initialRows: StockRowItem[] }) {
@@ -32,6 +33,14 @@ export function InventoryManagerClient({ initialRows }: { initialRows: StockRowI
   const [reason, setReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  useEffect(() => {
+    setRows(initialRows);
+    setActiveRow((prev) => {
+      if (!prev) return null;
+      return initialRows.find((r) => r.variantId === prev.variantId) || prev;
+    });
+  }, [initialRows]);
+
   const filtered = useMemo(() => {
     return rows.filter((r) => {
       if (search.trim()) {
@@ -44,301 +53,3 @@ export function InventoryManagerClient({ initialRows }: { initialRows: StockRowI
       return true;
     });
   }, [rows, search, stockFilter]);
-
-  const openModal = (row: StockRowItem, op: 'in' | 'out' | 'adjustment') => {
-    setActiveRow(row);
-    setOperation(op);
-    setAmount(op === 'adjustment' ? String(row.quantity) : '1');
-    setThreshold(String(row.lowStockThreshold));
-    setReason('');
-  };
-
-  const handleConfirmMove = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!activeRow) return;
-
-    setSubmitting(true);
-    try {
-      const res = await fetch('/api/admin/inventory', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          variantId: activeRow.variantId,
-          operation,
-          amount: Number(amount),
-          lowStockThreshold: Number(threshold),
-          reason,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        toast(data.error || 'Erro ao movimentar estoque.', 'error');
-        return;
-      }
-
-      const nextQty = Number(data.result?.new_quantity ?? activeRow.quantity);
-      setRows((prev) =>
-        prev.map((r) =>
-          r.variantId === activeRow.variantId
-            ? { ...r, quantity: nextQty, lowStockThreshold: Number(threshold) }
-            : r
-        )
-      );
-      toast('Movimentação registrada com sucesso!', 'success');
-      setActiveRow(null);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-black text-white">
-            Controle de Estoque por Numeração
-          </h1>
-          <p className="text-xs sm:text-sm text-zinc-400">
-            Adicione entradas, baixe saídas, corrija quantidades e defina alertas mínimos com rastreabilidade.
-          </p>
-        </div>
-
-        <Link
-          href="/admin/movimentacoes"
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#16161D] border border-zinc-800 text-xs sm:text-sm font-bold text-[#BEFA46] hover:border-zinc-600"
-        >
-          <History className="w-4 h-4" />
-          Ver Histórico de Movimentações
-        </Link>
-      </div>
-
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Filtrar por produto, código, cor ou numeração..."
-            className="w-full h-11 pl-10 pr-4 rounded-xl bg-[#121216] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
-          />
-        </div>
-        <div className="flex gap-2">
-          {[
-            { v: 'all', l: 'Todos' },
-            { v: 'low', l: 'Estoque Baixo' },
-            { v: 'zero', l: 'Sem Estoque (0)' },
-          ].map((btn) => (
-            <button
-              key={btn.v}
-              type="button"
-              onClick={() => setStockFilter(btn.v as typeof stockFilter)}
-              className={cn(
-                'px-4 h-11 rounded-xl text-xs font-bold border transition',
-                stockFilter === btn.v
-                  ? 'bg-[#BEFA46] text-[#09090B] border-[#BEFA46]'
-                  : 'bg-[#121216] text-zinc-300 border-zinc-800'
-              )}
-            >
-              {btn.l}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Inventory Table */}
-      <div className="rounded-3xl border border-zinc-800 bg-[#121216] overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs sm:text-sm">
-            <thead className="bg-[#17171E] text-zinc-400 text-[11px] uppercase tracking-wider">
-              <tr>
-                <th className="px-4 py-3.5">Modelo</th>
-                <th className="px-4 py-3.5">Cor</th>
-                <th className="px-4 py-3.5">Numeração</th>
-                <th className="px-4 py-3.5">Quantidade</th>
-                <th className="px-4 py-3.5">Alerta Mín.</th>
-                <th className="px-4 py-3.5 text-right">Operações</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-800/80">
-              {filtered.map((r) => (
-                <tr key={r.variantId} className="hover:bg-zinc-900/40">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={r.image}
-                        alt={r.productName}
-                        className="w-10 h-10 rounded-lg object-cover bg-[#EAE0D5]"
-                      />
-                      <div>
-                        <p className="font-bold text-white">{r.productName}</p>
-                        <p className="text-[11px] text-zinc-500">{r.sku}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-zinc-300">{r.color}</td>
-                  <td className="px-4 py-3">
-                    <span className="px-2.5 py-1 rounded-lg bg-zinc-800 font-black text-white">
-                      {r.size}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={cn(
-                        'px-2.5 py-1 rounded-full text-xs font-extrabold',
-                        r.quantity === 0
-                          ? 'bg-red-500/15 text-red-400'
-                          : r.quantity <= r.lowStockThreshold
-                            ? 'bg-amber-500/15 text-amber-300'
-                            : 'bg-emerald-500/15 text-emerald-400'
-                      )}
-                    >
-                      {r.quantity} un.
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-zinc-400">{r.lowStockThreshold} un.</td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="inline-flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => openModal(r, 'in')}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 text-xs font-bold"
-                      >
-                        <PlusCircle className="w-3.5 h-3.5" />
-                        Entrada
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => openModal(r, 'out')}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-500/15 hover:bg-red-500/25 text-red-300 text-xs font-bold"
-                      >
-                        <MinusCircle className="w-3.5 h-3.5" />
-                        Saída
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => openModal(r, 'adjustment')}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold"
-                      >
-                        <Sliders className="w-3.5 h-3.5" />
-                        Corrigir
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Movement Modal */}
-      {activeRow && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <form
-            onSubmit={handleConfirmMove}
-            className="w-full max-w-md rounded-3xl border border-zinc-700 bg-[#131319] p-6 space-y-4 shadow-2xl"
-          >
-            <div>
-              <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#BEFA46]">
-                Movimentação Auditada
-              </span>
-              <h2 className="text-lg font-black text-white mt-0.5">
-                {activeRow.productName} — Tam. {activeRow.size}
-              </h2>
-              <p className="text-xs text-zinc-400">
-                Saldo atual: <strong className="text-white">{activeRow.quantity} un.</strong> ({activeRow.color})
-              </p>
-            </div>
-
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { v: 'in', l: 'Adicionar' },
-                { v: 'out', l: 'Remover' },
-                { v: 'adjustment', l: 'Corrigir Saldo' },
-              ].map((op) => (
-                <button
-                  key={op.v}
-                  type="button"
-                  onClick={() => setOperation(op.v as typeof operation)}
-                  className={cn(
-                    'py-2 rounded-xl text-xs font-bold border',
-                    operation === op.v
-                      ? 'bg-[#BEFA46] text-[#09090B] border-[#BEFA46]'
-                      : 'bg-[#18181F] text-zinc-300 border-zinc-800'
-                  )}
-                >
-                  {op.l}
-                </button>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs text-zinc-300 font-semibold">
-                  {operation === 'adjustment' ? 'Novo Saldo Final *' : 'Quantidade *'}
-                </label>
-                <input
-                  type="number"
-                  min={operation === 'adjustment' ? 0 : 1}
-                  required
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="mt-1 w-full h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-sm font-bold text-white"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs text-zinc-300 font-semibold">
-                  Alerta Estoque Baixo
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  value={threshold}
-                  onChange={(e) => setThreshold(e.target.value)}
-                  className="mt-1 w-full h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="text-xs text-zinc-300 font-semibold">
-                Motivo da movimentação *
-              </label>
-              <input
-                type="text"
-                required
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                placeholder="Ex: Reposição de fornecedor / Venda balcão / Conferência"
-                className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white"
-              />
-            </div>
-
-            <div className="flex justify-end gap-2.5 pt-2">
-              <button
-                type="button"
-                onClick={() => setActiveRow(null)}
-                className="px-4 py-2.5 rounded-xl bg-zinc-800 text-xs font-bold text-zinc-300"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={submitting}
-                className="px-5 py-2.5 rounded-xl bg-[#BEFA46] text-[#09090B] text-xs font-black"
-              >
-                {submitting ? 'Registrando...' : 'Confirmar Movimentação'}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-    </div>
-  );
-}
-
