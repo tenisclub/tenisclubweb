@@ -47,4 +47,21 @@ export async function PATCH(request: Request) {
         updates[key] = body[key];
       }
     }
-// step 3/5
+
+    const supabase = createServiceClient();
+    const { data, error } = await supabase
+      .from('store_settings')
+      .upsert(updates)
+      .select('*')
+      .single();
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+    revalidateStoreData('settings');
+    primeStoreSettingsCache(data);
+
+    void supabase
+      .from('admin_logs')
+      .insert({
+        admin_id: session.userId,
+// step 4/5
