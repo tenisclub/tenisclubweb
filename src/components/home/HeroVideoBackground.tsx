@@ -104,4 +104,40 @@ function MobileRandomPlayer() {
         }
       }
     };
-// step 3/12
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [activeSlot]);
+
+  const handleEnded = (finishedSlot: 0 | 1) => {
+    if (finishedSlot !== activeSlot) return;
+
+    const finishedVideoIdx = slotIndices[finishedSlot];
+    const nextSlot: 0 | 1 = finishedSlot === 0 ? 1 : 0;
+    const nowPlayingIdx = slotIndices[nextSlot];
+
+    // Keep last 3 played indices so random picks feel varied and never repeat previous/current
+    const updatedRecent = [...recentHistoryRef.current, nowPlayingIdx].slice(-4);
+    recentHistoryRef.current = updatedRecent;
+
+    const excluded = new Set<number>([
+      nowPlayingIdx,
+      finishedVideoIdx,
+      ...updatedRecent,
+    ]);
+    // Fallback to strict (current + previous) if excluded grew too large
+    const upcomingIdx =
+      excluded.size < total
+        ? pickRandomExcluding(total, excluded)
+        : pickRandomExcluding(total, new Set([nowPlayingIdx, finishedVideoIdx]));
+
+    const nextEl = videoRefs.current[nextSlot];
+    if (nextEl) {
+      nextEl.muted = true;
+      nextEl.currentTime = 0;
+      nextEl.play().catch(() => {});
+    }
+
+    setActiveSlot(nextSlot);
+
+// step 4/12
