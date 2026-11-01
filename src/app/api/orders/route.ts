@@ -94,3 +94,52 @@ export async function POST(request: Request) {
             city: shippingAddress.city || '',
             state: shippingAddress.state || 'SP',
             reference: shippingAddress.reference || '',
+          }
+        : null;
+
+    const optionMetadata: Record<string, unknown> = {};
+    if (matchedOption) {
+      if (matchedOption.customCardId) {
+        optionMetadata.custom_option_id = matchedOption.customCardId;
+      }
+      if (matchedOption.title) {
+        optionMetadata.custom_option_title = matchedOption.title;
+      }
+      if (matchedOption.summaryLabel) {
+        optionMetadata.shipping_label = matchedOption.summaryLabel;
+      }
+      if (matchedOption.kind === 'pickup' && !requiresAddress) {
+        optionMetadata.pickup_address =
+          deliveryCfg.pickup_subtitle.trim() || settings.address;
+      }
+    } else {
+      const primaryInfoCard = deliveryCfg.extra_cards.find(
+        (c) =>
+          c.enabled &&
+          c.card_type === 'info' &&
+          (c.title.trim() || c.description.trim())
+      );
+      if (primaryInfoCard) {
+        if (primaryInfoCard.title.trim()) {
+          optionMetadata.custom_option_title = primaryInfoCard.title.trim();
+        }
+        if (primaryInfoCard.badge.trim()) {
+          optionMetadata.shipping_label = primaryInfoCard.badge.trim();
+        }
+      }
+      if (!optionMetadata.shipping_label) {
+        optionMetadata.shipping_label = 'A combinar';
+      }
+    }
+
+    const finalShippingAddress =
+      addressPayload || Object.keys(optionMetadata).length > 0
+        ? {
+            ...optionMetadata,
+            ...(addressPayload || {}),
+          }
+        : null;
+
+    const supabase = createServiceClient();
+
+    const phoneUpdatePromise =
