@@ -485,3 +485,125 @@ export function CheckoutStep3Customizer({
                             onClick={() => removeExtraCard(card.id)}
                             className="p-2 rounded-lg text-zinc-500 hover:text-red-400 hover:bg-red-500/10 transition cursor-pointer"
                           >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Expanded Body */}
+                      {isExpanded && (
+                        <div className="border-t border-zinc-800/80 p-3.5 sm:p-4 bg-[#15151B] space-y-3.5">
+                          {/* Type Switcher + Icon Picker side-by-side */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+                            <div className="space-y-1.5">
+                              <label className="text-[11px] font-semibold text-zinc-400 block">
+                                Formato do Card
+                              </label>
+                              <div className="grid grid-cols-2 rounded-xl border border-zinc-800 bg-[#121216] p-1 text-xs font-bold gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => updateExtraCard(card.id, { card_type: 'option' })}
+                                  className={cn(
+                                    'py-1.5 px-2 rounded-lg transition cursor-pointer text-center truncate',
+                                    card.card_type === 'option'
+                                      ? 'bg-[#BEFA46] text-[#09090B] font-black'
+                                      : 'text-zinc-400 hover:text-white'
+                                  )}
+                                >
+                                  Opção Clicável
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => updateExtraCard(card.id, { card_type: 'info' })}
+                                  className={cn(
+                                    'py-1.5 px-2 rounded-lg transition cursor-pointer text-center truncate',
+                                    card.card_type === 'info'
+                                      ? 'bg-[#BEFA46] text-[#09090B] font-black'
+                                      : 'text-zinc-400 hover:text-white'
+                                  )}
+                                >
+                                  Quadro de Aviso
+                                </button>
+                              </div>
+                            </div>
+
+                            <CheckoutIconPicker
+                              label="Ícone do Card"
+                              value={card.icon}
+                              onChange={(icon) => updateExtraCard(card.id, { icon })}
+                            />
+                          </div>
+
+                          {card.card_type === 'option' ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <div>
+                                <label className="text-[11px] font-semibold text-zinc-400">
+                                  Título da Opção
+                                </label>
+                                <input
+                                  type="text"
+                                  value={card.title}
+                                  onChange={(e) =>
+                                    updateExtraCard(card.id, { title: e.target.value })
+                                  }
+                                  placeholder="Ex: Entrega Expressa / Retirar no Shopping"
+                                  className="mt-1 w-full h-10 px-3 rounded-xl bg-[#121216] border border-zinc-800 text-xs sm:text-sm text-white"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-[11px] font-semibold text-zinc-400">
+                                  Modo de Taxa
+                                </label>
+                                <select
+                                  value={card.fee_mode}
+                                  onChange={(e) =>
+                                    updateExtraCard(card.id, {
+                                      fee_mode: e.target.value as DeliveryFeeMode,
+                                    })
+                                  }
+                                  className="mt-1 w-full h-10 px-3 rounded-xl bg-[#121216] border border-zinc-800 text-xs sm:text-sm text-white"
+                                >
+                                  <option value="to_combine">A combinar (confirmado pela loja)</option>
+                                  <option value="fixed">Taxa fixa automática em R$</option>
+                                  <option value="free">Grátis</option>
+                                </select>
+                              </div>
+
+                              {card.fee_mode === 'fixed' ? (
+                                <>
+                                  <div>
+                                    <label className="text-[11px] font-semibold text-zinc-400">
+                                      Valor da Taxa (R$)
+                                    </label>
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      step="0.50"
+                                      value={card.fee}
+                                      onChange={(e) =>
+                                        updateExtraCard(card.id, {
+                                          fee: Math.max(0, Number(e.target.value) || 0),
+                                        })
+                                      }
+                                      className="mt-1 w-full h-10 px-3 rounded-xl bg-[#121216] border border-zinc-800 text-xs sm:text-sm text-white"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="text-[11px] font-semibold text-zinc-400">
+                                      Grátis acima de (R$ — 0 desativa)
+                                    </label>
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      step="1"
+                                      value={card.free_threshold}
+                                      onChange={(e) =>
+                                        updateExtraCard(card.id, {
+                                          free_threshold: Math.max(0, Number(e.target.value) || 0),
+                                        })
+                                      }
+                                      className="mt-1 w-full h-10 px-3 rounded-xl bg-[#121216] border border-zinc-800 text-xs sm:text-sm text-white"
+                                    />
+                                  </div>
+                                </>
+                              ) : (
