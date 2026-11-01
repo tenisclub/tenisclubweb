@@ -37,7 +37,7 @@ export default async function MinhaContaDashboardPage() {
   return (
     <div className="space-y-6">
       {/* Greeting Banner */}
-      <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-5 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <span className="text-xs font-extrabold uppercase tracking-widest text-[#BEFA46]">
             Bem-vindo(a)
@@ -53,117 +53,6 @@ export default async function MinhaContaDashboardPage() {
         <div className="flex flex-wrap gap-2.5">
           <Link
             href="/carrinho"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#BEFA46] text-[#09090B] text-xs font-black"
+            className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#BEFA46] text-[#09090B] text-xs font-black"
           >
             <ShoppingBag className="w-4 h-4" />
-            Meu Carrinho
-          </Link>
-          <Link
-            href="/minha-conta/dados"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1A1A22] border border-zinc-800 text-xs font-bold text-white hover:border-zinc-700"
-          >
-            <User className="w-4 h-4 text-[#BEFA46]" />
-            Editar Cadastro
-          </Link>
-        </div>
-      </div>
-
-      {/* KPI Summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="rounded-2xl border border-zinc-800 bg-[#121216] p-5">
-          <span className="text-xs font-semibold text-zinc-400">Total de Pedidos</span>
-          <p className="text-3xl font-black text-white mt-1">{orders.length}</p>
-        </div>
-        <div className="rounded-2xl border border-zinc-800 bg-[#121216] p-5">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-zinc-400">Em Andamento</span>
-            <Clock className="w-4 h-4 text-[#BEFA46]" />
-          </div>
-          <p className="text-3xl font-black text-[#BEFA46] mt-1">{activeOrders.length}</p>
-        </div>
-        <div className="rounded-2xl border border-zinc-800 bg-[#121216] p-5">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-zinc-400">Concluídos</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-          </div>
-          <p className="text-3xl font-black text-white mt-1">{completedOrders.length}</p>
-        </div>
-      </div>
-
-      {/* Latest Order Highlight */}
-      <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base sm:text-lg font-black text-white">
-            Último Pedido Realizado
-          </h2>
-          <Link
-            href="/minha-conta/pedidos"
-            className="text-xs font-bold text-[#BEFA46] hover:underline inline-flex items-center gap-1"
-          >
-            Ver todos <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-
-        {!latestOrder ? (
-          <div className="rounded-2xl border border-zinc-800/80 bg-[#17171E] p-6 text-center space-y-3">
-            <p className="text-sm text-zinc-300 font-semibold">
-              Você ainda não realizou nenhum pedido.
-            </p>
-            <Link
-              href="/produtos"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#BEFA46] text-[#09090B] text-xs font-extrabold"
-            >
-              Conferir Catálogo
-            </Link>
-          </div>
-        ) : (
-          <div className="rounded-2xl border border-zinc-800 bg-[#17171E] p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2.5">
-                <span className="text-sm font-black text-white">
-                  #{latestOrder.order_number}
-                </span>
-                <span
-                  className={cn(
-                    'px-2.5 py-0.5 rounded-full text-[11px] font-bold border',
-                    ORDER_STATUS_CONFIG[latestOrder.status as OrderStatus]?.colorClass
-                  )}
-                >
-                  {ORDER_STATUS_CONFIG[latestOrder.status as OrderStatus]?.label}
-                </span>
-              </div>
-              <p className="text-xs text-zinc-400">
-                Data: {formatDate(latestOrder.created_at)} •{' '}
-                {latestOrder.delivery_method === 'pickup'
-                  ? 'Retirada na Loja'
-                  : 'Entrega Local'}
-              </p>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <span className="text-xs text-zinc-400 block">Total</span>
-                <strong className="text-lg font-black text-[#BEFA46]">
-                  {formatCurrency(latestOrder.total)}
-                </strong>
-              </div>
-              <Link
-                href={`/minha-conta/pedidos/${latestOrder.id}`}
-                className="px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-white transition"
-              >
-                Detalhes
-              </Link>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Customer Notifications */}
-      <NotificationsPanel
-        initialNotifications={(notificationsRaw || []) as NotificationItem[]}
-        scope="customer"
-      />
-    </div>
-  );
-}
-
