@@ -13,4 +13,19 @@ export async function GET(request: Request) {
   if (scope === 'admin' && session.isAdmin) {
     const { data } = await supabase
       .from('notifications')
-// step 1/5
+      .select('*')
+      .eq('target_audience', 'admin')
+      .order('created_at', { ascending: false })
+      .limit(40);
+    return NextResponse.json({ notifications: data || [] });
+  }
+
+  const { data } = await supabase
+    .from('notifications')
+    .select('*')
+    .eq('target_audience', 'customer')
+    .eq('user_id', session.userId)
+    .order('created_at', { ascending: false })
+    .limit(40);
+
+// step 2/5
