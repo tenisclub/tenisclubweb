@@ -689,3 +689,101 @@ export function ProductForm({
         {/* Allow Backorder Toggle Box inside Stock Section */}
         <label
           className={cn(
+            'flex items-start sm:items-center justify-between gap-3 rounded-2xl border p-3.5 cursor-pointer transition',
+            allowBackorder
+              ? 'border-[#BEFA46]/50 bg-[#BEFA46]/10'
+              : 'border-zinc-800 bg-[#18181F] hover:border-zinc-700'
+          )}
+        >
+          <div className="flex items-start sm:items-center gap-3">
+            <input
+              type="checkbox"
+              checked={allowBackorder}
+              onChange={(e) => setAllowBackorder(e.target.checked)}
+              className="w-4 h-4 accent-[#BEFA46] mt-0.5 sm:mt-0 shrink-0"
+            />
+            <div className="space-y-0.5">
+              <span className="block text-xs sm:text-sm font-extrabold text-white">
+                Vender este produto mesmo sem estoque
+              </span>
+              <span className="block text-[11px] sm:text-xs text-zinc-400">
+                Quando ativado, o cliente pode escolher qualquer numeração abaixo e finalizar o pedido mesmo com saldo 0.
+              </span>
+            </div>
+          </div>
+          <span
+            className={cn(
+              'px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shrink-0',
+              allowBackorder
+                ? 'bg-[#BEFA46] text-[#09090B]'
+                : 'bg-zinc-800 text-zinc-400'
+            )}
+          >
+            {allowBackorder ? 'Ativado' : 'Desativado'}
+          </span>
+        </label>
+
+        {variants.length === 0 ? (
+          <p className="text-xs text-zinc-500 text-center py-6">
+            Nenhuma numeração adicionada. Use os botões acima para gerar a grade de tamanhos.
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {variants.map((v, idx) => (
+              <div
+                key={`${v.id || idx}`}
+                className="rounded-2xl border border-zinc-800 bg-[#18181F] p-3 flex flex-wrap sm:flex-nowrap items-center gap-2"
+              >
+                <input
+                  type="color"
+                  value={v.color_hex}
+                  onChange={(e) => updateVariant(idx, { color_hex: e.target.value })}
+                  className="w-7 h-7 rounded bg-transparent shrink-0"
+                />
+                <input
+                  type="text"
+                  value={v.color}
+                  onChange={(e) => updateVariant(idx, { color: e.target.value })}
+                  placeholder="Cor"
+                  className="flex-1 min-w-[78px] sm:w-24 h-9 px-2.5 rounded-lg bg-[#111116] border border-zinc-800 text-xs text-white"
+                />
+                <select
+                  value={v.size}
+                  onChange={(e) => updateVariant(idx, { size: e.target.value })}
+                  className="w-16 h-9 px-1.5 rounded-lg bg-[#111116] border border-zinc-800 text-xs font-bold text-white shrink-0"
+                >
+                  {STANDARD_SHOE_SIZES.map((sz) => (
+                    <option key={sz} value={sz}>
+                      {sz}
+                    </option>
+                  ))}
+                  {!STANDARD_SHOE_SIZES.includes(v.size) && (
+                    <option value={v.size}>{v.size}</option>
+                  )}
+                </select>
+                <div className="w-16 sm:flex-1 shrink-0">
+                  <input
+                    type="number"
+                    min="0"
+                    value={v.stock}
+                    onChange={(e) => updateVariant(idx, { stock: Number(e.target.value) })}
+                    className="w-full h-9 px-2 rounded-lg bg-[#111116] border border-zinc-800 text-xs font-extrabold text-[#BEFA46]"
+                    title="Quantidade em estoque"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeVariant(idx)}
+                  className="p-1.5 text-zinc-500 hover:text-red-400 shrink-0"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </form>
+  );
+}
+
