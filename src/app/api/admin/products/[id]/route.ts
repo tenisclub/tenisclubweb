@@ -384,4 +384,38 @@ export async function DELETE(
 
     revalidateStoreData('catalog');
 
-// step 11/12
+    void supabase
+      .from('admin_logs')
+      .insert({
+        admin_id: session.userId,
+        action: 'product.archive',
+        entity_type: 'product',
+        entity_id: id,
+        details: { reason: 'Produto possui pedidos históricos vinculados; arquivado como inativo.' },
+      })
+      .then(() => {});
+
+    return NextResponse.json({
+      archived: true,
+      message: 'Produto arquivado (inativado) pois possui histórico de pedidos.',
+    });
+  }
+
+  const { error } = await supabase.from('products').delete().eq('id', id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  revalidateStoreData('catalog');
+
+  void supabase
+    .from('admin_logs')
+    .insert({
+      admin_id: session.userId,
+      action: 'product.delete',
+      entity_type: 'product',
+      entity_id: id,
+      details: {},
+    })
+    .then(() => {});
+
+  return NextResponse.json({ deleted: true });
+}
