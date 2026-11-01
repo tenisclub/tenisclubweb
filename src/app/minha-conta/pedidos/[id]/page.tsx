@@ -187,4 +187,36 @@ export default async function PedidoDetalheClientePage({
                 {order.shipping_address.complement
                   ? ` - ${order.shipping_address.complement}`
                   : ''}
-// step 6/8
+              </p>
+              <p>
+                {order.shipping_address.neighborhood} — {order.shipping_address.city}/
+                {order.shipping_address.state}
+              </p>
+              {order.shipping_address.reference && (
+                <p className="text-zinc-400">Ref: {order.shipping_address.reference}</p>
+              )}
+            </div>
+          ) : order.shipping_address?.pickup_address ? (
+            <div className="text-zinc-300 space-y-1">
+              <p>{order.shipping_address.pickup_address}</p>
+              <p className="text-zinc-400 text-xs">{settings.business_hours}</p>
+            </div>
+          ) : (
+            <p className="text-zinc-400 text-xs">
+              Alinhado diretamente com a equipe pelo WhatsApp.
+            </p>
+          )}
+
+          {order.customer_notes && (
+            <div className="pt-3 border-t border-zinc-800">
+              <span className="text-xs text-zinc-400 block">Suas observações:</span>
+              <p className="text-zinc-200">{order.customer_notes}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Timeline */}
+        <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-4">
+          <h3 className="text-base font-black text-white flex items-center gap-2">
+            <Clock className="w-4 h-4 text-[#BEFA46]" />
+// step 7/8
