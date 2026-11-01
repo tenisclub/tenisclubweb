@@ -88,4 +88,35 @@ function LoginForm() {
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-// step 3/8
+        options: {
+          redirectTo: callbackUrl,
+        },
+      });
+      if (error) {
+        setErrorMsg(
+          'O provedor Google OAuth precisa estar habilitado no painel do Supabase Auth ou tente entrar com e-mail e senha.'
+        );
+        setGoogleLoading(false);
+      }
+    } catch {
+      setErrorMsg('Falha ao iniciar autenticação com Google.');
+      setGoogleLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-[82vh] flex items-center justify-center px-4 py-8 sm:py-12">
+      <div className="w-full max-w-md rounded-3xl border border-zinc-800 bg-[#111116] p-5 sm:p-9 shadow-2xl space-y-6">
+        <div className="text-center space-y-2">
+          <Link href="/" className="inline-block">
+            <TenisClubLogo size="lg" />
+          </Link>
+          <h1 className="text-xl sm:text-2xl font-black text-white pt-2">
+            Acesse sua conta
+          </h1>
+          <p className="text-xs sm:text-sm text-zinc-400">
+            Acompanhe pedidos, salve favoritos e finalize suas compras.
+          </p>
+        </div>
+
+// step 4/8
