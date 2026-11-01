@@ -31,4 +31,20 @@ export async function PATCH(request: Request) {
       'pickup_info',
       'delivery_info',
       'exchange_policy',
-// step 2/5
+      'privacy_policy',
+      'terms_of_use',
+      'about_text',
+      'checkout_delivery_config',
+    ];
+
+    const updates: Record<string, unknown> = {
+      id: 1,
+      updated_at: new Date().toISOString(),
+    };
+
+    for (const key of allowedFields) {
+      if (body[key] !== undefined) {
+        updates[key] = body[key];
+      }
+    }
+// step 3/5
