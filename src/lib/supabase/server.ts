@@ -28,4 +28,14 @@ export async function createClient() {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-// step 3/5
+let cachedServiceClient: SupabaseClient<any> | null = null;
+
+export function createServiceClient() {
+  if (cachedServiceClient) {
+    return cachedServiceClient;
+  }
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    throw new Error('Missing Supabase server credentials');
+// step 4/5
