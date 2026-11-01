@@ -206,3 +206,73 @@ export function SettingsClient({ initialSettings }: { initialSettings: StoreSett
       {/* 1. Identity, Banner & WhatsApp Link Preview */}
       {(activeTab === 'all' || activeTab === 'identity') && (
         <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-5">
+          <div className="border-b border-zinc-800/80 pb-4">
+            <span className="text-[11px] font-black uppercase tracking-widest text-[#BEFA46] block">
+              Identidade Visual & SEO
+            </span>
+            <h2 className="text-base sm:text-lg font-black text-white">
+              Marca, Banner Principal & Prévia do Link no WhatsApp
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div>
+                <label className="text-[11px] font-semibold text-zinc-400">Nome da Loja</label>
+                <input
+                  type="text"
+                  value={form.store_name}
+                  onChange={(e) => setField('store_name', e.target.value)}
+                  className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white"
+                />
+              </div>
+              <div>
+                <label className="text-[11px] font-semibold text-zinc-400">
+                  Slogan (Título no Link)
+                </label>
+                <input
+                  type="text"
+                  value={form.tagline}
+                  onChange={(e) => setField('tagline', e.target.value)}
+                  className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white"
+                />
+              </div>
+              <div>
+                <label className="text-[11px] font-semibold text-zinc-400">
+                  Selo Superior (Hero Badge)
+                </label>
+                <input
+                  type="text"
+                  value={form.hero_badge}
+                  onChange={(e) => setField('hero_badge', e.target.value)}
+                  className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white"
+                />
+              </div>
+              <div>
+                <label className="text-[11px] font-semibold text-zinc-400">
+                  Frase Principal do Banner
+                </label>
+                <input
+                  type="text"
+                  value={form.hero_title}
+                  onChange={(e) => setField('hero_title', e.target.value)}
+                  className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="text-[11px] font-semibold text-zinc-400">
+                  Descrição do Site / Texto da Prévia no WhatsApp e Google
+                </label>
+                <input
+                  type="text"
+                  value={form.hero_subtitle}
+                  onChange={(e) => setField('hero_subtitle', e.target.value)}
+                  className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white"
+                />
+              </div>
+            </div>
+
+            {/* WhatsApp Link Preview Box */}
+            <div className="lg:col-span-5 rounded-2xl border border-zinc-800 bg-[#18181F] p-4 space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="text-xs font-extrabold uppercase tracking-wider text-[#BEFA46]">
