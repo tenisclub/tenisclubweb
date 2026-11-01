@@ -52,4 +52,22 @@ export function NotificationsPanel({
           >
             <CheckCheck className="w-3.5 h-3.5" />
             Marcar todas como lidas
-// step 3/5
+          </button>
+        )}
+      </div>
+
+      <div className="divide-y divide-zinc-800/80 max-h-72 overflow-y-auto">
+        {items.slice(0, 8).map((n) => (
+          <div
+            key={n.id}
+            className={cn(
+              'py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2',
+              !n.is_read && 'bg-[#BEFA46]/[0.03] -mx-2 px-2 rounded-xl'
+            )}
+          >
+            <div>
+              <p className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
+                {!n.is_read && <span className="w-2 h-2 rounded-full bg-[#BEFA46]" />}
+                {n.title}
+              </p>
+// step 4/5
