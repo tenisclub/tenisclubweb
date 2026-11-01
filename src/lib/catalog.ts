@@ -370,4 +370,57 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
   }
 
   const supabase = createServiceClient();
-// step 7/12
+  const { data: row } = await supabase
+    .from('products')
+    .select(PRODUCT_SELECT_QUERY)
+    .eq('slug', slug)
+    .eq('is_active', true)
+    .maybeSingle();
+
+  if (!row) return null;
+
+  // Increment view count asynchronously
+  supabase
+    .from('products')
+    .update({ views_count: Number(row.views_count || 0) + 1 })
+    .eq('id', row.id)
+    .then(() => {});
+
+  return enrichProductRow(row, false);
+}
+
+export async function getRelatedProducts(product: Product, limit = 4): Promise<Product[]> {
+  const { products } = await getCatalogProducts({ pageSize: 24 });
+  return products
+    .filter(
+      (p) =>
+        p.id !== product.id &&
+        (p.category_id === product.category_id || p.gender === product.gender)
+    )
+    .slice(0, limit);
+}
+
+export const getAdminCategoriesAndBrands = cache(
+  async (): Promise<{ categories: Category[]; brands: Brand[] }> => {
+    return getOrLoadCacheSlot('allCategoriesAndBrands', 60_000, async () => {
+      const supabase = createServiceClient();
+      const [{ data: categories }, { data: brands }] = await Promise.all([
+        supabase.from('categories').select('*').order('sort_order', { ascending: true }),
+        supabase.from('brands').select('*').order('name', { ascending: true }),
+      ]);
+
+      return {
+        categories: (categories || []) as Category[],
+        brands: (brands || []) as Brand[],
+      };
+    });
+  }
+);
+
+export const getCategoriesAndBrands = cache(
+  async (): Promise<{ categories: Category[]; brands: Brand[] }> => {
+    const all = await getAdminCategoriesAndBrands();
+    return {
+      categories: all.categories.filter((c) => c.is_active),
+      brands: all.brands.filter((b) => b.is_active),
+// step 8/12
