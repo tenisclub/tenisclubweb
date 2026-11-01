@@ -202,3 +202,53 @@ export default async function PedidoDetalheClientePage({
             <div className="text-zinc-300 space-y-1">
               <p>{settings.address}</p>
               <p className="text-zinc-400 text-xs">{settings.business_hours}</p>
+            </div>
+          ) : (
+            <p className="text-zinc-400 text-xs">
+              Alinhado diretamente com a equipe pelo WhatsApp.
+            </p>
+          )}
+
+          {order.customer_notes && (
+            <div className="pt-3 border-t border-zinc-800">
+              <span className="text-xs text-zinc-400 block">Suas observações:</span>
+              <p className="text-zinc-200">{order.customer_notes}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Timeline */}
+        <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-4">
+          <h3 className="text-base font-black text-white flex items-center gap-2">
+            <Clock className="w-4 h-4 text-[#BEFA46]" />
+            Histórico do Pedido
+          </h3>
+
+          <div className="space-y-3">
+            {(order.history || []).map((h, idx) => {
+              const cfg = ORDER_STATUS_CONFIG[h.new_status as OrderStatus];
+              return (
+                <div key={h.id} className="flex items-start gap-3">
+                  <div
+                    className={cn(
+                      'w-2.5 h-2.5 rounded-full mt-1.5 shrink-0',
+                      idx === 0 ? 'bg-[#BEFA46]' : 'bg-zinc-600'
+                    )}
+                  />
+                  <div className="text-xs">
+                    <p className="font-bold text-white">{cfg?.label || h.new_status}</p>
+                    {h.note && <p className="text-zinc-400 mt-0.5">{h.note}</p>}
+                    <span className="text-[11px] text-zinc-500">
+                      {formatDateTime(h.created_at)}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
