@@ -148,4 +148,29 @@ export default async function AdminRelatoriosPage() {
                   <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-zinc-400">
                     <span>Custo: {formatCurrency(cost)}</span>
                     <span>Venda: {formatCurrency(p.effective_price)}</span>
-// step 6/8
+                    <span className="font-extrabold text-emerald-400">
+                      Margem: {formatCurrency(margin)}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop Table */}
+          <div className="hidden sm:block overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="text-zinc-400 border-b border-zinc-800">
+                <tr>
+                  <th className="py-2">Produto</th>
+                  <th className="py-2">Custo</th>
+                  <th className="py-2">Venda Atual</th>
+                  <th className="py-2">Margem Unit.</th>
+                  <th className="py-2 text-right">Vendidos</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-800/70">
+                {products.slice(0, 10).map((p) => {
+                  const cost = p.cost_price || 0;
+                  const margin = p.effective_price - cost;
+// step 7/8
