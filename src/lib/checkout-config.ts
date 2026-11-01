@@ -441,4 +441,48 @@ export function getSelectableCheckoutOptions(
     if (!card.enabled || card.card_type !== 'option') continue;
     const feeCalc = computeOptionFee(
       card.fee_mode,
-// step 10/12
+      card.fee,
+      card.free_threshold,
+      card.badge,
+      itemsTotal
+    );
+
+    options.push({
+      key: `custom:${card.id}`,
+      kind: 'custom',
+      customCardId: card.id,
+      icon: card.icon,
+      title: card.title || 'Opção de Recebimento',
+      subtitle: card.description,
+      badgeLabel: feeCalc.badgeLabel,
+      shippingCost: feeCalc.shippingCost,
+      summaryLabel: feeCalc.summaryLabel,
+      freeThreshold: card.fee_mode === 'fixed' ? safeNum(card.free_threshold, 0) : 0,
+      requiresAddress: card.require_address,
+      deliveryMethod: card.require_address ? 'local_delivery' : 'pickup',
+    });
+  }
+
+  return options;
+}
+
+export function resolveDefaultOptionKey(cfg: CheckoutDeliveryConfig): string {
+  const options = getSelectableCheckoutOptions(cfg, '', 0);
+  return options[0]?.key ?? 'pickup';
+}
+
+export function resolveDefaultDeliveryMethod(
+  cfg: CheckoutDeliveryConfig
+): DeliveryMethod {
+  const options = getSelectableCheckoutOptions(cfg, '', 0);
+  return options[0]?.deliveryMethod ?? 'pickup';
+}
+
+export function calculateCheckoutShipping(
+  cfg: CheckoutDeliveryConfig,
+  selectedKeyOrMethod: string,
+  itemsTotal: number
+): {
+  shippingCost: number;
+  summaryLabel: string;
+// step 11/12
