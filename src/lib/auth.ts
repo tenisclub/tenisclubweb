@@ -53,4 +53,32 @@ export const getAuthSession = cache(async (): Promise<AuthSession | null> => {
         email: claimEmail || cached.profile.email,
         profile: cached.profile,
         role: cached.role,
-// step 2/6
+        isAdmin: cached.isAdmin,
+        isSuperAdmin: cached.isSuperAdmin,
+      };
+    }
+
+    const userMeta = claims.user_metadata || {};
+    const appMeta = claims.app_metadata || {};
+
+    const service = createServiceClient();
+
+    const [{ data: profile }, { data: userRoles }] = await Promise.all([
+      service.from('user_profiles').select('*').eq('id', userId).maybeSingle(),
+      service.from('user_roles').select('roles(name)').eq('user_id', userId),
+    ]);
+
+    // Ensure profile exists even if signed up before trigger
+    let resolvedProfile = profile as UserProfile | null;
+    if (!resolvedProfile) {
+      const fullName =
+        (typeof userMeta.full_name === 'string' && userMeta.full_name) ||
+        (typeof userMeta.name === 'string' && userMeta.name) ||
+        claimEmail.split('@')[0] ||
+        'Cliente';
+      const { data: inserted } = await service
+        .from('user_profiles')
+        .upsert({
+          id: userId,
+          email: claimEmail.toLowerCase(),
+// step 3/6
