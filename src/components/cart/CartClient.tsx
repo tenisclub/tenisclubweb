@@ -38,4 +38,44 @@ export function CartClient({
     items: CartItemView[];
     totalItems: number;
     subtotal: number;
-// step 1/8
+    total: number;
+  }) => {
+    setItems(data.items || []);
+    setTotalItems(data.totalItems || 0);
+    setSubtotal(data.subtotal || 0);
+    setTotal(data.total || 0);
+    setCartCount(data.totalItems || 0);
+  };
+
+  const recomputeAndApply = (nextItems: CartItemView[]) => {
+    const active = nextItems.filter((i) => i.is_available);
+    const nextTotalItems = active.reduce((acc, i) => acc + i.quantity, 0);
+    const nextSubtotal = active.reduce((acc, i) => acc + i.base_price * i.quantity, 0);
+    const nextTotal = active.reduce((acc, i) => acc + i.subtotal, 0);
+    setItems(nextItems);
+    setTotalItems(nextTotalItems);
+    setSubtotal(nextSubtotal);
+    setTotal(nextTotal);
+    setCartCount(nextTotalItems);
+  };
+
+  const updateQty = async (itemId: string, nextQty: number) => {
+    const prevSnapshot = items;
+    const optimistic = items.map((i) =>
+      i.id === itemId ? { ...i, quantity: nextQty, subtotal: i.unit_price * nextQty } : i
+    );
+    recomputeAndApply(optimistic);
+    setLoadingId(itemId);
+
+    try {
+      const res = await fetch('/api/cart', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ itemId, quantity: nextQty }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        recomputeAndApply(prevSnapshot);
+        toast(data.error || 'Erro ao atualizar quantidade.', 'error');
+        return;
+// step 2/8
