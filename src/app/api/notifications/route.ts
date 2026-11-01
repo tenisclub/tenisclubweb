@@ -28,4 +28,19 @@ export async function GET(request: Request) {
     .order('created_at', { ascending: false })
     .limit(40);
 
-// step 2/5
+  return NextResponse.json({ notifications: data || [] });
+}
+
+export async function PATCH(request: Request) {
+  const session = await getAuthSession();
+  if (!session) return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 });
+
+  const { id, markAll, scope } = await request.json();
+  const supabase = createServiceClient();
+
+  if (scope === 'admin' && session.isAdmin) {
+    if (markAll) {
+      await supabase
+        .from('notifications')
+        .update({ is_read: true })
+// step 3/5
