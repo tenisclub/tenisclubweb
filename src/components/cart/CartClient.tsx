@@ -78,4 +78,44 @@ export function CartClient({
         recomputeAndApply(prevSnapshot);
         toast(data.error || 'Erro ao atualizar quantidade.', 'error');
         return;
-// step 2/8
+      }
+      applyCartData(data);
+    } catch {
+      recomputeAndApply(prevSnapshot);
+      toast('Erro ao atualizar quantidade.', 'error');
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
+  const removeItem = async (itemId: string) => {
+    const prevSnapshot = items;
+    recomputeAndApply(items.filter((i) => i.id !== itemId));
+    toast('Item removido do carrinho.', 'info');
+    setLoadingId(itemId);
+
+    try {
+      const res = await fetch(`/api/cart?itemId=${encodeURIComponent(itemId)}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (res.ok) {
+        applyCartData(data);
+      } else {
+        recomputeAndApply(prevSnapshot);
+        toast(data.error || 'Erro ao remover item.', 'error');
+      }
+    } catch {
+      recomputeAndApply(prevSnapshot);
+      toast('Erro ao remover item.', 'error');
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
+  if (items.length === 0) {
+    return (
+      <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-6 sm:p-12 text-center space-y-4 max-w-xl mx-auto my-6 sm:my-10">
+        <div className="w-16 h-16 rounded-2xl bg-[#BEFA46]/10 border border-[#BEFA46]/30 text-[#BEFA46] flex items-center justify-center mx-auto">
+          <ShoppingBag className="w-8 h-8" />
+// step 3/8
