@@ -590,4 +590,70 @@ export function ProductForm({
                     onClick={() => setPrimaryImage(idx)}
                     className={cn(
                       'p-1.5 rounded-lg text-xs',
-// step 9/12
+                      img.is_primary ? 'text-[#BEFA46]' : 'text-zinc-400 hover:text-white'
+                    )}
+                    title="Definir como foto principal"
+                  >
+                    <Star className={cn('w-4 h-4', img.is_primary && 'fill-current')} />
+                  </button>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      disabled={idx === 0}
+                      onClick={() => moveImage(idx, -1)}
+                      className="p-1.5 rounded-lg bg-zinc-800 text-zinc-300 disabled:opacity-30"
+                      title="Mover para esquerda"
+                    >
+                      <ArrowLeft className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      disabled={idx === images.length - 1}
+                      onClick={() => moveImage(idx, 1)}
+                      className="p-1.5 rounded-lg bg-zinc-800 text-zinc-300 disabled:opacity-30"
+                      title="Mover para direita"
+                    >
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removeImage(idx)}
+                      className="p-1.5 rounded-lg bg-red-500/15 text-red-400"
+                      title="Excluir imagem"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 3. Variants & Per-Size Stock Matrix */}
+      <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div>
+            <h2 className="text-base font-black text-white">
+              3. Numerações, Cores e Estoque por Tamanho
+            </h2>
+            <p className="text-xs text-zinc-400">
+              Controle individualizado por cor e numeração.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <input
+                type="text"
+                value={defaultColor}
+                onChange={(e) => setDefaultColor(e.target.value)}
+                placeholder="Cor (ex: Preto)"
+                className="flex-1 sm:w-36 h-9 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+              />
+              <input
+                type="color"
+                value={defaultColorHex}
+                onChange={(e) => setDefaultColorHex(e.target.value)}
+// step 10/12
