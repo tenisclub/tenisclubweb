@@ -50,4 +50,30 @@ export default function MeusDadosPage() {
       setNewPassword('');
       setConfirmPassword('');
       await refreshSession();
-// step 2/6
+      toast(data.message || 'Seus dados foram atualizados!', 'success');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-8">
+        <h1 className="text-xl sm:text-2xl font-black text-white">Meus Dados Pessoais</h1>
+        <p className="text-xs sm:text-sm text-zinc-400 mt-1">
+          Mantenha suas informações atualizadas para facilitar o atendimento e entrega.
+        </p>
+
+        <form onSubmit={handleSave} className="mt-6 space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="sm:col-span-2 space-y-1.5">
+              <label className="text-xs font-semibold text-zinc-300">Nome completo</label>
+              <input
+                type="text"
+                required
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="w-full h-11 px-4 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+              />
+            </div>
+// step 3/6
