@@ -62,3 +62,68 @@ export async function POST(request: Request) {
       .insert({
         name: name.trim(),
         slug,
+        sku: sku?.trim() || null,
+        brand_id: brand_id || null,
+        category_id: category_id || null,
+        gender: gender || 'unissex',
+        short_description: short_description?.trim() || '',
+        description: description?.trim() || '',
+        additional_info: additional_info || {},
+        cost_price: Number(cost_price || 0),
+        base_price: Number(base_price),
+        promo_price: parsedPromo,
+        is_active: is_active !== false,
+        is_featured: Boolean(is_featured),
+        is_new_release: Boolean(is_new_release),
+        allow_backorder: Boolean(allow_backorder),
+        meta_title: `${name.trim()} | Tênis Club`,
+        meta_description: short_description?.trim() || description?.slice(0, 155) || '',
+      })
+      .select('*')
+      .single();
+
+    if (prodError || !product) {
+      return NextResponse.json(
+        { error: prodError?.message || 'Erro ao criar produto.' },
+        { status: 400 }
+      );
+    }
+
+    const validVariants = Array.isArray(variants)
+      ? variants.filter((v: { size?: string | number }) => Boolean(v?.size))
+      : [];
+
+    // Wave 2: Bulk-insert images & variants in parallel
+    const [, createdVarsRes] = await Promise.all([
+      Array.isArray(images) && images.length > 0
+        ? supabase.from('product_images').insert(
+            images.map((img: { url: string; is_primary?: boolean }, index: number) => ({
+              product_id: product.id,
+              url: img.url,
+              alt_text: name.trim(),
+              is_primary: img.is_primary ?? index === 0,
+              sort_order: index,
+            }))
+          )
+        : Promise.resolve(null),
+      validVariants.length > 0
+        ? supabase
+            .from('product_variants')
+            .insert(
+              validVariants.map(
+                (v: {
+                  color?: string;
+                  color_hex?: string;
+                  size: string | number;
+                  variant_sku?: string;
+                }) => ({
+                  product_id: product.id,
+                  color: v.color?.trim() || 'Padrão',
+                  color_hex: v.color_hex || '#18181B',
+                  size: String(v.size).trim(),
+                  variant_sku: v.variant_sku || `${sku || slug}-${v.size}`,
+                  is_active: true,
+                })
+              )
+            )
+            .select('id, color, size')
