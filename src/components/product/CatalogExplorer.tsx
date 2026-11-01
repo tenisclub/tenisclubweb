@@ -134,4 +134,49 @@ export function CatalogExplorer({
         case 'bestsellers':
           return b.sold_count - a.sold_count;
         case 'popular':
-// step 3/12
+          return b.views_count + b.sold_count * 2 - (a.views_count + a.sold_count * 2);
+        case 'newest':
+        default:
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
+    });
+
+    return list;
+  }, [
+    products,
+    search,
+    gender,
+    category,
+    brand,
+    size,
+    color,
+    minPrice,
+    maxPrice,
+    onlyAvailable,
+    onlyPromo,
+    onlyNew,
+    sort,
+  ]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredAndSorted.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const pageItems = filteredAndSorted.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  const resetAll = () => {
+    setSearch('');
+    setGender('todos');
+    setCategory('todos');
+    setBrand('todas');
+    setSize('');
+    setColor('todas');
+    setMinPrice('');
+    setMaxPrice('');
+    setOnlyAvailable(false);
+    setOnlyPromo(false);
+    setOnlyNew(false);
+    setSort('newest');
+    setPage(1);
+  };
+
+  return (
+// step 4/12
