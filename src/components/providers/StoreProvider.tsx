@@ -690,4 +690,73 @@ export function StoreProvider({
 
       try {
         const res = await fetch('/api/favorites', {
-// step 10/12
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId }),
+        });
+
+        if (!res.ok) {
+          setFavoriteIds((prev) =>
+            wasFav ? [...prev, productId] : prev.filter((id) => id !== productId)
+          );
+          toast('Erro ao atualizar favoritos.', 'error');
+        }
+      } catch {
+        setFavoriteIds((prev) =>
+          wasFav ? [...prev, productId] : prev.filter((id) => id !== productId)
+        );
+        toast('Erro ao atualizar favoritos.', 'error');
+      }
+    },
+    [authenticated, favoriteIds, pathname, router, toast]
+  );
+
+  return (
+    <StoreContext.Provider
+      value={{
+        authenticated,
+        user,
+        role,
+        isAdmin: role === 'super_admin' || role === 'admin_operational',
+        cartCount,
+        favoriteIds,
+        unreadNotifications,
+        refreshSession,
+        hydrateSession,
+        logout,
+        addToCart,
+        toggleFavorite,
+        toast,
+        showOrderConfirmedPopup,
+        setCartCount,
+      }}
+    >
+      {children}
+
+      {/* 5-Second Order Confirmed Popup on Home ('/') */}
+      {orderPopup && pathname === '/' && (
+        <div
+          onClick={dismissOrderPopup}
+          className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/65 backdrop-blur-[2px] animate-in fade-in duration-200"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm rounded-3xl border border-[#BEFA46]/40 bg-[#121216] p-6 text-center space-y-4 shadow-[0_24px_70px_rgba(0,0,0,0.85)] relative overflow-hidden animate-in zoom-in-95 duration-200"
+          >
+            <button
+              type="button"
+              onClick={dismissOrderPopup}
+              className="absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center cursor-pointer"
+              aria-label="Fechar confirmação"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="w-14 h-14 rounded-full bg-[#BEFA46] text-[#09090B] flex items-center justify-center mx-auto shadow-[0_0_28px_rgba(190,250,70,0.4)]">
+              <CheckCircle2 className="w-8 h-8 stroke-[2.5]" />
+            </div>
+
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#BEFA46] block">
+                Pedido Confirmado!
+// step 11/12
