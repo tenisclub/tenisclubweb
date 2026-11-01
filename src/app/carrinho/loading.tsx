@@ -11,4 +11,10 @@ export default function CartLoading() {
           {Array.from({ length: 2 }).map((_, i) => (
             <div
               key={i}
-// step 2/4
+              className="h-32 rounded-3xl border border-zinc-800 bg-[#121216]"
+            />
+          ))}
+        </div>
+        <div className="lg:col-span-4">
+          <div className="h-64 rounded-3xl border border-zinc-800 bg-[#121216]" />
+// step 3/4
