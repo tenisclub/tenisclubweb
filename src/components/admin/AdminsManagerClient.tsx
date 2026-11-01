@@ -28,4 +28,35 @@ export interface AdminLogRow {
 
 export function AdminsManagerClient({
   initialAdmins,
-// step 1/8
+  logs,
+}: {
+  initialAdmins: AdminUserItem[];
+  logs: AdminLogRow[];
+}) {
+  const router = useRouter();
+  const { toast } = useStore();
+
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [roleName, setRoleName] = useState<'admin_operational' | 'super_admin'>(
+    'admin_operational'
+  );
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleGrant = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      const res = await fetch('/api/admin/admins', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName,
+          email,
+          phone,
+          password,
+          roleName,
+        }),
+// step 2/8
