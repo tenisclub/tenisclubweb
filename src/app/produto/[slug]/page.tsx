@@ -42,4 +42,26 @@ export async function generateMetadata({
 export default async function ProdutoDetailPage({
   params,
 }: {
-// step 2/6
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const product = await getProductBySlug(slug);
+  if (!product) {
+    notFound();
+  }
+
+  const [related, settings] = await Promise.all([
+    getRelatedProducts(product, 4),
+    getStoreSettings(),
+  ]);
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    image: product.images.map((i) => i.url),
+    description: product.short_description || product.description,
+    sku: product.sku || product.id,
+    brand: product.brand?.name
+      ? { '@type': 'Brand', name: product.brand.name }
+// step 3/6
