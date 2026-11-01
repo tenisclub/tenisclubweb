@@ -173,4 +173,28 @@ export function invalidateServerCache(
 
   if (scope === 'all') {
     clearSlot('settings');
-// step 7/8
+    clearSlot('allProductsAdmin');
+    clearSlot('allCategoriesAndBrands');
+    clearSlot('adminBadges');
+    store.authByUser.clear();
+    return true;
+  }
+
+  if (scope === 'settings') {
+    clearSlot('settings');
+  } else if (scope === 'catalog') {
+    clearSlot('allProductsAdmin');
+    clearSlot('allCategoriesAndBrands');
+    clearSlot('adminBadges');
+  } else if (scope === 'orders') {
+    clearSlot('allProductsAdmin');
+    clearSlot('adminBadges');
+  } else if (scope === 'notifications') {
+    clearSlot('adminBadges');
+  } else if (scope === 'users') {
+    store.authByUser.clear();
+  }
+
+  return true;
+}
+
