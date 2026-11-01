@@ -972,3 +972,125 @@ export function CheckoutStep3Customizer({
                           </div>
                           <p className="text-[11px] text-zinc-400 truncate mt-0.5">
                             {deliveryCfg.delivery_subtitle || 'Entrega via motoboy ou correios'}
+                          </p>
+                        </div>
+                      </button>
+
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          type="button"
+                          title={deliveryCfg.delivery_enabled ? 'Ocultar card' : 'Mostrar card'}
+                          onClick={() =>
+                            updateDeliveryCfg({
+                              delivery_enabled: !deliveryCfg.delivery_enabled,
+                            })
+                          }
+                          className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition cursor-pointer"
+                        >
+                          {deliveryCfg.delivery_enabled ? (
+                            <Eye className="w-4 h-4 text-[#BEFA46]" />
+                          ) : (
+                            <EyeOff className="w-4 h-4 text-zinc-500" />
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => toggleExpand('main:delivery')}
+                          className={cn(
+                            'px-2.5 py-1.5 rounded-lg border text-[11px] font-bold inline-flex items-center gap-1 transition cursor-pointer',
+                            expandedCardId === 'main:delivery'
+                              ? 'border-[#BEFA46]/40 bg-[#BEFA46]/10 text-[#BEFA46]'
+                              : 'border-zinc-800 bg-[#18181F] text-zinc-300 hover:text-white'
+                          )}
+                        >
+                          <SlidersHorizontal className="w-3 h-3" />
+                          <span className="hidden sm:inline">Editar</span>
+                          <ChevronDown
+                            className={cn(
+                              'w-3.5 h-3.5 transition-transform',
+                              expandedCardId === 'main:delivery' && 'rotate-180'
+                            )}
+                          />
+                        </button>
+                        <button
+                          type="button"
+                          title="Excluir card principal"
+                          onClick={() =>
+                            updateDeliveryCfg({
+                              delivery_removed: true,
+                              delivery_enabled: false,
+                            })
+                          }
+                          className="p-2 rounded-lg text-zinc-500 hover:text-red-400 hover:bg-red-500/10 transition cursor-pointer"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {expandedCardId === 'main:delivery' && (
+                      <div className="border-t border-zinc-800/80 p-3.5 sm:p-4 bg-[#15151B] space-y-3.5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <label className="text-[11px] font-semibold text-zinc-400">
+                              Título do Card
+                            </label>
+                            <input
+                              type="text"
+                              value={deliveryCfg.delivery_title}
+                              onChange={(e) =>
+                                updateDeliveryCfg({ delivery_title: e.target.value })
+                              }
+                              className="mt-1 w-full h-10 px-3 rounded-xl bg-[#121216] border border-zinc-800 text-xs sm:text-sm text-white"
+                            />
+                          </div>
+                          <CheckoutIconPicker
+                            label="Ícone do Card"
+                            value={deliveryCfg.delivery_icon}
+                            onChange={(delivery_icon) => updateDeliveryCfg({ delivery_icon })}
+                          />
+                          <div>
+                            <label className="text-[11px] font-semibold text-zinc-400">
+                              Modo de Taxa de Entrega
+                            </label>
+                            <select
+                              value={deliveryCfg.delivery_fee_mode}
+                              onChange={(e) =>
+                                updateDeliveryCfg({
+                                  delivery_fee_mode: e.target.value as DeliveryFeeMode,
+                                })
+                              }
+                              className="mt-1 w-full h-10 px-3 rounded-xl bg-[#121216] border border-zinc-800 text-xs sm:text-sm text-white"
+                            >
+                              <option value="to_combine">A combinar (confirmado pela loja)</option>
+                              <option value="fixed">Taxa fixa automática em R$</option>
+                              <option value="free">Entrega Grátis</option>
+                            </select>
+                          </div>
+
+                          {deliveryCfg.delivery_fee_mode === 'fixed' ? (
+                            <>
+                              <div>
+                                <label className="text-[11px] font-semibold text-zinc-400">
+                                  Taxa Fixa (R$)
+                                </label>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  step="0.50"
+                                  value={deliveryCfg.delivery_fee}
+                                  onChange={(e) =>
+                                    updateDeliveryCfg({
+                                      delivery_fee: Math.max(0, Number(e.target.value) || 0),
+                                    })
+                                  }
+                                  className="mt-1 w-full h-10 px-3 rounded-xl bg-[#121216] border border-zinc-800 text-xs sm:text-sm text-white"
+                                />
+                              </div>
+                              <div className="sm:col-span-2">
+                                <label className="text-[11px] font-semibold text-zinc-400">
+                                  Frete Grátis acima de (R$ — 0 desativa)
+                                </label>
+                                <input
+                                  type="number"
+                                  min="0"
