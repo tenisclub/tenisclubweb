@@ -143,4 +143,31 @@ export async function PATCH(request: Request) {
       await supabase
         .from('user_roles')
         .delete()
-// step 5/6
+        .eq('user_id', userId)
+        .in('role_id', adminRoleIds);
+    }
+
+    if (roleName !== 'customer') {
+      const targetRole = (adminRoles || []).find((r) => r.name === roleName);
+      if (targetRole) {
+        await supabase.from('user_roles').insert({
+          user_id: userId,
+          role_id: targetRole.id,
+          assigned_by: session.userId,
+        });
+      }
+    }
+  }
+
+  await supabase.from('admin_logs').insert({
+    admin_id: session.userId,
+    action: 'admin.update_access',
+    entity_type: 'user_profile',
+    entity_id: userId,
+    details: { roleName, is_active },
+  });
+
+  revalidateStoreData();
+  return NextResponse.json({ success: true });
+}
+
