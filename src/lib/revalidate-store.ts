@@ -14,4 +14,8 @@ export function revalidateStoreData(scope: ServerSyncScope = 'all') {
     }
     if (scope === 'all' || scope === 'settings') {
       revalidateTag('store-settings', { expire: 0 });
-// step 3/4
+    }
+  } catch {
+    // Safe fallback when invoked outside a Next.js request context
+  }
+}
