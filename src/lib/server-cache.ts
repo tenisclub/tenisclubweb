@@ -148,4 +148,29 @@ export function setCachedAuthRecord(
 export function invalidateAuthCache(userId?: string) {
   if (userId) {
     store.authByUser.delete(userId);
-// step 6/8
+  } else {
+    store.authByUser.clear();
+  }
+}
+
+export function invalidateServerCache(
+  scope: ServerSyncScope = 'all',
+  remoteVersion?: number
+): boolean {
+  if (typeof remoteVersion === 'number' && remoteVersion > 0) {
+    if (remoteVersion <= store.lastBustedRealtimeVersion) {
+      return false;
+    }
+    store.lastBustedRealtimeVersion = remoteVersion;
+
+    // If this server process JUST ran a local mutation within the last 800ms, its slots were already cleared synchronously
+    if (Date.now() - store.lastLocalMutationAt < 800) {
+      return false;
+    }
+  } else {
+    store.lastLocalMutationAt = Date.now();
+  }
+
+  if (scope === 'all') {
+    clearSlot('settings');
+// step 7/8
