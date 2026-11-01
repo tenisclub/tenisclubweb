@@ -58,4 +58,18 @@ export async function PATCH(request: Request) {
   if (markAll) {
     await supabase
       .from('notifications')
-// step 4/5
+      .update({ is_read: true })
+      .eq('target_audience', 'customer')
+      .eq('user_id', session.userId)
+      .eq('is_read', false);
+  } else if (id) {
+    await supabase
+      .from('notifications')
+      .update({ is_read: true })
+      .eq('id', id)
+      .eq('user_id', session.userId);
+  }
+
+  return NextResponse.json({ success: true });
+}
+
