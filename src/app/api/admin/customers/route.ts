@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
+import { revalidateStoreData } from '@/lib/revalidate-store';
 import { createServiceClient } from '@/lib/supabase/server';
 
 export async function PATCH(request: Request) {
@@ -19,23 +20,4 @@ export async function PATCH(request: Request) {
       { status: 400 }
     );
   }
-
-  const supabase = createServiceClient();
-  const { error } = await supabase
-    .from('user_profiles')
-    .update({ is_active: Boolean(is_active), updated_at: new Date().toISOString() })
-    .eq('id', userId);
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
-
-  await supabase.from('admin_logs').insert({
-    admin_id: session.userId,
-    action: is_active ? 'customer.activate' : 'customer.deactivate',
-    entity_type: 'user_profile',
-    entity_id: userId,
-    details: { reason: reason || 'Operação administrativa' },
-  });
-
-  return NextResponse.json({ success: true });
-}
 
