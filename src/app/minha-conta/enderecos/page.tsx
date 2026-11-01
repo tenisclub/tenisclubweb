@@ -225,4 +225,42 @@ export default function MeusEnderecosPage() {
           <button
             type="submit"
             className="px-6 py-2.5 rounded-xl bg-[#BEFA46] text-[#09090B] text-xs font-black"
-// step 6/8
+          >
+            Salvar Endereço
+          </button>
+        </form>
+      )}
+
+      {loading ? (
+        <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-8 text-center text-sm text-zinc-400">
+          Carregando endereços...
+        </div>
+      ) : addresses.length === 0 ? (
+        <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-10 text-center space-y-2">
+          <MapPin className="w-8 h-8 text-zinc-600 mx-auto" />
+          <p className="text-sm font-bold text-white">Nenhum endereço cadastrado</p>
+          <p className="text-xs text-zinc-400">
+            Adicione um endereço para utilizá-lo automaticamente nos pedidos com entrega local.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {addresses.map((addr) => (
+            <div
+              key={addr.id}
+              className="rounded-2xl border border-zinc-800 bg-[#121216] p-5 flex flex-col justify-between gap-4"
+            >
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-extrabold text-white">{addr.label}</span>
+                  {addr.is_default && (
+                    <span className="px-2.5 py-0.5 rounded-full bg-[#BEFA46]/15 text-[#BEFA46] text-[10px] font-bold">
+                      Principal
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-zinc-300">
+                  {addr.street}, {addr.number}
+                  {addr.complement ? ` - ${addr.complement}` : ''}
+                </p>
+// step 7/8
