@@ -151,3 +151,54 @@ export default async function PedidoDetalheClientePage({
               <span>Descontos</span>
               <span>-{formatCurrency(order.discount_total)}</span>
             </div>
+          )}
+          {order.payment_method_note && (
+            <div className="flex justify-between text-zinc-300">
+              <span>Forma de pagamento</span>
+              <span className="font-bold text-white">{order.payment_method_note}</span>
+            </div>
+          )}
+          <div className="flex justify-between items-baseline pt-2">
+            <span className="font-bold text-white">Valor Total</span>
+            <span className="text-xl font-black text-[#BEFA46]">
+              {formatCurrency(order.total)}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Delivery & Timeline */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+        <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-3 text-xs sm:text-sm">
+          <h3 className="text-base font-black text-white flex items-center gap-2">
+            {order.delivery_method === 'pickup' ? (
+              <Store className="w-4 h-4 text-[#BEFA46]" />
+            ) : (
+              <MapPin className="w-4 h-4 text-[#BEFA46]" />
+            )}
+            {order.shipping_address?.custom_option_title ||
+              (order.delivery_method === 'pickup'
+                ? 'Retirada na Loja'
+                : 'Endereço de Entrega')}
+          </h3>
+
+          {order.shipping_address?.street ? (
+            <div className="text-zinc-300 space-y-1">
+              <p>
+                {order.shipping_address.street}, {order.shipping_address.number}
+                {order.shipping_address.complement
+                  ? ` - ${order.shipping_address.complement}`
+                  : ''}
+              </p>
+              <p>
+                {order.shipping_address.neighborhood} — {order.shipping_address.city}/
+                {order.shipping_address.state}
+              </p>
+              {order.shipping_address.reference && (
+                <p className="text-zinc-400">Ref: {order.shipping_address.reference}</p>
+              )}
+            </div>
+          ) : order.delivery_method === 'pickup' ? (
+            <div className="text-zinc-300 space-y-1">
+              <p>{settings.address}</p>
+              <p className="text-zinc-400 text-xs">{settings.business_hours}</p>
