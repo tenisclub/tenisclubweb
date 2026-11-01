@@ -5,4 +5,11 @@ import { getAdminCategoriesAndBrands, getAdminProductById } from '@/lib/catalog'
 export const dynamic = 'force-dynamic';
 
 export default async function EditarProdutoAdminPage({
-// step 1/4
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+
+  const [product, { categories, brands }] = await Promise.all([
+// step 2/4
