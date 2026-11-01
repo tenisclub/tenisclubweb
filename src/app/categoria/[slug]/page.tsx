@@ -17,4 +17,23 @@ const GENDER_SLUGS: Record<string, { title: string; subtitle: string }> = {
   },
   infantil: {
     title: 'Calçados Infantis',
-// step 1/5
+    subtitle: 'Modelos confortáveis e resistentes para acompanhar toda a energia das crianças.',
+  },
+  unissex: {
+    title: 'Modelos Unissex',
+    subtitle: 'Clássicos versáteis que combinam com todos os estilos.',
+  },
+};
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const gInfo = GENDER_SLUGS[slug.toLowerCase()];
+  if (gInfo) {
+    return { title: gInfo.title, description: gInfo.subtitle };
+  }
+  return {
+// step 2/5
