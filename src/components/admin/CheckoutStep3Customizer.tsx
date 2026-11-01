@@ -1134,4 +1134,86 @@ export function CheckoutStep3Customizer({
                               Descrição / Subtítulo do Card
                             </label>
                             <input
-// step 14/24
+                              type="text"
+                              value={deliveryCfg.delivery_subtitle}
+                              onChange={(e) =>
+                                updateDeliveryCfg({ delivery_subtitle: e.target.value })
+                              }
+                              className="mt-1 w-full h-10 px-3 rounded-xl bg-[#121216] border border-zinc-800 text-xs text-white"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 pt-1">
+                          <label className="inline-flex items-center gap-2 text-xs text-zinc-200 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={deliveryCfg.require_address_on_delivery}
+                              onChange={(e) =>
+                                updateDeliveryCfg({
+                                  require_address_on_delivery: e.target.checked,
+                                })
+                              }
+                              className="accent-[#BEFA46] w-4 h-4 rounded shrink-0"
+                            />
+                            <span>Pedir endereço completo (CEP, Rua, Número, Bairro)</span>
+                          </label>
+
+                          <label className="inline-flex items-center gap-2 text-xs text-zinc-200 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={deliveryCfg.delivery_info_card_enabled}
+                              onChange={(e) =>
+                                updateDeliveryCfg({
+                                  delivery_info_card_enabled: e.target.checked,
+                                })
+                              }
+                              className="accent-[#BEFA46] w-4 h-4 rounded shrink-0"
+                            />
+                            <span>Exibir quadro informativo na Entrega Local</span>
+                          </label>
+                        </div>
+
+                        <div className="border-t border-zinc-800/80 pt-3 space-y-3">
+                          {deliveryCfg.delivery_info_card_enabled && (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <div>
+                                <label className="text-[11px] font-semibold text-zinc-400">
+                                  Título do Quadro de Entrega
+                                </label>
+                                <input
+                                  type="text"
+                                  value={deliveryCfg.delivery_info_card_title}
+                                  onChange={(e) =>
+                                    updateDeliveryCfg({
+                                      delivery_info_card_title: e.target.value,
+                                    })
+                                  }
+                                  className="mt-1 w-full h-10 px-3 rounded-xl bg-[#121216] border border-zinc-800 text-xs text-white"
+                                />
+                              </div>
+                              <CheckoutIconPicker
+                                label="Ícone do Quadro"
+                                value={deliveryCfg.delivery_info_card_icon}
+                                onChange={(delivery_info_card_icon) =>
+                                  updateDeliveryCfg({ delivery_info_card_icon })
+                                }
+                              />
+                            </div>
+                          )}
+
+                          <div>
+                            <label className="text-[11px] font-semibold text-zinc-400">
+                              Informações sobre Entrega Local (Checkout & página institucional)
+                            </label>
+                            <textarea
+                              rows={2}
+                              value={form.delivery_info}
+                              onChange={(e) => setField('delivery_info', e.target.value)}
+                              className="mt-1 w-full p-2.5 rounded-xl bg-[#121216] border border-zinc-800 text-xs text-white"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+// step 15/24
