@@ -81,3 +81,44 @@ export function BrandsClient({ initialBrands }: { initialBrands: Brand[] }) {
         <button
           type="submit"
           className="w-full sm:w-auto px-5 h-11 rounded-xl bg-[#BEFA46] text-[#09090B] text-xs font-black inline-flex items-center justify-center gap-1.5 shrink-0"
+        >
+          <Plus className="w-4 h-4" />
+          Adicionar Marca
+        </button>
+      </form>
+
+      <div className="rounded-3xl border border-zinc-800 bg-[#121216] divide-y divide-zinc-800">
+        {brands.map((brand) => (
+          <div key={brand.id} className="p-4 flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-sm font-extrabold text-white truncate">{brand.name}</p>
+              <p className="text-xs text-zinc-500 truncate">Slug: {brand.slug}</p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => toggleActive(brand)}
+                className={cn(
+                  'px-3 py-1 rounded-full text-xs font-bold',
+                  brand.is_active
+                    ? 'bg-emerald-500/15 text-emerald-400'
+                    : 'bg-zinc-800 text-zinc-400'
+                )}
+              >
+                {brand.is_active ? 'Ativa' : 'Inativa'}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDelete(brand.id)}
+                className="p-2 text-zinc-500 hover:text-red-400"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
