@@ -43,4 +43,19 @@ export async function POST(request: Request) {
 
     const ext = file.name.split('.').pop()?.toLowerCase() || 'webp';
     const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${ext}`;
-// step 3/5
+    const filePath = `uploads/${fileName}`;
+
+    const arrayBuffer = await file.arrayBuffer();
+    const supabase = createServiceClient();
+
+    const { error: uploadError } = await supabase.storage
+      .from(bucket)
+      .upload(filePath, Buffer.from(arrayBuffer), {
+        contentType: file.type,
+        upsert: false,
+      });
+
+    if (uploadError) {
+      return NextResponse.json({ error: uploadError.message }, { status: 500 });
+    }
+// step 4/5
