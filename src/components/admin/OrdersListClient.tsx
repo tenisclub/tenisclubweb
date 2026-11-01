@@ -31,4 +31,38 @@ export function OrdersListClient({ initialOrders }: { initialOrders: Order[] }) 
 
   const filtered = useMemo(() => {
     return initialOrders.filter((o) => {
-// step 1/8
+      if (search.trim()) {
+        const q = search.toLowerCase();
+        if (
+          !o.order_number.toLowerCase().includes(q) &&
+          !o.customer_name.toLowerCase().includes(q) &&
+          !o.customer_email.toLowerCase().includes(q)
+        ) {
+          return false;
+        }
+      }
+      if (statusFilter !== 'all' && o.status !== statusFilter) return false;
+      if (deliveryFilter !== 'all' && o.delivery_method !== deliveryFilter) return false;
+      if (dateFilter && !String(o.created_at).startsWith(dateFilter)) return false;
+      return true;
+    });
+  }, [initialOrders, search, statusFilter, deliveryFilter, dateFilter]);
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-black text-white">Gerenciar Pedidos</h1>
+        <p className="text-xs sm:text-sm text-zinc-400">
+          Confirme solicitações, separe numerações, atualize status e registre pagamentos manuais.
+        </p>
+      </div>
+
+      {/* Filters Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="relative">
+          <Search className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+// step 2/8
