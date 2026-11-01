@@ -58,4 +58,18 @@ export async function POST(request: Request) {
     if (uploadError) {
       return NextResponse.json({ error: uploadError.message }, { status: 500 });
     }
-// step 4/5
+
+    const { data: publicUrlData } = supabase.storage.from(bucket).getPublicUrl(filePath);
+
+    return NextResponse.json({
+      url: publicUrlData.publicUrl,
+      path: filePath,
+    });
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Falha no upload de imagem.' },
+      { status: 500 }
+    );
+  }
+}
+
