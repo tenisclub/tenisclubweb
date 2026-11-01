@@ -62,4 +62,37 @@ export async function POST(request: Request) {
       .insert({
         name: name.trim(),
         slug,
-// step 2/6
+        sku: sku?.trim() || null,
+        brand_id: brand_id || null,
+        category_id: category_id || null,
+        gender: gender || 'unissex',
+        short_description: short_description?.trim() || '',
+        description: description?.trim() || '',
+        additional_info: additional_info || {},
+        cost_price: Number(cost_price || 0),
+        base_price: Number(base_price),
+        promo_price: parsedPromo,
+        is_active: is_active !== false,
+        is_featured: Boolean(is_featured),
+        is_new_release: Boolean(is_new_release),
+        allow_backorder: Boolean(allow_backorder),
+        meta_title: `${name.trim()} | Tênis Club`,
+        meta_description: short_description?.trim() || description?.slice(0, 155) || '',
+      })
+      .select('*')
+      .single();
+
+    if (prodError || !product) {
+      return NextResponse.json(
+        { error: prodError?.message || 'Erro ao criar produto.' },
+        { status: 400 }
+      );
+    }
+
+    const validVariants = Array.isArray(variants)
+      ? variants.filter((v: { size?: string | number }) => Boolean(v?.size))
+      : [];
+
+    // Wave 2: Bulk-insert images & variants in parallel
+    const [, createdVarsRes] = await Promise.all([
+// step 3/6
