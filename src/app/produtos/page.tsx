@@ -7,4 +7,13 @@ export const metadata: Metadata = {
   description: 'Explore o catálogo completo da Tênis Club com filtros por marca, numeração, cor e preço.',
 };
 
-// step 1/4
+export default async function ProdutosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; genero?: string; categoria?: string }>;
+}) {
+  const sp = await searchParams;
+  const [{ allMatching }, { categories, brands }, settings] = await Promise.all([
+    getCatalogProducts({ pageSize: 200 }),
+    getCategoriesAndBrands(),
+// step 2/4
