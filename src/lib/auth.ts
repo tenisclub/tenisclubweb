@@ -81,4 +81,32 @@ export const getAuthSession = cache(async (): Promise<AuthSession | null> => {
         .upsert({
           id: userId,
           email: claimEmail.toLowerCase(),
-// step 3/6
+          full_name: fullName,
+          phone: typeof userMeta.phone === 'string' ? userMeta.phone : '',
+          avatar_url:
+            (typeof userMeta.avatar_url === 'string' && userMeta.avatar_url) ||
+            (typeof userMeta.picture === 'string' && userMeta.picture) ||
+            null,
+          auth_provider: typeof appMeta.provider === 'string' ? appMeta.provider : 'email',
+          is_active: true,
+        })
+        .select('*')
+        .single();
+      resolvedProfile = inserted as UserProfile;
+    }
+
+    if (!resolvedProfile?.is_active) {
+      setCachedAuthRecord(userId, null, 15_000);
+      return null;
+    }
+
+    const roleNames = (userRoles || [])
+      .map((ur: { roles?: { name?: string } | { name?: string }[] | null }) => {
+        if (Array.isArray(ur.roles)) return ur.roles[0]?.name;
+        return ur.roles?.name;
+      })
+      .filter(Boolean) as UserRole[];
+
+    let role: UserRole = 'customer';
+    if (roleNames.includes('super_admin')) role = 'super_admin';
+// step 4/6
