@@ -125,3 +125,67 @@ export function ProductDetailClient({
       await addToCart({
         productId: product.id,
         variantId: selectedVariant.id,
+        quantity,
+        redirectToCart,
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleShare = async () => {
+    const url = typeof window !== 'undefined' ? window.location.href : '';
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${product.name} | Tênis Club`,
+          text: product.short_description || product.name,
+          url,
+        });
+        return;
+      } catch {
+        // Fallback to copy
+      }
+    }
+    if (url && navigator.clipboard) {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      toast('Link do produto copiado!', 'info');
+      setTimeout(() => setCopied(false), 2500);
+    }
+  };
+
+  const waUrl = buildProductWhatsAppUrl({
+    whatsapp,
+    productName: product.name,
+    sku: product.sku,
+    size: selectedVariant?.size,
+    price: product.effective_price,
+  });
+
+  const additionalSpecs = Object.entries(product.additional_info || {});
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+      {/* Left: Image Gallery */}
+      <div className="lg:col-span-7 space-y-4">
+        <div className="relative aspect-square sm:aspect-[4/3.5] rounded-3xl overflow-hidden bg-[#EAE0D5] border border-zinc-800">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={activeImage}
+            alt={product.name}
+            className="w-full h-full object-cover object-center"
+          />
+
+          <div className="absolute top-4 left-4 flex flex-wrap gap-2">
+            {product.discount_percent > 0 && (
+              <span className="px-3 py-1 rounded-full bg-[#BEFA46] text-[#09090B] text-xs font-black">
+                -{product.discount_percent}% OFF
+              </span>
+            )}
+            {product.is_new_release && (
+              <span className="px-3 py-1 rounded-full bg-[#09090B]/85 text-white text-xs font-bold uppercase tracking-wider">
+                Lançamento
+              </span>
+            )}
+          </div>
