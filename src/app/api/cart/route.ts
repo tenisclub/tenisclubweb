@@ -119,4 +119,27 @@ export async function PATCH(request: Request) {
 
 export async function DELETE(request: Request) {
   const userId = await getAuthenticatedUserId();
-// step 5/6
+  if (!userId) {
+    return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 });
+  }
+
+  const { searchParams } = new URL(request.url);
+  const itemId = searchParams.get('itemId');
+  const supabase = createServiceClient();
+
+  if (itemId) {
+    const { data: item } = await supabase
+      .from('cart_items')
+      .select('id, carts!inner(user_id)')
+      .eq('id', itemId)
+      .maybeSingle();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const cartOwner = Array.isArray((item as any)?.carts) ? (item as any)?.carts[0]?.user_id : (item as any)?.carts?.user_id;
+    if (item && cartOwner === userId) {
+      await supabase.from('cart_items').delete().eq('id', itemId);
+    }
+  }
+
+  const updatedCart = await getUserCartView(userId);
+  return NextResponse.json(updatedCart);
+}
