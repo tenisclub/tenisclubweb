@@ -850,3 +850,125 @@ export function CheckoutStep3Customizer({
                             <label className="text-[11px] font-semibold text-zinc-400">
                               Título do Card
                             </label>
+                            <input
+                              type="text"
+                              value={deliveryCfg.pickup_title}
+                              onChange={(e) =>
+                                updateDeliveryCfg({ pickup_title: e.target.value })
+                              }
+                              className="mt-1 w-full h-10 px-3 rounded-xl bg-[#121216] border border-zinc-800 text-xs sm:text-sm text-white"
+                            />
+                          </div>
+                          <CheckoutIconPicker
+                            label="Ícone do Card"
+                            value={deliveryCfg.pickup_icon}
+                            onChange={(pickup_icon) => updateDeliveryCfg({ pickup_icon })}
+                          />
+                          <div>
+                            <label className="text-[11px] font-semibold text-zinc-400">
+                              Selo (quando R$ 0)
+                            </label>
+                            <input
+                              type="text"
+                              value={deliveryCfg.pickup_badge}
+                              onChange={(e) =>
+                                updateDeliveryCfg({ pickup_badge: e.target.value })
+                              }
+                              placeholder="Grátis"
+                              className="mt-1 w-full h-10 px-3 rounded-xl bg-[#121216] border border-zinc-800 text-xs sm:text-sm text-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[11px] font-semibold text-zinc-400">
+                              Taxa de Retirada (R$)
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              step="0.50"
+                              value={deliveryCfg.pickup_fee}
+                              onChange={(e) =>
+                                updateDeliveryCfg({
+                                  pickup_fee: Math.max(0, Number(e.target.value) || 0),
+                                })
+                              }
+                              className="mt-1 w-full h-10 px-3 rounded-xl bg-[#121216] border border-zinc-800 text-xs sm:text-sm text-white"
+                            />
+                          </div>
+                          <div className="sm:col-span-2">
+                            <label className="text-[11px] font-semibold text-zinc-400">
+                              Subtítulo / Endereço exibido no card (em branco usa o endereço da loja)
+                            </label>
+                            <input
+                              type="text"
+                              value={deliveryCfg.pickup_subtitle}
+                              onChange={(e) =>
+                                updateDeliveryCfg({ pickup_subtitle: e.target.value })
+                              }
+                              placeholder={form.address}
+                              className="mt-1 w-full h-10 px-3 rounded-xl bg-[#121216] border border-zinc-800 text-xs text-white"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* MAIN CARD 2: LOCAL DELIVERY */}
+                {!deliveryCfg.delivery_removed && (
+                  <div
+                    className={cn(
+                      'rounded-xl border transition overflow-hidden',
+                      deliveryCfg.delivery_enabled
+                        ? expandedCardId === 'main:delivery'
+                          ? 'border-[#BEFA46]/50 bg-[#121216]'
+                          : 'border-zinc-800 bg-[#121216] hover:border-zinc-700'
+                        : 'border-zinc-800/60 bg-[#121216]/60 opacity-75'
+                    )}
+                  >
+                    <div className="px-3.5 py-3 flex items-center justify-between gap-2">
+                      <button
+                        type="button"
+                        onClick={() => toggleExpand('main:delivery')}
+                        className="flex items-center gap-3 min-w-0 flex-1 text-left cursor-pointer"
+                      >
+                        <div
+                          className={cn(
+                            'w-8 h-8 rounded-lg border flex items-center justify-center shrink-0',
+                            deliveryCfg.delivery_enabled
+                              ? 'border-[#BEFA46]/30 bg-[#BEFA46]/10 text-[#BEFA46]'
+                              : 'border-zinc-800 bg-zinc-900 text-zinc-500'
+                          )}
+                        >
+                          <CheckoutIcon
+                            name={
+                              deliveryCfg.delivery_icon === 'none'
+                                ? 'truck'
+                                : deliveryCfg.delivery_icon
+                            }
+                            className="w-4 h-4"
+                          />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <span className="text-xs sm:text-sm font-extrabold text-white truncate">
+                              {deliveryCfg.delivery_title || 'Entrega Local'}
+                            </span>
+                            <span className="px-1.5 py-0.5 rounded bg-zinc-800 text-[10px] font-bold text-zinc-300">
+                              Card Principal
+                            </span>
+                            {deliveryCfg.require_address_on_delivery && (
+                              <span className="px-1.5 py-0.5 rounded bg-zinc-800 text-[10px] font-semibold text-zinc-300 inline-flex items-center gap-1">
+                                <MapPin className="w-2.5 h-2.5 text-[#BEFA46]" />
+                                Pede endereço
+                              </span>
+                            )}
+                            {!deliveryCfg.delivery_enabled && (
+                              <span className="px-1.5 py-0.5 rounded bg-zinc-800 text-[10px] font-semibold text-zinc-400">
+                                Oculto
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-zinc-400 truncate mt-0.5">
+                            {deliveryCfg.delivery_subtitle || 'Entrega via motoboy ou correios'}
