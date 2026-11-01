@@ -82,4 +82,25 @@ export async function PATCH(request: Request) {
   if (!session) return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 });
 
   const body = await request.json();
-// step 4/6
+  const { id, is_default, ...fields } = body;
+  if (!id) return NextResponse.json({ error: 'ID inválido.' }, { status: 400 });
+
+  const supabase = createServiceClient();
+  if (is_default) {
+    await supabase
+      .from('user_addresses')
+      .update({ is_default: false })
+      .eq('user_id', session.userId);
+  }
+
+  const { data, error } = await supabase
+    .from('user_addresses')
+    .update({
+      ...fields,
+      ...(is_default !== undefined ? { is_default: Boolean(is_default) } : {}),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', id)
+    .eq('user_id', session.userId)
+    .select('*')
+// step 5/6
