@@ -244,4 +244,39 @@ export async function PATCH(
               reason: 'Atualização via edição de produto',
               performed_by: session.userId,
             });
-// step 7/12
+          }
+        } else {
+          newVariantsSpec.push({
+            color,
+            color_hex: colorHex,
+            size,
+            variant_sku: `${sku || product.slug}-${size}`,
+            desiredQty,
+          });
+        }
+      }
+
+      if (newVariantsSpec.length > 0) {
+        parallelOps.push(
+          (async () => {
+            const { data: createdVars } = await supabase
+              .from('product_variants')
+              .insert(
+                newVariantsSpec.map((nv) => ({
+                  product_id: id,
+                  color: nv.color,
+                  color_hex: nv.color_hex,
+                  size: nv.size,
+                  variant_sku: nv.variant_sku,
+                  is_active: true,
+                }))
+              )
+              .select('id, color, size');
+
+            if (createdVars && createdVars.length > 0) {
+              const invRows: Record<string, unknown>[] = [];
+              const newMovements: Record<string, unknown>[] = [];
+
+              for (const cv of createdVars) {
+                const match = newVariantsSpec.find(
+// step 8/12
