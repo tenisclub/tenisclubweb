@@ -104,3 +104,57 @@ function MobileRandomPlayer() {
         }
       }
     };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [activeSlot]);
+
+  const handleEnded = (finishedSlot: 0 | 1) => {
+    if (finishedSlot !== activeSlot) return;
+
+    const finishedVideoIdx = slotIndices[finishedSlot];
+    const nextSlot: 0 | 1 = finishedSlot === 0 ? 1 : 0;
+    const nowPlayingIdx = slotIndices[nextSlot];
+
+    // Keep last 3 played indices so random picks feel varied and never repeat previous/current
+    const updatedRecent = [...recentHistoryRef.current, nowPlayingIdx].slice(-4);
+    recentHistoryRef.current = updatedRecent;
+
+    const excluded = new Set<number>([
+      nowPlayingIdx,
+      finishedVideoIdx,
+      ...updatedRecent,
+    ]);
+    // Fallback to strict (current + previous) if excluded grew too large
+    const upcomingIdx =
+      excluded.size < total
+        ? pickRandomExcluding(total, excluded)
+        : pickRandomExcluding(total, new Set([nowPlayingIdx, finishedVideoIdx]));
+
+    const nextEl = videoRefs.current[nextSlot];
+    if (nextEl) {
+      nextEl.muted = true;
+      nextEl.currentTime = 0;
+      nextEl.play().catch(() => {});
+    }
+
+    setActiveSlot(nextSlot);
+
+    // Preload the newly chosen random video into the inactive slot after crossfade finishes
+    setTimeout(() => {
+      setSlotIndices((prev) =>
+        finishedSlot === 0 ? [upcomingIdx, prev[1]] : [prev[0], upcomingIdx]
+      );
+    }, 650);
+  };
+
+  return (
+    <div className="relative h-full w-full overflow-hidden bg-[#09090C] opacity-95">
+      {([0, 1] as const).map((slot) => {
+        const isActive = activeSlot === slot;
+        const src = ALL_HERO_VIDEOS[slotIndices[slot]];
+        return (
+          <video
+            key={slot}
+            ref={bindRef(slot)}
+            src={src}
