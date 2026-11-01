@@ -183,4 +183,42 @@ export function InventoryManagerClient({ initialRows }: { initialRows: StockRowI
                     </span>
                     {r.allowBackorder && (
                       <span className="px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 text-[9px] font-bold">
-// step 5/12
+                        Venda s/ estoque
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <span
+                className={cn(
+                  'px-2.5 py-1 rounded-full text-xs font-extrabold shrink-0',
+                  r.quantity === 0
+                    ? r.allowBackorder
+                      ? 'bg-sky-500/15 text-sky-300'
+                      : 'bg-red-500/15 text-red-400'
+                    : r.quantity <= r.lowStockThreshold
+                      ? 'bg-amber-500/15 text-amber-300'
+                      : 'bg-emerald-500/15 text-emerald-400'
+                )}
+              >
+                {r.quantity} un.
+              </span>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 pt-2 border-t border-zinc-800/80">
+              <button
+                type="button"
+                onClick={() => openModal(r, 'in')}
+                className="h-9 rounded-xl bg-emerald-500/15 text-emerald-300 text-xs font-bold inline-flex items-center justify-center gap-1"
+              >
+                <PlusCircle className="w-3.5 h-3.5" />
+                Entrada
+              </button>
+              <button
+                type="button"
+                onClick={() => openModal(r, 'out')}
+                className="h-9 rounded-xl bg-red-500/15 text-red-300 text-xs font-bold inline-flex items-center justify-center gap-1"
+              >
+                <MinusCircle className="w-3.5 h-3.5" />
+                Saída
+// step 6/12
