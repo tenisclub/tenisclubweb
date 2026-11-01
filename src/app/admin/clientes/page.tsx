@@ -7,30 +7,4 @@ import { createServiceClient } from '@/lib/supabase/server';
 export const dynamic = 'force-dynamic';
 
 export default async function AdminClientesPage() {
-  const supabase = createServiceClient();
-
-  const [{ data: profiles }, { data: orders }] = await Promise.all([
-    supabase
-      .from('user_profiles')
-      .select('id, full_name, email, phone, auth_provider, is_active, created_at')
-      .order('created_at', { ascending: false }),
-    supabase
-      .from('orders')
-      .select('id, user_id, total, status, created_at')
-      .order('created_at', { ascending: false }),
-  ]);
-
-  const customers: CustomerSummary[] = (profiles || []).map((p) => {
-    const userOrders = (orders || []).filter((o) => o.user_id === p.id);
-    const validOrders = userOrders.filter((o) => o.status !== 'cancelled');
-    return {
-      ...p,
-      ordersCount: userOrders.length,
-      totalSpent: validOrders.reduce((acc, o) => acc + Number(o.total || 0), 0),
-      lastOrderId: userOrders[0]?.id || null,
-    };
-  });
-
-  return <CustomersClient initialCustomers={customers} />;
-}
-
+// step 1/4
