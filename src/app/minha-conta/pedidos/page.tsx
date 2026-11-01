@@ -19,4 +19,26 @@ export default async function MeusPedidosPage() {
 
   const orders = (ordersRaw || []).map((o) => ({
     ...o,
-// step 1/6
+    items: o.order_items || [],
+  })) as Order[];
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-xl sm:text-2xl font-black text-white">Meus Pedidos</h1>
+        <p className="text-xs sm:text-sm text-zinc-400">
+          Consulte o histórico e acompanhe o status de cada solicitação em tempo real.
+        </p>
+      </div>
+
+      {orders.length === 0 ? (
+        <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-6 sm:p-12 text-center space-y-3">
+          <ShoppingBag className="w-10 h-10 text-zinc-600 mx-auto" />
+          <p className="text-base font-bold text-white">Você ainda não realizou pedidos</p>
+          <p className="text-xs text-zinc-400">
+            Escolha sua numeração no catálogo e finalize em poucos segundos.
+          </p>
+          <Link
+            href="/produtos"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#BEFA46] text-[#09090B] text-xs font-black"
+// step 2/6
