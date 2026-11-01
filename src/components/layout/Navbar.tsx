@@ -211,4 +211,39 @@ export function Navbar({ settings }: { settings: StoreSettings }) {
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Buscar produto, marca ou numeração..."
               className="w-full h-11 pl-10 pr-4 rounded-full bg-[#18181F] border border-zinc-700 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#BEFA46]"
-// step 6/8
+            />
+          </form>
+
+          <nav className="grid grid-cols-2 gap-2">
+            {NAV_LINKS.map((link) => {
+              const active = effectivePath === link.href;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  prefetch={true}
+                  onClick={() => {
+                    setOptimisticHref(link.href);
+                    setMobileOpen(false);
+                  }}
+                  className={cn(
+                    'px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold border transition truncate text-center',
+                    active
+                      ? 'bg-[#BEFA46] text-[#09090B] border-[#BEFA46]'
+                      : 'bg-[#15151B] text-zinc-200 border-zinc-800 hover:border-zinc-700'
+                  )}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="pt-2 border-t border-zinc-800 flex flex-col gap-2">
+            {isAdmin && (
+              <Link
+                href="/admin"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl bg-[#BEFA46]/15 border border-[#BEFA46]/40 text-[#BEFA46] text-xs sm:text-sm font-bold"
+              >
+// step 7/8
