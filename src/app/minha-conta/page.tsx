@@ -144,4 +144,32 @@ export default async function MinhaContaDashboardPage() {
                   ? 'Retirada na Loja'
                   : 'Entrega Local'}
               </p>
-// step 5/6
+            </div>
+
+            <div className="flex items-center justify-between sm:justify-end gap-4 pt-3 sm:pt-0 border-t sm:border-t-0 border-zinc-800/80">
+              <div className="sm:text-right">
+                <span className="text-xs text-zinc-400 block">Total</span>
+                <strong className="text-lg font-black text-[#BEFA46]">
+                  {formatCurrency(latestOrder.total)}
+                </strong>
+              </div>
+              <Link
+                href={`/minha-conta/pedidos/${latestOrder.id}`}
+                className="px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-white transition"
+              >
+                Detalhes
+              </Link>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Customer Notifications */}
+      <NotificationsPanel
+        initialNotifications={(notificationsRaw || []) as NotificationItem[]}
+        scope="customer"
+      />
+    </div>
+  );
+}
+
