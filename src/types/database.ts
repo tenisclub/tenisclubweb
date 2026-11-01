@@ -96,4 +96,37 @@ export interface Product {
   allow_backorder: boolean;
   sold_count: number;
   views_count: number;
-// step 3/8
+  meta_title: string | null;
+  meta_description: string | null;
+  created_at: string;
+  brand?: Brand | null;
+  category?: Category | null;
+  images: ProductImage[];
+  primary_image: string;
+  variants: EnrichedVariant[];
+  available_sizes: string[];
+  all_sizes: string[];
+  total_stock: number;
+  size_range_label: string;
+}
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  full_name: string;
+  phone: string;
+  avatar_url: string | null;
+  auth_provider: string;
+  is_active: boolean;
+  created_at: string;
+  role?: UserRole;
+}
+
+export interface UserAddress {
+  id: string;
+  user_id: string;
+  label: string;
+  recipient_name: string;
+  zip_code: string;
+  street: string;
+// step 4/8
