@@ -61,4 +61,35 @@ export default async function PedidoDetalheClientePage({
 
   return (
     <div className="space-y-6">
-// step 2/8
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="space-y-1">
+          <Link
+            href="/minha-conta/pedidos"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-400 hover:text-white"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            Voltar para Meus Pedidos
+          </Link>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h1 className="text-2xl sm:text-3xl font-black text-white">
+              Pedido #{order.order_number}
+            </h1>
+            <span
+              className={cn(
+                'px-3 py-1 rounded-full text-xs font-bold border',
+                st?.colorClass
+              )}
+            >
+              {st?.label || order.status}
+            </span>
+          </div>
+          <p className="text-xs text-zinc-400">
+            Solicitado em {formatDateTime(order.created_at)}
+          </p>
+        </div>
+
+        <a
+          href={waUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+// step 3/8
