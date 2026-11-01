@@ -232,3 +232,81 @@ export default async function AdminDashboardPage() {
                 <div key={d.key} className="flex-1 min-w-0 flex flex-col items-center gap-1.5 sm:gap-2">
                   <span className="text-[9px] sm:text-[10px] font-bold text-zinc-300 truncate max-w-full">
                     {d.salesTotal > 0 ? `R$${Math.round(d.salesTotal)}` : 'R$0'}
+                  </span>
+                  <div className="w-full h-28 bg-[#1A1A22] rounded-xl flex items-end overflow-hidden p-1">
+                    <div
+                      className="w-full rounded-lg bg-emerald-400 transition-all"
+                      style={{ height: `${heightPct}%` }}
+                    />
+                  </div>
+                  <span className="text-[9px] sm:text-[10px] text-zinc-500 font-semibold">{d.label}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Latest Orders & Low Stock Alerts */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+        {/* Latest Orders */}
+        <div className="xl:col-span-7 rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-4">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-sm sm:text-base font-black text-white">Últimos Pedidos Recebidos</h2>
+            <Link
+              href="/admin/pedidos"
+              className="text-xs font-bold text-[#BEFA46] hover:underline inline-flex items-center gap-1 shrink-0"
+            >
+              Gerenciar todos <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {orders.length === 0 ? (
+            <p className="text-xs text-zinc-400 py-6 text-center">
+              Nenhum pedido registrado até o momento.
+            </p>
+          ) : (
+            <div className="divide-y divide-zinc-800/80">
+              {orders.slice(0, 6).map((o) => {
+                const st = ORDER_STATUS_CONFIG[o.status as OrderStatus];
+                return (
+                  <div
+                    key={o.id}
+                    className="py-3 flex flex-wrap items-center justify-between gap-3"
+                  >
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Link
+                          href={`/admin/pedidos/${o.id}`}
+                          className="text-xs sm:text-sm font-black text-white hover:text-[#BEFA46]"
+                        >
+                          #{o.order_number}
+                        </Link>
+                        <span
+                          className={cn(
+                            'px-2 py-0.5 rounded-full text-[10px] font-bold border',
+                            st?.colorClass
+                          )}
+                        >
+                          {st?.label || o.status}
+                        </span>
+                      </div>
+                      <p className="text-xs text-zinc-400 truncate">
+                        {o.customer_name} • {formatDateTime(o.created_at)}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3 ml-auto sm:ml-0">
+                      <span className="text-sm font-black text-[#BEFA46]">
+                        {formatCurrency(o.total)}
+                      </span>
+                      <Link
+                        href={`/admin/pedidos/${o.id}`}
+                        className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-white"
+                      >
+                        Abrir
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
