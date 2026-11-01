@@ -98,4 +98,29 @@ export default async function AdminRelatoriosPage() {
             <span className="text-xs text-zinc-400 block">Total de Pares Disponíveis</span>
             <strong className="text-xl sm:text-2xl font-black text-white">{totalUnitsInStock} un.</strong>
           </div>
-// step 4/8
+          <div className="rounded-2xl bg-[#18181F] p-4">
+            <span className="text-xs text-zinc-400 block">Custo de Aquisição em Estoque</span>
+            <strong className="text-xl sm:text-2xl font-black text-zinc-200">
+              {formatCurrency(stockCostValuation)}
+            </strong>
+          </div>
+          <div className="rounded-2xl bg-[#18181F] p-4">
+            <span className="text-xs text-zinc-400 block">Potencial de Venda do Estoque</span>
+            <strong className="text-xl sm:text-2xl font-black text-[#BEFA46]">
+              {formatCurrency(stockSaleValuation)}
+            </strong>
+          </div>
+        </div>
+      </div>
+
+      {/* Status Distribution & Profitability Table */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-5 rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-3">
+          <h2 className="text-base font-black text-white">Pedidos por Status</h2>
+          <div className="divide-y divide-zinc-800/80 text-xs sm:text-sm">
+            {statusBreakdown.map((st) => (
+              <div key={st.key} className="py-2.5 flex justify-between items-center gap-2">
+                <span className="text-zinc-300">{st.label}</span>
+                <strong className="text-white">{st.count}</strong>
+              </div>
+// step 5/8
