@@ -143,3 +143,51 @@ function LoginForm() {
             />
             <path
               fill="#FBBC05"
+              d="M5.3 14.8c-.2-.8-.4-1.6-.4-2.5s.2-1.7.4-2.5L1.6 7C.6 9 0 11.2 0 13.5s.6 4.5 1.6 6.5l3.7-2.8z"
+            />
+            <path
+              fill="#34A853"
+              d="M12 24c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5l-3.7 2.8C3.5 21.4 7.4 24 12 24z"
+            />
+          </svg>
+          {googleLoading ? 'Conectando ao Google...' : 'Continuar com Google'}
+        </button>
+
+        <div className="flex items-center gap-3">
+          <span className="flex-1 border-t border-zinc-800" />
+          <span className="shrink-0 whitespace-nowrap text-[11px] uppercase tracking-wider text-zinc-500 font-semibold">
+            ou com e-mail
+          </span>
+          <span className="flex-1 border-t border-zinc-800" />
+        </div>
+
+        <form onSubmit={handleEmailLogin} className="space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-zinc-300">E-mail</label>
+            <div className="relative">
+              <Mail className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="seu@email.com"
+                className="w-full h-11 pl-10 pr-4 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#BEFA46]"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold text-zinc-300">Senha</label>
+              <Link
+                href="/recuperar-senha"
+                className="text-xs font-semibold text-[#BEFA46] hover:underline"
+              >
+                Esqueci minha senha
+              </Link>
+            </div>
+            <div className="relative">
+              <Lock className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type={showPwd ? 'text' : 'password'}
