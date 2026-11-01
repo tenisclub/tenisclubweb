@@ -54,4 +54,16 @@ export default async function RootLayout({
   return (
     <html
       lang="pt-BR"
-// step 4/5
+      data-scroll-behavior="smooth"
+      className={`${inter.variable} ${montserrat.variable} dark`}
+    >
+      <body className="min-h-screen flex flex-col bg-[#09090B] text-zinc-100 antialiased font-sans">
+        <StoreProvider>
+          <Navbar settings={settings} />
+          <main className="flex-1">{children}</main>
+          <Footer settings={settings} />
+        </StoreProvider>
+      </body>
+    </html>
+  );
+}
