@@ -149,4 +149,42 @@ export default function MeusEnderecosPage() {
                 value={number}
                 onChange={(e) => setNumber(e.target.value)}
                 className="mt-1 w-full h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
-// step 4/8
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="text-xs text-zinc-400">Rua / Avenida *</label>
+              <input
+                type="text"
+                required
+                value={street}
+                onChange={(e) => setStreet(e.target.value)}
+                className="mt-1 w-full h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-zinc-400">Complemento</label>
+              <input
+                type="text"
+                value={complement}
+                onChange={(e) => setComplement(e.target.value)}
+                className="mt-1 w-full h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-zinc-400">Bairro *</label>
+              <input
+                type="text"
+                required
+                value={neighborhood}
+                onChange={(e) => setNeighborhood(e.target.value)}
+                className="mt-1 w-full h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-zinc-400">Cidade *</label>
+              <input
+                type="text"
+                required
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+// step 5/8
