@@ -17,4 +17,23 @@ export async function POST(request: Request) {
   const { data, error } = await supabase
     .from('categories')
     .insert({
-// step 1/6
+      name: name.trim(),
+      slug,
+      description: description?.trim() || '',
+      sort_order: Number(sort_order || 0),
+      is_active: is_active !== false,
+    })
+    .select('*')
+    .single();
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  revalidateStoreData('catalog');
+  void supabase
+    .from('admin_logs')
+    .insert({
+      admin_id: session.userId,
+      action: 'category.create',
+      entity_type: 'category',
+      entity_id: data.id,
+// step 2/6
