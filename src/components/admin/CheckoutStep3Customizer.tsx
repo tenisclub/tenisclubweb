@@ -1216,4 +1216,85 @@ export function CheckoutStep3Customizer({
                         </div>
                       </div>
                     )}
-// step 15/24
+                  </div>
+                )}
+
+                {/* MAIN CARD 3: PICKUP INFO CALLOUT */}
+                {!deliveryCfg.pickup_info_removed && (
+                  <div
+                    className={cn(
+                      'rounded-xl border transition overflow-hidden',
+                      deliveryCfg.pickup_info_card_enabled
+                        ? expandedCardId === 'main:pickup_info'
+                          ? 'border-[#BEFA46]/50 bg-[#121216]'
+                          : 'border-zinc-800 bg-[#121216] hover:border-zinc-700'
+                        : 'border-zinc-800/60 bg-[#121216]/60 opacity-75'
+                    )}
+                  >
+                    <div className="px-3.5 py-3 flex items-center justify-between gap-2">
+                      <button
+                        type="button"
+                        onClick={() => toggleExpand('main:pickup_info')}
+                        className="flex items-center gap-3 min-w-0 flex-1 text-left cursor-pointer"
+                      >
+                        <div
+                          className={cn(
+                            'w-8 h-8 rounded-lg border flex items-center justify-center shrink-0',
+                            deliveryCfg.pickup_info_card_enabled
+                              ? 'border-[#BEFA46]/30 bg-[#BEFA46]/10 text-[#BEFA46]'
+                              : 'border-zinc-800 bg-zinc-900 text-zinc-500'
+                          )}
+                        >
+                          <CheckoutIcon
+                            name={
+                              deliveryCfg.pickup_info_card_icon === 'none'
+                                ? 'info'
+                                : deliveryCfg.pickup_info_card_icon
+                            }
+                            className="w-4 h-4"
+                          />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <span className="text-xs sm:text-sm font-extrabold text-white truncate">
+                              {deliveryCfg.pickup_info_card_title || 'Informações de Retirada'}
+                            </span>
+                            <span className="px-1.5 py-0.5 rounded bg-sky-500/15 text-[10px] font-bold text-sky-300">
+                              Quadro de Retirada
+                            </span>
+                            {!deliveryCfg.pickup_info_card_enabled && (
+                              <span className="px-1.5 py-0.5 rounded bg-zinc-800 text-[10px] font-semibold text-zinc-400">
+                                Oculto
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-zinc-400 truncate mt-0.5">
+                            {form.pickup_info || 'Orientações e horários para retirada na loja'}
+                          </p>
+                        </div>
+                      </button>
+
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          type="button"
+                          title={
+                            deliveryCfg.pickup_info_card_enabled
+                              ? 'Ocultar quadro'
+                              : 'Mostrar quadro'
+                          }
+                          onClick={() =>
+                            updateDeliveryCfg({
+                              pickup_info_card_enabled: !deliveryCfg.pickup_info_card_enabled,
+                            })
+                          }
+                          className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition cursor-pointer"
+                        >
+                          {deliveryCfg.pickup_info_card_enabled ? (
+                            <Eye className="w-4 h-4 text-[#BEFA46]" />
+                          ) : (
+                            <EyeOff className="w-4 h-4 text-zinc-500" />
+                          )}
+                        </button>
+                        <button
+                          type="button"
+// step 16/24
