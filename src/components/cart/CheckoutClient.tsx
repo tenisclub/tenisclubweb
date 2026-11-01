@@ -980,4 +980,53 @@ export function CheckoutClient({
                     </div>
                     <div className="col-span-4 sm:col-span-3">
                       <label className="text-[11px] font-semibold text-zinc-400">Número *</label>
-// step 20/24
+                      <input
+                        type="text"
+                        value={number}
+                        onChange={(e) => setNumber(e.target.value)}
+                        className="mt-1 w-full h-10 px-3 rounded-xl bg-[#15151C] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+                      />
+                    </div>
+
+                    <div className="col-span-6">
+                      <label className="text-[11px] font-semibold text-zinc-400">Bairro *</label>
+                      <input
+                        type="text"
+                        value={neighborhood}
+                        onChange={(e) => setNeighborhood(e.target.value)}
+                        className="mt-1 w-full h-10 px-3 rounded-xl bg-[#15151C] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+                      />
+                    </div>
+                    <div className="col-span-6">
+                      <label className="text-[11px] font-semibold text-zinc-400">
+                        Complemento
+                      </label>
+                      <input
+                        type="text"
+                        value={complement}
+                        onChange={(e) => setComplement(e.target.value)}
+                        placeholder="Apto, Casa..."
+                        className="mt-1 w-full h-10 px-3 rounded-xl bg-[#15151C] border border-zinc-800 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#BEFA46]"
+                      />
+                    </div>
+
+                    <div className="col-span-12">
+                      <label className="text-[11px] font-semibold text-zinc-400">
+                        Ponto de Referência
+                      </label>
+                      <input
+                        type="text"
+                        value={reference}
+                        onChange={(e) => setReference(e.target.value)}
+                        placeholder="Ex: Próximo à estação / portão branco"
+                        className="mt-1 w-full h-10 px-3 rounded-xl bg-[#15151C] border border-zinc-800 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#BEFA46]"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 5. Compact Optional Notes */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-zinc-300">
+// step 21/24
