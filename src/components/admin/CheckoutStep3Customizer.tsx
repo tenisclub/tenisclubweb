@@ -322,4 +322,86 @@ export function CheckoutStep3Customizer({
                   deliveryCfg.always_require_address
                     ? 'Desativar endereço obrigatório global'
                     : 'Ativar endereço obrigatório global'
-// step 4/24
+                }
+              >
+                <span
+                  className={cn(
+                    'pointer-events-none inline-block h-6 w-6 transform rounded-full bg-[#09090B] shadow ring-0 transition duration-200 ease-in-out',
+                    deliveryCfg.always_require_address ? 'translate-x-5' : 'translate-x-0'
+                  )}
+                />
+              </button>
+            </div>
+          </div>
+
+          {/* SECTION 2: UNIFIED CARDS & CALLOUTS ACCORDION LIST */}
+          <div className="rounded-2xl border border-zinc-800/90 bg-[#18181F] p-4 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-black text-white">
+                  Cards & Quadros da Etapa 3
+                </h3>
+                <p className="text-[11px] text-zinc-400">
+                  Clique em um card para abrir suas opções, oculte com o ícone de olho ou exclua.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => addCustomCard('option')}
+                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#BEFA46] hover:bg-[#d1ff70] text-[#09090B] text-xs font-black transition cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                  Opção Clicável
+                </button>
+                <button
+                  type="button"
+                  onClick={() => addCustomCard('info')}
+                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-zinc-700 bg-[#121216] hover:bg-zinc-800 text-xs font-bold text-zinc-200 transition cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5 text-[#BEFA46]" />
+                  Quadro de Aviso
+                </button>
+              </div>
+            </div>
+
+            {!hasAnyCard ? (
+              <div className="rounded-xl border border-dashed border-zinc-800 bg-[#121216] px-4 py-6 text-center space-y-1.5">
+                <p className="text-xs font-bold text-zinc-300">
+                  Nenhum card ativo na Etapa 3
+                </p>
+                <p className="text-[11px] text-zinc-500 max-w-md mx-auto">
+                  O cliente verá apenas os dados do pedido, {deliveryCfg.always_require_address ? 'o formulário de endereço, ' : ''}o campo de observações e o botão de finalizar no WhatsApp. Use os botões acima se quiser adicionar uma opção ou aviso.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {/* CUSTOM CARDS */}
+                {deliveryCfg.extra_cards.map((card, index) => {
+                  const isExpanded = expandedCardId === card.id;
+                  return (
+                    <div
+                      key={card.id}
+                      className={cn(
+                        'rounded-xl border transition overflow-hidden',
+                        card.enabled
+                          ? isExpanded
+                            ? 'border-[#BEFA46]/50 bg-[#121216]'
+                            : 'border-zinc-800 bg-[#121216] hover:border-zinc-700'
+                          : 'border-zinc-800/60 bg-[#121216]/60 opacity-75'
+                      )}
+                    >
+                      {/* Compact Accordion Row Header */}
+                      <div className="px-3.5 py-3 flex items-center justify-between gap-2">
+                        <button
+                          type="button"
+                          onClick={() => toggleExpand(card.id)}
+                          className="flex items-center gap-3 min-w-0 flex-1 text-left cursor-pointer"
+                        >
+                          <div
+                            className={cn(
+                              'w-8 h-8 rounded-lg border flex items-center justify-center shrink-0',
+                              card.enabled
+                                ? 'border-[#BEFA46]/30 bg-[#BEFA46]/10 text-[#BEFA46]'
+// step 5/24
