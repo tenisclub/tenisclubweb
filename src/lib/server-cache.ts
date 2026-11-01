@@ -123,4 +123,29 @@ function clearSlot(key: SlotKey) {
   slot.expiresAt = 0;
   slot.inflight = null;
 }
-// step 5/8
+
+export function getCachedAuthRecord(userId: string): CachedAuthRecord | null | undefined {
+  const entry = store.authByUser.get(userId);
+  if (!entry) return undefined;
+  if (Date.now() >= entry.expiresAt) {
+    store.authByUser.delete(userId);
+    return undefined;
+  }
+  return entry.value;
+}
+
+export function setCachedAuthRecord(
+  userId: string,
+  value: CachedAuthRecord | null,
+  ttlMs = 45_000
+) {
+  store.authByUser.set(userId, {
+    value,
+    expiresAt: Date.now() + ttlMs,
+  });
+}
+
+export function invalidateAuthCache(userId?: string) {
+  if (userId) {
+    store.authByUser.delete(userId);
+// step 6/8
