@@ -10,4 +10,6 @@ export default async function NovoProdutoAdminPage() {
     <ProductForm
       categories={categories}
       brands={brands}
-// step 3/4
+    />
+  );
+}
