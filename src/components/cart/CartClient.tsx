@@ -158,4 +158,44 @@ export function CartClient({
               <Link
                 href={`/produto/${item.product_slug}`}
                 className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-[#EAE0D5] shrink-0"
-// step 4/8
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={item.product_image}
+                  alt={item.product_name}
+                  className="w-full h-full object-cover"
+                />
+              </Link>
+
+              <div className="space-y-1 min-w-0 flex-1">
+                {item.brand_name && (
+                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#BEFA46]">
+                    {item.brand_name}
+                  </span>
+                )}
+                <Link
+                  href={`/produto/${item.product_slug}`}
+                  className="block text-sm sm:text-base font-extrabold text-white hover:text-[#BEFA46] line-clamp-2 break-words"
+                >
+                  {item.product_name}
+                </Link>
+                <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-400">
+                  <span className="px-2 py-0.5 rounded-md bg-zinc-800/80 text-zinc-200 font-semibold">
+                    Tam. {item.size}
+                  </span>
+                  <span>Cor: {item.color}</span>
+                </div>
+                <div className="text-xs text-zinc-400 pt-0.5">
+                  Unitário:{' '}
+                  <strong className="text-zinc-200">{formatCurrency(item.unit_price)}</strong>
+                </div>
+                {!item.is_available && (
+                  <span className="inline-block text-xs font-bold text-red-400">
+                    Indisponível no estoque atual
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between sm:justify-end gap-4 pt-2 sm:pt-0 border-t sm:border-t-0 border-zinc-800/80">
+// step 5/8
