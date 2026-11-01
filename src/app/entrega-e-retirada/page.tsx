@@ -49,4 +49,30 @@ export default async function EntregaRetiradaPage() {
                   className={cn(
                     'text-xs font-extrabold',
                     opt.badgeLabel === 'Grátis' ? 'text-emerald-400' : 'text-zinc-200'
-// step 2/6
+                  )}
+                >
+                  {opt.badgeLabel}
+                </span>
+              </div>
+              <h2 className="text-lg font-black text-white">{opt.title}</h2>
+              {opt.kind === 'pickup' && settings.pickup_info && (
+                <p className="text-sm text-zinc-300 leading-relaxed">{settings.pickup_info}</p>
+              )}
+              {opt.kind === 'local_delivery' && settings.delivery_info && (
+                <p className="text-sm text-zinc-300 leading-relaxed">
+                  {settings.delivery_info}
+                </p>
+              )}
+              {opt.freeThreshold > 0 && (
+                <p className="text-xs font-bold text-emerald-400">
+                  Frete grátis em compras acima de {formatCurrency(opt.freeThreshold)}!
+                </p>
+              )}
+              {opt.subtitle && (
+                <p className="text-xs text-zinc-400 pt-1">
+                  {opt.kind === 'pickup' ? (
+                    <>
+                      <strong>Endereço:</strong> {opt.subtitle}
+                      {cfg.show_pickup_hours && settings.business_hours && (
+                        <>
+// step 3/6
