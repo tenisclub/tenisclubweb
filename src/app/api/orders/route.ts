@@ -191,3 +191,51 @@ export async function POST(request: Request) {
 
       const orderUpdates: Record<string, unknown> = {};
       if (cleanPaymentMethod) {
+        orderUpdates.payment_method_note = cleanPaymentMethod;
+      }
+
+      if (resolvedOption) {
+        const resolvedShippingCost = Number(resolvedOption.shippingCost) || 0;
+        const labelChanged =
+          resolvedOption.summaryLabel !== (optionMetadata.shipping_label as string | undefined);
+
+        if (resolvedShippingCost > 0 || labelChanged) {
+          const updatedShippingAddress = {
+            ...(finalShippingAddress || {}),
+            shipping_label: resolvedOption.summaryLabel,
+          };
+          const updatedTotal = itemsTotalAfterDiscount + resolvedShippingCost;
+          orderUpdates.shipping_cost = resolvedShippingCost;
+          orderUpdates.total = updatedTotal;
+          orderUpdates.shipping_address = updatedShippingAddress;
+        }
+      }
+
+      if (Object.keys(orderUpdates).length > 0) {
+        await supabase.from('orders').update(orderUpdates).eq('id', orderId);
+        orderData = {
+          ...orderData,
+          ...orderUpdates,
+        };
+      }
+    }
+
+    revalidateStoreData('orders');
+
+    return NextResponse.json({
+      order: orderData
+        ? {
+            ...orderData,
+            items: (orderData.order_items as unknown[]) || [],
+          }
+        : null,
+      orderId,
+      orderNumber: r?.order_number,
+    });
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Erro ao processar pedido.' },
+      { status: 500 }
+    );
+  }
+}
