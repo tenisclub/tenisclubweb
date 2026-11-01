@@ -40,4 +40,18 @@ export default async function AdminAdministradoresPage() {
         email: prof.email,
         phone: prof.phone || '',
         is_active: Boolean(prof.is_active),
-// step 3/5
+        role: role.name as 'super_admin' | 'admin_operational',
+        created_at: prof.created_at,
+      });
+    }
+  }
+
+  const logs: AdminLogRow[] = (logsRaw || []).map((l) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const prof: any = Array.isArray(l.user_profiles) ? l.user_profiles[0] : l.user_profiles;
+    return {
+      id: l.id,
+      action: l.action,
+      entity_type: l.entity_type,
+      entity_id: l.entity_id,
+// step 4/5
