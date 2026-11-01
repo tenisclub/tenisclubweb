@@ -18,4 +18,14 @@ export async function createClient() {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options)
             );
-// step 2/5
+          } catch {
+            // Ignored when called from Server Components where response headers are immutable
+          }
+        },
+      },
+    }
+  );
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// step 3/5
