@@ -19,4 +19,14 @@ const FAQS = [
     q: 'E se a numeração não servir?',
     a: 'Você conta com até 7 dias corridos após o recebimento para solicitar a troca por outra numeração ou modelo disponível, bastando manter o calçado sem sinais de uso e na caixa original.',
   },
-// step 2/5
+  {
+    q: 'Como acompanho o andamento do meu pedido?',
+    a: 'Basta acessar "Minha Conta > Meus Pedidos" para visualizar o status atualizado em tempo real e todas as observações da loja.',
+  },
+];
+
+export default function FaqPage() {
+  return (
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-14 space-y-8">
+      <div>
+// step 3/5
