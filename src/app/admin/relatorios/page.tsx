@@ -73,4 +73,29 @@ export default async function AdminRelatoriosPage() {
           <span className="text-xs text-zinc-400 font-semibold">
             Pagamentos Confirmados Manualmente
           </span>
-// step 3/8
+          <p className="text-2xl sm:text-3xl font-black text-emerald-400">
+            {formatCurrency(manualPaidTotal)}
+          </p>
+          <p className="text-[11px] text-zinc-500">{paidOrders.length} pedido(s) quitados</p>
+        </div>
+
+        <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-5 sm:p-6 space-y-1 sm:col-span-2 lg:col-span-1">
+          <span className="text-xs text-zinc-400 font-semibold">Ticket Médio por Pedido</span>
+          <p className="text-2xl sm:text-3xl font-black text-white">
+            {formatCurrency(averageTicket)}
+          </p>
+          <p className="text-[11px] text-zinc-500">
+            Retirada: {pickupCount} • Entrega local: {deliveryCount}
+          </p>
+        </div>
+      </div>
+
+      {/* Stock Valuation */}
+      <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-4">
+        <h2 className="text-base font-black text-white">Valoração de Estoque Físico</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 text-sm">
+          <div className="rounded-2xl bg-[#18181F] p-4">
+            <span className="text-xs text-zinc-400 block">Total de Pares Disponíveis</span>
+            <strong className="text-xl sm:text-2xl font-black text-white">{totalUnitsInStock} un.</strong>
+          </div>
+// step 4/8
