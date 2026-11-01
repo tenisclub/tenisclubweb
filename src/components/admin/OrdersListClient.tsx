@@ -167,4 +167,38 @@ export function OrdersListClient({ initialOrders }: { initialOrders: Order[] }) 
               </Link>
             </div>
           );
-// step 5/8
+        })}
+        {filtered.length === 0 && (
+          <div className="rounded-2xl border border-zinc-800 bg-[#121216] p-8 text-center text-xs text-zinc-500">
+            Nenhum pedido encontrado para os filtros selecionados.
+          </div>
+        )}
+      </div>
+
+      {/* Desktop Table */}
+      <div className="hidden md:block rounded-3xl border border-zinc-800 bg-[#121216] overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs sm:text-sm">
+            <thead className="bg-[#17171E] text-zinc-400 uppercase tracking-wider text-[11px]">
+              <tr>
+                <th className="px-4 py-3.5">Pedido</th>
+                <th className="px-4 py-3.5">Cliente</th>
+                <th className="px-4 py-3.5">Data</th>
+                <th className="px-4 py-3.5">Recebimento</th>
+                <th className="px-4 py-3.5">Status</th>
+                <th className="px-4 py-3.5">Pagamento (Manual)</th>
+                <th className="px-4 py-3.5">Total</th>
+                <th className="px-4 py-3.5 text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-800/80">
+              {filtered.map((o) => {
+                const st = ORDER_STATUS_CONFIG[o.status as OrderStatus];
+                const deliveryLabel = formatOrderModalityLabel(o);
+                return (
+                  <tr key={o.id} className="hover:bg-zinc-900/40">
+                    <td className="px-4 py-3.5 font-black text-white">#{o.order_number}</td>
+                    <td className="px-4 py-3.5">
+                      <p className="font-bold text-white">{o.customer_name}</p>
+                      <p className="text-[11px] text-zinc-500">{o.customer_phone}</p>
+// step 6/8
