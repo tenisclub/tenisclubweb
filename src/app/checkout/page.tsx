@@ -53,4 +53,16 @@ export default async function CheckoutPage() {
           {totalUnits} {totalUnits === 1 ? 'par' : 'pares'}
         </span>
       </div>
-// step 4/5
+
+      <CheckoutClient
+        items={activeItems}
+        total={cart.total}
+        subtotal={cart.subtotal}
+        profile={session.profile}
+        savedAddresses={(addresses || []) as UserAddress[]}
+        settings={settings}
+      />
+    </div>
+  );
+}
+
