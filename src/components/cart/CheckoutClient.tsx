@@ -145,3 +145,77 @@ export function CheckoutClient({
     () =>
       calculateCheckoutShipping(
         deliveryCfg,
+        activeSelectedOption?.key ?? selectedOptionKey,
+        total
+      ),
+    [deliveryCfg, activeSelectedOption?.key, selectedOptionKey, total]
+  );
+
+  const finalOrderTotal = total + shippingCalc.shippingCost;
+
+  const visibleInfoCards = useMemo(
+    () =>
+      deliveryCfg.extra_cards.filter(
+        (c) =>
+          c.enabled &&
+          c.card_type === 'info' &&
+          (c.title.trim() || c.description.trim()) &&
+          (c.visibility === 'always' || c.visibility === effectiveDeliveryMethod)
+      ),
+    [deliveryCfg.extra_cards, effectiveDeliveryMethod]
+  );
+
+  const visibleCustomButtons = useMemo(
+    () =>
+      deliveryCfg.custom_buttons.filter(
+        (b) =>
+          b.label.trim() &&
+          b.url.trim() &&
+          (b.visibility === 'always' || b.visibility === effectiveDeliveryMethod)
+      ),
+    [deliveryCfg.custom_buttons, effectiveDeliveryMethod]
+  );
+
+  const showAddressForm = useMemo(
+    () =>
+      shouldRequireCheckoutAddress(
+        deliveryCfg,
+        activeSelectedOption,
+        effectiveDeliveryMethod
+      ),
+    [deliveryCfg, activeSelectedOption, effectiveDeliveryMethod]
+  );
+
+  const goToStep = (nextStep: 1 | 2 | 3) => {
+    setErrorMsg('');
+    setStep(nextStep);
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const applySavedAddress = (addr: UserAddress) => {
+    setZipCode(addr.zip_code || '');
+    setStreet(addr.street || '');
+    setNumber(addr.number || '');
+    setComplement(addr.complement || '');
+    setNeighborhood(addr.neighborhood || '');
+    setCity(addr.city || '');
+    setStateUf(addr.state || 'SP');
+    setReference(addr.reference || '');
+  };
+
+  const handleContinueFromStep2 = () => {
+    if (!customerName.trim() || !customerPhone.trim() || !customerEmail.trim()) {
+      setErrorMsg('Preencha seu nome, WhatsApp e e-mail para continuar.');
+      return;
+    }
+    if (!paymentChoice) {
+      setErrorMsg('Selecione como pretende pagar (Pix, Cartão, Dinheiro ou Outro).');
+      return;
+    }
+    if (paymentChoice === 'other' && !customPaymentMethod.trim()) {
+      setErrorMsg('Digite qual forma de pagamento você pretende usar em "Outro".');
+      return;
+    }
+    goToStep(3);
