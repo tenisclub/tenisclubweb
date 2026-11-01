@@ -91,4 +91,35 @@ export function CustomersClient({ initialCustomers }: { initialCustomers: Custom
             key={c.id}
             className="rounded-2xl border border-zinc-800 bg-[#121216] p-4 space-y-3"
           >
-// step 3/8
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-white truncate">{c.full_name}</p>
+                <p className="text-[11px] text-zinc-500 truncate">
+                  {c.email} • {c.auth_provider === 'google' ? 'Google' : 'E-mail'}
+                </p>
+              </div>
+              <span
+                className={cn(
+                  'px-2.5 py-0.5 rounded-full text-[10px] font-bold shrink-0',
+                  c.is_active
+                    ? 'bg-emerald-500/15 text-emerald-400'
+                    : 'bg-red-500/15 text-red-400'
+                )}
+              >
+                {c.is_active ? 'Ativo' : 'Desativado'}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 text-xs text-zinc-300">
+              <div>
+                <span className="text-[10px] text-zinc-500 block">WhatsApp</span>
+                {c.phone ? (
+                  <a
+                    href={`https://wa.me/${cleanWhatsAppNumber(c.phone)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-[#BEFA46] font-semibold"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5" />
+                    {c.phone}
+// step 4/8
