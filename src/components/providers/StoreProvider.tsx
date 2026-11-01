@@ -482,4 +482,74 @@ export function StoreProvider({
         const { data } = await supabase
           .from('site_sync_state')
           .select('version')
-// step 7/12
+          .eq('id', 1)
+          .maybeSingle();
+        const remoteVersion = Number((data as { version?: number } | null)?.version || 0);
+        if (lastSeenVersion === 0) {
+          lastSeenVersion = remoteVersion;
+          return;
+        }
+        if (remoteVersion > lastSeenVersion) {
+          lastSeenVersion = remoteVersion;
+          pendingScope = 'all';
+          pending.public = true;
+          if (liveRefs.current.isAdmin) pending.admin = true;
+          if (liveRefs.current.authenticated) pending.user = true;
+          scheduleFlush();
+        }
+      } catch {
+        // Ignore transient offline state
+      }
+    };
+
+    const channel = supabase
+      .channel('tc-global-realtime-sync')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'site_sync_state' },
+        (payload: { new?: Record<string, unknown> }) => {
+          const row = (payload.new || {}) as {
+            version?: number;
+            scope?: string;
+            actor_tag?: string | null;
+          };
+          const v = Number(row.version || 0);
+          if (v > lastSeenVersion) {
+            lastSeenVersion = v;
+          }
+
+          const scope = row.scope || 'all';
+          const actorTag = row.actor_tag || null;
+          const cur = liveRefs.current;
+
+          if (!pendingScope) {
+            pendingScope = scope;
+          } else if (pendingScope !== scope) {
+            pendingScope = 'all';
+          }
+
+          if (scope === 'catalog' || scope === 'settings' || scope === 'all') {
+            pending.public = true;
+          }
+          if (
+            cur.isAdmin &&
+            (scope === 'orders' || scope === 'notifications' || scope === 'users')
+          ) {
+            pending.admin = true;
+          }
+          if (
+            cur.authenticated &&
+            (scope === 'users' || (actorTag && cur.syncTag && actorTag === cur.syncTag))
+          ) {
+            pending.user = true;
+          }
+
+          if (pending.public || pending.admin || pending.user) {
+            scheduleFlush();
+          }
+        }
+      )
+      .subscribe((status: string) => {
+        if (status === 'SUBSCRIBED') {
+          void checkLatestVersionOnWake();
+// step 8/12
