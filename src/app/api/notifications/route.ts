@@ -43,4 +43,19 @@ export async function PATCH(request: Request) {
       await supabase
         .from('notifications')
         .update({ is_read: true })
-// step 3/5
+        .eq('target_audience', 'admin')
+        .eq('is_read', false);
+    } else if (id) {
+      await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('id', id)
+        .eq('target_audience', 'admin');
+    }
+    return NextResponse.json({ success: true });
+  }
+
+  if (markAll) {
+    await supabase
+      .from('notifications')
+// step 4/5
