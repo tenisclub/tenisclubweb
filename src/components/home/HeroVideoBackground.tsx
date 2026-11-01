@@ -69,4 +69,39 @@ function MobileRandomPlayer() {
     }
     const second = pickRandomExcluding(total, new Set([first, lastStart]));
     return [first, second];
-// step 2/12
+  });
+
+  const [activeSlot, setActiveSlot] = useState<0 | 1>(0);
+  const [slotIndices, setSlotIndices] = useState<[number, number]>(initPair);
+  const recentHistoryRef = useRef<number[]>([initPair[0]]);
+  const videoRefs = useRef<[HTMLVideoElement | null, HTMLVideoElement | null]>([null, null]);
+
+  const bindRef = useCallback(
+    (slot: 0 | 1) => (el: HTMLVideoElement | null) => {
+      videoRefs.current[slot] = el;
+      if (el) {
+        el.defaultMuted = true;
+        el.muted = true;
+        el.volume = 0;
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    const current = videoRefs.current[activeSlot];
+    if (current) {
+      current.muted = true;
+      current.play().catch(() => {});
+    }
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        const el = videoRefs.current[activeSlot];
+        if (el && el.paused) {
+          el.muted = true;
+          el.play().catch(() => {});
+        }
+      }
+    };
+// step 3/12
