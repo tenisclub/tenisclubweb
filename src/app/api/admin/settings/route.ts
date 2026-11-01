@@ -14,4 +14,21 @@ export async function PATCH(request: Request) {
     const body = await request.json();
     const allowedFields = [
       'store_name',
-// step 1/5
+      'tagline',
+      'hero_badge',
+      'hero_title',
+      'hero_subtitle',
+      'hero_banner_url',
+      'logo_url',
+      'whatsapp',
+      'phone',
+      'email',
+      'address',
+      'business_hours',
+      'instagram_url',
+      'facebook_url',
+      'tiktok_url',
+      'pickup_info',
+      'delivery_info',
+      'exchange_policy',
+// step 2/5
