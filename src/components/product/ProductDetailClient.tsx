@@ -40,4 +40,47 @@ export function ProductDetailClient({
     for (const v of product.variants) {
       if (!map.has(v.color)) map.set(v.color, v.color_hex);
     }
-// step 1/12
+    return Array.from(map.entries()).map(([name, hex]) => ({ name, hex }));
+  }, [product.variants]);
+
+  const initialVariant =
+    product.variants.find((v) => v.stock > 0) || product.variants[0] || null;
+
+  const [selectedColor, setSelectedColor] = useState(initialVariant?.color || colors[0]?.name || '');
+  const [selectedVariantId, setSelectedVariantId] = useState(initialVariant?.id || '');
+  const [quantity, setQuantity] = useState(1);
+  const [submitting, setSubmitting] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const colorVariants = useMemo(
+    () => product.variants.filter((v) => !selectedColor || v.color === selectedColor),
+    [product.variants, selectedColor]
+  );
+
+  const selectedVariant = useMemo(
+    () => colorVariants.find((v) => v.id === selectedVariantId) || null,
+    [colorVariants, selectedVariantId]
+  );
+
+  const allowBackorder = Boolean(product.allow_backorder);
+  const canBuySelected = Boolean(
+    selectedVariant && (selectedVariant.stock > 0 || allowBackorder)
+  );
+  const maxStock = allowBackorder ? 99 : selectedVariant?.stock || 0;
+
+  useEffect(() => {
+    const stillExists = product.images.some((img) => img.url === activeImage);
+    if (!stillExists || activeImage !== product.primary_image) {
+      if (!stillExists) {
+        setActiveImage(product.primary_image);
+      }
+    }
+  }, [product.images, product.primary_image, activeImage]);
+
+  useEffect(() => {
+    setActiveImage(product.primary_image);
+  }, [product.primary_image]);
+
+  useEffect(() => {
+    const current = product.variants.find((v) => v.id === selectedVariantId);
+// step 2/12
