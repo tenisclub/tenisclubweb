@@ -6,4 +6,12 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Ofertas & Promoções',
-// step 1/4
+  description: 'Aproveite descontos especiais em tênis, sapatos sociais e calçados selecionados.',
+};
+
+export default async function OfertasPage() {
+  const [{ allMatching }, { categories, brands }, settings] = await Promise.all([
+    getCatalogProducts({ pageSize: 200 }),
+    getCategoriesAndBrands(),
+    getStoreSettings(),
+// step 2/4
