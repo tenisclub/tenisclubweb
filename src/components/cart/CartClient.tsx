@@ -238,4 +238,44 @@ export function CartClient({
                   type="button"
                   disabled={loadingId === item.id}
                   onClick={() => removeItem(item.id)}
-// step 6/8
+                  className="mt-1 inline-flex items-center gap-1 text-xs text-zinc-500 hover:text-red-400 transition"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Remover
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        <div className="pt-2">
+          <Link
+            href="/produtos"
+            className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-zinc-300 hover:text-[#BEFA46]"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Continuar comprando
+          </Link>
+        </div>
+      </div>
+
+      {/* Order Summary Box */}
+      <aside className="lg:col-span-4 rounded-3xl border border-zinc-800 bg-[#121216] p-5 sm:p-6 space-y-5 lg:sticky lg:top-28">
+        <h2 className="text-lg font-black text-white">Resumo do Carrinho</h2>
+
+        <div className="space-y-2.5 text-sm border-b border-zinc-800 pb-4">
+          <div className="flex justify-between text-zinc-400">
+            <span>Quantidade de pares</span>
+            <strong className="text-white">{totalItems}</strong>
+          </div>
+          <div className="flex justify-between text-zinc-400">
+            <span>Subtotal</span>
+            <span>{formatCurrency(subtotal)}</span>
+          </div>
+          {savings > 0 && (
+            <div className="flex justify-between text-emerald-400">
+              <span>Descontos aplicados</span>
+              <span>-{formatCurrency(savings)}</span>
+            </div>
+          )}
+// step 7/8
