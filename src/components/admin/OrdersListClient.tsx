@@ -201,4 +201,38 @@ export function OrdersListClient({ initialOrders }: { initialOrders: Order[] }) 
                     <td className="px-4 py-3.5">
                       <p className="font-bold text-white">{o.customer_name}</p>
                       <p className="text-[11px] text-zinc-500">{o.customer_phone}</p>
-// step 6/8
+                    </td>
+                    <td className="px-4 py-3.5 text-zinc-400 whitespace-nowrap">
+                      {formatDateTime(o.created_at)}
+                    </td>
+                    <td className="px-4 py-3.5 text-zinc-300">{deliveryLabel}</td>
+                    <td className="px-4 py-3.5">
+                      <span
+                        className={cn(
+                          'px-2.5 py-0.5 rounded-full text-[11px] font-bold border',
+                          st?.colorClass
+                        )}
+                      >
+                        {st?.label || o.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <div className="flex flex-col items-start gap-1">
+                        <span
+                          className={cn(
+                            'px-2 py-0.5 rounded-full text-[11px] font-bold',
+                            o.payment_status === 'paid_manual'
+                              ? 'bg-emerald-500/15 text-emerald-400'
+                              : 'bg-zinc-800 text-zinc-400'
+                          )}
+                        >
+                          {o.payment_status === 'paid_manual'
+                            ? 'Pago (Manual)'
+                            : 'Pendente'}
+                        </span>
+                        {o.payment_method_note && (
+                          <span className="text-[11px] font-bold text-[#BEFA46]">
+                            {o.payment_method_note}
+                          </span>
+                        )}
+// step 7/8
