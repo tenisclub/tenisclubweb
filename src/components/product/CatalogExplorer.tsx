@@ -66,3 +66,71 @@ export function CatalogExplorer({
           p.sku || '',
           p.brand?.name || '',
           p.category?.name || '',
+          p.gender,
+          p.short_description,
+          ...p.variants.map((v) => v.color),
+        ]
+          .join(' ')
+          .toLowerCase();
+        if (!terms.every((t) => hay.includes(t))) return false;
+      }
+
+      if (gender !== 'todos') {
+        if (gender === 'unissex') {
+          if (p.gender !== 'unissex') return false;
+        } else if (
+          p.gender !== gender &&
+          !(p.gender === 'unissex' && (gender === 'masculino' || gender === 'feminino'))
+        ) {
+          return false;
+        }
+      }
+
+      if (category !== 'todos' && p.category?.slug !== category) {
+        return false;
+      }
+
+      if (brand !== 'todas' && p.brand?.slug !== brand) {
+        return false;
+      }
+
+      if (size && !p.available_sizes.includes(size)) {
+        return false;
+      }
+
+      if (color !== 'todas' && !p.variants.some((v) => v.color === color)) {
+        return false;
+      }
+
+      if (minPrice !== '' && p.effective_price < Number(minPrice)) {
+        return false;
+      }
+
+      if (maxPrice !== '' && p.effective_price > Number(maxPrice)) {
+        return false;
+      }
+
+      if (onlyAvailable && p.total_stock <= 0 && !p.allow_backorder) {
+        return false;
+      }
+
+      if (onlyPromo && p.discount_percent <= 0) {
+        return false;
+      }
+
+      if (onlyNew && !p.is_new_release) {
+        return false;
+      }
+
+      return true;
+    });
+
+    list = [...list].sort((a, b) => {
+      switch (sort) {
+        case 'price_asc':
+          return a.effective_price - b.effective_price;
+        case 'price_desc':
+          return b.effective_price - a.effective_price;
+        case 'bestsellers':
+          return b.sold_count - a.sold_count;
+        case 'popular':
