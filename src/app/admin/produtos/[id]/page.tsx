@@ -19,4 +19,10 @@ export default async function EditarProdutoAdminPage({
   if (!product) notFound();
 
   return (
-// step 3/4
+    <ProductForm
+      initialProduct={product}
+      categories={categories}
+      brands={brands}
+    />
+  );
+}
