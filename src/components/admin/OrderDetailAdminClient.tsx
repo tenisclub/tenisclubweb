@@ -312,3 +312,81 @@ export function OrderDetailAdminClient({ initialOrder }: { initialOrder: Order }
               <label className="text-xs font-semibold text-zinc-300">
                 Mensagem de atualização (histórico / notificação)
               </label>
+              <input
+                type="text"
+                value={statusNote}
+                onChange={(e) => setStatusNote(e.target.value)}
+                placeholder="Ex: Pares conferidos e separados no balcão"
+                className="w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+              />
+            </div>
+
+            <div className="pt-3 border-t border-zinc-800 space-y-3">
+              <h3 className="text-xs font-extrabold uppercase tracking-wider text-[#BEFA46]">
+                Registro Manual de Pagamento
+              </h3>
+              <p className="text-[11px] text-zinc-500">
+                Sem gateway integrado: registre aqui pagamentos recebidos via Pix, cartão ou dinheiro.
+              </p>
+
+              <select
+                value={paymentStatus}
+                onChange={(e) => setPaymentStatus(e.target.value as PaymentStatus)}
+                className="w-full h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs font-bold text-white"
+              >
+                <option value="pending">Aguardando recebimento</option>
+                <option value="paid_manual">Pagamento recebido manualmente</option>
+                <option value="refunded_manual">Estornado manualmente</option>
+              </select>
+
+              <input
+                type="text"
+                value={paymentMethodNote}
+                onChange={(e) => setPaymentMethodNote(e.target.value)}
+                placeholder="Ex: Pix recebido em 31/10 às 14:20"
+                className="w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+              />
+            </div>
+
+            <div className="pt-3 border-t border-zinc-800 space-y-3">
+              <div>
+                <label className="text-xs font-semibold text-zinc-300">
+                  Observações para o Cliente (visível em Minha Conta)
+                </label>
+                <textarea
+                  rows={2}
+                  value={storeNotes}
+                  onChange={(e) => setStoreNotes(e.target.value)}
+                  className="mt-1 w-full p-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-amber-300">
+                  Observações Internas (restrito à equipe Admin)
+                </label>
+                <textarea
+                  rows={2}
+                  value={internalNotes}
+                  onChange={(e) => setInternalNotes(e.target.value)}
+                  className="mt-1 w-full p-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+                />
+              </div>
+            </div>
+
+            <button
+              type="button"
+              disabled={saving}
+              onClick={() => handleSave()}
+              className="w-full h-12 rounded-xl bg-[#BEFA46] hover:bg-[#d1ff70] text-[#09090B] text-sm font-black inline-flex items-center justify-center gap-2"
+            >
+              <Save className="w-4 h-4" />
+              {saving ? 'Salvando...' : 'Salvar Alterações do Pedido'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
