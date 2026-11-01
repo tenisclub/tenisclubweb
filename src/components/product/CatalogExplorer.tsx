@@ -315,4 +315,50 @@ export function CatalogExplorer({
           </div>
 
           {/* Brand */}
-// step 7/12
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-zinc-400 block">Marca</label>
+            <select
+              value={brand}
+              onChange={(e) => {
+                setBrand(e.target.value);
+                setPage(1);
+              }}
+              className="w-full h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs font-medium text-white focus:outline-none focus:border-[#BEFA46]"
+            >
+              <option value="todas">Todas as marcas</option>
+              {brands.map((b) => (
+                <option key={b.id} value={b.slug}>
+                  {b.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Size */}
+          <div className="space-y-2">
+            <span className="text-xs font-semibold text-zinc-400 block">Numeração</span>
+            <div className="grid grid-cols-4 gap-1.5">
+              {STANDARD_SHOE_SIZES.map((sz) => {
+                const active = size === sz;
+                return (
+                  <button
+                    key={sz}
+                    type="button"
+                    onClick={() => {
+                      setSize(active ? '' : sz);
+                      setPage(1);
+                    }}
+                    className={cn(
+                      'h-8 rounded-lg text-xs font-bold border transition',
+                      active
+                        ? 'bg-[#BEFA46] text-[#09090B] border-[#BEFA46]'
+                        : 'bg-[#18181F] text-zinc-300 border-zinc-800 hover:border-zinc-600'
+                    )}
+                  >
+                    {sz}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+// step 8/12
