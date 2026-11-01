@@ -458,4 +458,70 @@ export function ProductForm({
               type="text"
               value={material}
               onChange={(e) => setMaterial(e.target.value)}
-// step 7/12
+              placeholder="Ex: Couro Legítimo / Mesh"
+              className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-zinc-400">Solado</label>
+            <input
+              type="text"
+              value={solado}
+              onChange={(e) => setSolado(e.target.value)}
+              placeholder="Ex: Borracha Antiderrapante"
+              className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-zinc-400">Garantia</label>
+            <input
+              type="text"
+              value={garantia}
+              onChange={(e) => setGarantia(e.target.value)}
+              className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+            />
+          </div>
+        </div>
+
+        {/* Status Toggles */}
+        <div className="flex flex-wrap gap-6 pt-3 border-t border-zinc-800 text-xs font-bold text-zinc-200">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isActive}
+              onChange={(e) => setIsActive(e.target.checked)}
+              className="w-4 h-4 accent-[#BEFA46]"
+            />
+            Produto Ativo na Loja
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isFeatured}
+              onChange={(e) => setIsFeatured(e.target.checked)}
+              className="w-4 h-4 accent-[#BEFA46]"
+            />
+            Destaque na Página Inicial
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isNewRelease}
+              onChange={(e) => setIsNewRelease(e.target.checked)}
+              className="w-4 h-4 accent-[#BEFA46]"
+            />
+            Marcar como Lançamento / Novidade
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer text-[#BEFA46]">
+            <input
+              type="checkbox"
+              checked={allowBackorder}
+              onChange={(e) => setAllowBackorder(e.target.checked)}
+              className="w-4 h-4 accent-[#BEFA46]"
+            />
+            Vender mesmo sem estoque
+          </label>
+        </div>
+      </div>
+
+// step 8/12
