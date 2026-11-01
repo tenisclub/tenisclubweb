@@ -136,4 +136,30 @@ export function CategoriesClient({ initialCategories }: { initialCategories: Cat
               <p className="text-xs text-zinc-400">{cat.description}</p>
             </div>
             <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
-// step 5/6
+              <button
+                type="button"
+                onClick={() => toggleActive(cat)}
+                className={cn(
+                  'px-3 py-1 rounded-full text-xs font-bold',
+                  cat.is_active
+                    ? 'bg-emerald-500/15 text-emerald-400'
+                    : 'bg-zinc-800 text-zinc-400'
+                )}
+              >
+                {cat.is_active ? 'Ativa' : 'Inativa'}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDelete(cat.id)}
+                className="p-2 text-zinc-500 hover:text-red-400"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
