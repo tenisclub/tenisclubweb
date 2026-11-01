@@ -49,3 +49,54 @@ export function AdminProductsTable({ initialProducts }: { initialProducts: Produ
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ quickToggle: true, [field]: nextVal }),
     });
+
+    if (!res.ok) {
+      toast('Erro ao atualizar produto.', 'error');
+      router.refresh();
+      return;
+    }
+    toast('Produto atualizado!', 'info');
+  };
+
+  const handleDelete = async (product: Product) => {
+    const ok = window.confirm(
+      `Deseja realmente excluir ou arquivar "${product.name}"?`
+    );
+    if (!ok) return;
+
+    const res = await fetch(`/api/admin/products/${product.id}`, {
+      method: 'DELETE',
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      toast(data.error || 'Erro ao excluir produto.', 'error');
+      return;
+    }
+
+    if (data.archived) {
+      setProducts((prev) =>
+        prev.map((p) => (p.id === product.id ? { ...p, is_active: false } : p))
+      );
+      toast(data.message, 'info');
+    } else {
+      setProducts((prev) => prev.filter((p) => p.id !== product.id));
+      toast('Produto excluído com sucesso.', 'success');
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-black text-white">Gerenciar Produtos</h1>
+          <p className="text-xs sm:text-sm text-zinc-400">
+            Cadastre tênis, fotos, variações, preços e acompanhe o saldo por numeração.
+          </p>
+        </div>
+        <Link
+          href="/admin/produtos/novo"
+          prefetch={true}
+          onMouseEnter={() => router.prefetch('/admin/produtos/novo')}
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#BEFA46] text-[#09090B] text-xs sm:text-sm font-black shrink-0"
+        >
+          <Plus className="w-4 h-4" />
