@@ -607,3 +607,124 @@ export function CheckoutStep3Customizer({
                                   </div>
                                 </>
                               ) : (
+                                <div className="sm:col-span-2">
+                                  <label className="text-[11px] font-semibold text-zinc-400">
+                                    Selo exibido no Card
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={card.badge}
+                                    onChange={(e) =>
+                                      updateExtraCard(card.id, { badge: e.target.value })
+                                    }
+                                    placeholder={card.fee_mode === 'free' ? 'Grátis' : 'A combinar'}
+                                    className="mt-1 w-full h-10 px-3 rounded-xl bg-[#121216] border border-zinc-800 text-xs sm:text-sm text-white"
+                                  />
+                                </div>
+                              )}
+
+                              <div className="sm:col-span-2">
+                                <label className="text-[11px] font-semibold text-zinc-400">
+                                  Descrição / Subtítulo
+                                </label>
+                                <input
+                                  type="text"
+                                  value={card.description}
+                                  onChange={(e) =>
+                                    updateExtraCard(card.id, { description: e.target.value })
+                                  }
+                                  placeholder="Ex: Entrega no mesmo dia para pedidos até as 16h."
+                                  className="mt-1 w-full h-10 px-3 rounded-xl bg-[#121216] border border-zinc-800 text-xs text-white"
+                                />
+                              </div>
+
+                              <div className="sm:col-span-2 pt-1">
+                                <label className="inline-flex items-center gap-2.5 text-xs text-zinc-200 cursor-pointer select-none">
+                                  <input
+                                    type="checkbox"
+                                    checked={card.require_address}
+                                    onChange={(e) =>
+                                      updateExtraCard(card.id, {
+                                        require_address: e.target.checked,
+                                      })
+                                    }
+                                    className="accent-[#BEFA46] w-4 h-4 rounded shrink-0"
+                                  />
+                                  <span>
+                                    Pedir endereço (CEP, Rua, Número e Bairro) ao escolher esta opção
+                                  </span>
+                                </label>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                              <div>
+                                <label className="text-[11px] font-semibold text-zinc-400">
+                                  Título do Aviso
+                                </label>
+                                <input
+                                  type="text"
+                                  value={card.title}
+                                  onChange={(e) =>
+                                    updateExtraCard(card.id, { title: e.target.value })
+                                  }
+                                  className="mt-1 w-full h-10 px-3 rounded-xl bg-[#121216] border border-zinc-800 text-xs text-white"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-[11px] font-semibold text-zinc-400">
+                                  Selo (opcional)
+                                </label>
+                                <input
+                                  type="text"
+                                  value={card.badge}
+                                  onChange={(e) =>
+                                    updateExtraCard(card.id, { badge: e.target.value })
+                                  }
+                                  placeholder="Ex: A combinar"
+                                  className="mt-1 w-full h-10 px-3 rounded-xl bg-[#121216] border border-zinc-800 text-xs text-white"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-[11px] font-semibold text-zinc-400">
+                                  Quando exibir
+                                </label>
+                                <select
+                                  value={card.visibility}
+                                  onChange={(e) =>
+                                    updateExtraCard(card.id, {
+                                      visibility: e.target.value as CheckoutExtraCard['visibility'],
+                                    })
+                                  }
+                                  className="mt-1 w-full h-10 px-2.5 rounded-xl bg-[#121216] border border-zinc-800 text-xs text-white"
+                                >
+                                  <option value="always">Sempre visível</option>
+                                  <option value="pickup">Só em Retirada</option>
+                                  <option value="local_delivery">Só em Entrega</option>
+                                </select>
+                              </div>
+                              <div className="sm:col-span-3">
+                                <label className="text-[11px] font-semibold text-zinc-400">
+                                  Texto do Aviso
+                                </label>
+                                <textarea
+                                  rows={2}
+                                  value={card.description}
+                                  onChange={(e) =>
+                                    updateExtraCard(card.id, { description: e.target.value })
+                                  }
+                                  className="mt-1 w-full p-2.5 rounded-xl bg-[#121216] border border-zinc-800 text-xs text-white"
+                                />
+                              </div>
+                              <div className="sm:col-span-3 pt-1">
+                                <label className="inline-flex items-center gap-2.5 text-xs text-zinc-200 cursor-pointer select-none">
+                                  <input
+                                    type="checkbox"
+                                    checked={card.require_address}
+                                    onChange={(e) =>
+                                      updateExtraCard(card.id, {
+                                        require_address: e.target.checked,
+                                      })
+                                    }
+                                    className="accent-[#BEFA46] w-4 h-4 rounded shrink-0"
+                                  />
