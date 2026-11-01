@@ -86,4 +86,20 @@ export async function GET(request: Request) {
             user: { ...profile, role },
             role,
             syncTag: computeUserSyncTag(userId),
-// step 5/6
+          })
+        );
+        response.cookies.set('tc_oauth_bootstrap', bootstrapPayload, {
+          path: '/',
+          maxAge: 20,
+          sameSite: 'lax',
+        });
+      } catch {
+        // Ignore if profile exceeds cookie limit
+      }
+
+      return response;
+    }
+  }
+
+  return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`);
+}
