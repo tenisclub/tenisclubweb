@@ -292,4 +292,53 @@ export function AdminShell({
               + Novo Produto
             </Link>
           </div>
-// step 6/8
+        </header>
+
+        <div className="p-3.5 sm:p-6 lg:p-8 flex-1 min-w-0">{children}</div>
+      </div>
+
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 flex max-h-[100dvh]">
+          <div
+            className="fixed inset-0 bg-black/70"
+            onClick={() => setSidebarOpen(false)}
+          />
+          <div className="relative w-72 max-w-[85vw] h-[100dvh] bg-[#0D0D11] border-r border-zinc-800 flex flex-col z-10">
+            <div className="h-16 px-5 flex items-center justify-between border-b border-zinc-800">
+              <TenisClubLogo size="sm" />
+              <button
+                type="button"
+                onClick={() => setSidebarOpen(false)}
+                className="p-2 text-zinc-400 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <nav className="flex-1 overflow-y-auto p-4 space-y-1">
+              {visibleLinks.map((item) => {
+                const Icon = item.icon;
+                const active = item.exact
+                  ? effectivePath === item.href
+                  : effectivePath === item.href || effectivePath.startsWith(`${item.href}/`);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    prefetch={true}
+                    onClick={() => {
+                      setOptimisticHref(item.href);
+                      setSidebarOpen(false);
+                    }}
+                    className={cn(
+                      'flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold',
+                      active ? 'bg-[#BEFA46] text-[#09090B]' : 'text-zinc-300'
+                    )}
+                  >
+                    <span className="flex items-center gap-3">
+                      <Icon className="w-4 h-4 shrink-0" />
+                      {item.label}
+                    </span>
+                    {item.href === '/admin/pedidos' && livePendingOrders > 0 && (
+                      <span
+// step 7/8
