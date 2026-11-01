@@ -39,3 +39,45 @@ export async function POST(request: Request) {
     }
 
     const service = createServiceClient();
+
+    // Check if email already exists
+    const { data: existing } = await service
+      .from('user_profiles')
+      .select('id, auth_provider')
+      .eq('email', cleanEmail)
+      .maybeSingle();
+
+    if (existing) {
+      if (existing.auth_provider === 'google') {
+        return NextResponse.json(
+          {
+            error:
+              'Este e-mail já possui conta vinculada ao Google. Clique em "Continuar com Google" na tela de login.',
+          },
+          { status: 409 }
+        );
+      }
+      return NextResponse.json(
+        { error: 'Este e-mail já está cadastrado. Faça login ou recupere sua senha.' },
+        { status: 409 }
+      );
+    }
+
+    // Single GoTrue round-trip: signs up, hashes password ONCE, runs handle_new_user trigger,
+    // and writes the SSR auth session cookie directly onto the response!
+    const supabaseServer = await createClient();
+    const { data: signUpData, error: signUpError } = await supabaseServer.auth.signUp({
+      email: cleanEmail,
+      password: String(password),
+      options: {
+        data: {
+          full_name: fullName.trim(),
+          phone: cleanPhone,
+        },
+      },
+    });
+
+    if (signUpError || !signUpData.user) {
+      return NextResponse.json(
+        { error: signUpError?.message || 'Erro ao criar conta.' },
+        { status: 400 }
