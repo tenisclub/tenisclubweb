@@ -210,4 +210,47 @@ export function ProductDetailClient({
               </button>
             ))}
           </div>
-// step 5/12
+        )}
+      </div>
+
+      {/* Right: Commercial Info & Actions */}
+      <div className="lg:col-span-5 flex flex-col space-y-6">
+        <div className="space-y-2">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-bold uppercase tracking-widest text-zinc-400 min-w-0 pt-1">
+              {product.brand?.name && (
+                <span className="text-[#BEFA46]">{product.brand.name}</span>
+              )}
+              <span>•</span>
+              <span>{GENDER_LABELS[product.gender]}</span>
+              {product.sku && (
+                <>
+                  <span>•</span>
+                  <span>{product.sku}</span>
+                </>
+              )}
+            </div>
+
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => toggleFavorite(product.id)}
+                className={cn(
+                  'p-2.5 rounded-full border transition',
+                  isFav
+                    ? 'bg-[#BEFA46] text-[#09090B] border-[#BEFA46]'
+                    : 'bg-[#15151B] text-zinc-300 border-zinc-800 hover:border-zinc-600'
+                )}
+                title={isFav ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
+              >
+                <Heart className={cn('w-4 h-4', isFav && 'fill-current')} />
+              </button>
+              <button
+                type="button"
+                onClick={handleShare}
+                className="p-2.5 rounded-full bg-[#15151B] text-zinc-300 border border-zinc-800 hover:border-zinc-600 transition"
+                title="Compartilhar produto"
+              >
+                {copied ? <Check className="w-4 h-4 text-[#BEFA46]" /> : <Share2 className="w-4 h-4" />}
+              </button>
+// step 6/12
