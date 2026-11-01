@@ -68,3 +68,38 @@ export async function GET(request: Request) {
 
       const isSafeCustomTarget =
         next &&
+        next.startsWith('/') &&
+        !next.startsWith('//') &&
+        next !== '/minha-conta' &&
+        !next.startsWith('/minha-conta?') &&
+        !next.startsWith('/login') &&
+        !next.startsWith('/cadastro');
+
+      const redirectUrl = isSafeCustomTarget ? `${origin}${next}` : `${origin}/`;
+      const response = NextResponse.redirect(redirectUrl);
+
+      // Instant 0ms first-frame session bootstrap for StoreProvider on destination page
+      try {
+        const bootstrapPayload = encodeURIComponent(
+          JSON.stringify({
+            authenticated: true,
+            user: { ...profile, role },
+            role,
+            syncTag: computeUserSyncTag(userId),
+          })
+        );
+        response.cookies.set('tc_oauth_bootstrap', bootstrapPayload, {
+          path: '/',
+          maxAge: 20,
+          sameSite: 'lax',
+        });
+      } catch {
+        // Ignore if profile exceeds cookie limit
+      }
+
+      return response;
+    }
+  }
+
+  return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`);
+}
