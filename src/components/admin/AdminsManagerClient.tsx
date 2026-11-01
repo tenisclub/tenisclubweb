@@ -46,3 +46,52 @@ export function AdminsManagerClient({
   const [submitting, setSubmitting] = useState(false);
 
   const handleGrant = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      const res = await fetch('/api/admin/admins', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName,
+          email,
+          phone,
+          password,
+          roleName,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast(data.error || 'Erro ao configurar administrador.', 'error');
+        return;
+      }
+      toast('Permissão administrativa configurada!', 'success');
+      setFullName('');
+      setEmail('');
+      setPhone('');
+      setPassword('');
+      router.refresh();
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const updateRoleOrStatus = async (
+    userId: string,
+    patch: { roleName?: string; is_active?: boolean }
+  ) => {
+    const res = await fetch('/api/admin/admins', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, ...patch }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      toast(data.error || 'Operação não permitida.', 'error');
+      return;
+    }
+    toast('Acesso administrativo atualizado!', 'info');
+    router.refresh();
+  };
+
+  return (
