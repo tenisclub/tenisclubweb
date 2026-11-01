@@ -70,4 +70,22 @@ export async function PATCH(request: Request) {
       admin_id: session.userId,
       action: 'brand.update',
       entity_type: 'brand',
-// step 4/6
+      entity_id: id,
+      details: updates,
+    })
+    .then(() => {});
+
+  return NextResponse.json({ brand: data });
+}
+
+export async function DELETE(request: Request) {
+  const session = await getAuthSession();
+  if (!session?.isAdmin) return NextResponse.json({ error: 'Acesso negado.' }, { status: 403 });
+
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get('id');
+  if (!id) return NextResponse.json({ error: 'ID inválido.' }, { status: 400 });
+
+  const supabase = createServiceClient();
+  const { error } = await supabase.from('brands').delete().eq('id', id);
+// step 5/6
