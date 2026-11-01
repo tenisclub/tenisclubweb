@@ -94,3 +94,51 @@ export default async function HomePage() {
                 <h3 className="text-base font-extrabold text-white group-hover:text-[#BEFA46] transition">
                   {cat.label}
                 </h3>
+                <p className="text-[11px] text-zinc-400 line-clamp-1 mt-0.5">{cat.sub}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* 4. PRODUTOS EM DESTAQUE */}
+      {featuredProducts.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+          <div className="flex items-end justify-between gap-3">
+            <div className="min-w-0">
+              <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#BEFA46]">
+                Seleção Especial
+              </span>
+              <h2 className="text-lg sm:text-3xl font-black text-white flex items-center gap-2 mt-0.5">
+                <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-[#BEFA46] shrink-0" />
+                <span>Produtos em Destaque</span>
+              </h2>
+            </div>
+            <Link
+              href="/produtos"
+              className="text-xs sm:text-sm font-bold text-[#BEFA46] hover:underline inline-flex items-center gap-1 shrink-0 pb-0.5"
+            >
+              Ver todos <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {featuredProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                whatsapp={settings.whatsapp}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* 5. OFERTAS PROMOCIONAIS */}
+      {offerProducts.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="rounded-3xl border border-[#BEFA46]/25 bg-gradient-to-br from-[#13170D] via-[#111115] to-[#111115] p-4 sm:p-8 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+              <div>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#BEFA46] text-[#09090B] text-[11px] font-black uppercase tracking-wider">
+                  <Tag className="w-3.5 h-3.5" />
