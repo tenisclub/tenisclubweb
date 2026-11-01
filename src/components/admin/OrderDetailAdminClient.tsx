@@ -340,4 +340,51 @@ export function OrderDetailAdminClient({ initialOrder }: { initialOrder: Order }
               <input
                 type="text"
                 value={paymentMethodNote}
-// step 7/8
+                onChange={(e) => setPaymentMethodNote(e.target.value)}
+                placeholder="Ex: Pix recebido em 31/10 às 14:20"
+                className="w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+              />
+            </div>
+
+            <div className="pt-3 border-t border-zinc-800 space-y-3">
+              <div>
+                <label className="text-xs font-semibold text-zinc-300">
+                  Observações para o Cliente (visível em Minha Conta)
+                </label>
+                <textarea
+                  rows={2}
+                  value={storeNotes}
+                  onChange={(e) => setStoreNotes(e.target.value)}
+                  className="mt-1 w-full p-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-amber-300">
+                  Observações Internas (restrito à equipe Admin)
+                </label>
+                <textarea
+                  rows={2}
+                  value={internalNotes}
+                  onChange={(e) => setInternalNotes(e.target.value)}
+                  className="mt-1 w-full p-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+                />
+              </div>
+            </div>
+
+            <button
+              type="button"
+              disabled={saving}
+              onClick={() => handleSave()}
+              className="w-full h-12 rounded-xl bg-[#BEFA46] hover:bg-[#d1ff70] text-[#09090B] text-sm font-black inline-flex items-center justify-center gap-2"
+            >
+              <Save className="w-4 h-4" />
+              {saving ? 'Salvando...' : 'Salvar Alterações do Pedido'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
