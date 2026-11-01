@@ -223,4 +223,35 @@ export function ProductCard({ product, whatsapp = '5511999999999' }: ProductCard
                 : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
             )}
           >
-// step 7/8
+            <ShoppingBag className="w-4 h-4 stroke-[2.3]" />
+            {adding
+              ? 'Adicionando...'
+              : canPurchase
+                ? `Adicionar${selectedVariant ? ` (Tam. ${selectedVariant.size})` : ''}`
+                : 'Sem Estoque'}
+          </button>
+
+          <div className="grid grid-cols-2 gap-2">
+            <Link
+              href={`/produto/${product.slug}`}
+              className="h-9 rounded-xl bg-[#1A1A21] hover:bg-zinc-800 border border-zinc-800 text-xs font-semibold text-zinc-200 inline-flex items-center justify-center gap-1.5 transition"
+            >
+              <Eye className="w-3.5 h-3.5 text-zinc-400" />
+              Detalhes
+            </Link>
+            <a
+              href={waUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="h-9 rounded-xl bg-[#1A1A21] hover:bg-emerald-950/50 border border-zinc-800 hover:border-emerald-500/40 text-xs font-semibold text-zinc-200 hover:text-emerald-300 inline-flex items-center justify-center gap-1.5 transition"
+            >
+              <MessageCircle className="w-3.5 h-3.5 text-[#BEFA46]" />
+              WhatsApp
+            </a>
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+}
+
