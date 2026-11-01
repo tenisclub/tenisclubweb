@@ -97,3 +97,53 @@ export function buildOrderWhatsAppUrl(
     customerLines.push(`*WhatsApp / Telefone:* ${order.customer_phone.trim()}`);
   }
   if (order.customer_email?.trim()) {
+    customerLines.push(`*E-mail:* ${order.customer_email.trim()}`);
+  }
+
+  const receiptLines = [`*Recebimento:* ${modalityLabel}`];
+  if (hasStreet) {
+    const streetLine = `${addr?.street?.trim() || ''}, Nº ${addr?.number?.trim() || 'S/N'}${
+      addr?.complement?.trim() ? ` (${addr.complement.trim()})` : ''
+    }`;
+    const cityState = [addr?.city?.trim(), addr?.state?.trim()].filter(Boolean).join('/');
+    const districtLine = [addr?.neighborhood?.trim(), cityState]
+      .filter(Boolean)
+      .join(' — ');
+    receiptLines.push(`*Endereço:* ${streetLine}`);
+    if (districtLine) {
+      receiptLines.push(`*Bairro / Cidade:* ${districtLine}`);
+    }
+    if (addr?.zip_code?.trim()) {
+      receiptLines.push(`*CEP:* ${addr.zip_code.trim()}`);
+    }
+    if (addr?.reference?.trim()) {
+      receiptLines.push(`*Referência:* ${addr.reference.trim()}`);
+    }
+  } else if (order.delivery_method === 'pickup' && addr?.pickup_address?.trim()) {
+    receiptLines.push(`*Local de Retirada:* ${addr.pickup_address.trim()}`);
+  }
+
+  const shippingCost = Number(order.shipping_cost) || 0;
+  const discountTotal = Number(order.discount_total) || 0;
+  const totalValue = Number(order.total) || 0;
+  const itemsSubtotal = Number(order.subtotal) || Math.max(0, totalValue - shippingCost);
+
+  const financialLines: string[] = [];
+  if (discountTotal > 0 || shippingCost > 0) {
+    financialLines.push(`*Subtotal:* ${formatCurrency(itemsSubtotal)}`);
+  }
+  if (discountTotal > 0) {
+    financialLines.push(`*Desconto em ofertas:* -${formatCurrency(discountTotal)}`);
+  }
+  if (shippingCost > 0) {
+    financialLines.push(`*Taxa de entrega:* ${formatCurrency(shippingCost)}`);
+  } else if (addr?.shipping_label?.trim()) {
+    financialLines.push(`*Entrega / Recebimento:* ${addr.shipping_label.trim()}`);
+  }
+  financialLines.push(`*Total do Pedido:* *${formatCurrency(totalValue)}*`);
+  if (order.payment_method_note?.trim()) {
+    financialLines.push(`*Forma de pagamento:* ${order.payment_method_note.trim()}`);
+  }
+
+  const notesBlock = order.customer_notes?.trim()
+    ? [`*Observações:* ${order.customer_notes.trim()}`, ``]
