@@ -102,4 +102,23 @@ export function BrandsClient({ initialBrands }: { initialBrands: Brand[] }) {
                   'px-3 py-1 rounded-full text-xs font-bold',
                   brand.is_active
                     ? 'bg-emerald-500/15 text-emerald-400'
-// step 5/6
+                    : 'bg-zinc-800 text-zinc-400'
+                )}
+              >
+                {brand.is_active ? 'Ativa' : 'Inativa'}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDelete(brand.id)}
+                className="p-2 text-zinc-500 hover:text-red-400"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
