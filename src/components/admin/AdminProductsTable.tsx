@@ -236,4 +236,38 @@ export function AdminProductsTable({ initialProducts }: { initialProducts: Produ
                 <button
                   type="button"
                   onClick={() => handleDelete(p)}
-// step 7/12
+                  className="p-2 rounded-lg bg-zinc-800/80 text-zinc-400 hover:text-red-400"
+                  title="Excluir / Arquivar"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+        {filtered.length === 0 && (
+          <div className="rounded-2xl border border-zinc-800 bg-[#121216] p-8 text-center text-xs text-zinc-500">
+            Nenhum produto encontrado.
+          </div>
+        )}
+      </div>
+
+      {/* Desktop Table */}
+      <div className="hidden md:block rounded-3xl border border-zinc-800 bg-[#121216] overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs sm:text-sm">
+            <thead className="bg-[#17171E] text-zinc-400 text-[11px] uppercase tracking-wider">
+              <tr>
+                <th className="px-4 py-3.5">Produto</th>
+                <th className="px-4 py-3.5">Marca / Linha</th>
+                <th className="px-4 py-3.5">Preço</th>
+                <th className="px-4 py-3.5">Estoque Total</th>
+                <th className="px-4 py-3.5">Destaque</th>
+                <th className="px-4 py-3.5">Status</th>
+                <th className="px-4 py-3.5 text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-800/80">
+              {filtered.map((p) => (
+                <tr key={p.id} className="hover:bg-zinc-900/40">
+// step 8/12
