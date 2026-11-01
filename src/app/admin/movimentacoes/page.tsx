@@ -79,3 +79,44 @@ export default async function AdminMovimentacoesPage() {
                   </p>
                 </div>
                 <span className={cn('px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0', badge.cls)}>
+                  {badge.label}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 rounded-xl bg-[#18181F] p-2.5 text-center">
+                <div>
+                  <span className="text-[10px] text-zinc-500 block">Anterior</span>
+                  <strong className="text-zinc-300">{m.previous_quantity}</strong>
+                </div>
+                <div>
+                  <span className="text-[10px] text-zinc-500 block">Movimento</span>
+                  <strong
+                    className={cn(
+                      m.moved_quantity >= 0 ? 'text-emerald-400' : 'text-red-400'
+                    )}
+                  >
+                    {m.moved_quantity > 0 ? `+${m.moved_quantity}` : m.moved_quantity}
+                  </strong>
+                </div>
+                <div>
+                  <span className="text-[10px] text-zinc-500 block">Saldo Final</span>
+                  <strong className="text-white">{m.new_quantity}</strong>
+                </div>
+              </div>
+
+              {m.reason && <p className="text-[11px] text-zinc-300">{m.reason}</p>}
+              <div className="flex items-center justify-between text-[10px] text-zinc-500 pt-1">
+                <span className="truncate pr-2">
+                  Por: {user?.full_name || user?.email || 'Sistema'}
+                </span>
+                <span className="shrink-0">{formatDateTime(m.created_at)}</span>
+              </div>
+            </div>
+          );
+        })}
+        {(movements || []).length === 0 && (
+          <div className="rounded-2xl border border-zinc-800 bg-[#121216] p-8 text-center text-xs text-zinc-500">
+            Nenhuma movimentação registrada.
+          </div>
+        )}
+      </div>
