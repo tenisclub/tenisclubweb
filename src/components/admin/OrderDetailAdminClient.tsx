@@ -46,4 +46,53 @@ export function OrderDetailAdminClient({ initialOrder }: { initialOrder: Order }
     setInternalNotes(initialOrder.internal_notes || '');
     setPaymentMethodNote(initialOrder.payment_method_note || '');
   }, [
-// step 1/8
+    initialOrder.updated_at,
+    initialOrder.status,
+    initialOrder.payment_status,
+    initialOrder.store_notes,
+    initialOrder.internal_notes,
+    initialOrder.payment_method_note,
+    saving,
+  ]);
+
+  const handleSave = async (overrideStatus?: OrderStatus, overrideNote?: string) => {
+    const nextStatus = overrideStatus || status;
+
+    if (nextStatus === 'cancelled' && initialOrder.status !== 'cancelled') {
+      const ok = window.confirm(
+        'Confirma o cancelamento deste pedido? O estoque das numerações reservadas será devolvido automaticamente sem duplicidade.'
+      );
+      if (!ok) return;
+    }
+
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/admin/orders/${initialOrder.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: nextStatus,
+          note: overrideNote ?? statusNote,
+          store_notes: storeNotes,
+          internal_notes: internalNotes,
+          payment_status: paymentStatus,
+          payment_method_note: paymentMethodNote,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        toast(data.error || 'Erro ao salvar pedido.', 'error');
+        return;
+      }
+
+      setStatus(nextStatus);
+      setStatusNote('');
+      toast('Pedido atualizado com sucesso!', 'success');
+      window.dispatchEvent(new CustomEvent('tc:admin-stats-sync'));
+      router.refresh();
+    } finally {
+      setSaving(false);
+    }
+  };
+// step 2/8
