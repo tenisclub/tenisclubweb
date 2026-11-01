@@ -88,4 +88,34 @@ export default async function HomePage() {
               className="group rounded-2xl border border-zinc-800/90 bg-[#121216] hover:border-[#BEFA46]/60 p-4 flex flex-col justify-between min-h-[112px] transition"
             >
               <span className="text-[10px] font-bold uppercase tracking-widest text-[#BEFA46]">
-// step 3/8
+                Linha
+              </span>
+              <div>
+                <h3 className="text-base font-extrabold text-white group-hover:text-[#BEFA46] transition">
+                  {cat.label}
+                </h3>
+                <p className="text-[11px] text-zinc-400 line-clamp-1 mt-0.5">{cat.sub}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* 4. PRODUTOS EM DESTAQUE */}
+      {featuredProducts.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+          <div className="flex items-end justify-between gap-3">
+            <div className="min-w-0">
+              <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#BEFA46]">
+                Seleção Especial
+              </span>
+              <h2 className="text-lg sm:text-3xl font-black text-white flex items-center gap-2 mt-0.5">
+                <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-[#BEFA46] shrink-0" />
+                <span>Produtos em Destaque</span>
+              </h2>
+            </div>
+            <Link
+              href="/produtos"
+              className="text-xs sm:text-sm font-bold text-[#BEFA46] hover:underline inline-flex items-center gap-1 shrink-0 pb-0.5"
+            >
+// step 4/8
