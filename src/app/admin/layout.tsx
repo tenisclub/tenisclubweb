@@ -11,4 +11,10 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   const [session, badges] = await Promise.all([requireAdmin(), getAdminBadgeCounts()]);
-// step 2/4
+
+  return (
+    <AdminShell
+      profile={session.profile}
+      role={session.role}
+      pendingOrdersCount={badges.pendingOrdersCount}
+// step 3/4
