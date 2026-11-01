@@ -67,3 +67,73 @@ export function SettingsClient({ initialSettings }: { initialSettings: StoreSett
       const current = normalizeCheckoutDeliveryConfig(prev.checkout_delivery_config);
       const next = { ...current, ...patch };
       return { ...prev, checkout_delivery_config: next };
+    });
+  };
+
+  const resetEtapa3ToDefault = () => {
+    isDirtyRef.current = true;
+    setForm((prev) => ({
+      ...prev,
+      checkout_delivery_config: {
+        ...DEFAULT_CHECKOUT_DELIVERY_CONFIG,
+        extra_cards: [],
+        custom_buttons: [],
+      },
+    }));
+    toast('Cards da Etapa 3 restaurados para o padrão! Clique em Salvar para publicar.', 'info');
+  };
+
+  const handleUploadAsset = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: 'logo_url' | 'hero_banner_url'
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingField(field);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('bucket', 'store');
+
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!res.ok) {
+        toast(data.error || 'Falha no upload.', 'error');
+        return;
+      }
+      setField(field, data.url);
+      toast('Imagem enviada! Clique em Salvar Configurações para publicar.', 'success');
+    } finally {
+      setUploadingField(null);
+      e.target.value = '';
+    }
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const payload: StoreSettings = {
+        ...form,
+        checkout_delivery_config: deliveryCfg,
+      };
+      const res = await fetch('/api/admin/settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast(data.error || 'Erro ao salvar configurações.', 'error');
+        return;
+      }
+      isDirtyRef.current = false;
+      router.refresh();
+      toast('Configurações da loja atualizadas em tempo real em todo o site!', 'success');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const copyFreshShareLink = async () => {
+    const origin =
