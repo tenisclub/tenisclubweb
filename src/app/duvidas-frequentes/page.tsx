@@ -40,4 +40,13 @@ export default function FaqPage() {
           <div
             key={item.q}
             className="rounded-2xl border border-zinc-800 bg-[#121216] p-5 sm:p-6 space-y-2"
-// step 4/5
+          >
+            <h2 className="text-sm sm:text-base font-extrabold text-white">{item.q}</h2>
+            <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">{item.a}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
