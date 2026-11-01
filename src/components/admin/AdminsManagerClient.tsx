@@ -89,4 +89,35 @@ export function AdminsManagerClient({
     if (!res.ok) {
       toast(data.error || 'Operação não permitida.', 'error');
       return;
-// step 3/8
+    }
+    toast('Acesso administrativo atualizado!', 'info');
+    router.refresh();
+  };
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-2xl font-black text-white">
+          Gerenciamento de Administradores & Auditoria
+        </h1>
+        <p className="text-xs sm:text-sm text-zinc-400">
+          Área exclusiva do Administrador Principal para controlar níveis de acesso e auditar operações.
+        </p>
+      </div>
+
+      {/* Create / Promote Admin */}
+      <form
+        onSubmit={handleGrant}
+        className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-4"
+      >
+        <h2 className="text-base font-black text-white flex items-center gap-2">
+          <ShieldPlus className="w-5 h-5 text-[#BEFA46] shrink-0" />
+          Criar ou Promover Administrador
+        </h2>
+        <p className="text-xs text-zinc-400">
+          Se o e-mail já possuir conta de cliente, será promovido ao nível escolhido. Caso contrário, uma nova conta será criada.
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          <input
+// step 4/8
