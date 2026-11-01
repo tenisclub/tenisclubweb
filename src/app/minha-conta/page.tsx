@@ -27,4 +27,33 @@ export default async function MinhaContaDashboardPage() {
       .limit(20),
   ]);
 
-// step 1/6
+  const orders = (ordersRaw || []) as Order[];
+  const activeOrders = orders.filter(
+    (o) => !['completed', 'cancelled'].includes(o.status)
+  );
+  const completedOrders = orders.filter((o) => o.status === 'completed');
+  const latestOrder = orders[0] || null;
+
+  return (
+    <div className="space-y-6">
+      {/* Greeting Banner */}
+      <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-5 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <span className="text-xs font-extrabold uppercase tracking-widest text-[#BEFA46]">
+            Bem-vindo(a)
+          </span>
+          <h1 className="text-2xl sm:text-3xl font-black text-white mt-0.5">
+            Olá, {session.profile.full_name?.split(' ')[0] || 'Cliente'}! 👋
+          </h1>
+          <p className="text-xs sm:text-sm text-zinc-400 mt-1">
+            Gerencie seus pedidos, dados pessoais, endereços e calçados favoritos.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-2.5">
+          <Link
+            href="/carrinho"
+            className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#BEFA46] text-[#09090B] text-xs font-black"
+          >
+            <ShoppingBag className="w-4 h-4" />
+// step 2/6
