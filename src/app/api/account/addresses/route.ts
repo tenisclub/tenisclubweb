@@ -19,4 +19,25 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-// step 1/6
+  const session = await getAuthSession();
+  if (!session) return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 });
+
+  const body = await request.json();
+  const {
+    label,
+    recipient_name,
+    zip_code,
+    street,
+    number,
+    complement,
+    neighborhood,
+    city,
+    state,
+    reference,
+    is_default,
+  } = body;
+
+  if (!street?.trim() || !number?.trim() || !neighborhood?.trim() || !city?.trim()) {
+    return NextResponse.json(
+      { error: 'Rua, número, bairro e cidade são obrigatórios.' },
+// step 2/6
