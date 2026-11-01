@@ -144,4 +144,53 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Primary KPI Grid */}
-// step 3/8
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="rounded-2xl border border-[#BEFA46]/30 bg-[#121216] p-4 sm:p-5 space-y-1">
+          <div className="flex items-center justify-between text-xs font-semibold text-zinc-400">
+            <span>Valor Registrado em Pedidos</span>
+            <DollarSign className="w-4 h-4 text-[#BEFA46]" />
+          </div>
+          <p className="text-2xl sm:text-3xl font-black text-[#BEFA46]">
+            {formatCurrency(registeredRevenue)}
+          </p>
+          <p className="text-[11px] text-zinc-500">
+            * Valor comercial de pedidos não cancelados (confirmação manual)
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-zinc-800 bg-[#121216] p-4 sm:p-5 space-y-1">
+          <div className="flex items-center justify-between text-xs font-semibold text-zinc-400">
+            <span>Pedidos Totais</span>
+            <ShoppingCart className="w-4 h-4 text-sky-400" />
+          </div>
+          <p className="text-2xl sm:text-3xl font-black text-white">{totalOrders}</p>
+          <p className="text-[11px] text-zinc-400">
+            <strong className="text-amber-400">{pendingConfirmationOrders}</strong> aguardando confirmação •{' '}
+            <strong className="text-emerald-400">{completedOrders}</strong> concluídos
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-zinc-800 bg-[#121216] p-4 sm:p-5 space-y-1">
+          <div className="flex items-center justify-between text-xs font-semibold text-zinc-400">
+            <span>Catálogo de Produtos</span>
+            <Package className="w-4 h-4 text-purple-400" />
+          </div>
+          <p className="text-2xl sm:text-3xl font-black text-white">{totalProducts}</p>
+          <p className="text-[11px] text-zinc-400">
+            <strong className="text-emerald-400">{activeProducts}</strong> ativos •{' '}
+            <strong className="text-red-400">{unavailableProducts}</strong> indisponíveis
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-zinc-800 bg-[#121216] p-4 sm:p-5 space-y-1">
+          <div className="flex items-center justify-between text-xs font-semibold text-zinc-400">
+            <span>Clientes & Alertas</span>
+            <Users className="w-4 h-4 text-emerald-400" />
+          </div>
+          <p className="text-2xl sm:text-3xl font-black text-white">{customersCount || 0}</p>
+          <p className="text-[11px] text-amber-400">
+            {productsWithLowStock} produto(s) com numeração em estoque baixo
+          </p>
+        </div>
+      </div>
+// step 4/8
