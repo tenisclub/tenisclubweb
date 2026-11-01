@@ -34,4 +34,14 @@ export default function ProductLoading() {
               ))}
             </div>
           </div>
-// step 3/4
+
+          <div className="space-y-3 pt-4">
+            <div className="h-13 w-full rounded-2xl bg-[#BEFA46]/20" />
+            <div className="h-13 w-full rounded-2xl bg-zinc-900" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
