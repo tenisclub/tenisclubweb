@@ -181,4 +181,34 @@ export function AdminsManagerClient({
                 <option value="admin_operational">Administrador Operacional</option>
                 <option value="customer">Revogar (Tornar Cliente)</option>
               </select>
-// step 6/8
+
+              <button
+                type="button"
+                onClick={() =>
+                  updateRoleOrStatus(adm.id, { is_active: !adm.is_active })
+                }
+                className={cn(
+                  'px-3 py-1.5 rounded-xl text-xs font-bold shrink-0',
+                  adm.is_active
+                    ? 'bg-emerald-500/15 text-emerald-400'
+                    : 'bg-red-500/15 text-red-400'
+                )}
+              >
+                {adm.is_active ? 'Ativo' : 'Bloqueado'}
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Audit Log */}
+      <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-4">
+        <h2 className="text-base font-black text-white flex items-center gap-2">
+          <History className="w-4 h-4 text-[#BEFA46] shrink-0" />
+          Histórico de Atividades Administrativas
+        </h2>
+
+        <div className="divide-y divide-zinc-800/80 max-h-96 overflow-y-auto text-xs">
+          {logs.map((log) => (
+            <div
+// step 7/8
