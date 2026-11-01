@@ -40,4 +40,18 @@ export async function generateMetadata(): Promise<Metadata> {
       type: 'website',
       locale: 'pt_BR',
       ...(ogImage ? { images: [{ url: ogImage }] } : {}),
-// step 3/5
+    },
+  };
+}
+
+export default async function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  const settings = await getStoreSettings();
+
+  return (
+    <html
+      lang="pt-BR"
+// step 4/5
