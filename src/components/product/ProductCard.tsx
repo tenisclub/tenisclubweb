@@ -30,4 +30,36 @@ export function ProductCard({ product, whatsapp = '5511999999999' }: ProductCard
     (allowBackorder ? product.variants[0] : undefined);
   const [selectedVariantId, setSelectedVariantId] = useState<string>(
     firstAvailableVariant?.id || ''
-// step 1/8
+  );
+  const [adding, setAdding] = useState(false);
+
+  useEffect(() => {
+    const current = product.variants.find((v) => v.id === selectedVariantId);
+    if (!current || (!allowBackorder && current.stock <= 0)) {
+      setSelectedVariantId(firstAvailableVariant?.id || '');
+    }
+  }, [product.variants, allowBackorder, firstAvailableVariant?.id, selectedVariantId]);
+
+  const selectedVariant = product.variants.find((v) => v.id === selectedVariantId);
+  const canPurchase = product.total_stock > 0 || (allowBackorder && product.variants.length > 0);
+
+  const handleQuickAdd = async () => {
+    const targetVar = selectedVariant || firstAvailableVariant;
+    if (!targetVar || (!allowBackorder && targetVar.stock <= 0)) return;
+    setAdding(true);
+    try {
+      await addToCart({
+        productId: product.id,
+        variantId: targetVar.id,
+        quantity: 1,
+      });
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  const waUrl = buildProductWhatsAppUrl({
+    whatsapp,
+    productName: product.name,
+    sku: product.sku,
+// step 2/8
