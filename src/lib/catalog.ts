@@ -423,4 +423,57 @@ export const getCategoriesAndBrands = cache(
     return {
       categories: all.categories.filter((c) => c.is_active),
       brands: all.brands.filter((b) => b.is_active),
-// step 8/12
+    };
+  }
+);
+
+export const getStoreSettings = cache(async (): Promise<StoreSettings> => {
+  try {
+    return await getOrLoadCacheSlot('settings', 60_000, async () => {
+      const supabase = createServiceClient();
+      const { data } = await supabase
+        .from('store_settings')
+        .select('*')
+        .eq('id', 1)
+        .maybeSingle();
+      return data ? ({ ...DEFAULT_SETTINGS, ...data } as StoreSettings) : DEFAULT_SETTINGS;
+    });
+  } catch {
+    return DEFAULT_SETTINGS;
+  }
+});
+
+export function primeStoreSettingsCache(settings: Partial<StoreSettings>) {
+  primeCacheSlot('settings', { ...DEFAULT_SETTINGS, ...settings } as StoreSettings, 60_000);
+}
+
+export const getAdminBadgeCounts = cache(async (): Promise<AdminBadgesSnapshot> => {
+  return getOrLoadCacheSlot('adminBadges', 15_000, async () => {
+    const supabase = createServiceClient();
+    const [pendingOrdersRes, unreadNotifsRes] = await Promise.all([
+      supabase
+        .from('orders')
+        .select('id', { count: 'exact', head: true })
+        .in('status', ['received', 'awaiting_confirmation']),
+      supabase
+        .from('notifications')
+        .select('id', { count: 'exact', head: true })
+        .eq('target_audience', 'admin')
+        .eq('is_read', false),
+    ]);
+
+    return {
+      pendingOrdersCount: pendingOrdersRes.count || 0,
+      unreadAdminNotifs: unreadNotifsRes.count || 0,
+    };
+  });
+});
+
+export const getUserNavbarState = cache(
+  async (userId: string): Promise<{ cartCount: number; favoriteIds: string[] }> => {
+    const supabase = createServiceClient();
+    const [{ data: cart }, { data: favs }] = await Promise.all([
+      supabase
+        .from('carts')
+        .select(
+// step 9/12
