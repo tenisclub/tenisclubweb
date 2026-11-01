@@ -15,4 +15,13 @@ export async function POST() {
   } catch {
     // Ignore errors if token already expired
   }
-// step 2/4
+
+  const cookieStore = await cookies();
+  const allCookies = cookieStore.getAll();
+  const res = NextResponse.json({ ok: true });
+
+  for (const c of allCookies) {
+    if (c.name.startsWith('sb-')) {
+      res.cookies.set(c.name, '', {
+        path: '/',
+// step 3/4
