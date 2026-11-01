@@ -9,4 +9,16 @@
     --accent-lime-hover: #d1ff70;
     --border-subtle: #24242c;
   }
-// step 1/4
+
+  html {
+    scroll-behavior: smooth;
+    background-color: #09090b;
+    color: #fafafa;
+    overflow-x: clip;
+  }
+
+  body {
+    background-color: #09090b;
+    color: #fafafa;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+// step 2/4
