@@ -15,4 +15,12 @@ export default async function AdminEstoquePage() {
   for (const prod of products) {
     for (const v of prod.variants) {
       stockRows.push({
-// step 2/4
+        variantId: v.id,
+        productId: prod.id,
+        productName: prod.name,
+        sku: prod.sku || '',
+        image: prod.primary_image,
+        color: v.color,
+        size: v.size,
+        quantity: v.stock,
+// step 3/4
