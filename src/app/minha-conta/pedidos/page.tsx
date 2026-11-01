@@ -85,3 +85,46 @@ export default async function MeusPedidosPage() {
                       </strong>
                     </div>
 
+                    <Link
+                      href={`/minha-conta/pedidos/${order.id}`}
+                      className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#1A1A22] hover:bg-zinc-800 border border-zinc-700 text-xs font-bold text-white transition"
+                    >
+                      Detalhes
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Items Preview */}
+                <div className="grid grid-cols-1 sm:flex sm:flex-wrap gap-2.5 sm:gap-3">
+                  {(order.items || []).map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex items-center gap-3 rounded-xl bg-[#17171E] border border-zinc-800/80 p-2.5 pr-4 min-w-0"
+                    >
+                      {item.product_image && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={item.product_image}
+                          alt={item.product_name}
+                          className="w-12 h-12 rounded-lg object-cover bg-[#EAE0D5] shrink-0"
+                        />
+                      )}
+                      <div className="text-xs min-w-0">
+                        <p className="font-bold text-white truncate">{item.product_name}</p>
+                        <p className="text-zinc-400">
+                          {item.quantity}x • Tam. {item.size} • {formatCurrency(item.unit_price)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
