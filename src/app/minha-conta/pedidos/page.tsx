@@ -63,4 +63,26 @@ export default async function MeusPedidosPage() {
                       <span
                         className={cn(
                           'px-2.5 py-0.5 rounded-full text-[11px] font-bold border',
-// step 3/6
+                          st?.colorClass
+                        )}
+                      >
+                        {st?.label || order.status}
+                      </span>
+                    </div>
+                    <p className="text-xs text-zinc-400">
+                      Solicitado em {formatDateTime(order.created_at)} •{' '}
+                      {order.delivery_method === 'pickup'
+                        ? 'Retirada na Loja'
+                        : 'Entrega Local'}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between sm:justify-end gap-4 pt-2 sm:pt-0 border-t sm:border-t-0 border-zinc-800/60">
+                    <div className="sm:text-right">
+                      <span className="text-[11px] text-zinc-400 block">Valor Total</span>
+                      <strong className="text-lg font-black text-[#BEFA46]">
+                        {formatCurrency(order.total)}
+                      </strong>
+                    </div>
+
+// step 4/6
