@@ -162,4 +162,37 @@ export interface CartItemView {
 
 export interface OrderItem {
   id: string;
-// step 5/8
+  order_id: string;
+  product_id: string | null;
+  variant_id: string | null;
+  product_name: string;
+  product_sku: string;
+  product_image: string;
+  brand_name: string;
+  color: string;
+  size: string;
+  unit_price: number;
+  original_price: number;
+  quantity: number;
+  stock_deducted_qty?: number;
+  subtotal: number;
+}
+
+export interface OrderStatusHistory {
+  id: string;
+  order_id: string;
+  previous_status: OrderStatus | null;
+  new_status: OrderStatus;
+  note: string;
+  changed_by: string | null;
+  created_at: string;
+}
+
+export type OrderShippingAddress = Partial<UserAddress> & {
+  custom_option_id?: string;
+  custom_option_title?: string;
+  shipping_label?: string;
+  pickup_address?: string;
+};
+
+// step 6/8
