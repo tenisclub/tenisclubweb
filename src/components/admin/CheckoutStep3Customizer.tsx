@@ -566,4 +566,85 @@ export function CheckoutStep3Customizer({
                                   <option value="to_combine">A combinar (confirmado pela loja)</option>
                                   <option value="fixed">Taxa fixa automática em R$</option>
                                   <option value="free">Grátis</option>
-// step 7/24
+                                </select>
+                              </div>
+
+                              {card.fee_mode === 'fixed' ? (
+                                <>
+                                  <div>
+                                    <label className="text-[11px] font-semibold text-zinc-400">
+                                      Valor da Taxa (R$)
+                                    </label>
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      step="0.50"
+                                      value={card.fee}
+                                      onChange={(e) =>
+                                        updateExtraCard(card.id, {
+                                          fee: Math.max(0, Number(e.target.value) || 0),
+                                        })
+                                      }
+                                      className="mt-1 w-full h-10 px-3 rounded-xl bg-[#121216] border border-zinc-800 text-xs sm:text-sm text-white"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="text-[11px] font-semibold text-zinc-400">
+                                      Grátis acima de (R$ — 0 desativa)
+                                    </label>
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      step="1"
+                                      value={card.free_threshold}
+                                      onChange={(e) =>
+                                        updateExtraCard(card.id, {
+                                          free_threshold: Math.max(0, Number(e.target.value) || 0),
+                                        })
+                                      }
+                                      className="mt-1 w-full h-10 px-3 rounded-xl bg-[#121216] border border-zinc-800 text-xs sm:text-sm text-white"
+                                    />
+                                  </div>
+                                </>
+                              ) : (
+                                <div className="sm:col-span-2">
+                                  <label className="text-[11px] font-semibold text-zinc-400">
+                                    Selo exibido no Card
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={card.badge}
+                                    onChange={(e) =>
+                                      updateExtraCard(card.id, { badge: e.target.value })
+                                    }
+                                    placeholder={card.fee_mode === 'free' ? 'Grátis' : 'A combinar'}
+                                    className="mt-1 w-full h-10 px-3 rounded-xl bg-[#121216] border border-zinc-800 text-xs sm:text-sm text-white"
+                                  />
+                                </div>
+                              )}
+
+                              <div className="sm:col-span-2">
+                                <label className="text-[11px] font-semibold text-zinc-400">
+                                  Descrição / Subtítulo
+                                </label>
+                                <input
+                                  type="text"
+                                  value={card.description}
+                                  onChange={(e) =>
+                                    updateExtraCard(card.id, { description: e.target.value })
+                                  }
+                                  placeholder="Ex: Entrega no mesmo dia para pedidos até as 16h."
+                                  className="mt-1 w-full h-10 px-3 rounded-xl bg-[#121216] border border-zinc-800 text-xs text-white"
+                                />
+                              </div>
+
+                              <div className="sm:col-span-2 pt-1">
+                                <label className="inline-flex items-center gap-2.5 text-xs text-zinc-200 cursor-pointer select-none">
+                                  <input
+                                    type="checkbox"
+                                    checked={card.require_address}
+                                    onChange={(e) =>
+                                      updateExtraCard(card.id, {
+                                        require_address: e.target.checked,
+                                      })
+// step 8/24
