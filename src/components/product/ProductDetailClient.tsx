@@ -83,4 +83,46 @@ export function ProductDetailClient({
 
   useEffect(() => {
     const current = product.variants.find((v) => v.id === selectedVariantId);
-// step 2/12
+    if (!current || (!allowBackorder && current.stock <= 0)) {
+      const sameColorAvail = product.variants.find(
+        (v) => v.color === selectedColor && (v.stock > 0 || allowBackorder)
+      );
+      const anyAvail =
+        product.variants.find((v) => v.stock > 0 || allowBackorder) || product.variants[0];
+      const next = sameColorAvail || anyAvail;
+      if (next) {
+        setSelectedColor(next.color);
+        setSelectedVariantId(next.id);
+      }
+    } else if (!allowBackorder && quantity > current.stock && current.stock > 0) {
+      setQuantity(current.stock);
+    }
+  }, [product.variants, allowBackorder, selectedColor, selectedVariantId, quantity]);
+
+  const handleSelectColor = (colorName: string) => {
+    setSelectedColor(colorName);
+    const firstInStock = product.variants.find(
+      (v) => v.color === colorName && v.stock > 0
+    );
+    const fallback = product.variants.find((v) => v.color === colorName);
+    setSelectedVariantId(firstInStock?.id || fallback?.id || '');
+    setQuantity(1);
+  };
+
+  const handleSelectSize = (variantId: string, stock: number) => {
+    if (!allowBackorder && stock <= 0) return;
+    setSelectedVariantId(variantId);
+    setQuantity(1);
+  };
+
+  const handleAdd = async (redirectToCart = false) => {
+    if (!selectedVariant || (!allowBackorder && selectedVariant.stock <= 0)) {
+      toast('Selecione uma numeração disponível em estoque.', 'error');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await addToCart({
+        productId: product.id,
+        variantId: selectedVariant.id,
+// step 3/12
