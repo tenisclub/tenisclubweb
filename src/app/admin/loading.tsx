@@ -19,4 +19,9 @@ export default function AdminLoading() {
         <div className="h-10 w-full rounded-xl bg-zinc-800/50" />
         <div className="h-14 w-full rounded-xl bg-zinc-800/40" />
         <div className="h-14 w-full rounded-xl bg-zinc-800/40" />
-// step 3/4
+        <div className="h-14 w-full rounded-xl bg-zinc-800/40" />
+      </div>
+    </div>
+  );
+}
+
