@@ -196,4 +196,31 @@ export async function POST(request: Request) {
         }
       }
 
-// step 7/8
+      if (Object.keys(orderUpdates).length > 0) {
+        await supabase.from('orders').update(orderUpdates).eq('id', orderId);
+        orderData = {
+          ...orderData,
+          ...orderUpdates,
+        };
+      }
+    }
+
+    revalidateStoreData('orders');
+
+    return NextResponse.json({
+      order: orderData
+        ? {
+            ...orderData,
+            items: (orderData.order_items as unknown[]) || [],
+          }
+        : null,
+      orderId,
+      orderNumber: r?.order_number,
+    });
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Erro ao processar pedido.' },
+      { status: 500 }
+    );
+  }
+}
