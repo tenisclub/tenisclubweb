@@ -193,4 +193,53 @@ export default async function AdminDashboardPage() {
           </p>
         </div>
       </div>
-// step 4/8
+
+      {/* Period Charts: Orders & Sales (Last 7 Days) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-5">
+          <div>
+            <h2 className="text-base font-black text-white">Pedidos por Período (7 dias)</h2>
+            <p className="text-xs text-zinc-400">Volume diário de pedidos registrados</p>
+          </div>
+          <div className="h-44 flex items-end justify-between gap-1.5 sm:gap-2 pt-4">
+            {days.map((d) => {
+              const heightPct = Math.max(8, Math.round((d.ordersCount / maxOrdersDay) * 100));
+              return (
+                <div key={d.key} className="flex-1 min-w-0 flex flex-col items-center gap-1.5 sm:gap-2">
+                  <span className="text-[10px] sm:text-[11px] font-bold text-white">{d.ordersCount}</span>
+                  <div className="w-full h-28 bg-[#1A1A22] rounded-xl flex items-end overflow-hidden p-1">
+                    <div
+                      className="w-full rounded-lg bg-[#BEFA46] transition-all"
+                      style={{ height: `${heightPct}%` }}
+                    />
+                  </div>
+                  <span className="text-[9px] sm:text-[10px] text-zinc-500 font-semibold">{d.label}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-5">
+          <div>
+            <h2 className="text-base font-black text-white">Valor de Pedidos por Período (7 dias)</h2>
+            <p className="text-xs text-zinc-400">Evolução financeira registrada por dia</p>
+          </div>
+          <div className="h-44 flex items-end justify-between gap-1.5 sm:gap-2 pt-4">
+            {days.map((d) => {
+              const heightPct = Math.max(8, Math.round((d.salesTotal / maxSalesDay) * 100));
+              return (
+                <div key={d.key} className="flex-1 min-w-0 flex flex-col items-center gap-1.5 sm:gap-2">
+                  <span className="text-[9px] sm:text-[10px] font-bold text-zinc-300 truncate max-w-full">
+                    {d.salesTotal > 0 ? `R$${Math.round(d.salesTotal)}` : 'R$0'}
+                  </span>
+                  <div className="w-full h-28 bg-[#1A1A22] rounded-xl flex items-end overflow-hidden p-1">
+                    <div
+                      className="w-full rounded-lg bg-emerald-400 transition-all"
+                      style={{ height: `${heightPct}%` }}
+                    />
+                  </div>
+                  <span className="text-[9px] sm:text-[10px] text-zinc-500 font-semibold">{d.label}</span>
+                </div>
+              );
+// step 5/8
