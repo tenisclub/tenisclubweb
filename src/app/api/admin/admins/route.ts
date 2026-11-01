@@ -27,4 +27,33 @@ export async function POST(request: Request) {
       .from('user_profiles')
       .select('id, email')
       .eq('email', cleanEmail)
-// step 1/6
+      .maybeSingle();
+
+    let targetUserId = existingProfile?.id;
+
+    if (!targetUserId) {
+      if (!password || String(password).length < 6) {
+        return NextResponse.json(
+          { error: 'Informe uma senha inicial de pelo menos 6 caracteres para o novo administrador.' },
+          { status: 400 }
+        );
+      }
+
+      const { data: created, error: createErr } = await supabase.auth.admin.createUser({
+        email: cleanEmail,
+        password: String(password),
+        email_confirm: true,
+        user_metadata: {
+          full_name: fullName?.trim() || 'Administrador',
+          phone: phone?.trim() || '',
+        },
+      });
+
+      if (createErr) {
+        return NextResponse.json({ error: createErr.message }, { status: 400 });
+      }
+      targetUserId = created.user.id;
+    }
+
+    const { data: roleRow } = await supabase
+// step 2/6
