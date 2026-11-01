@@ -685,4 +685,53 @@ export function CheckoutClient({
                       </p>
                       {resolvedPaymentMethod && (
                         <span className="px-2 py-0.5 rounded-md bg-[#BEFA46]/15 text-[10px] font-extrabold text-[#BEFA46] truncate max-w-[160px]">
-// step 14/24
+                          Pgto: {resolvedPaymentMethod}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-zinc-400 truncate">
+                      {formatPhoneBr(customerPhone) || customerPhone}
+                      {customerEmail ? ` · ${customerEmail}` : ''}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => goToStep(2)}
+                  className="px-2.5 py-1.5 rounded-lg bg-[#16161D] border border-zinc-800 hover:border-zinc-700 text-[11px] font-bold text-zinc-300 hover:text-white inline-flex items-center gap-1 shrink-0 cursor-pointer"
+                >
+                  <Pencil className="w-3 h-3" />
+                  Editar
+                </button>
+              </div>
+
+              {/* 2. Dynamic Step Title & Selectable Options */}
+              {(deliveryCfg.step_title || selectableOptions.length > 0) && (
+                <div className="space-y-3">
+                  {deliveryCfg.step_title && (
+                    <h2 className="text-base sm:text-xl font-black text-white flex items-center gap-2">
+                      {deliveryCfg.step_icon !== 'none' && (
+                        <CheckoutIcon
+                          name={deliveryCfg.step_icon}
+                          className="w-5 h-5 text-[#BEFA46] shrink-0"
+                        />
+                      )}
+                      <span>{deliveryCfg.step_title}</span>
+                    </h2>
+                  )}
+
+                  {selectableOptions.length > 0 && (
+                    <div
+                      className={cn(
+                        'grid grid-cols-1 gap-3',
+                        selectableOptions.length >= 2 && 'sm:grid-cols-2'
+                      )}
+                    >
+                      {selectableOptions.map((opt) => {
+                        const selected = activeSelectedOption?.key === opt.key;
+                        return (
+                          <button
+                            key={opt.key}
+                            type="button"
+                            onClick={() => setSelectedOptionKey(opt.key)}
+// step 15/24
