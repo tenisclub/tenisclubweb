@@ -64,4 +64,26 @@ export default async function ProdutoDetailPage({
     sku: product.sku || product.id,
     brand: product.brand?.name
       ? { '@type': 'Brand', name: product.brand.name }
-// step 3/6
+      : undefined,
+    offers: {
+      '@type': 'Offer',
+      priceCurrency: 'BRL',
+      price: product.effective_price.toFixed(2),
+      availability:
+        product.total_stock > 0 || product.allow_backorder
+          ? 'https://schema.org/InStock'
+          : 'https://schema.org/OutOfStock',
+    },
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8 space-y-8 sm:space-y-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      {/* Breadcrumbs */}
+      <nav className="flex flex-wrap items-center gap-1.5 text-xs text-zinc-400">
+        <Link href="/" className="hover:text-[#BEFA46]">Início</Link>
+// step 4/6
