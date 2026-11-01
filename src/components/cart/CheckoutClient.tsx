@@ -47,4 +47,53 @@ function formatPhoneBr(value: string): string {
   if (digits.length <= 10) {
     return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
   }
-// step 1/24
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+}
+
+export function CheckoutClient({
+  items,
+  total,
+  subtotal,
+  profile,
+  savedAddresses,
+  settings,
+}: {
+  items: CartItemView[];
+  total: number;
+  subtotal: number;
+  profile: UserProfile;
+  savedAddresses: UserAddress[];
+  settings: StoreSettings;
+}) {
+  const router = useRouter();
+  const { setCartCount, showOrderConfirmedPopup } = useStore();
+  const topAnchorRef = useRef<HTMLDivElement>(null);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [mobileItemsOpen, setMobileItemsOpen] = useState(false);
+
+  const deliveryCfg = useMemo(
+    () => normalizeCheckoutDeliveryConfig(settings.checkout_delivery_config),
+    [settings.checkout_delivery_config]
+  );
+
+  const selectableOptions = useMemo(
+    () => getSelectableCheckoutOptions(deliveryCfg, settings.address, total),
+    [deliveryCfg, settings.address, total]
+  );
+
+  // Step 2: Customer info & intended payment method
+  const [customerName, setCustomerName] = useState(profile.full_name || '');
+  const [customerEmail, setCustomerEmail] = useState(profile.email || '');
+  const [customerPhone, setCustomerPhone] = useState(() =>
+    formatPhoneBr(profile.phone || '')
+  );
+  const [paymentChoice, setPaymentChoice] = useState<
+    'pix' | 'card' | 'cash' | 'other' | ''
+  >('');
+  const [customPaymentMethod, setCustomPaymentMethod] = useState('');
+
+  const resolvedPaymentMethod = useMemo(() => {
+    if (paymentChoice === 'pix') return 'Pix';
+    if (paymentChoice === 'card') return 'Cartão';
+    if (paymentChoice === 'cash') return 'Dinheiro';
+// step 2/24
