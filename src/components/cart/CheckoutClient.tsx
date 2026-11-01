@@ -636,4 +636,53 @@ export function CheckoutClient({
 
                 {paymentChoice === 'other' && (
                   <div className="pt-1">
-// step 13/24
+                    <input
+                      type="text"
+                      autoFocus
+                      value={customPaymentMethod}
+                      onChange={(e) => setCustomPaymentMethod(e.target.value)}
+                      placeholder="Digite como pretende pagar (ex: Pix + Cartão, Parcelado em 2x...)"
+                      className="w-full h-11 px-3.5 rounded-xl bg-[#0D0D11] border border-[#BEFA46]/50 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#BEFA46]"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2.5 pt-1">
+                <button
+                  type="button"
+                  onClick={handleContinueFromStep2}
+                  className="w-full h-12 rounded-2xl bg-[#BEFA46] hover:bg-[#d1ff70] text-[#09090B] text-sm font-black inline-flex items-center justify-center gap-2 shadow-[0_6px_22px_rgba(190,250,70,0.22)] transition cursor-pointer"
+                >
+                  <span>Ir para Confirmação</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => goToStep(1)}
+                  className="w-full py-2 text-xs font-bold text-zinc-400 hover:text-white inline-flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  Voltar para sacola
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 3: DELIVERY / PICKUP & FINAL CONFIRMATION */}
+          {step === 3 && (
+            <div className="space-y-5">
+              {/* 1. Compact Buyer Strip (Separated cleanly, never mixed with items) */}
+              <div className="rounded-2xl border border-zinc-800/90 bg-[#0B0B0E] px-3.5 py-3 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0">
+                    <User className="w-4 h-4 text-[#BEFA46]" />
+                  </div>
+                  <div className="min-w-0 space-y-0.5">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <p className="text-xs sm:text-sm font-extrabold text-white truncate">
+                        {customerName}
+                      </p>
+                      {resolvedPaymentMethod && (
+                        <span className="px-2 py-0.5 rounded-md bg-[#BEFA46]/15 text-[10px] font-extrabold text-[#BEFA46] truncate max-w-[160px]">
+// step 14/24
