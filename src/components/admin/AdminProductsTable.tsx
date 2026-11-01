@@ -304,3 +304,54 @@ export function AdminProductsTable({ initialProducts }: { initialProducts: Produ
                   </td>
                   <td className="px-4 py-3.5">
                     <div className="flex flex-wrap items-center gap-1.5">
+                      <span
+                        className={cn(
+                          'px-2.5 py-1 rounded-full text-xs font-extrabold',
+                          p.total_stock === 0
+                            ? p.allow_backorder
+                              ? 'bg-sky-500/15 text-sky-300'
+                              : 'bg-red-500/15 text-red-400'
+                            : p.total_stock <= 5
+                              ? 'bg-amber-500/15 text-amber-300'
+                              : 'bg-emerald-500/15 text-emerald-400'
+                        )}
+                      >
+                        {p.total_stock} un.
+                      </span>
+                      {p.allow_backorder && (
+                        <span className="px-2 py-0.5 rounded-full bg-[#BEFA46]/15 text-[#BEFA46] text-[10px] font-bold">
+                          Venda s/ estoque
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <button
+                      type="button"
+                      onClick={() => toggleFlag(p.id, 'is_featured', !p.is_featured)}
+                      className={cn(
+                        'p-2 rounded-lg border transition',
+                        p.is_featured
+                          ? 'border-[#BEFA46] bg-[#BEFA46]/15 text-[#BEFA46]'
+                          : 'border-zinc-800 text-zinc-500 hover:text-white'
+                      )}
+                      title="Destacar na Home"
+                    >
+                      <Star className={cn('w-4 h-4', p.is_featured && 'fill-current')} />
+                    </button>
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <button
+                      type="button"
+                      onClick={() => toggleFlag(p.id, 'is_active', !p.is_active)}
+                      className={cn(
+                        'px-3 py-1 rounded-full text-[11px] font-bold border transition',
+                        p.is_active
+                          ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                          : 'bg-zinc-800 text-zinc-400 border-zinc-700'
+                      )}
+                    >
+                      {p.is_active ? 'Ativo' : 'Inativo'}
+                    </button>
+                  </td>
+                  <td className="px-4 py-3.5 text-right">
