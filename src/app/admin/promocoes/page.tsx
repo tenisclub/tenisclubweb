@@ -31,4 +31,15 @@ export default async function AdminPromocoesPage() {
       promo_price: Number(pr.promo_price),
       discount_percent: Number(pr.discount_percent || 0),
       starts_at: pr.starts_at,
-// step 3/5
+      ends_at: pr.ends_at,
+      is_active: Boolean(pr.is_active),
+      highlight_home: Boolean(pr.highlight_home),
+    };
+  });
+
+  const sortedProductsList = [...products]
+    .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
+    .map((p) => ({
+      id: p.id,
+      name: p.name,
+// step 4/5
