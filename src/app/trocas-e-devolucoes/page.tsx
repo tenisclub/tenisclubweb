@@ -16,4 +16,9 @@ export default async function TrocasPage() {
           <li>O calçado deve estar sem indícios de uso na sola ou cabedal e na embalagem original.</li>
           <li>Informe o número do pedido no atendimento ou na área &ldquo;Minha Conta&rdquo;.</li>
           <li>A disponibilidade para troca de numeração respeita o estoque vigente no momento da solicitação.</li>
-// step 3/4
+        </ul>
+      </div>
+    </div>
+  );
+}
+
