@@ -100,3 +100,54 @@ export default async function PedidoDetalheClientePage({
 
       {/* Store Observations if present */}
       {order.store_notes && (
+        <div className="rounded-2xl border border-[#BEFA46]/35 bg-[#BEFA46]/10 p-4 text-xs sm:text-sm text-zinc-100">
+          <strong className="text-[#BEFA46] block mb-1">Observações da Loja:</strong>
+          {order.store_notes}
+        </div>
+      )}
+
+      {/* Items List */}
+      <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-4">
+        <h2 className="text-base font-black text-white">Produtos Solicitados</h2>
+        <div className="divide-y divide-zinc-800">
+          {(order.items || []).map((item) => (
+            <div key={item.id} className="py-3.5 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                {item.product_image && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={item.product_image}
+                    alt={item.product_name}
+                    className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl object-cover bg-[#EAE0D5] shrink-0"
+                  />
+                )}
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm font-extrabold text-white line-clamp-2 break-words">
+                    {item.product_name}
+                  </p>
+                  <p className="text-[11px] sm:text-xs text-zinc-400">
+                    Cor: {item.color} • Tam. <strong>{item.size}</strong> • Qtd:{' '}
+                    <strong>{item.quantity}</strong>
+                  </p>
+                  <p className="text-[11px] sm:text-xs text-zinc-500">
+                    Unitário: {formatCurrency(item.unit_price)}
+                  </p>
+                </div>
+              </div>
+              <span className="text-xs sm:text-base font-black text-[#BEFA46] shrink-0">
+                {formatCurrency(item.subtotal)}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div className="border-t border-zinc-800 pt-4 space-y-1.5 text-xs sm:text-sm">
+          <div className="flex justify-between text-zinc-400">
+            <span>Subtotal</span>
+            <span>{formatCurrency(order.subtotal)}</span>
+          </div>
+          {order.discount_total > 0 && (
+            <div className="flex justify-between text-emerald-400">
+              <span>Descontos</span>
+              <span>-{formatCurrency(order.discount_total)}</span>
+            </div>
