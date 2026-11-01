@@ -60,4 +60,25 @@ export function BrandsClient({ initialBrands }: { initialBrands: Brand[] }) {
   return (
     <div className="space-y-6 max-w-3xl">
       <div>
-// step 3/6
+        <h1 className="text-2xl font-black text-white">Gerenciar Marcas</h1>
+        <p className="text-xs sm:text-sm text-zinc-400">
+          Marcas exibidas no cadastro de produtos e filtros do catálogo.
+        </p>
+      </div>
+
+      <form
+        onSubmit={handleCreate}
+        className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-5 flex flex-col sm:flex-row gap-3"
+      >
+        <input
+          type="text"
+          required
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Ex: Mizuno, Asics, Olympikus..."
+          className="flex-1 h-11 px-4 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+        />
+        <button
+          type="submit"
+          className="w-full sm:w-auto px-5 h-11 rounded-xl bg-[#BEFA46] text-[#09090B] text-xs font-black inline-flex items-center justify-center gap-1.5 shrink-0"
+// step 4/6
