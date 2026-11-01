@@ -214,3 +214,75 @@ function CadastroForm() {
                 <input
                   type="email"
                   required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="seu@email.com"
+                  className="w-full h-11 pl-10 pr-3 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#BEFA46]"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-zinc-300">Telefone / WhatsApp *</label>
+              <div className="relative">
+                <Phone className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="tel"
+                  required
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="(11) 99999-9999"
+                  className="w-full h-11 pl-10 pr-3 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#BEFA46]"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-zinc-300">Senha *</label>
+              <div className="relative">
+                <Lock className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Mínimo 8 caracteres"
+                  className="w-full h-11 pl-10 pr-3 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#BEFA46]"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-zinc-300">Confirmar senha *</label>
+              <div className="relative">
+                <Lock className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="password"
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Repita a senha"
+                  className="w-full h-11 pl-10 pr-3 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#BEFA46]"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Password strength bar */}
+          {password.length > 0 && (
+            <div className="space-y-1">
+              <div className="grid grid-cols-4 gap-1.5">
+                {[1, 2, 3, 4].map((level) => (
+                  <div
+                    key={level}
+                    className={cn(
+                      'h-1.5 rounded-full transition-colors',
+                      pwdStrength >= level
+                        ? pwdStrength <= 1
+                          ? 'bg-red-500'
+                          : pwdStrength === 2
+                            ? 'bg-amber-400'
+                            : 'bg-[#BEFA46]'
+                        : 'bg-zinc-800'
