@@ -35,4 +35,42 @@ export default function MeusEnderecosPage() {
   useEffect(() => {
     loadAddresses();
     const onRealtime = () => {
-// step 1/8
+      void loadAddresses();
+    };
+    window.addEventListener('tc:realtime-sync', onRealtime);
+    return () => window.removeEventListener('tc:realtime-sync', onRealtime);
+  }, []);
+
+  const handleAdd = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const res = await fetch('/api/account/addresses', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        label,
+        zip_code: zipCode,
+        street,
+        number,
+        complement,
+        neighborhood,
+        city,
+        state: stateUf,
+        reference,
+        is_default: isDefault,
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      toast(data.error || 'Erro ao adicionar endereço.', 'error');
+      return;
+    }
+
+    toast('Endereço salvo com sucesso!', 'success');
+    setShowForm(false);
+    setStreet('');
+    setNumber('');
+    setComplement('');
+    setNeighborhood('');
+    setReference('');
+// step 2/8
