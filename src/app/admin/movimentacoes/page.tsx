@@ -74,4 +74,30 @@ export default async function AdminMovimentacoesPage() {
                   <p className="font-extrabold text-white truncate">
                     {prod?.name || 'Produto'}
                   </p>
-// step 3/8
+                  <p className="text-[11px] text-zinc-400">
+                    {pv?.color} • Tam. <strong className="text-white">{pv?.size}</strong>
+                  </p>
+                </div>
+                <span className={cn('px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0', badge.cls)}>
+                  {badge.label}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 rounded-xl bg-[#18181F] p-2.5 text-center">
+                <div>
+                  <span className="text-[10px] text-zinc-500 block">Anterior</span>
+                  <strong className="text-zinc-300">{m.previous_quantity}</strong>
+                </div>
+                <div>
+                  <span className="text-[10px] text-zinc-500 block">Movimento</span>
+                  <strong
+                    className={cn(
+                      m.moved_quantity >= 0 ? 'text-emerald-400' : 'text-red-400'
+                    )}
+                  >
+                    {m.moved_quantity > 0 ? `+${m.moved_quantity}` : m.moved_quantity}
+                  </strong>
+                </div>
+                <div>
+                  <span className="text-[10px] text-zinc-500 block">Saldo Final</span>
+// step 4/8
