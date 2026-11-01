@@ -24,4 +24,30 @@ export default function MeusDadosPage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-// step 1/6
+    if (newPassword && newPassword !== confirmPassword) {
+      toast('A confirmação de senha não confere.', 'error');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const res = await fetch('/api/account/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName,
+          phone,
+          email,
+          newPassword: newPassword || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast(data.error || 'Erro ao salvar dados.', 'error');
+        return;
+      }
+
+      setNewPassword('');
+      setConfirmPassword('');
+      await refreshSession();
+// step 2/6
