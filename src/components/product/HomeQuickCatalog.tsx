@@ -100,3 +100,54 @@ export function HomeQuickCatalog({
 
             <div className="flex items-center justify-between sm:justify-end gap-2.5">
               {hasFilters ? (
+                <button
+                  type="button"
+                  onClick={resetFilters}
+                  className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-zinc-800/90 hover:bg-zinc-700 text-xs font-bold text-zinc-200 transition cursor-pointer"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  Limpar
+                </button>
+              ) : (
+                <span className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 sm:hidden">
+                  Busca rápida
+                </span>
+              )}
+
+              <Link
+                href="/produtos"
+                className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl border border-[#BEFA46]/30 bg-[#BEFA46]/10 hover:bg-[#BEFA46]/15 text-xs font-extrabold text-[#BEFA46] transition"
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                Filtros avançados
+              </Link>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            {/* GÊNERO */}
+            <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+              <span className="md:w-20 shrink-0 text-[11px] font-extrabold uppercase tracking-widest text-zinc-500">
+                Gênero
+              </span>
+              <div className="grid grid-cols-6 sm:flex sm:flex-wrap gap-2 flex-1">
+                {GENDER_OPTIONS.map((opt, idx) => {
+                  const active = gender === opt.value;
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setGender(opt.value)}
+                      className={cn(
+                        'h-9 px-2 sm:px-3.5 rounded-xl sm:rounded-full text-xs font-bold border transition text-center truncate cursor-pointer',
+                        idx < 3 ? 'col-span-2' : 'col-span-3',
+                        active
+                          ? 'bg-[#BEFA46] text-[#09090B] border-[#BEFA46] font-extrabold shadow-[0_2px_10px_rgba(190,250,70,0.18)]'
+                          : 'bg-[#17171E] text-zinc-300 border-zinc-800/90 hover:border-zinc-600 hover:text-white'
+                      )}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
