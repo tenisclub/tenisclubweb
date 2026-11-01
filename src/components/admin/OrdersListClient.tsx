@@ -235,4 +235,36 @@ export function OrdersListClient({ initialOrders }: { initialOrders: Order[] }) 
                             {o.payment_method_note}
                           </span>
                         )}
-// step 7/8
+                      </div>
+                    </td>
+                    <td className="px-4 py-3.5 font-black text-[#BEFA46]">
+                      {formatCurrency(o.total)}
+                    </td>
+                    <td className="px-4 py-3.5 text-right">
+                      <Link
+                        href={`/admin/pedidos/${o.id}`}
+                        prefetch={true}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-white"
+                      >
+                        <Eye className="w-3.5 h-3.5 text-[#BEFA46]" />
+                        Gerenciar
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              })}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={8} className="px-4 py-10 text-center text-zinc-500">
+                    Nenhum pedido encontrado para os filtros selecionados.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
