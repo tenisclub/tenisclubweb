@@ -158,3 +158,43 @@ export default async function AdminRelatoriosPage() {
           </div>
 
           {/* Desktop Table */}
+          <div className="hidden sm:block overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="text-zinc-400 border-b border-zinc-800">
+                <tr>
+                  <th className="py-2">Produto</th>
+                  <th className="py-2">Custo</th>
+                  <th className="py-2">Venda Atual</th>
+                  <th className="py-2">Margem Unit.</th>
+                  <th className="py-2 text-right">Vendidos</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-800/70">
+                {products.slice(0, 10).map((p) => {
+                  const cost = p.cost_price || 0;
+                  const margin = p.effective_price - cost;
+                  return (
+                    <tr key={p.id}>
+                      <td className="py-2.5 font-bold text-white">{p.name}</td>
+                      <td className="py-2.5 text-zinc-400">{formatCurrency(cost)}</td>
+                      <td className="py-2.5 text-zinc-200">
+                        {formatCurrency(p.effective_price)}
+                      </td>
+                      <td className="py-2.5 font-extrabold text-emerald-400">
+                        {formatCurrency(margin)}
+                      </td>
+                      <td className="py-2.5 text-right font-black text-[#BEFA46]">
+                        {p.sold_count}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
