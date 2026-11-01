@@ -44,4 +44,14 @@ export async function PATCH(
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
-// step 4/5
+
+    revalidateStoreData('orders');
+    return NextResponse.json({ result: data });
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Erro ao atualizar pedido.' },
+      { status: 500 }
+    );
+  }
+}
+
