@@ -102,4 +102,23 @@ export async function POST(request: Request) {
               avatar_url: null,
               auth_provider: 'email',
               is_active: true,
-// step 5/6
+              accepted_terms_at: nowIso,
+              created_at: nowIso,
+              updated_at: nowIso,
+              role: 'customer',
+            },
+            role: 'customer',
+            syncTag: computeUserSyncTag(userId),
+            cartCount: 0,
+            favoriteIds: [],
+            unreadNotifications: 1,
+          }
+        : null,
+    });
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Erro ao criar conta.' },
+      { status: 500 }
+    );
+  }
+}
