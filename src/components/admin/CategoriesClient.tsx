@@ -53,4 +53,32 @@ export function CategoriesClient({ initialCategories }: { initialCategories: Cat
         prev.map((c) => (c.id === cat.id ? { ...c, is_active: !cat.is_active } : c))
       );
       toast('Categoria atualizada.', 'info');
-// step 2/6
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Deseja excluir esta categoria?')) return;
+    const res = await fetch(`/api/admin/categories?id=${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    });
+    if (res.ok) {
+      setCategories((prev) => prev.filter((c) => c.id !== id));
+      toast('Categoria excluída.', 'info');
+    } else {
+      toast('Não foi possível excluir (verifique se há produtos vinculados).', 'error');
+    }
+  };
+
+  return (
+    <div className="space-y-6 max-w-4xl">
+      <div>
+        <h1 className="text-2xl font-black text-white">Gerenciar Categorias</h1>
+        <p className="text-xs sm:text-sm text-zinc-400">
+          As categorias aparecem automaticamente nos filtros e páginas da loja.
+        </p>
+      </div>
+
+      <form
+        onSubmit={handleCreate}
+        className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-4 gap-3 items-end"
+// step 3/6
