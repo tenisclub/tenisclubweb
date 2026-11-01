@@ -60,4 +60,35 @@ export function CustomersClient({ initialCustomers }: { initialCustomers: Custom
 
     setCustomers((prev) =>
       prev.map((item) => (item.id === c.id ? { ...item, is_active: nextActive } : item))
-// step 2/8
+    );
+    toast('Status da conta atualizado!', 'info');
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-black text-white">Gerenciar Clientes</h1>
+        <p className="text-xs sm:text-sm text-zinc-400">
+          Consulte dados de relacionamento, histórico de pedidos e status de acesso.
+        </p>
+      </div>
+
+      <div className="relative max-w-md">
+        <Search className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Buscar por nome, e-mail ou telefone..."
+          className="w-full h-11 pl-10 pr-4 rounded-xl bg-[#121216] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+        />
+      </div>
+
+      {/* Mobile Customer Cards */}
+      <div className="md:hidden space-y-3">
+        {filtered.map((c) => (
+          <div
+            key={c.id}
+            className="rounded-2xl border border-zinc-800 bg-[#121216] p-4 space-y-3"
+          >
+// step 3/8
