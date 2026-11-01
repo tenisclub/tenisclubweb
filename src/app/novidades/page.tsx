@@ -22,4 +22,10 @@ export default async function NovidadesPage() {
       categories={categories}
       brands={brands}
       whatsapp={settings.whatsapp}
-// step 3/4
+      initialOnlyNew={true}
+      heading="Novidades · Drop Novo"
+      subheading="Os modelos mais recentes que acabaram de chegar no estoque."
+    />
+  );
+}
+
