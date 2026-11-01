@@ -28,4 +28,34 @@ export default async function HomePage() {
       <section className="relative min-h-[360px] sm:min-h-[430px] md:min-h-[480px] flex items-center justify-center overflow-hidden bg-[#09090B] py-12 sm:py-14 md:py-20">
         <HeroVideoBackground />
 
-// step 1/8
+        <div className="relative z-10 max-w-4xl mx-auto px-4 text-center flex flex-col items-center drop-shadow-[0_4px_18px_rgba(0,0,0,0.65)]">
+          <span className="text-[11px] sm:text-xs font-extrabold tracking-[0.22em] sm:tracking-[0.34em] uppercase text-[#BEFA46] mb-5">
+            {settings.hero_badge || 'DROP NOVO · CATÁLOGO'}
+          </span>
+
+          <TenisClubLogo
+            size="hero"
+            logoUrl={settings.logo_url}
+          />
+
+          <h1 className="mt-4 text-base sm:text-xl font-medium text-zinc-100 tracking-tight">
+            {settings.hero_title || 'Seu próximo par tá aqui. Bora?'}{' '}
+            <span aria-hidden="true">👟</span>
+          </h1>
+        </div>
+      </section>
+
+      {/* 2. INTERACTIVE QUICK FILTER BAR + CATALOG SHOWCASE */}
+      <div className="!mt-0 relative z-10">
+        <HomeQuickCatalog
+          products={allProducts}
+          categories={categories}
+          whatsapp={settings.whatsapp}
+        />
+      </div>
+
+      {/* 3. CATEGORIES SHOWCASE */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+// step 2/8
