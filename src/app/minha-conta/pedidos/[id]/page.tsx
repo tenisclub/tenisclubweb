@@ -29,4 +29,36 @@ export default async function PedidoDetalheClientePage({
   ]);
 
   // RN14: Strictly restrict to user's own order
-// step 1/8
+  const { data: orderRaw } = await supabase
+    .from('orders')
+    .select(
+      `
+      id, order_number, user_id, customer_name, customer_email, customer_phone,
+      delivery_method, shipping_address, subtotal, discount_total, shipping_cost, total,
+      status, payment_status, payment_method_note, customer_notes, store_notes, created_at, updated_at,
+      order_items(*),
+      order_status_history(*)
+    `
+    )
+    .eq('id', id)
+    .eq('user_id', session.userId)
+    .maybeSingle();
+
+  if (!orderRaw) {
+    notFound();
+  }
+
+  const order: Order = {
+    ...(orderRaw as unknown as Order),
+    items: orderRaw.order_items || [],
+    history: [...(orderRaw.order_status_history || [])].sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    ),
+  };
+
+  const st = ORDER_STATUS_CONFIG[order.status as OrderStatus];
+  const waUrl = buildOrderWhatsAppUrl(settings.whatsapp, order, settings.store_name);
+
+  return (
+    <div className="space-y-6">
+// step 2/8
