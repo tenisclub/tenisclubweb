@@ -122,4 +122,35 @@ export function CustomersClient({ initialCustomers }: { initialCustomers: Custom
                   >
                     <MessageCircle className="w-3.5 h-3.5" />
                     {c.phone}
-// step 4/8
+                  </a>
+                ) : (
+                  '—'
+                )}
+              </div>
+              <div className="text-right">
+                <span className="text-[10px] text-zinc-500 block">
+                  {c.ordersCount} pedido(s) • desde {formatDate(c.created_at)}
+                </span>
+                <strong className="text-sm font-black text-[#BEFA46]">
+                  {formatCurrency(c.totalSpent)}
+                </strong>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 pt-2 border-t border-zinc-800/80">
+              {c.lastOrderId && (
+                <Link
+                  href={`/admin/pedidos/${c.lastOrderId}`}
+                  className="flex-1 h-9 rounded-xl bg-zinc-800 text-xs font-bold text-zinc-200 inline-flex items-center justify-center"
+                >
+                  Último Pedido
+                </Link>
+              )}
+              <button
+                type="button"
+                onClick={() => toggleStatus(c)}
+                className="flex-1 h-9 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-zinc-300"
+              >
+                {c.is_active ? 'Desativar' : 'Reativar'}
+              </button>
+// step 5/8
