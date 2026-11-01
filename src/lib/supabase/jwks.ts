@@ -10,4 +10,17 @@ interface JwksGlobalState {
   cachedJwks: JwksOption | null;
   cachedAt: number;
   inflight: Promise<JwksOption | undefined> | null;
-// step 1/5
+}
+
+const globalForJwks = globalThis as unknown as {
+  __tcJwksState?: JwksGlobalState;
+};
+
+const state: JwksGlobalState =
+  globalForJwks.__tcJwksState ??
+  (globalForJwks.__tcJwksState = {
+    cachedJwks: null,
+    cachedAt: 0,
+    inflight: null,
+  });
+// step 2/5
