@@ -5,4 +5,11 @@ export default function CatalogLoading() {
         <div className="h-9 w-72 rounded-2xl bg-zinc-900" />
         <div className="h-4 w-96 max-w-full rounded-full bg-zinc-900/70" />
       </div>
-// step 1/4
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div
+            key={i}
+            className="rounded-3xl border border-zinc-800/80 bg-[#121216] overflow-hidden"
+          >
+// step 2/4
