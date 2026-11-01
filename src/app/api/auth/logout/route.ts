@@ -24,4 +24,11 @@ export async function POST() {
     if (c.name.startsWith('sb-')) {
       res.cookies.set(c.name, '', {
         path: '/',
-// step 3/4
+        maxAge: 0,
+      });
+    }
+  }
+
+  return res;
+}
+
