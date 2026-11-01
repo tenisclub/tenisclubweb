@@ -43,4 +43,49 @@ function CadastroForm() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-// step 1/8
+  const pwdStrength = useMemo(() => {
+    let score = 0;
+    if (password.length >= 8) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^A-Za-z0-9]/.test(password)) score++;
+    return score;
+  }, [password]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg('');
+
+    if (password !== confirmPassword) {
+      setErrorMsg('As senhas informadas não coincidem.');
+      return;
+    }
+
+    if (password.length < 8) {
+      setErrorMsg('Sua senha deve conter pelo menos 8 caracteres.');
+      return;
+    }
+
+    if (!acceptedTerms) {
+      setErrorMsg('Aceite os Termos de Uso e a Política de Privacidade para continuar.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const regRes = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName,
+          email,
+          phone,
+          password,
+          acceptedTerms,
+        }),
+      });
+
+      const regData = await regRes.json();
+      if (!regRes.ok) {
+        setErrorMsg(regData.error || 'Erro ao criar conta.');
+// step 2/8
