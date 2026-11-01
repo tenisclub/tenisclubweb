@@ -39,4 +39,25 @@ export async function POST(request: Request) {
     }
 
     const service = createServiceClient();
-// step 2/6
+
+    // Check if email already exists
+    const { data: existing } = await service
+      .from('user_profiles')
+      .select('id, auth_provider')
+      .eq('email', cleanEmail)
+      .maybeSingle();
+
+    if (existing) {
+      if (existing.auth_provider === 'google') {
+        return NextResponse.json(
+          {
+            error:
+              'Este e-mail já possui conta vinculada ao Google. Clique em "Continuar com Google" na tela de login.',
+          },
+          { status: 409 }
+        );
+      }
+      return NextResponse.json(
+        { error: 'Este e-mail já está cadastrado. Faça login ou recupere sua senha.' },
+        { status: 409 }
+// step 3/6
