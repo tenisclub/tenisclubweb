@@ -193,3 +193,51 @@ export function AdminsManagerClient({
                     ? 'bg-emerald-500/15 text-emerald-400'
                     : 'bg-red-500/15 text-red-400'
                 )}
+              >
+                {adm.is_active ? 'Ativo' : 'Bloqueado'}
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Audit Log */}
+      <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-4">
+        <h2 className="text-base font-black text-white flex items-center gap-2">
+          <History className="w-4 h-4 text-[#BEFA46] shrink-0" />
+          Histórico de Atividades Administrativas
+        </h2>
+
+        <div className="divide-y divide-zinc-800/80 max-h-96 overflow-y-auto text-xs">
+          {logs.map((log) => (
+            <div
+              key={log.id}
+              className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+            >
+              <div className="min-w-0">
+                <p className="font-bold text-white break-words">
+                  <span className="text-[#BEFA46]">{log.admin_name}</span> executou{' '}
+                  <code className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-200">
+                    {log.action}
+                  </code>
+                </p>
+                <p className="text-zinc-500 font-mono text-[11px] truncate max-w-full sm:max-w-xl">
+                  {JSON.stringify(log.details)}
+                </p>
+              </div>
+              <span className="text-zinc-500 whitespace-nowrap text-[11px]">
+                {formatDateTime(log.created_at)}
+              </span>
+            </div>
+          ))}
+          {logs.length === 0 && (
+            <p className="py-6 text-center text-zinc-500">
+              Nenhuma atividade registrada ainda.
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
