@@ -69,4 +69,27 @@ export function TenisClubLogo({
           >
             TÊNIS
           </span>
-// step 3/6
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span className="h-[1.5px] w-3 bg-[#BEFA46]" />
+            <span className="text-[9px] font-extrabold tracking-[0.32em] text-zinc-200 uppercase">
+              CLUB
+            </span>
+            <span className="h-[1.5px] w-3 bg-[#BEFA46]" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn('inline-flex flex-col items-center select-none', className)}>
+      {/* Iconic Sneaker Silhouette Arch matching TÊNIS CLUB identity */}
+      <svg
+        viewBox="0 0 220 68"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className={cn(
+          'text-white mb-1',
+          size === 'lg' ? 'w-36 h-11' : 'w-48 md:w-60 h-14 md:h-16'
+        )}
+// step 4/6
