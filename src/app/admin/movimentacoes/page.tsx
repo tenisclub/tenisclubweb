@@ -100,4 +100,29 @@ export default async function AdminMovimentacoesPage() {
                 </div>
                 <div>
                   <span className="text-[10px] text-zinc-500 block">Saldo Final</span>
-// step 4/8
+                  <strong className="text-white">{m.new_quantity}</strong>
+                </div>
+              </div>
+
+              {m.reason && <p className="text-[11px] text-zinc-300">{m.reason}</p>}
+              <div className="flex items-center justify-between text-[10px] text-zinc-500 pt-1">
+                <span className="truncate pr-2">
+                  Por: {user?.full_name || user?.email || 'Sistema'}
+                </span>
+                <span className="shrink-0">{formatDateTime(m.created_at)}</span>
+              </div>
+            </div>
+          );
+        })}
+        {(movements || []).length === 0 && (
+          <div className="rounded-2xl border border-zinc-800 bg-[#121216] p-8 text-center text-xs text-zinc-500">
+            Nenhuma movimentação registrada.
+          </div>
+        )}
+      </div>
+
+      {/* Desktop Table */}
+      <div className="hidden md:block rounded-3xl border border-zinc-800 bg-[#121216] overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+// step 5/8
