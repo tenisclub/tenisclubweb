@@ -241,4 +241,85 @@ export function CheckoutStep3Customizer({
           <h2 className="text-lg sm:text-xl font-black text-white">
             Personalização de Recebimento, Avisos & Endereço
           </h2>
-// step 3/24
+          <p className="text-xs text-zinc-400 max-w-2xl">
+            Configure opções clicáveis, quadros de aviso, solicitação de endereço e botão do
+            WhatsApp. Clique em qualquer card abaixo para expandir e editar seus detalhes.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleReset}
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-zinc-800 bg-[#18181F] hover:bg-zinc-800 hover:border-zinc-700 text-xs font-bold text-zinc-300 transition cursor-pointer shrink-0"
+        >
+          <RotateCcw className="w-3.5 h-3.5 text-[#BEFA46]" />
+          Restaurar padrão
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+        {/* LEFT COLUMN: STRUCTURED, CLEAN CONTROLS */}
+        <div className="xl:col-span-7 space-y-5 min-w-0">
+          {/* SECTION 1: STANDALONE ADDRESS TOGGLE BAR */}
+          <div
+            className={cn(
+              'rounded-2xl border p-4 transition',
+              deliveryCfg.always_require_address
+                ? 'border-[#BEFA46]/50 bg-[#BEFA46]/[0.05]'
+                : 'border-zinc-800/90 bg-[#18181F]'
+            )}
+          >
+            <div className="flex items-start sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-3 min-w-0">
+                <div
+                  className={cn(
+                    'w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 mt-0.5 sm:mt-0 transition',
+                    deliveryCfg.always_require_address
+                      ? 'border-[#BEFA46]/50 bg-[#BEFA46]/15 text-[#BEFA46]'
+                      : 'border-zinc-800 bg-[#121216] text-zinc-400'
+                  )}
+                >
+                  <MapPin className="w-5 h-5" />
+                </div>
+                <div className="space-y-0.5 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="text-sm font-black text-white">
+                      Pedir Endereço (Independente)
+                    </h3>
+                    <span
+                      className={cn(
+                        'px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider',
+                        deliveryCfg.always_require_address
+                          ? 'bg-[#BEFA46] text-[#09090B]'
+                          : 'bg-zinc-800 text-zinc-400'
+                      )}
+                    >
+                      {deliveryCfg.always_require_address ? 'Sempre Ativo' : 'Por Card'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-400 leading-relaxed">
+                    Exige CEP, Rua, Número, Bairro e Cidade na Etapa 3 e envia no WhatsApp, mesmo
+                    sem nenhum card selecionável.
+                  </p>
+                </div>
+              </div>
+
+              {/* Modern Toggle Switch */}
+              <button
+                type="button"
+                role="switch"
+                aria-checked={deliveryCfg.always_require_address}
+                onClick={() =>
+                  updateDeliveryCfg({
+                    always_require_address: !deliveryCfg.always_require_address,
+                  })
+                }
+                className={cn(
+                  'relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
+                  deliveryCfg.always_require_address ? 'bg-[#BEFA46]' : 'bg-zinc-700'
+                )}
+                title={
+                  deliveryCfg.always_require_address
+                    ? 'Desativar endereço obrigatório global'
+                    : 'Ativar endereço obrigatório global'
+// step 4/24
