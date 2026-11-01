@@ -211,4 +211,40 @@ function DesktopRandomWall() {
     if (typeof window !== 'undefined') {
       try {
         sessionStorage.setItem(LAST_HERO_START_KEY, deck.slice(0, colCount).join(','));
-// step 6/12
+      } catch {
+        // Ignore
+      }
+    }
+
+    return Array.from({ length: colCount }, (_, c) => ({
+      activeSlot: 0,
+      slots: [deck[c], deck[c + colCount]] as [number, number],
+    }));
+  });
+
+  const columnsRef = useRef<ColumnSlotState[]>(columns);
+  columnsRef.current = columns;
+
+  const videoRefs = useRef<(HTMLVideoElement | null)[][]>(
+    Array.from({ length: colCount }, () => [null, null])
+  );
+
+  const bindVideoRef = useCallback(
+    (colIdx: number, slot: 0 | 1) => (el: HTMLVideoElement | null) => {
+      videoRefs.current[colIdx][slot] = el;
+      if (el) {
+        el.defaultMuted = true;
+        el.muted = true;
+        el.volume = 0;
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    for (let c = 0; c < colCount; c++) {
+      const active = columnsRef.current[c].activeSlot;
+      const el = videoRefs.current[c][active];
+      if (el) {
+        el.muted = true;
+// step 7/12
