@@ -6,4 +6,8 @@ export const dynamic = 'force-dynamic';
 
 export default async function AdminPedidosPage() {
   const supabase = createServiceClient();
-// step 2/4
+  const { data } = await supabase
+    .from('orders')
+    .select('*')
+    .order('created_at', { ascending: false });
+// step 3/4
