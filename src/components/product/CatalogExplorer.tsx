@@ -338,3 +338,71 @@ export function CatalogExplorer({
           <div className="space-y-2">
             <span className="text-xs font-semibold text-zinc-400 block">Numeração</span>
             <div className="grid grid-cols-4 gap-1.5">
+              {STANDARD_SHOE_SIZES.map((sz) => {
+                const active = size === sz;
+                return (
+                  <button
+                    key={sz}
+                    type="button"
+                    onClick={() => {
+                      setSize(active ? '' : sz);
+                      setPage(1);
+                    }}
+                    className={cn(
+                      'h-8 rounded-lg text-xs font-bold border transition',
+                      active
+                        ? 'bg-[#BEFA46] text-[#09090B] border-[#BEFA46]'
+                        : 'bg-[#18181F] text-zinc-300 border-zinc-800 hover:border-zinc-600'
+                    )}
+                  >
+                    {sz}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Color */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-zinc-400 block">Cor</label>
+            <select
+              value={color}
+              onChange={(e) => {
+                setColor(e.target.value);
+                setPage(1);
+              }}
+              className="w-full h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs font-medium text-white focus:outline-none focus:border-[#BEFA46]"
+            >
+              <option value="todas">Todas as cores</option>
+              {availableColors.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Price Range */}
+          <div className="space-y-1.5">
+            <span className="text-xs font-semibold text-zinc-400 block">Faixa de preço (R$)</span>
+            <div className="grid grid-cols-2 gap-2">
+              <input
+                type="number"
+                min="0"
+                value={minPrice}
+                onChange={(e) => {
+                  setMinPrice(e.target.value);
+                  setPage(1);
+                }}
+                placeholder="Mín"
+                className="h-9 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#BEFA46]"
+              />
+              <input
+                type="number"
+                min="0"
+                value={maxPrice}
+                onChange={(e) => {
+                  setMaxPrice(e.target.value);
+                  setPage(1);
+                }}
+                placeholder="Máx"
