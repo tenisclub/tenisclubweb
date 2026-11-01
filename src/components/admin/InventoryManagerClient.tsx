@@ -258,4 +258,41 @@ export function InventoryManagerClient({ initialRows }: { initialRows: StockRowI
               {filtered.map((r) => (
                 <tr key={r.variantId} className="hover:bg-zinc-900/40">
                   <td className="px-4 py-3">
-// step 7/12
+                    <div className="flex items-center gap-3">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={r.image}
+                        alt={r.productName}
+                        className="w-10 h-10 rounded-lg object-cover bg-[#EAE0D5]"
+                      />
+                      <div>
+                        <p className="font-bold text-white">{r.productName}</p>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <span className="text-[11px] text-zinc-500">{r.sku}</span>
+                          {r.allowBackorder && (
+                            <span className="px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 text-[9px] font-bold">
+                              Venda s/ estoque
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-zinc-300">{r.color}</td>
+                  <td className="px-4 py-3">
+                    <span className="px-2.5 py-1 rounded-lg bg-zinc-800 font-black text-white">
+                      {r.size}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={cn(
+                        'px-2.5 py-1 rounded-full text-xs font-extrabold',
+                        r.quantity === 0
+                          ? r.allowBackorder
+                            ? 'bg-sky-500/15 text-sky-300'
+                            : 'bg-red-500/15 text-red-400'
+                          : r.quantity <= r.lowStockThreshold
+                            ? 'bg-amber-500/15 text-amber-300'
+                            : 'bg-emerald-500/15 text-emerald-400'
+// step 8/12
