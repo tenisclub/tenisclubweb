@@ -931,4 +931,53 @@ export function CheckoutClient({
                           >
                             {addr.label}
                           </button>
-// step 19/24
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-12 gap-2.5">
+                    <div className="col-span-5 sm:col-span-4">
+                      <label className="text-[11px] font-semibold text-zinc-400">CEP</label>
+                      <input
+                        type="text"
+                        value={zipCode}
+                        onChange={(e) => setZipCode(e.target.value)}
+                        placeholder="00000-000"
+                        className="mt-1 w-full h-10 px-3 rounded-xl bg-[#15151C] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+                      />
+                    </div>
+                    <div className="col-span-7 sm:col-span-6">
+                      <label className="text-[11px] font-semibold text-zinc-400">Cidade *</label>
+                      <input
+                        type="text"
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                        className="mt-1 w-full h-10 px-3 rounded-xl bg-[#15151C] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+                      />
+                    </div>
+                    <div className="col-span-3 sm:col-span-2 hidden sm:block">
+                      <label className="text-[11px] font-semibold text-zinc-400">UF</label>
+                      <input
+                        type="text"
+                        maxLength={2}
+                        value={stateUf}
+                        onChange={(e) => setStateUf(e.target.value.toUpperCase())}
+                        className="mt-1 w-full h-10 px-3 rounded-xl bg-[#15151C] border border-zinc-800 text-sm text-white text-center focus:outline-none focus:border-[#BEFA46]"
+                      />
+                    </div>
+
+                    <div className="col-span-8 sm:col-span-9">
+                      <label className="text-[11px] font-semibold text-zinc-400">
+                        Rua / Avenida *
+                      </label>
+                      <input
+                        type="text"
+                        value={street}
+                        onChange={(e) => setStreet(e.target.value)}
+                        className="mt-1 w-full h-10 px-3 rounded-xl bg-[#15151C] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+                      />
+                    </div>
+                    <div className="col-span-4 sm:col-span-3">
+                      <label className="text-[11px] font-semibold text-zinc-400">Número *</label>
+// step 20/24
