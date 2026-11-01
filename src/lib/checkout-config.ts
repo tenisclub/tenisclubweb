@@ -175,4 +175,48 @@ function safeNum(val: unknown, fallback = 0): number {
   return Number.isFinite(n) && n >= 0 ? n : fallback;
 }
 
-// step 4/12
+export function normalizeCheckoutDeliveryConfig(
+  raw: unknown
+): CheckoutDeliveryConfig {
+  const obj = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
+  const d = DEFAULT_CHECKOUT_DELIVERY_CONFIG;
+
+  const extraCardsRaw = Array.isArray(obj.extra_cards) ? obj.extra_cards : [];
+  const customButtonsRaw = Array.isArray(obj.custom_buttons) ? obj.custom_buttons : [];
+
+  const pickupRemoved = Boolean(obj.pickup_removed);
+  const deliveryRemoved = Boolean(obj.delivery_removed);
+  const pickupInfoRemoved = Boolean(obj.pickup_info_removed);
+
+  return {
+    step_title: typeof obj.step_title === 'string' ? obj.step_title : d.step_title,
+    step_icon: safeIcon(obj.step_icon, d.step_icon),
+
+    pickup_removed: pickupRemoved,
+    pickup_enabled: pickupRemoved
+      ? false
+      : typeof obj.pickup_enabled === 'boolean'
+        ? obj.pickup_enabled
+        : d.pickup_enabled,
+    pickup_icon: safeIcon(obj.pickup_icon, d.pickup_icon),
+    pickup_title: typeof obj.pickup_title === 'string' ? obj.pickup_title : d.pickup_title,
+    pickup_subtitle:
+      typeof obj.pickup_subtitle === 'string' ? obj.pickup_subtitle : d.pickup_subtitle,
+    pickup_badge: typeof obj.pickup_badge === 'string' ? obj.pickup_badge : d.pickup_badge,
+    pickup_fee: safeNum(obj.pickup_fee, d.pickup_fee),
+
+    delivery_removed: deliveryRemoved,
+    delivery_enabled: deliveryRemoved
+      ? false
+      : typeof obj.delivery_enabled === 'boolean'
+        ? obj.delivery_enabled
+        : d.delivery_enabled,
+    delivery_icon: safeIcon(obj.delivery_icon, d.delivery_icon),
+    delivery_title:
+      typeof obj.delivery_title === 'string' ? obj.delivery_title : d.delivery_title,
+    delivery_subtitle:
+      typeof obj.delivery_subtitle === 'string'
+        ? obj.delivery_subtitle
+        : d.delivery_subtitle,
+    delivery_fee_mode:
+// step 5/12
