@@ -366,3 +366,77 @@ export function CheckoutClient({
           );
         })}
       </div>
+
+      {/* Mobile Collapsible Bag Strip on Steps 2 & 3 (Replaces bottom redundant Resumo box) */}
+      {step > 1 && (
+        <div className="lg:hidden rounded-2xl border border-zinc-800/90 bg-[#121216] overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setMobileItemsOpen((v) => !v)}
+            className="w-full px-3.5 py-3 flex items-center justify-between gap-2 text-left cursor-pointer"
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <ShoppingBag className="w-4 h-4 text-[#BEFA46] shrink-0" />
+              <span className="text-xs font-bold text-zinc-200 truncate">
+                {mobileItemsOpen ? 'Ocultar itens' : 'Ver itens da sacola'} ({totalUnits})
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span className="text-sm font-black text-[#BEFA46]">
+                {formatCurrency(finalOrderTotal)}
+              </span>
+              <ChevronDown
+                className={cn(
+                  'w-4 h-4 text-zinc-400 transition-transform',
+                  mobileItemsOpen && 'rotate-180'
+                )}
+              />
+            </div>
+          </button>
+
+          {mobileItemsOpen && (
+            <div className="px-3.5 pb-3.5 pt-1 border-t border-zinc-800/80 space-y-2.5 bg-[#0D0D11]">
+              {items.map((item) => (
+                <div key={item.id} className="flex items-center justify-between gap-2.5">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={item.product_image}
+                      alt={item.product_name}
+                      className="w-10 h-10 rounded-lg object-cover bg-[#EAE0D5] shrink-0"
+                    />
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-white truncate">
+                        {item.product_name}
+                      </p>
+                      <p className="text-[11px] text-zinc-400">
+                        Tam. {item.size} • Qtd {item.quantity}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-extrabold text-white shrink-0">
+                    {formatCurrency(item.subtotal)}
+                  </span>
+                </div>
+              ))}
+              <div className="pt-1 flex justify-end">
+                <Link
+                  href="/carrinho"
+                  className="text-[11px] font-bold text-[#BEFA46] hover:underline"
+                >
+                  Editar sacola
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {errorMsg && (
+        <div className="rounded-2xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-xs sm:text-sm text-red-300 font-semibold">
+          {errorMsg}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* MAIN STEP CARD */}
