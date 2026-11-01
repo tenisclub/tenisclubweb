@@ -41,4 +41,26 @@ export default async function MeusPedidosPage() {
           <Link
             href="/produtos"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#BEFA46] text-[#09090B] text-xs font-black"
-// step 2/6
+          >
+            Explorar Catálogo
+          </Link>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {orders.map((order) => {
+            const st = ORDER_STATUS_CONFIG[order.status as OrderStatus];
+            return (
+              <div
+                key={order.id}
+                className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-4"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800/80 pb-4">
+                  <div className="space-y-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-base font-black text-white">
+                        Pedido #{order.order_number}
+                      </span>
+                      <span
+                        className={cn(
+                          'px-2.5 py-0.5 rounded-full text-[11px] font-bold border',
+// step 3/6
