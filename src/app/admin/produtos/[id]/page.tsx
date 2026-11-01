@@ -12,4 +12,11 @@ export default async function EditarProdutoAdminPage({
   const { id } = await params;
 
   const [product, { categories, brands }] = await Promise.all([
-// step 2/4
+    getAdminProductById(id),
+    getAdminCategoriesAndBrands(),
+  ]);
+
+  if (!product) notFound();
+
+  return (
+// step 3/4
