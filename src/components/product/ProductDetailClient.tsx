@@ -465,4 +465,45 @@ export function ProductDetailClient({
             <Truck className="w-4 h-4 text-[#BEFA46] shrink-0" />
             <span>Entrega local ágil</span>
           </div>
-// step 11/12
+          <div className="rounded-xl border border-zinc-800/80 bg-[#111116] p-3 flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-[#BEFA46] shrink-0" />
+            <span>Troca fácil em 7 dias</span>
+          </div>
+        </div>
+
+        {/* Description & Specs */}
+        <div className="pt-4 border-t border-zinc-800 space-y-4">
+          {product.description && (
+            <div>
+              <h2 className="text-xs font-extrabold uppercase tracking-widest text-white mb-2">
+                Descrição do Produto
+              </h2>
+              <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-line">
+                {product.description}
+              </p>
+            </div>
+          )}
+
+          {additionalSpecs.length > 0 && (
+            <div>
+              <h3 className="text-xs font-extrabold uppercase tracking-widest text-white mb-2.5">
+                Informações Adicionais
+              </h3>
+              <dl className="divide-y divide-zinc-800/80 rounded-2xl border border-zinc-800 bg-[#111116] overflow-hidden text-xs">
+                {additionalSpecs.map(([k, v]) => (
+                  <div key={k} className="grid grid-cols-1 sm:grid-cols-3 gap-0.5 sm:gap-2 px-4 py-2.5">
+                    <dt className="font-semibold text-zinc-400">
+                      {k.replace(/_/g, ' ')}
+                    </dt>
+                    <dd className="sm:col-span-2 text-zinc-100 font-medium break-words">{String(v)}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
