@@ -34,4 +34,15 @@ export async function POST(request: Request) {
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
-// step 3/4
+    }
+
+    revalidateStoreData('catalog');
+    return NextResponse.json({ result: data });
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Erro ao movimentar estoque.' },
+      { status: 500 }
+    );
+  }
+}
+
