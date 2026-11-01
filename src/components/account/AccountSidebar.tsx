@@ -113,4 +113,25 @@ export function AccountSidebar() {
           <Link
             href="/admin"
             className="hidden lg:flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-[#BEFA46] bg-[#BEFA46]/10 border border-[#BEFA46]/30 mt-2"
-// step 5/6
+          >
+            <ShieldCheck className="w-4 h-4 shrink-0" />
+            Painel Administrativo
+          </Link>
+        )}
+      </nav>
+
+      <div className="hidden lg:block pt-3 border-t border-zinc-800">
+        <button
+          type="button"
+          onClick={handleLogout}
+          disabled={loggingOut}
+          className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-red-400 hover:bg-red-500/10 transition disabled:opacity-60 cursor-pointer"
+        >
+          <LogOut className="w-4 h-4" />
+          {loggingOut ? 'Encerrando...' : 'Encerrar Sessão'}
+        </button>
+      </div>
+    </aside>
+  );
+}
+
