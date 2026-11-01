@@ -58,4 +58,17 @@ export async function PATCH(request: Request) {
         return NextResponse.json({ error: pwdErr.message }, { status: 400 });
       }
     }
-// step 4/5
+
+    revalidateStoreData('users');
+    return NextResponse.json({
+      success: true,
+      message: `Dados atualizados com sucesso!${emailMessage}`,
+    });
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Erro ao atualizar perfil.' },
+      { status: 500 }
+    );
+  }
+}
+
