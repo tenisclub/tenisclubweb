@@ -157,3 +157,56 @@ export function PromotionsClient({
               placeholder="Ex: 199.90"
               className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
             />
+          </div>
+
+          <div>
+            <label className="text-xs text-zinc-400">Início Programado (Opcional)</label>
+            <input
+              type="datetime-local"
+              value={startsAt}
+              onChange={(e) => setStartsAt(e.target.value)}
+              className="mt-1 w-full h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs text-zinc-400">Término Programado (Opcional)</label>
+            <input
+              type="datetime-local"
+              value={endsAt}
+              onChange={(e) => setEndsAt(e.target.value)}
+              className="mt-1 w-full h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+            />
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+            <label className="flex items-center gap-2 text-xs font-bold text-zinc-300 h-10">
+              <input
+                type="checkbox"
+                checked={highlightHome}
+                onChange={(e) => setHighlightHome(e.target.checked)}
+                className="w-4 h-4 accent-[#BEFA46]"
+              />
+              Destacar na Home
+            </label>
+            <button
+              type="submit"
+              className="w-full sm:w-auto h-10 px-5 rounded-xl bg-[#BEFA46] text-[#09090B] text-xs font-black inline-flex items-center justify-center gap-1.5"
+            >
+              <Plus className="w-4 h-4" />
+              Criar
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <div className="rounded-3xl border border-zinc-800 bg-[#121216] divide-y divide-zinc-800">
+        {promos.map((pr) => (
+          <div
+            key={pr.id}
+            className="p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4"
+          >
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-extrabold text-white">{pr.name}</span>
+                {pr.discount_percent > 0 && (
