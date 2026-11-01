@@ -44,4 +44,50 @@ export function SettingsClient({ initialSettings }: { initialSettings: StoreSett
     if (isDirtyRef.current || saving) return;
     const normalized = normalizeCheckoutDeliveryConfig(
       initialSettings.checkout_delivery_config
-// step 1/12
+    );
+    setForm({
+      ...initialSettings,
+      checkout_delivery_config: normalized,
+    });
+  }, [initialSettings, saving]);
+
+  const deliveryCfg = useMemo(
+    () => normalizeCheckoutDeliveryConfig(form.checkout_delivery_config),
+    [form.checkout_delivery_config]
+  );
+
+  const setField = (key: keyof StoreSettings, value: unknown) => {
+    isDirtyRef.current = true;
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const updateDeliveryCfg = (patch: Partial<CheckoutDeliveryConfig>) => {
+    isDirtyRef.current = true;
+    setForm((prev) => {
+      const current = normalizeCheckoutDeliveryConfig(prev.checkout_delivery_config);
+      const next = { ...current, ...patch };
+      return { ...prev, checkout_delivery_config: next };
+    });
+  };
+
+  const resetEtapa3ToDefault = () => {
+    isDirtyRef.current = true;
+    setForm((prev) => ({
+      ...prev,
+      checkout_delivery_config: {
+        ...DEFAULT_CHECKOUT_DELIVERY_CONFIG,
+        extra_cards: [],
+        custom_buttons: [],
+      },
+    }));
+    toast('Cards da Etapa 3 restaurados para o padrão! Clique em Salvar para publicar.', 'info');
+  };
+
+  const handleUploadAsset = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: 'logo_url' | 'hero_banner_url'
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingField(field);
+// step 2/12
