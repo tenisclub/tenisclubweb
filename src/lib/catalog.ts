@@ -476,4 +476,57 @@ export const getUserNavbarState = cache(
       supabase
         .from('carts')
         .select(
-// step 9/12
+          'cart_items(quantity, products(is_active, allow_backorder), product_variants(is_active, inventory(quantity)))'
+        )
+        .eq('user_id', userId)
+        .maybeSingle(),
+      supabase.from('favorites').select('product_id').eq('user_id', userId),
+    ]);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rawItems: any[] = (cart as any)?.cart_items || [];
+    let cartCount = 0;
+    for (const item of rawItems) {
+      const prod = Array.isArray(item.products) ? item.products[0] : item.products;
+      const pv = Array.isArray(item.product_variants) ? item.product_variants[0] : item.product_variants;
+      const inv = Array.isArray(pv?.inventory) ? pv.inventory[0] : pv?.inventory;
+      const stock = Number(inv?.quantity ?? 0);
+      const allowBackorder = Boolean(prod?.allow_backorder);
+      if (prod?.is_active && pv?.is_active && (stock > 0 || allowBackorder)) {
+        cartCount += allowBackorder
+          ? Math.min(Number(item.quantity || 0), 99)
+          : Math.min(Number(item.quantity || 0), stock);
+      }
+    }
+
+    return {
+      cartCount,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      favoriteIds: (favs || []).map((f: any) => f.product_id),
+    };
+  }
+);
+
+export const getUserCartView = cache(
+  async (
+    userId: string
+  ): Promise<{
+    items: CartItemView[];
+    totalItems: number;
+    subtotal: number;
+    total: number;
+  }> => {
+    const supabase = createServiceClient();
+    const { data: cartRow } = await supabase
+      .from('carts')
+      .select(
+        `
+        id,
+        cart_items (
+          id,
+          cart_id,
+          product_id,
+          variant_id,
+          quantity,
+          created_at,
+// step 10/12
