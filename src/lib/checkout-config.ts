@@ -86,4 +86,49 @@ export interface CheckoutDeliveryConfig {
 
   // Independent Address Form Toggle (works even with only Info Cards or zero cards)
   always_require_address: boolean;
-// step 2/12
+
+  // Footer CTA
+  next_button_label: string;
+}
+
+export interface SelectableCheckoutOption {
+  key: string;
+  kind: 'pickup' | 'local_delivery' | 'custom';
+  customCardId?: string;
+  icon: CheckoutIconKey;
+  title: string;
+  subtitle: string;
+  badgeLabel: string;
+  shippingCost: number;
+  summaryLabel: string;
+  freeThreshold: number;
+  requiresAddress: boolean;
+  deliveryMethod: DeliveryMethod;
+}
+
+export const DEFAULT_CHECKOUT_DELIVERY_CONFIG: CheckoutDeliveryConfig = {
+  step_title: 'Etapa 3 — Entrega ou Retirada',
+  step_icon: 'map-pin',
+
+  pickup_removed: false,
+  pickup_enabled: true,
+  pickup_icon: 'store',
+  pickup_title: 'Retirar na Loja',
+  pickup_subtitle: '',
+  pickup_badge: 'Grátis',
+  pickup_fee: 0,
+
+  delivery_removed: false,
+  delivery_enabled: true,
+  delivery_icon: 'truck',
+  delivery_title: 'Solicitar Entrega Local',
+  delivery_subtitle: 'Disponibilidade e taxa confirmadas manualmente pela loja.',
+  delivery_fee_mode: 'to_combine',
+  delivery_fee: 0,
+  free_delivery_threshold: 0,
+  delivery_badge: 'A combinar',
+  require_address_on_delivery: true,
+
+  pickup_info_removed: false,
+  pickup_info_card_enabled: true,
+// step 3/12
