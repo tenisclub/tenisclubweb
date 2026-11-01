@@ -82,3 +82,45 @@ export async function PATCH(request: Request) {
   if (!session) return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 });
 
   const body = await request.json();
+  const { id, is_default, ...fields } = body;
+  if (!id) return NextResponse.json({ error: 'ID inválido.' }, { status: 400 });
+
+  const supabase = createServiceClient();
+  if (is_default) {
+    await supabase
+      .from('user_addresses')
+      .update({ is_default: false })
+      .eq('user_id', session.userId);
+  }
+
+  const { data, error } = await supabase
+    .from('user_addresses')
+    .update({
+      ...fields,
+      ...(is_default !== undefined ? { is_default: Boolean(is_default) } : {}),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', id)
+    .eq('user_id', session.userId)
+    .select('*')
+    .single();
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  revalidateStoreData('user_private');
+  return NextResponse.json({ address: data });
+}
+
+export async function DELETE(request: Request) {
+  const session = await getAuthSession();
+  if (!session) return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 });
+
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get('id');
+  if (!id) return NextResponse.json({ error: 'ID inválido.' }, { status: 400 });
+
+  const supabase = createServiceClient();
+  await supabase.from('user_addresses').delete().eq('id', id).eq('user_id', session.userId);
+  revalidateStoreData('user_private');
+  return NextResponse.json({ success: true });
+}
+
