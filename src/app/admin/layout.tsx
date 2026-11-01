@@ -17,4 +17,9 @@ export default async function AdminLayout({
       profile={session.profile}
       role={session.role}
       pendingOrdersCount={badges.pendingOrdersCount}
-// step 3/4
+      unreadAdminNotifs={badges.unreadAdminNotifs}
+    >
+      {children}
+    </AdminShell>
+  );
+}
