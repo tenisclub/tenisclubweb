@@ -95,4 +95,36 @@ export async function POST(request: Request) {
 
     // Wave 2: Bulk-insert images & variants in parallel
     const [, createdVarsRes] = await Promise.all([
-// step 3/6
+      Array.isArray(images) && images.length > 0
+        ? supabase.from('product_images').insert(
+            images.map((img: { url: string; is_primary?: boolean }, index: number) => ({
+              product_id: product.id,
+              url: img.url,
+              alt_text: name.trim(),
+              is_primary: img.is_primary ?? index === 0,
+              sort_order: index,
+            }))
+          )
+        : Promise.resolve(null),
+      validVariants.length > 0
+        ? supabase
+            .from('product_variants')
+            .insert(
+              validVariants.map(
+                (v: {
+                  color?: string;
+                  color_hex?: string;
+                  size: string | number;
+                  variant_sku?: string;
+                }) => ({
+                  product_id: product.id,
+                  color: v.color?.trim() || 'Padrão',
+                  color_hex: v.color_hex || '#18181B',
+                  size: String(v.size).trim(),
+                  variant_sku: v.variant_sku || `${sku || slug}-${v.size}`,
+                  is_active: true,
+                })
+              )
+            )
+            .select('id, color, size')
+// step 4/6
