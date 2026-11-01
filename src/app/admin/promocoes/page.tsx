@@ -42,4 +42,13 @@ export default async function AdminPromocoesPage() {
     .map((p) => ({
       id: p.id,
       name: p.name,
-// step 4/5
+      base_price: Number(p.base_price),
+    }));
+
+  return (
+    <PromotionsClient
+      initialPromos={promos}
+      productsList={sortedProductsList}
+    />
+  );
+}
