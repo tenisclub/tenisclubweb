@@ -159,4 +159,36 @@ export function ProductCard({ product, whatsapp = '5511999999999' }: ProductCard
                 canPurchase ? 'bg-emerald-400' : 'bg-red-400'
               )}
             />
-// step 5/8
+            {canPurchase ? 'Disponível' : 'Indisponível'}
+          </span>
+        </div>
+
+        {/* Interactive Size Pills */}
+        {product.variants.length > 0 && (
+          <div className="mt-2.5 flex flex-wrap gap-1">
+            {product.variants.slice(0, 8).map((v) => {
+              const out = !allowBackorder && v.stock <= 0;
+              const selected = selectedVariantId === v.id;
+              return (
+                <button
+                  key={v.id}
+                  type="button"
+                  disabled={out}
+                  onClick={() => setSelectedVariantId(v.id)}
+                  className={cn(
+                    'min-w-[30px] h-7 px-1.5 rounded-lg text-[11px] font-bold border transition',
+                    out
+                      ? 'border-zinc-800/60 bg-zinc-900/40 text-zinc-600 line-through cursor-not-allowed'
+                      : selected
+                        ? 'border-[#BEFA46] bg-[#BEFA46] text-[#09090B]'
+                        : 'border-zinc-800 bg-[#1A1A20] text-zinc-300 hover:border-zinc-600'
+                  )}
+                  title={
+                    out
+                      ? `Tam. ${v.size} indisponível`
+                      : v.stock > 0
+                        ? `Tam. ${v.size} (${v.stock} un.)`
+                        : `Tam. ${v.size} disponível`
+                  }
+                >
+// step 6/8
