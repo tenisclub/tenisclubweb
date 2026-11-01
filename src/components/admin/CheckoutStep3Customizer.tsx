@@ -1053,4 +1053,85 @@ export function CheckoutStep3Customizer({
                             <label className="text-[11px] font-semibold text-zinc-400">
                               Modo de Taxa de Entrega
                             </label>
-// step 13/24
+                            <select
+                              value={deliveryCfg.delivery_fee_mode}
+                              onChange={(e) =>
+                                updateDeliveryCfg({
+                                  delivery_fee_mode: e.target.value as DeliveryFeeMode,
+                                })
+                              }
+                              className="mt-1 w-full h-10 px-3 rounded-xl bg-[#121216] border border-zinc-800 text-xs sm:text-sm text-white"
+                            >
+                              <option value="to_combine">A combinar (confirmado pela loja)</option>
+                              <option value="fixed">Taxa fixa automática em R$</option>
+                              <option value="free">Entrega Grátis</option>
+                            </select>
+                          </div>
+
+                          {deliveryCfg.delivery_fee_mode === 'fixed' ? (
+                            <>
+                              <div>
+                                <label className="text-[11px] font-semibold text-zinc-400">
+                                  Taxa Fixa (R$)
+                                </label>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  step="0.50"
+                                  value={deliveryCfg.delivery_fee}
+                                  onChange={(e) =>
+                                    updateDeliveryCfg({
+                                      delivery_fee: Math.max(0, Number(e.target.value) || 0),
+                                    })
+                                  }
+                                  className="mt-1 w-full h-10 px-3 rounded-xl bg-[#121216] border border-zinc-800 text-xs sm:text-sm text-white"
+                                />
+                              </div>
+                              <div className="sm:col-span-2">
+                                <label className="text-[11px] font-semibold text-zinc-400">
+                                  Frete Grátis acima de (R$ — 0 desativa)
+                                </label>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  step="1"
+                                  value={deliveryCfg.free_delivery_threshold}
+                                  onChange={(e) =>
+                                    updateDeliveryCfg({
+                                      free_delivery_threshold: Math.max(
+                                        0,
+                                        Number(e.target.value) || 0
+                                      ),
+                                    })
+                                  }
+                                  className="mt-1 w-full h-10 px-3 rounded-xl bg-[#121216] border border-zinc-800 text-xs sm:text-sm text-white"
+                                />
+                              </div>
+                            </>
+                          ) : (
+                            <div>
+                              <label className="text-[11px] font-semibold text-zinc-400">
+                                Texto do Selo no Card
+                              </label>
+                              <input
+                                type="text"
+                                value={deliveryCfg.delivery_badge}
+                                onChange={(e) =>
+                                  updateDeliveryCfg({ delivery_badge: e.target.value })
+                                }
+                                placeholder={
+                                  deliveryCfg.delivery_fee_mode === 'free'
+                                    ? 'Grátis'
+                                    : 'A combinar'
+                                }
+                                className="mt-1 w-full h-10 px-3 rounded-xl bg-[#121216] border border-zinc-800 text-xs sm:text-sm text-white"
+                              />
+                            </div>
+                          )}
+
+                          <div className="sm:col-span-2">
+                            <label className="text-[11px] font-semibold text-zinc-400">
+                              Descrição / Subtítulo do Card
+                            </label>
+                            <input
+// step 14/24
