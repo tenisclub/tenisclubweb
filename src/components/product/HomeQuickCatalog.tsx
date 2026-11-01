@@ -30,4 +30,36 @@ export function HomeQuickCatalog({
   const [gender, setGender] = useState('todos');
   const [categorySlug, setCategorySlug] = useState('todos');
   const [selectedSize, setSelectedSize] = useState<string>('');
-// step 1/8
+
+  const filtered = useMemo(() => {
+    return products.filter((p) => {
+      if (search.trim()) {
+        const q = search.toLowerCase().trim();
+        const hay = `${p.name} ${p.sku || ''} ${p.brand?.name || ''} ${p.category?.name || ''}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+
+      if (gender !== 'todos') {
+        if (gender === 'unissex') {
+          if (p.gender !== 'unissex') return false;
+        } else if (
+          p.gender !== gender &&
+          !(p.gender === 'unissex' && (gender === 'masculino' || gender === 'feminino'))
+        ) {
+          return false;
+        }
+      }
+
+      if (categorySlug !== 'todos' && p.category?.slug !== categorySlug) {
+        return false;
+      }
+
+      if (selectedSize && !p.available_sizes.includes(selectedSize)) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [products, search, gender, categorySlug, selectedSize]);
+
+// step 2/8
