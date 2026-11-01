@@ -64,6 +64,23 @@ export function buildProductWhatsAppUrl(params: {
   return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
 }
 
+export function formatOrderModalityLabel(order: Order): string {
+  const addr = order.shipping_address;
+  const customTitle = addr?.custom_option_title?.trim();
+  if (customTitle) return customTitle;
+
+  const hasStreet = Boolean(addr?.street?.trim());
+  if (hasStreet) return 'Entrega Local';
+
+  const hasPickupAddress = Boolean(addr?.pickup_address?.trim());
+  if (hasPickupAddress) return 'Retirada na Loja';
+
+  const shippingLabel = addr?.shipping_label?.trim();
+  if (shippingLabel) return shippingLabel;
+
+  return 'A combinar';
+}
+
 export function buildOrderWhatsAppUrl(
   whatsapp: string,
   order: Order,
@@ -85,12 +102,8 @@ export function buildOrderWhatsAppUrl(
     .join('\n');
 
   const addr = order.shipping_address;
-  const customTitle = addr?.custom_option_title?.trim();
   const hasStreet = Boolean(addr?.street?.trim());
-
-  const modalityLabel =
-    customTitle ||
-    (order.delivery_method === 'pickup' ? 'Retirada na Loja' : 'Entrega Local');
+  const modalityLabel = formatOrderModalityLabel(order);
 
   const customerLines = [`*Cliente:* ${order.customer_name}`];
   if (order.customer_phone?.trim()) {
@@ -137,8 +150,6 @@ export function buildOrderWhatsAppUrl(
   }
   if (shippingCost > 0) {
     financialLines.push(`*Taxa de entrega:* ${formatCurrency(shippingCost)}`);
-  } else if (addr?.shipping_label?.trim()) {
-    financialLines.push(`*Entrega / Recebimento:* ${addr.shipping_label.trim()}`);
   }
   financialLines.push(`*Total do Pedido:* *${formatCurrency(totalValue)}*`);
   if (order.payment_method_note?.trim()) {
