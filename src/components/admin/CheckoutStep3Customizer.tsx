@@ -160,4 +160,85 @@ export function CheckoutStep3Customizer({
   };
 
   const removeCustomButton = (id: string) => {
-// step 2/24
+    updateDeliveryCfg({
+      custom_buttons: deliveryCfg.custom_buttons.filter((b) => b.id !== id),
+    });
+  };
+
+  // Live preview calculations
+  const previewSelectableOptions = useMemo(
+    () => getSelectableCheckoutOptions(deliveryCfg, form.address, PREVIEW_SUBTOTAL),
+    [deliveryCfg, form.address]
+  );
+
+  const activePreviewOption =
+    previewSelectableOptions.find((opt) => opt.key === previewOptionKey) ??
+    previewSelectableOptions[0] ??
+    null;
+
+  const activePreviewKey = activePreviewOption?.key ?? 'pickup';
+  const activePreviewMethod: DeliveryMethod =
+    activePreviewOption?.deliveryMethod ?? 'pickup';
+
+  const previewShipping = useMemo(
+    () => calculateCheckoutShipping(deliveryCfg, activePreviewKey, PREVIEW_SUBTOTAL),
+    [deliveryCfg, activePreviewKey]
+  );
+
+  const previewInfoCards = useMemo(
+    () =>
+      deliveryCfg.extra_cards.filter(
+        (c) =>
+          c.enabled &&
+          c.card_type === 'info' &&
+          (c.title.trim() || c.description.trim()) &&
+          (c.visibility === 'always' || c.visibility === activePreviewMethod)
+      ),
+    [deliveryCfg.extra_cards, activePreviewMethod]
+  );
+
+  const previewCustomButtons = useMemo(
+    () =>
+      deliveryCfg.custom_buttons.filter(
+        (b) =>
+          b.label.trim() &&
+          b.url.trim() &&
+          (b.visibility === 'always' || b.visibility === activePreviewMethod)
+      ),
+    [deliveryCfg.custom_buttons, activePreviewMethod]
+  );
+
+  const previewRequiresAddress = useMemo(
+    () =>
+      shouldRequireCheckoutAddress(
+        deliveryCfg,
+        activePreviewOption,
+        activePreviewMethod
+      ),
+    [deliveryCfg, activePreviewOption, activePreviewMethod]
+  );
+
+  const hasAnyCard =
+    !deliveryCfg.pickup_removed ||
+    !deliveryCfg.delivery_removed ||
+    !deliveryCfg.pickup_info_removed ||
+    deliveryCfg.extra_cards.length > 0;
+
+  const hasDeletedMainCard =
+    deliveryCfg.pickup_removed ||
+    deliveryCfg.delivery_removed ||
+    deliveryCfg.pickup_info_removed;
+
+  return (
+    <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-6">
+      {/* MAIN HEADER — Single Reset Button, Clean Hierarchy */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800/80 pb-5">
+        <div className="space-y-1">
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-[#BEFA46]">
+            <Sparkles className="w-3.5 h-3.5" />
+            Etapa 3 do Checkout
+          </span>
+          <h2 className="text-lg sm:text-xl font-black text-white">
+            Personalização de Recebimento, Avisos & Endereço
+          </h2>
+// step 3/24
