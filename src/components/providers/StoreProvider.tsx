@@ -517,3 +517,107 @@ export function StoreProvider({
           if (v > lastSeenVersion) {
             lastSeenVersion = v;
           }
+
+          const scope = row.scope || 'all';
+          const actorTag = row.actor_tag || null;
+          const cur = liveRefs.current;
+
+          if (!pendingScope) {
+            pendingScope = scope;
+          } else if (pendingScope !== scope) {
+            pendingScope = 'all';
+          }
+
+          if (scope === 'catalog' || scope === 'settings' || scope === 'all') {
+            pending.public = true;
+          }
+          if (
+            cur.isAdmin &&
+            (scope === 'orders' || scope === 'notifications' || scope === 'users')
+          ) {
+            pending.admin = true;
+          }
+          if (
+            cur.authenticated &&
+            (scope === 'users' || (actorTag && cur.syncTag && actorTag === cur.syncTag))
+          ) {
+            pending.user = true;
+          }
+
+          if (pending.public || pending.admin || pending.user) {
+            scheduleFlush();
+          }
+        }
+      )
+      .subscribe((status: string) => {
+        if (status === 'SUBSCRIBED') {
+          void checkLatestVersionOnWake();
+        }
+      });
+
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        void checkLatestVersionOnWake();
+      }
+    };
+
+    document.addEventListener('visibilitychange', onVisibility);
+
+    return () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      document.removeEventListener('visibilitychange', onVisibility);
+      void supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const addToCart = useCallback(
+    async ({
+      productId,
+      variantId,
+      quantity = 1,
+      redirectToCart = false,
+    }: {
+      productId: string;
+      variantId: string;
+      quantity?: number;
+      redirectToCart?: boolean;
+    }): Promise<boolean> => {
+      if (!authenticated) {
+        if (typeof window !== 'undefined') {
+          const returnUrl = redirectToCart ? '/carrinho' : window.location.pathname;
+          sessionStorage.setItem(
+            PENDING_CART_KEY,
+            JSON.stringify({ productId, variantId, quantity, returnUrl })
+          );
+          toast('Entre na sua conta para adicionar ao carrinho. Guardamos sua escolha!', 'info');
+          router.push(`/login?redirect=${encodeURIComponent(returnUrl)}`);
+        }
+        return false;
+      }
+
+      // Optimistic instant feedback when staying on the current page
+      if (!redirectToCart) {
+        setCartCount((prev) => prev + quantity);
+        toast('Adicionado ao carrinho com sucesso!', 'success');
+
+        fetch('/api/cart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId, variantId, quantity }),
+        })
+          .then(async (res) => {
+            const data = await res.json();
+            if (res.status === 401) {
+              setCartCount((prev) => Math.max(0, prev - quantity));
+              if (typeof window !== 'undefined') {
+                const returnUrl = window.location.pathname;
+                sessionStorage.setItem(
+                  PENDING_CART_KEY,
+                  JSON.stringify({ productId, variantId, quantity, returnUrl })
+                );
+                toast('Faça login para continuar. Guardamos sua numeração!', 'info');
+                router.push(`/login?redirect=${encodeURIComponent(returnUrl)}`);
+              }
+              return;
+            }
+            if (!res.ok) {
