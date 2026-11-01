@@ -349,4 +349,39 @@ export async function PATCH(
       .then(() => {});
 
     return NextResponse.json({ product });
-// step 10/12
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Erro ao salvar produto.' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await getAuthSession();
+  if (!session?.isAdmin) {
+    return NextResponse.json({ error: 'Acesso negado.' }, { status: 403 });
+  }
+
+  const { id } = await params;
+  const supabase = createServiceClient();
+
+  // Check if product is referenced in historical order_items
+  const { count } = await supabase
+    .from('order_items')
+    .select('id', { count: 'exact', head: true })
+    .eq('product_id', id);
+
+  if ((count || 0) > 0) {
+    // Archive safely to preserve order history integrity
+    await supabase
+      .from('products')
+      .update({ is_active: false, updated_at: new Date().toISOString() })
+      .eq('id', id);
+
+    revalidateStoreData('catalog');
+
+// step 11/12
