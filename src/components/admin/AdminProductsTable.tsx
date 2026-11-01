@@ -338,4 +338,38 @@ export function AdminProductsTable({ initialProducts }: { initialProducts: Produ
                       title="Destacar na Home"
                     >
                       <Star className={cn('w-4 h-4', p.is_featured && 'fill-current')} />
-// step 10/12
+                    </button>
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <button
+                      type="button"
+                      onClick={() => toggleFlag(p.id, 'is_active', !p.is_active)}
+                      className={cn(
+                        'px-3 py-1 rounded-full text-[11px] font-bold border transition',
+                        p.is_active
+                          ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                          : 'bg-zinc-800 text-zinc-400 border-zinc-700'
+                      )}
+                    >
+                      {p.is_active ? 'Ativo' : 'Inativo'}
+                    </button>
+                  </td>
+                  <td className="px-4 py-3.5 text-right">
+                    <div className="inline-flex items-center gap-1.5">
+                      <Link
+                        href={`/produto/${p.slug}`}
+                        target="_blank"
+                        className="p-2 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300"
+                        title="Visualizar na loja"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Link>
+                      <Link
+                        href={`/admin/produtos/${p.id}`}
+                        prefetch={true}
+                        onMouseEnter={() => router.prefetch(`/admin/produtos/${p.id}`)}
+                        onClick={() => setOpeningId(p.id)}
+                        className="p-2 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-[#BEFA46]"
+                        title="Editar produto"
+                      >
+// step 11/12
