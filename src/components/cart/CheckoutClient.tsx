@@ -587,3 +587,77 @@ export function CheckoutClient({
                       placeholder="voce@email.com"
                       className="w-full h-12 pl-10 pr-4 rounded-xl bg-[#0D0D11] border border-zinc-800 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#BEFA46]"
                     />
+                  </div>
+                </div>
+              </div>
+
+              {/* Intended Payment Method Selector */}
+              <div className="pt-2 border-t border-zinc-800/80 space-y-2.5">
+                <div>
+                  <label className="text-xs font-bold text-zinc-200 block">
+                    Como você pretende pagar? *
+                  </label>
+                  <p className="text-[11px] text-zinc-500">
+                    Apenas informativo para a loja já agilizar seu atendimento.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  {(
+                    [
+                      { key: 'pix' as const, label: 'Pix', Icon: QrCode },
+                      { key: 'card' as const, label: 'Cartão', Icon: CreditCard },
+                      { key: 'cash' as const, label: 'Dinheiro', Icon: Banknote },
+                      { key: 'other' as const, label: 'Outro', Icon: Wallet },
+                    ] as const
+                  ).map(({ key, label, Icon }) => {
+                    const active = paymentChoice === key;
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => {
+                          setPaymentChoice(key);
+                          if (errorMsg) setErrorMsg('');
+                        }}
+                        className={cn(
+                          'h-12 px-3 rounded-xl border text-xs sm:text-sm font-extrabold inline-flex items-center justify-center gap-2 transition cursor-pointer',
+                          active
+                            ? 'border-[#BEFA46] bg-[#BEFA46]/12 text-[#BEFA46] shadow-[0_0_16px_rgba(190,250,70,0.12)]'
+                            : 'border-zinc-800 bg-[#0D0D11] text-zinc-300 hover:border-zinc-700 hover:text-white'
+                        )}
+                      >
+                        <Icon className="w-4 h-4 shrink-0" />
+                        <span>{label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {paymentChoice === 'other' && (
+                  <div className="pt-1">
+                    <input
+                      type="text"
+                      autoFocus
+                      value={customPaymentMethod}
+                      onChange={(e) => setCustomPaymentMethod(e.target.value)}
+                      placeholder="Digite como pretende pagar (ex: Pix + Cartão, Parcelado em 2x...)"
+                      className="w-full h-11 px-3.5 rounded-xl bg-[#0D0D11] border border-[#BEFA46]/50 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#BEFA46]"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2.5 pt-1">
+                <button
+                  type="button"
+                  onClick={handleContinueFromStep2}
+                  className="w-full h-12 rounded-2xl bg-[#BEFA46] hover:bg-[#d1ff70] text-[#09090B] text-sm font-black inline-flex items-center justify-center gap-2 shadow-[0_6px_22px_rgba(190,250,70,0.22)] transition cursor-pointer"
+                >
+                  <span>Ir para Confirmação</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => goToStep(1)}
+                  className="w-full py-2 text-xs font-bold text-zinc-400 hover:text-white inline-flex items-center justify-center gap-1.5 cursor-pointer"
