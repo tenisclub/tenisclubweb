@@ -291,4 +291,53 @@ export function OrderDetailAdminClient({ initialOrder }: { initialOrder: Order }
           <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-4">
             <h2 className="text-base font-black text-white">Controle Operacional</h2>
 
-// step 6/8
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-zinc-300">Status do Pedido</label>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value as OrderStatus)}
+                className="w-full h-11 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-sm font-bold text-white"
+              >
+                {Object.entries(ORDER_STATUS_CONFIG).map(([key, cfg]) => (
+                  <option key={key} value={key}>
+                    {cfg.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-zinc-300">
+                Mensagem de atualização (histórico / notificação)
+              </label>
+              <input
+                type="text"
+                value={statusNote}
+                onChange={(e) => setStatusNote(e.target.value)}
+                placeholder="Ex: Pares conferidos e separados no balcão"
+                className="w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+              />
+            </div>
+
+            <div className="pt-3 border-t border-zinc-800 space-y-3">
+              <h3 className="text-xs font-extrabold uppercase tracking-wider text-[#BEFA46]">
+                Registro Manual de Pagamento
+              </h3>
+              <p className="text-[11px] text-zinc-500">
+                Sem gateway integrado: registre aqui pagamentos recebidos via Pix, cartão ou dinheiro.
+              </p>
+
+              <select
+                value={paymentStatus}
+                onChange={(e) => setPaymentStatus(e.target.value as PaymentStatus)}
+                className="w-full h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs font-bold text-white"
+              >
+                <option value="pending">Aguardando recebimento</option>
+                <option value="paid_manual">Pagamento recebido manualmente</option>
+                <option value="refunded_manual">Estornado manualmente</option>
+              </select>
+
+              <input
+                type="text"
+                value={paymentMethodNote}
+// step 7/8
