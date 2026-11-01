@@ -278,4 +278,42 @@ export function CartClient({
               <span>-{formatCurrency(savings)}</span>
             </div>
           )}
-// step 7/8
+          <div className="flex justify-between text-zinc-400">
+            <span>Entrega / Retirada</span>
+            <span className="text-xs">Definir na próxima etapa</span>
+          </div>
+        </div>
+
+        <div className="flex items-baseline justify-between">
+          <span className="text-sm font-bold text-white">Valor Total</span>
+          <span className="text-2xl font-black text-[#BEFA46]">
+            {formatCurrency(total)}
+          </span>
+        </div>
+
+        {hasUnavailable || totalItems === 0 ? (
+          <button
+            type="button"
+            disabled
+            className="w-full h-12 rounded-2xl bg-zinc-800 text-zinc-500 font-bold text-sm cursor-not-allowed"
+          >
+            Remova os itens indisponíveis
+          </button>
+        ) : (
+          <Link
+            href="/checkout"
+            className="w-full h-12 rounded-2xl bg-[#BEFA46] hover:bg-[#d1ff70] text-[#09090B] font-black text-sm inline-flex items-center justify-center gap-2 shadow-[0_6px_24px_rgba(190,250,70,0.22)] transition"
+          >
+            Prosseguir com o Pedido
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        )}
+
+        <p className="text-[11px] text-zinc-500 text-center leading-relaxed">
+          Sem cobrança online nesta etapa. Confirme sua reserva e combine o pagamento com nossa equipe.
+        </p>
+      </aside>
+    </div>
+  );
+}
+
