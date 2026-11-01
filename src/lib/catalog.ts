@@ -317,4 +317,57 @@ export async function getCatalogProducts(filters: CatalogFilters = {}) {
     products = products.filter((p) => p.is_featured);
   }
 
-// step 6/12
+  // Sort
+  switch (filters.sort) {
+    case 'price_asc':
+      products.sort((a, b) => a.effective_price - b.effective_price);
+      break;
+    case 'price_desc':
+      products.sort((a, b) => b.effective_price - a.effective_price);
+      break;
+    case 'bestsellers':
+      products.sort((a, b) => b.sold_count - a.sold_count);
+      break;
+    case 'popular':
+      products.sort((a, b) => b.views_count + b.sold_count * 2 - (a.views_count + a.sold_count * 2));
+      break;
+    case 'newest':
+    default:
+      products.sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      break;
+  }
+
+  const total = products.length;
+  const page = Math.max(1, filters.page || 1);
+  const pageSize = filters.pageSize || 12;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const paginated = products.slice((page - 1) * pageSize, page * pageSize);
+
+  return {
+    products: paginated,
+    allMatching: products,
+    total,
+    page,
+    pageSize,
+    totalPages,
+  };
+}
+
+export async function getProductBySlug(slug: string): Promise<Product | null> {
+  const cachedAll = await getActiveProductsMemo();
+  const cachedMatch = cachedAll.find((p) => p.slug === slug);
+
+  if (cachedMatch) {
+    const supabase = createServiceClient();
+    supabase
+      .from('products')
+      .update({ views_count: Number(cachedMatch.views_count || 0) + 1 })
+      .eq('id', cachedMatch.id)
+      .then(() => {});
+    return cachedMatch;
+  }
+
+  const supabase = createServiceClient();
+// step 7/12
