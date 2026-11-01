@@ -26,4 +26,18 @@ export async function generateMetadata(): Promise<Metadata> {
   const ogImage = settings.hero_banner_url || settings.logo_url || undefined;
 
   return {
-// step 2/5
+    metadataBase: new URL(siteUrl),
+    title: {
+      default: `${settings.store_name} — ${settings.tagline}`,
+      template: `%s | ${settings.store_name}`,
+    },
+    description: settings.hero_subtitle,
+    openGraph: {
+      title: `${settings.store_name} — ${settings.tagline}`,
+      description: settings.hero_subtitle,
+      siteName: settings.store_name,
+      url: siteUrl,
+      type: 'website',
+      locale: 'pt_BR',
+      ...(ogImage ? { images: [{ url: ogImage }] } : {}),
+// step 3/5
