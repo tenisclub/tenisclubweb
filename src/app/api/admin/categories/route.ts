@@ -55,4 +55,23 @@ export async function PATCH(request: Request) {
   if (name !== undefined) {
     updates.name = name.trim();
     updates.slug = slugify(name);
-// step 3/6
+  }
+  if (description !== undefined) updates.description = description;
+  if (sort_order !== undefined) updates.sort_order = Number(sort_order);
+  if (is_active !== undefined) updates.is_active = Boolean(is_active);
+
+  const { data, error } = await supabase
+    .from('categories')
+    .update(updates)
+    .eq('id', id)
+    .select('*')
+    .single();
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  revalidateStoreData('catalog');
+  void supabase
+    .from('admin_logs')
+    .insert({
+      admin_id: session.userId,
+// step 4/6
