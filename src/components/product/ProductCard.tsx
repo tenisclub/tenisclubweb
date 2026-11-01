@@ -127,4 +127,36 @@ export function ProductCard({ product, whatsapp = '5511999999999' }: ProductCard
       <div className="flex flex-1 flex-col p-4 sm:p-5">
         {/* Eyebrow: GENDER · SKU · BRAND */}
         <div className="flex items-center justify-between gap-2 text-[11px] font-semibold tracking-wider uppercase text-zinc-400">
-// step 4/8
+          <span className="truncate">
+            {GENDER_LABELS[product.gender]}
+            {product.sku ? ` · ${product.sku}` : ''}
+          </span>
+          {product.brand?.name && (
+            <span className="text-zinc-500 font-bold shrink-0">{product.brand.name}</span>
+          )}
+        </div>
+
+        {/* Product Title */}
+        <Link
+          href={`/produto/${product.slug}`}
+          className="mt-1.5 text-base sm:text-lg font-extrabold text-white group-hover:text-[#BEFA46] transition line-clamp-2 leading-snug"
+        >
+          {product.name}
+        </Link>
+
+        {/* Size Range + Availability Indicator */}
+        <div className="mt-2 flex items-center justify-between text-xs text-zinc-400">
+          <span>Numeração: {product.size_range_label}</span>
+          <span
+            className={cn(
+              'inline-flex items-center gap-1 font-medium',
+              canPurchase ? 'text-emerald-400' : 'text-red-400'
+            )}
+          >
+            <span
+              className={cn(
+                'w-1.5 h-1.5 rounded-full',
+                canPurchase ? 'bg-emerald-400' : 'bg-red-400'
+              )}
+            />
+// step 5/8
