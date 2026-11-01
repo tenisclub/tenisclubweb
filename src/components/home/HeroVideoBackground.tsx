@@ -389,4 +389,38 @@ function DesktopRandomWall() {
       ))}
     </div>
   );
-// step 11/12
+}
+
+export function HeroVideoBackground() {
+  const [viewportMode, setViewportMode] = useState<'ssr' | 'mobile' | 'desktop'>('ssr');
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 639px)');
+    const apply = () => setViewportMode(mq.matches ? 'mobile' : 'desktop');
+    apply();
+    mq.addEventListener('change', apply);
+    return () => mq.removeEventListener('change', apply);
+  }, []);
+
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 select-none overflow-hidden bg-[#09090B]"
+    >
+      {viewportMode === 'mobile' && <MobileRandomPlayer />}
+      {viewportMode === 'desktop' && <DesktopRandomWall />}
+
+      {/* Subtle, semi-dark ultra-light blur across the entire top hero section */}
+      <div
+        className="absolute -inset-2 pointer-events-none"
+        style={{
+          background: 'rgba(12, 12, 16, 0.45)',
+          backdropFilter: 'blur(2.5px)',
+          WebkitBackdropFilter: 'blur(2.5px)',
+          transform: 'translateZ(0)',
+        }}
+      />
+      <div className="absolute -inset-x-1 -bottom-1 h-24 bg-gradient-to-t from-[#09090B] via-[#09090B]/70 to-transparent pointer-events-none" />
+    </div>
+  );
+}
