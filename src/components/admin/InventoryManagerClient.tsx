@@ -35,4 +35,41 @@ export function InventoryManagerClient({ initialRows }: { initialRows: StockRowI
 
   useEffect(() => {
     setRows(initialRows);
-// step 1/12
+    setActiveRow((prev) => {
+      if (!prev) return null;
+      return initialRows.find((r) => r.variantId === prev.variantId) || prev;
+    });
+  }, [initialRows]);
+
+  const filtered = useMemo(() => {
+    return rows.filter((r) => {
+      if (search.trim()) {
+        const q = search.toLowerCase();
+        const hay = `${r.productName} ${r.sku} ${r.color} ${r.size}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      if (stockFilter === 'zero' && r.quantity !== 0) return false;
+      if (stockFilter === 'low' && r.quantity > r.lowStockThreshold) return false;
+      return true;
+    });
+  }, [rows, search, stockFilter]);
+
+  const openModal = (row: StockRowItem, op: 'in' | 'out' | 'adjustment') => {
+    setActiveRow(row);
+    setOperation(op);
+    setAmount(op === 'adjustment' ? String(row.quantity) : '1');
+    setThreshold(String(row.lowStockThreshold));
+    setReason('');
+  };
+
+  const handleConfirmMove = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activeRow) return;
+
+    setSubmitting(true);
+    try {
+      const res = await fetch('/api/admin/inventory', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+// step 2/12
