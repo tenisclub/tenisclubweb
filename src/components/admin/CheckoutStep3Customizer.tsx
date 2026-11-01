@@ -1378,4 +1378,85 @@ export function CheckoutStep3Customizer({
                             rows={2}
                             value={form.pickup_info}
                             onChange={(e) => setField('pickup_info', e.target.value)}
-// step 17/24
+                            className="mt-1 w-full p-2.5 rounded-xl bg-[#121216] border border-zinc-800 text-xs text-white"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Discreet Restore Chips for Deleted Default Cards */}
+            {hasDeletedMainCard && (
+              <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-zinc-800/80 text-[11px]">
+                <span className="text-zinc-500 font-medium mr-1">
+                  Cards padrão ocultos da lista:
+                </span>
+                {deliveryCfg.pickup_removed && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      updateDeliveryCfg({ pickup_removed: false, pickup_enabled: true });
+                      setExpandedCardId('main:pickup');
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-[#121216] border border-zinc-800 hover:border-zinc-700 text-zinc-300 font-semibold cursor-pointer transition"
+                  >
+                    + Retirada na Loja
+                  </button>
+                )}
+                {deliveryCfg.delivery_removed && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      updateDeliveryCfg({ delivery_removed: false, delivery_enabled: true });
+                      setExpandedCardId('main:delivery');
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-[#121216] border border-zinc-800 hover:border-zinc-700 text-zinc-300 font-semibold cursor-pointer transition"
+                  >
+                    + Entrega Local
+                  </button>
+                )}
+                {deliveryCfg.pickup_info_removed && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      updateDeliveryCfg({
+                        pickup_info_removed: false,
+                        pickup_info_card_enabled: true,
+                      });
+                      setExpandedCardId('main:pickup_info');
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-[#121216] border border-zinc-800 hover:border-zinc-700 text-zinc-300 font-semibold cursor-pointer transition"
+                  >
+                    + Quadro Info. Retirada
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* SECTION 3: STEP HEADER, SUBMIT BUTTON & EXTRA LINKS */}
+          <div className="grid grid-cols-1 gap-4">
+            {/* Step Header & Main CTA */}
+            <div className="rounded-2xl border border-zinc-800/90 bg-[#18181F] p-4 space-y-3.5">
+              <div>
+                <h3 className="text-sm font-black text-white">
+                  Título da Etapa & Botão Finalizar Pedido
+                </h3>
+                <p className="text-[11px] text-zinc-400">
+                  Personalize o cabeçalho da Etapa 3 e o texto do botão principal que abre o WhatsApp.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                <div>
+                  <label className="text-[11px] font-semibold text-zinc-400">
+                    Título da Etapa (vazio oculta)
+                  </label>
+                  <input
+                    type="text"
+                    value={deliveryCfg.step_title}
+                    onChange={(e) => updateDeliveryCfg({ step_title: e.target.value })}
+// step 18/24
