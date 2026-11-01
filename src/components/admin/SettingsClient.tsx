@@ -183,4 +183,50 @@ export function SettingsClient({ initialSettings }: { initialSettings: StoreSett
         <div className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-zinc-800/90 bg-[#121216] p-1.5">
           {sectionTabs.map((tab) => {
             const active = activeTab === tab.id;
-// step 4/12
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={cn(
+                  'inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-extrabold transition cursor-pointer',
+                  active
+                    ? 'bg-[#BEFA46] text-[#09090B] font-black shadow-sm'
+                    : 'text-zinc-400 hover:text-white hover:bg-[#18181F]'
+                )}
+              >
+                {tab.icon}
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 1. Identity, Banner & WhatsApp Link Preview */}
+      {(activeTab === 'all' || activeTab === 'identity') && (
+        <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-5">
+          <div className="border-b border-zinc-800/80 pb-4">
+            <span className="text-[11px] font-black uppercase tracking-widest text-[#BEFA46] block">
+              Identidade Visual & SEO
+            </span>
+            <h2 className="text-base sm:text-lg font-black text-white">
+              Marca, Banner Principal & Prévia do Link no WhatsApp
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div>
+                <label className="text-[11px] font-semibold text-zinc-400">Nome da Loja</label>
+                <input
+                  type="text"
+                  value={form.store_name}
+                  onChange={(e) => setField('store_name', e.target.value)}
+                  className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white"
+                />
+              </div>
+              <div>
+                <label className="text-[11px] font-semibold text-zinc-400">
+                  Slogan (Título no Link)
+// step 5/12
