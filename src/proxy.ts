@@ -49,4 +49,15 @@ export async function proxy(request: NextRequest) {
   }
 
   return supabaseResponse;
-// step 4/5
+}
+
+export default proxy;
+
+export const config = {
+  matcher: [
+    '/minha-conta/:path*',
+    '/carrinho/:path*',
+    '/checkout/:path*',
+    '/admin/:path*',
+  ],
+};
