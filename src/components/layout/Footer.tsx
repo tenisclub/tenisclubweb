@@ -20,4 +20,16 @@ export function Footer({ settings }: { settings: StoreSettings }) {
     return null;
   }
 
-// step 2/5
+  return (
+    <footer className="border-t border-zinc-900 bg-[#070709] text-zinc-500 mt-12 sm:mt-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-center sm:text-left">
+        <p>
+          © {new Date().getFullYear()}{' '}
+          <strong className="text-zinc-300 font-semibold">{settings.store_name}</strong>. Todos os
+          direitos reservados.
+        </p>
+
+        <div className="flex items-center gap-4 text-zinc-500">
+          <Link href="/privacidade" className="hover:text-zinc-300 transition">
+            Privacidade
+// step 3/5
