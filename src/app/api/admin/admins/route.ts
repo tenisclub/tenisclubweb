@@ -85,4 +85,33 @@ export async function POST(request: Request) {
       role_id: roleRow.id,
       assigned_by: session.userId,
     });
-// step 3/6
+
+    await supabase.from('admin_logs').insert({
+      admin_id: session.userId,
+      action: 'admin.grant_role',
+      entity_type: 'user_profile',
+      entity_id: targetUserId,
+      details: { email: cleanEmail, role: roleName },
+    });
+
+    revalidateStoreData();
+    return NextResponse.json({ success: true, userId: targetUserId });
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Erro ao configurar administrador.' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(request: Request) {
+  const session = await getAuthSession();
+  if (!session?.isSuperAdmin) {
+    return NextResponse.json(
+      { error: 'Apenas o Administrador Principal pode alterar permissões.' },
+      { status: 403 }
+    );
+  }
+
+  const { userId, roleName, is_active } = await request.json();
+// step 4/6
