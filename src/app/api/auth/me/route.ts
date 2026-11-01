@@ -88,4 +88,20 @@ export async function GET() {
 
   const isAdmin = role === 'super_admin' || role === 'admin_operational';
   const isSuperAdmin = role === 'super_admin';
-// step 5/6
+
+  const unreadNotifications = (unreadRows || []).filter((n) =>
+    isAdmin ? n.target_audience === 'admin' : n.target_audience === 'customer' && n.user_id === userId
+  ).length;
+
+  return NextResponse.json({
+    authenticated: true,
+    user: { ...resolvedProfile, role },
+    role,
+    isAdmin,
+    isSuperAdmin,
+    syncTag: computeUserSyncTag(userId),
+    cartCount: navState.cartCount,
+    favoriteIds: navState.favoriteIds,
+    unreadNotifications,
+  });
+}
