@@ -151,4 +151,29 @@ export default async function AdminMovimentacoesPage() {
                   ? m.user_profiles[0]
                   : m.user_profiles;
                 const badge = MOVE_TYPE_LABELS[m.movement_type] || {
-// step 6/8
+                  label: m.movement_type,
+                  cls: 'bg-zinc-800 text-zinc-300',
+                };
+
+                return (
+                  <tr key={m.id} className="hover:bg-zinc-900/40">
+                    <td className="px-4 py-3 text-zinc-400 whitespace-nowrap">
+                      {formatDateTime(m.created_at)}
+                    </td>
+                    <td className="px-4 py-3 font-bold text-white">
+                      {prod?.name || 'Produto'}
+                    </td>
+                    <td className="px-4 py-3 text-zinc-300 whitespace-nowrap">
+                      {pv?.color} • Tam. <strong>{pv?.size}</strong>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <span
+                        className={cn(
+                          'inline-flex items-center px-2.5 py-0.5 rounded-full font-bold whitespace-nowrap',
+                          badge.cls
+                        )}
+                      >
+                        {badge.label}
+                      </span>
+                    </td>
+// step 7/8
