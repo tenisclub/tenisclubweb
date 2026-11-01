@@ -92,4 +92,36 @@ export default async function PedidoDetalheClientePage({
           href={waUrl}
           target="_blank"
           rel="noopener noreferrer"
-// step 3/8
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-3 rounded-2xl bg-[#BEFA46] hover:bg-[#d1ff70] text-[#09090B] text-xs sm:text-sm font-black shadow-[0_6px_22px_rgba(190,250,70,0.22)] transition"
+        >
+          <MessageCircle className="w-4 h-4 shrink-0" />
+          Continuar atendimento pelo WhatsApp
+        </a>
+      </div>
+
+      {/* Store Observations if present */}
+      {order.store_notes && (
+        <div className="rounded-2xl border border-[#BEFA46]/35 bg-[#BEFA46]/10 p-4 text-xs sm:text-sm text-zinc-100">
+          <strong className="text-[#BEFA46] block mb-1">Observações da Loja:</strong>
+          {order.store_notes}
+        </div>
+      )}
+
+      {/* Items List */}
+      <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-4">
+        <h2 className="text-base font-black text-white">Produtos Solicitados</h2>
+        <div className="divide-y divide-zinc-800">
+          {(order.items || []).map((item) => (
+            <div key={item.id} className="py-3.5 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                {item.product_image && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={item.product_image}
+                    alt={item.product_name}
+                    className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl object-cover bg-[#EAE0D5] shrink-0"
+                  />
+                )}
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm font-extrabold text-white line-clamp-2 break-words">
+// step 4/8
