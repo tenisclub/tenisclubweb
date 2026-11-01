@@ -253,4 +253,46 @@ export function ProductDetailClient({
               >
                 {copied ? <Check className="w-4 h-4 text-[#BEFA46]" /> : <Share2 className="w-4 h-4" />}
               </button>
-// step 6/12
+            </div>
+          </div>
+
+          <h1 className="text-2xl sm:text-4xl font-black text-white leading-tight">
+            {product.name}
+          </h1>
+
+          {product.short_description && (
+            <p className="text-sm text-zinc-400 leading-relaxed">{product.short_description}</p>
+          )}
+        </div>
+
+        {/* Pricing Card */}
+        <div className="rounded-2xl border border-zinc-800 bg-[#121217] p-4 sm:p-5">
+          {product.promo_price !== null && product.promo_price < product.base_price && (
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-sm text-zinc-500 line-through">
+                De {formatCurrency(product.base_price)}
+              </span>
+              <span className="px-2 py-0.5 rounded-md bg-[#BEFA46]/15 text-[#BEFA46] text-[11px] font-bold">
+                Economize {formatCurrency(product.base_price - product.effective_price)}
+              </span>
+            </div>
+          )}
+          <div className="text-3xl sm:text-4xl font-black text-[#BEFA46] tracking-tight">
+            {formatCurrency(product.effective_price)}
+          </div>
+          <p className="text-xs text-zinc-400 mt-1">
+            Reserve agora sem pagamento online • Combine Pix, cartão ou dinheiro na entrega/retirada
+          </p>
+        </div>
+
+        {/* Colors */}
+        {colors.length > 0 && (
+          <div className="space-y-2.5">
+            <span className="text-xs font-bold uppercase tracking-wider text-zinc-300">
+              Cor: <strong className="text-white">{selectedColor}</strong>
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {colors.map((c) => {
+                const active = selectedColor === c.name;
+                return (
+// step 7/12
