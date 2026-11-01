@@ -452,4 +452,49 @@ export function CatalogExplorer({
               Lançamentos / Novidades
             </label>
           </div>
-// step 10/12
+        </aside>
+
+        {/* Product Grid + Pagination */}
+        <div className="lg:col-span-9 space-y-6">
+          <div className="text-xs text-zinc-400">
+            <strong className="text-white">{filteredAndSorted.length}</strong> produto(s)
+            encontrado(s)
+          </div>
+
+          {pageItems.length === 0 ? (
+            <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-6 sm:p-12 text-center space-y-3">
+              <p className="text-base sm:text-lg font-bold text-white">
+                Nenhum produto encontrado para essa combinação.
+              </p>
+              <p className="text-xs sm:text-sm text-zinc-400">
+                Tente remover alguns filtros ou buscar por outro modelo.
+              </p>
+              <button
+                type="button"
+                onClick={resetAll}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#BEFA46] text-[#09090B] text-xs font-extrabold"
+              >
+                Limpar todos os filtros
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                {pageItems.map((product) => (
+                  <ProductCard key={product.id} product={product} whatsapp={whatsapp} />
+                ))}
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 pt-6">
+                  <button
+                    type="button"
+                    disabled={safePage <= 1}
+                    onClick={() => {
+                      setPage((p) => Math.max(1, p - 1));
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className="h-10 px-3.5 rounded-xl border border-zinc-800 bg-[#141419] text-xs font-bold text-zinc-200 disabled:opacity-40 inline-flex items-center gap-1"
+                  >
+// step 11/12
