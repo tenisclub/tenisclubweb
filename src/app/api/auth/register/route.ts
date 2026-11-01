@@ -81,3 +81,44 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: signUpError?.message || 'Erro ao criar conta.' },
         { status: 400 }
+      );
+    }
+
+    const nowIso = new Date().toISOString();
+    const userId = signUpData.user.id;
+
+    return NextResponse.json({
+      success: true,
+      userId,
+      hasSession: Boolean(signUpData.session),
+      sessionSnapshot: signUpData.session
+        ? {
+            authenticated: true,
+            user: {
+              id: userId,
+              email: cleanEmail,
+              full_name: fullName.trim(),
+              phone: cleanPhone,
+              avatar_url: null,
+              auth_provider: 'email',
+              is_active: true,
+              accepted_terms_at: nowIso,
+              created_at: nowIso,
+              updated_at: nowIso,
+              role: 'customer',
+            },
+            role: 'customer',
+            syncTag: computeUserSyncTag(userId),
+            cartCount: 0,
+            favoriteIds: [],
+            unreadNotifications: 1,
+          }
+        : null,
+    });
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Erro ao criar conta.' },
+      { status: 500 }
+    );
+  }
+}
