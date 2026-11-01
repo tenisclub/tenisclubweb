@@ -1784,4 +1784,85 @@ export function CheckoutStep3Customizer({
                     </div>
                   )}
                   {form.pickup_info && (
-// step 22/24
+                    <p className="whitespace-pre-line text-[11px]">{form.pickup_info}</p>
+                  )}
+                  {deliveryCfg.show_pickup_hours && form.business_hours && (
+                    <p className="text-[11px] text-zinc-400">
+                      Horário: {form.business_hours}
+                    </p>
+                  )}
+                </div>
+              )}
+
+            {/* Delivery Info Box Preview */}
+            {activePreviewMethod === 'local_delivery' &&
+              !deliveryCfg.delivery_removed &&
+              deliveryCfg.delivery_info_card_enabled &&
+              form.delivery_info && (
+                <div className="rounded-xl border border-zinc-800/90 border-l-[3px] border-l-[#BEFA46] bg-[#16161E] px-3.5 py-2.5 text-xs text-zinc-300 space-y-1">
+                  {deliveryCfg.delivery_info_card_title && (
+                    <div className="flex items-center gap-1.5 font-extrabold text-white">
+                      {deliveryCfg.delivery_info_card_icon !== 'none' && (
+                        <CheckoutIcon
+                          name={deliveryCfg.delivery_info_card_icon}
+                          className="w-4 h-4 text-[#BEFA46] shrink-0"
+                        />
+                      )}
+                      <span>{deliveryCfg.delivery_info_card_title}</span>
+                    </div>
+                  )}
+                  <p className="whitespace-pre-line text-[11px]">{form.delivery_info}</p>
+                </div>
+              )}
+
+            {/* Custom Info Cards Preview */}
+            {previewInfoCards.map((card) => (
+              <div
+                key={card.id}
+                className="rounded-xl border border-zinc-800/90 border-l-[3px] border-l-[#BEFA46] bg-[#16161E] px-3.5 py-2.5 text-xs text-zinc-300 space-y-1"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 font-extrabold text-white">
+                    {card.icon !== 'none' && (
+                      <CheckoutIcon
+                        name={card.icon}
+                        className="w-4 h-4 text-[#BEFA46] shrink-0"
+                      />
+                    )}
+                    <span>{card.title}</span>
+                  </div>
+                  {card.badge && (
+                    <span className="px-2 py-0.5 rounded-md bg-[#BEFA46]/15 text-[10px] font-extrabold text-[#BEFA46]">
+                      {card.badge}
+                    </span>
+                  )}
+                </div>
+                {card.description && (
+                  <p className="whitespace-pre-line text-[11px] text-zinc-400">
+                    {card.description}
+                  </p>
+                )}
+              </div>
+            ))}
+
+            {/* Custom Buttons Preview */}
+            {previewCustomButtons.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {previewCustomButtons.map((btn) => (
+                  <span
+                    key={btn.id}
+                    className={cn(
+                      'inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold',
+                      btn.variant === 'volt' && 'bg-[#BEFA46] text-[#09090B] font-black',
+                      btn.variant === 'whatsapp' &&
+                        'bg-emerald-500/15 border border-emerald-500/40 text-emerald-300',
+                      btn.variant === 'outline' &&
+                        'bg-[#18181F] border border-zinc-700 text-white',
+                      btn.variant === 'subtle' && 'bg-zinc-900 text-zinc-300'
+                    )}
+                  >
+                    {btn.icon !== 'none' && (
+                      <CheckoutIcon name={btn.icon} className="w-3.5 h-3.5 shrink-0" />
+                    )}
+                    <span>{btn.label}</span>
+// step 23/24
