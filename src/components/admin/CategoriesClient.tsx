@@ -108,4 +108,32 @@ export function CategoriesClient({ initialCategories }: { initialCategories: Cat
             type="number"
             value={sortOrder}
             onChange={(e) => setSortOrder(e.target.value)}
-// step 4/6
+            className="w-16 h-10 px-2 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+            title="Ordem"
+          />
+          <button
+            type="submit"
+            disabled={creating}
+            className="flex-1 h-10 rounded-xl bg-[#BEFA46] text-[#09090B] text-xs font-black inline-flex items-center justify-center gap-1"
+          >
+            <Plus className="w-4 h-4" />
+            Criar
+          </button>
+        </div>
+      </form>
+
+      <div className="rounded-3xl border border-zinc-800 bg-[#121216] divide-y divide-zinc-800">
+        {categories.map((cat) => (
+          <div
+            key={cat.id}
+            className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+          >
+            <div className="min-w-0">
+              <p className="text-sm font-extrabold text-white break-words">
+                {cat.name}{' '}
+                <span className="text-xs font-normal text-zinc-500">(/categoria/{cat.slug})</span>
+              </p>
+              <p className="text-xs text-zinc-400">{cat.description}</p>
+            </div>
+            <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+// step 5/6
