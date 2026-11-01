@@ -143,3 +143,51 @@ export async function POST(request: Request) {
     const supabase = createServiceClient();
 
     const phoneUpdatePromise =
+      !session.profile.phone && customerPhone
+        ? supabase
+            .from('user_profiles')
+            .update({ phone: customerPhone.trim() })
+            .eq('id', session.userId)
+        : Promise.resolve();
+
+    const [{ data: rpcResult, error: rpcError }] = await Promise.all([
+      supabase.rpc('create_order_from_cart', {
+        p_user_id: session.userId,
+        p_customer_name: customerName.trim(),
+        p_customer_email: customerEmail.trim(),
+        p_customer_phone: customerPhone.trim(),
+        p_delivery_method: effectiveDeliveryMethod,
+        p_shipping_address: finalShippingAddress,
+        p_customer_notes: customerNotes || '',
+      }),
+      phoneUpdatePromise,
+    ]);
+
+    if (rpcError) {
+      return NextResponse.json({ error: rpcError.message }, { status: 400 });
+    }
+
+    const r = rpcResult as { order_id?: string; order_number?: string } | null;
+    const orderId = r?.order_id;
+    const { data: fullOrder } = await supabase
+      .from('orders')
+      .select('*, order_items(*)')
+      .eq('id', orderId!)
+      .single();
+
+    let orderData = fullOrder as Record<string, unknown> | null;
+
+    if (orderData && orderId) {
+      const itemsTotalAfterDiscount = Number(orderData.total) || 0;
+      const resolvedOptions = getSelectableCheckoutOptions(
+        deliveryCfg,
+        settings.address,
+        itemsTotalAfterDiscount
+      );
+      const resolvedOption =
+        resolvedOptions.find((opt) => opt.key === requestedKey) ??
+        resolvedOptions[0] ??
+        null;
+
+      const orderUpdates: Record<string, unknown> = {};
+      if (cleanPaymentMethod) {
