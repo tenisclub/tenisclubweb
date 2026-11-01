@@ -101,3 +101,107 @@ function clearClientAuthStorage() {
 }
 
 export function StoreProvider({
+  children,
+  initialAuth = false,
+  initialUser = null,
+  initialRole = 'visitor',
+  initialCartCount = 0,
+  initialFavoriteIds = EMPTY_FAVORITES,
+}: {
+  children: React.ReactNode;
+  initialAuth?: boolean;
+  initialUser?: UserProfile | null;
+  initialRole?: UserRole;
+  initialCartCount?: number;
+  initialFavoriteIds?: string[];
+}) {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const [authenticated, setAuthenticated] = useState(initialAuth);
+  const [user, setUser] = useState<UserProfile | null>(initialUser);
+  const [role, setRole] = useState<UserRole>(initialRole);
+  const [syncTag, setSyncTag] = useState<string | null>(null);
+  const [cartCount, setCartCount] = useState(initialCartCount);
+  const [favoriteIds, setFavoriteIds] = useState<string[]>(initialFavoriteIds);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [hydratedCache, setHydratedCache] = useState(false);
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const [orderPopup, setOrderPopup] = useState<OrderConfirmedPopupData | null>(null);
+  const [orderPopupProgress, setOrderPopupProgress] = useState(100);
+
+  const isAdmin = role === 'super_admin' || role === 'admin_operational';
+
+  const dismissOrderPopup = useCallback(() => {
+    setOrderPopup(null);
+    setOrderPopupProgress(100);
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem(ORDER_POPUP_KEY);
+    }
+  }, []);
+
+  const showOrderConfirmedPopup = useCallback((data: OrderConfirmedPopupData) => {
+    setOrderPopupProgress(100);
+    setOrderPopup(data);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(
+        ORDER_POPUP_KEY,
+        JSON.stringify({ ...data, createdAt: Date.now() })
+      );
+    }
+  }, []);
+
+  // Restore pending order confirmation popup if page reloaded on '/' after WhatsApp handoff
+  useEffect(() => {
+    if (typeof window === 'undefined' || orderPopup) return;
+    const raw = sessionStorage.getItem(ORDER_POPUP_KEY);
+    if (!raw) return;
+    try {
+      const parsed = JSON.parse(raw) as OrderConfirmedPopupData & { createdAt?: number };
+      if (parsed.createdAt && Date.now() - parsed.createdAt > 120_000) {
+        sessionStorage.removeItem(ORDER_POPUP_KEY);
+        return;
+      }
+      if (parsed.orderNumber) {
+        setOrderPopupProgress(100);
+        setOrderPopup({ orderNumber: parsed.orderNumber, waUrl: parsed.waUrl });
+      }
+    } catch {
+      sessionStorage.removeItem(ORDER_POPUP_KEY);
+    }
+  }, [pathname, orderPopup]);
+
+  // Auto-close popup after 5 seconds of visible screen time on Home ('/')
+  useEffect(() => {
+    if (!orderPopup || pathname !== '/') return;
+
+    let elapsed = 0;
+    let lastTick = performance.now();
+
+    const interval = window.setInterval(() => {
+      const now = performance.now();
+      if (document.visibilityState === 'visible') {
+        elapsed += now - lastTick;
+        const pct = Math.max(0, 100 - (elapsed / ORDER_POPUP_DURATION_MS) * 100);
+        setOrderPopupProgress(pct);
+        if (elapsed >= ORDER_POPUP_DURATION_MS) {
+          window.clearInterval(interval);
+          dismissOrderPopup();
+        }
+      }
+      lastTick = now;
+    }, 50);
+
+    return () => window.clearInterval(interval);
+  }, [orderPopup, pathname, dismissOrderPopup]);
+
+  const toast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    const id = `${Date.now()}-${Math.random()}`;
+    setToasts((prev) => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 4200);
+  }, []);
+
+  const replayPendingCartIntent = useCallback(async () => {
+    if (typeof window === 'undefined') return;
