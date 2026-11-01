@@ -22,4 +22,16 @@ export default async function SobrePage() {
         </p>
       </div>
 
-// step 2/5
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-6 space-y-2">
+          <Sparkles className="w-6 h-6 text-[#BEFA46]" />
+          <h2 className="text-base font-extrabold text-white">Curadoria de Estilo</h2>
+          <p className="text-xs text-zinc-400 leading-relaxed">
+            Selecionamos tênis casuais, esportivos, mocassins e modelos infantis com foco em conforto e durabilidade.
+          </p>
+        </div>
+        <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-6 space-y-2">
+          <ShieldCheck className="w-6 h-6 text-[#BEFA46]" />
+          <h2 className="text-base font-extrabold text-white">Estoque Transparente</h2>
+          <p className="text-xs text-zinc-400 leading-relaxed">
+// step 3/5
