@@ -253,3 +253,54 @@ export function AdminProductsTable({ initialProducts }: { initialProducts: Produ
       </div>
 
       {/* Desktop Table */}
+      <div className="hidden md:block rounded-3xl border border-zinc-800 bg-[#121216] overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs sm:text-sm">
+            <thead className="bg-[#17171E] text-zinc-400 text-[11px] uppercase tracking-wider">
+              <tr>
+                <th className="px-4 py-3.5">Produto</th>
+                <th className="px-4 py-3.5">Marca / Linha</th>
+                <th className="px-4 py-3.5">Preço</th>
+                <th className="px-4 py-3.5">Estoque Total</th>
+                <th className="px-4 py-3.5">Destaque</th>
+                <th className="px-4 py-3.5">Status</th>
+                <th className="px-4 py-3.5 text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-800/80">
+              {filtered.map((p) => (
+                <tr key={p.id} className="hover:bg-zinc-900/40">
+                  <td className="px-4 py-3.5">
+                    <div className="flex items-center gap-3">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={p.primary_image}
+                        alt={p.name}
+                        className="w-12 h-12 rounded-xl object-cover bg-[#EAE0D5] shrink-0"
+                      />
+                      <div>
+                        <p className="font-extrabold text-white">{p.name}</p>
+                        <p className="text-[11px] text-zinc-500">
+                          {p.sku || 'Sem SKU'} • Tam. {p.size_range_label}
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3.5 text-zinc-300">
+                    <p className="font-semibold">{p.brand?.name || '—'}</p>
+                    <p className="text-[11px] text-zinc-500">
+                      {GENDER_LABELS[p.gender]} • {p.category?.name || 'Geral'}
+                    </p>
+                  </td>
+                  <td className="px-4 py-3.5">
+                    {p.promo_price !== null && p.promo_price < p.base_price && (
+                      <span className="block text-[11px] text-zinc-500 line-through">
+                        {formatCurrency(p.base_price)}
+                      </span>
+                    )}
+                    <span className="font-black text-[#BEFA46]">
+                      {formatCurrency(p.effective_price)}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <div className="flex flex-wrap items-center gap-1.5">
