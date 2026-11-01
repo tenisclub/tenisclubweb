@@ -14,4 +14,8 @@ export default function CheckoutLoading() {
         <div className="lg:col-span-5">
           <div className="h-72 rounded-3xl border border-zinc-800 bg-[#121216]" />
         </div>
-// step 3/4
+      </div>
+    </div>
+  );
+}
+
