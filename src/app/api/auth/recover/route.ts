@@ -5,4 +5,12 @@ export async function POST(request: Request) {
   const { email } = await request.json();
   const cleanEmail = (email || '').trim().toLowerCase();
 
-// step 1/4
+  if (!cleanEmail) {
+    return NextResponse.json({ error: 'Informe o e-mail cadastrado.' }, { status: 400 });
+  }
+
+  const supabase = createServiceClient();
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('auth_provider')
+// step 2/4
