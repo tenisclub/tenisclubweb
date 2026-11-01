@@ -6,4 +6,8 @@ export default function Loading() {
         {Array.from({ length: 8 }).map((_, i) => (
           <div
             key={i}
-// step 2/4
+            className="h-96 rounded-2xl bg-[#14141A] border border-zinc-800/70"
+          />
+        ))}
+      </div>
+// step 3/4
