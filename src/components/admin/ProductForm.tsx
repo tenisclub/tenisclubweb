@@ -195,4 +195,70 @@ export function ProductForm({
 
   const addSingleVariant = () => {
     setVariants((prev) => [
-// step 3/12
+      ...prev,
+      {
+        color: defaultColor || 'Padrão',
+        color_hex: defaultColorHex,
+        size: '40',
+        stock: allowBackorder ? 0 : 2,
+      },
+    ]);
+  };
+
+  const updateVariant = (idx: number, patch: Partial<EditableVariant>) => {
+    setVariants((prev) =>
+      prev.map((v, i) => (i === idx ? { ...v, ...patch } : v))
+    );
+  };
+
+  const removeVariant = (idx: number) => {
+    setVariants((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !basePrice) {
+      toast('Preencha o nome do calçado e o preço de venda.', 'error');
+      return;
+    }
+
+    if (variants.length === 0) {
+      toast('Adicione pelo menos uma numeração ao produto.', 'error');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const additionalInfo: Record<string, string> = {};
+      if (material.trim()) additionalInfo.Material = material.trim();
+      if (solado.trim()) additionalInfo.Solado = solado.trim();
+      if (garantia.trim()) additionalInfo.Garantia = garantia.trim();
+
+      const payload = {
+        name,
+        sku,
+        brand_id: brandId || null,
+        category_id: categoryId || null,
+        gender,
+        short_description: shortDesc,
+        description,
+        additional_info: additionalInfo,
+        cost_price: Number(costPrice || 0),
+        base_price: Number(basePrice),
+        promo_price: promoPrice ? Number(promoPrice) : null,
+        is_active: isActive,
+        is_featured: isFeatured,
+        is_new_release: isNewRelease,
+        allow_backorder: allowBackorder,
+        images,
+        variants,
+      };
+
+      const res = await fetch(
+        isEditing ? `/api/admin/products/${initialProduct!.id}` : '/api/admin/products',
+        {
+          method: isEditing ? 'PATCH' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        }
+// step 4/12
