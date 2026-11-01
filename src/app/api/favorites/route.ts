@@ -26,4 +26,12 @@ export async function POST(request: Request) {
 
   if (existing) {
     await supabase.from('favorites').delete().eq('id', existing.id);
-// step 3/4
+    return NextResponse.json({ favorited: false });
+  } else {
+    await supabase.from('favorites').insert({
+      user_id: userId,
+      product_id: productId,
+    });
+    return NextResponse.json({ favorited: true });
+  }
+}
