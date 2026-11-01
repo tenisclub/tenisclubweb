@@ -340,4 +340,51 @@ export default async function AdminDashboardPage() {
                   >
                     <div className="min-w-0">
                       <p className="font-bold text-white truncate">{item.productName}</p>
-// step 7/8
+                      <p className="text-zinc-400">
+                        Cor: {item.color} • Tam. <strong>{item.size}</strong>
+                      </p>
+                    </div>
+                    <span
+                      className={cn(
+                        'px-2.5 py-1 rounded-full font-extrabold shrink-0',
+                        item.stock === 0
+                          ? 'bg-red-500/15 text-red-400'
+                          : 'bg-amber-500/15 text-amber-300'
+                      )}
+                    >
+                      {item.stock} un.
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-3">
+            <h2 className="text-base font-black text-white flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-[#BEFA46]" />
+              Produtos Mais Vendidos
+            </h2>
+            <div className="divide-y divide-zinc-800/80">
+              {topSelling.map((p) => (
+                <div key={p.id} className="py-2.5 flex items-center justify-between text-xs">
+                  <span className="font-bold text-zinc-200 truncate pr-3">{p.name}</span>
+                  <span className="font-black text-[#BEFA46] shrink-0">
+                    {p.sold_count} vendidos
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Admin Notifications */}
+      <NotificationsPanel
+        initialNotifications={(notificationsRaw || []) as NotificationItem[]}
+        scope="admin"
+      />
+    </div>
+  );
+}
+
