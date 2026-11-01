@@ -8,4 +8,14 @@ const VALID_SCOPES = new Set<ServerSyncScope>([
   'settings',
   'orders',
   'notifications',
-// step 1/4
+  'users',
+  'user_private',
+]);
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json().catch(() => ({}));
+    const rawScope = typeof body?.scope === 'string' ? body.scope : 'all';
+    const scope: ServerSyncScope = VALID_SCOPES.has(rawScope as ServerSyncScope)
+      ? (rawScope as ServerSyncScope)
+// step 2/4
