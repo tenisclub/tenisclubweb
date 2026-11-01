@@ -507,4 +507,49 @@ export function SettingsClient({ initialSettings }: { initialSettings: StoreSett
             </div>
             <div className="sm:col-span-2">
               <label className="text-[11px] font-semibold text-zinc-400">
-// step 11/12
+                Sobre Nós (Apresentação da Loja)
+              </label>
+              <textarea
+                rows={3}
+                value={form.about_text}
+                onChange={(e) => setField('about_text', e.target.value)}
+                className="mt-1 w-full p-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-zinc-400">
+                Política de Privacidade (LGPD)
+              </label>
+              <textarea
+                rows={2}
+                value={form.privacy_policy}
+                onChange={(e) => setField('privacy_policy', e.target.value)}
+                className="mt-1 w-full p-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-zinc-400">Termos de Uso</label>
+              <textarea
+                rows={2}
+                value={form.terms_of_use}
+                onChange={(e) => setField('terms_of_use', e.target.value)}
+                className="mt-1 w-full p-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="flex justify-end">
+        <button
+          type="submit"
+          disabled={saving}
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-[#BEFA46] hover:bg-[#d1ff70] text-[#09090B] text-sm font-black shadow-[0_8px_28px_rgba(190,250,70,0.25)] transition cursor-pointer"
+        >
+          <Save className="w-4 h-4" />
+          {saving ? 'Salvando...' : 'Salvar Todas as Configurações'}
+        </button>
+      </div>
+    </form>
+  );
+}
