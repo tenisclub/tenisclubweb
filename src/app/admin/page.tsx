@@ -154,3 +154,81 @@ export default async function AdminDashboardPage() {
             {formatCurrency(registeredRevenue)}
           </p>
           <p className="text-[11px] text-zinc-500">
+            * Valor comercial de pedidos não cancelados (confirmação manual)
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-zinc-800 bg-[#121216] p-4 sm:p-5 space-y-1">
+          <div className="flex items-center justify-between text-xs font-semibold text-zinc-400">
+            <span>Pedidos Totais</span>
+            <ShoppingCart className="w-4 h-4 text-sky-400" />
+          </div>
+          <p className="text-2xl sm:text-3xl font-black text-white">{totalOrders}</p>
+          <p className="text-[11px] text-zinc-400">
+            <strong className="text-amber-400">{pendingConfirmationOrders}</strong> aguardando confirmação •{' '}
+            <strong className="text-emerald-400">{completedOrders}</strong> concluídos
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-zinc-800 bg-[#121216] p-4 sm:p-5 space-y-1">
+          <div className="flex items-center justify-between text-xs font-semibold text-zinc-400">
+            <span>Catálogo de Produtos</span>
+            <Package className="w-4 h-4 text-purple-400" />
+          </div>
+          <p className="text-2xl sm:text-3xl font-black text-white">{totalProducts}</p>
+          <p className="text-[11px] text-zinc-400">
+            <strong className="text-emerald-400">{activeProducts}</strong> ativos •{' '}
+            <strong className="text-red-400">{unavailableProducts}</strong> indisponíveis
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-zinc-800 bg-[#121216] p-4 sm:p-5 space-y-1">
+          <div className="flex items-center justify-between text-xs font-semibold text-zinc-400">
+            <span>Clientes & Alertas</span>
+            <Users className="w-4 h-4 text-emerald-400" />
+          </div>
+          <p className="text-2xl sm:text-3xl font-black text-white">{customersCount || 0}</p>
+          <p className="text-[11px] text-amber-400">
+            {productsWithLowStock} produto(s) com numeração em estoque baixo
+          </p>
+        </div>
+      </div>
+
+      {/* Period Charts: Orders & Sales (Last 7 Days) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-5">
+          <div>
+            <h2 className="text-base font-black text-white">Pedidos por Período (7 dias)</h2>
+            <p className="text-xs text-zinc-400">Volume diário de pedidos registrados</p>
+          </div>
+          <div className="h-44 flex items-end justify-between gap-1.5 sm:gap-2 pt-4">
+            {days.map((d) => {
+              const heightPct = Math.max(8, Math.round((d.ordersCount / maxOrdersDay) * 100));
+              return (
+                <div key={d.key} className="flex-1 min-w-0 flex flex-col items-center gap-1.5 sm:gap-2">
+                  <span className="text-[10px] sm:text-[11px] font-bold text-white">{d.ordersCount}</span>
+                  <div className="w-full h-28 bg-[#1A1A22] rounded-xl flex items-end overflow-hidden p-1">
+                    <div
+                      className="w-full rounded-lg bg-[#BEFA46] transition-all"
+                      style={{ height: `${heightPct}%` }}
+                    />
+                  </div>
+                  <span className="text-[9px] sm:text-[10px] text-zinc-500 font-semibold">{d.label}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-5">
+          <div>
+            <h2 className="text-base font-black text-white">Valor de Pedidos por Período (7 dias)</h2>
+            <p className="text-xs text-zinc-400">Evolução financeira registrada por dia</p>
+          </div>
+          <div className="h-44 flex items-end justify-between gap-1.5 sm:gap-2 pt-4">
+            {days.map((d) => {
+              const heightPct = Math.max(8, Math.round((d.salesTotal / maxSalesDay) * 100));
+              return (
+                <div key={d.key} className="flex-1 min-w-0 flex flex-col items-center gap-1.5 sm:gap-2">
+                  <span className="text-[9px] sm:text-[10px] font-bold text-zinc-300 truncate max-w-full">
+                    {d.salesTotal > 0 ? `R$${Math.round(d.salesTotal)}` : 'R$0'}
