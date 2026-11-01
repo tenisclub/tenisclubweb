@@ -24,4 +24,11 @@ export default async function AdminPedidoDetailPage({
   const order: Order = {
     ...(row as unknown as Order),
     items: row.order_items || [],
-// step 3/4
+    history: [...(row.order_status_history || [])].sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    ),
+  };
+
+  return <OrderDetailAdminClient initialOrder={order} />;
+}
+
