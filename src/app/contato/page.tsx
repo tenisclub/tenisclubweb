@@ -33,4 +33,22 @@ export default async function ContatoPage() {
             <h2 className="text-lg font-black text-white">WhatsApp Oficial</h2>
             <p className="text-xs text-zinc-400">
               Canal rápido para consultar numerações, confirmar pedidos e combinar entrega local.
-// step 2/5
+            </p>
+          </div>
+          <a
+            href={waUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full inline-flex items-center justify-center gap-2 h-11 px-5 rounded-xl bg-[#BEFA46] text-[#09090B] text-xs sm:text-sm font-black"
+          >
+            <MessageCircle className="w-4 h-4 shrink-0" />
+            Iniciar Conversa no WhatsApp
+          </a>
+        </div>
+
+        <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-5 sm:p-6 space-y-4 text-xs sm:text-sm text-zinc-300 break-words">
+          <div className="flex items-start gap-3">
+            <MapPin className="w-5 h-5 text-[#BEFA46] shrink-0 mt-0.5" />
+            <div>
+              <strong className="text-white block text-xs uppercase tracking-wider">Endereço</strong>
+// step 3/5
