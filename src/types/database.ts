@@ -129,4 +129,37 @@ export interface UserAddress {
   recipient_name: string;
   zip_code: string;
   street: string;
-// step 4/8
+  number: string;
+  complement: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+  reference: string;
+  is_default: boolean;
+}
+
+export interface CartItemView {
+  id: string;
+  cart_id: string;
+  product_id: string;
+  variant_id: string;
+  quantity: number;
+  product_name: string;
+  product_slug: string;
+  product_sku: string;
+  product_image: string;
+  brand_name: string;
+  color: string;
+  color_hex: string;
+  size: string;
+  base_price: number;
+  unit_price: number;
+  available_stock: number;
+  allow_backorder: boolean;
+  is_available: boolean;
+  subtotal: number;
+}
+
+export interface OrderItem {
+  id: string;
+// step 5/8
