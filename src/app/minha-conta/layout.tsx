@@ -17,4 +17,9 @@ export default async function MinhaContaLayout({
         <div className="lg:col-span-3 min-w-0">
           <AccountSidebar />
         </div>
-// step 3/4
+        <div className="lg:col-span-9 min-w-0">{children}</div>
+      </div>
+    </div>
+  );
+}
+
