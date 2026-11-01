@@ -70,4 +70,22 @@ export async function GET() {
       user: null,
       role: 'visitor',
       cartCount: 0,
-// step 4/6
+      favoriteIds: [],
+      unreadNotifications: 0,
+    });
+  }
+
+  const roleNames = (userRoles || [])
+    .map((ur: { roles?: { name?: string } | { name?: string }[] | null }) => {
+      if (Array.isArray(ur.roles)) return ur.roles[0]?.name;
+      return ur.roles?.name;
+    })
+    .filter(Boolean) as UserRole[];
+
+  let role: UserRole = 'customer';
+  if (roleNames.includes('super_admin')) role = 'super_admin';
+  else if (roleNames.includes('admin_operational')) role = 'admin_operational';
+
+  const isAdmin = role === 'super_admin' || role === 'admin_operational';
+  const isSuperAdmin = role === 'super_admin';
+// step 5/6
