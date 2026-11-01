@@ -6,4 +6,8 @@ export const dynamic = 'force-dynamic';
 export default async function NovoProdutoAdminPage() {
   const { categories, brands } = await getAdminCategoriesAndBrands();
 
-// step 2/4
+  return (
+    <ProductForm
+      categories={categories}
+      brands={brands}
+// step 3/4
