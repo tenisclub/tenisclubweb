@@ -243,4 +243,53 @@ export function CheckoutClient({
     setSubmitting(true);
 
     // Open blank window synchronously during click gesture so mobile/desktop browsers never block WhatsApp
-// step 5/24
+    let waPopup: Window | null = null;
+    try {
+      waPopup = window.open('about:blank', '_blank');
+      if (waPopup && !waPopup.closed) {
+        waPopup.document.write(
+          '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Abrindo WhatsApp...</title></head><body style="margin:0;background:#09090B;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;font-size:14px;">Abrindo WhatsApp da loja...</body></html>'
+        );
+        waPopup.document.close();
+      }
+    } catch {
+      waPopup = null;
+    }
+
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerName,
+          customerEmail,
+          customerPhone,
+          paymentMethod: resolvedPaymentMethod,
+          deliveryMethod:
+            !activeSelectedOption && showAddressForm
+              ? 'local_delivery'
+              : effectiveDeliveryMethod,
+          selectedOptionKey: activeSelectedOption?.key ?? 'pickup',
+          shippingAddress: showAddressForm
+            ? {
+                zip_code: zipCode,
+                street,
+                number,
+                complement,
+                neighborhood,
+                city,
+                state: stateUf,
+                reference,
+              }
+            : null,
+          customerNotes,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        if (waPopup && !waPopup.closed) waPopup.close();
+        setErrorMsg(data.error || 'Não foi possível criar o pedido.');
+        setSubmitting(false);
+        return;
+// step 6/24
