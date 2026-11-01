@@ -75,4 +75,29 @@ export default async function EntregaRetiradaPage() {
                       <strong>Endereço:</strong> {opt.subtitle}
                       {cfg.show_pickup_hours && settings.business_hours && (
                         <>
-// step 3/6
+                          <br />
+                          <strong>Horários:</strong> {settings.business_hours}
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    opt.subtitle
+                  )}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {infoCards.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {infoCards.map((card) => (
+            <div
+              key={card.id}
+              className="rounded-2xl border border-zinc-800 bg-[#121216] p-5 space-y-1.5"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  {card.icon !== 'none' && (
+// step 4/6
