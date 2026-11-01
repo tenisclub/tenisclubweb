@@ -295,4 +295,47 @@ export function ProductDetailClient({
               {colors.map((c) => {
                 const active = selectedColor === c.name;
                 return (
-// step 7/12
+                  <button
+                    key={c.name}
+                    type="button"
+                    onClick={() => handleSelectColor(c.name)}
+                    className={cn(
+                      'inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border text-xs font-bold transition',
+                      active
+                        ? 'border-[#BEFA46] bg-[#BEFA46]/10 text-white'
+                        : 'border-zinc-800 bg-[#15151B] text-zinc-300 hover:border-zinc-600'
+                    )}
+                  >
+                    <span
+                      className="w-3.5 h-3.5 rounded-full border border-white/25"
+                      style={{ backgroundColor: c.hex }}
+                    />
+                    {c.name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Sizes & Per-Size Stock */}
+        <div className="space-y-2.5">
+          <div className="flex flex-wrap items-center justify-between gap-1.5">
+            <span className="text-xs font-bold uppercase tracking-wider text-zinc-300">
+              Selecione a Numeração
+            </span>
+            {selectedVariant && (
+              <span
+                className={cn(
+                  'text-xs font-bold',
+                  selectedVariant.stock === 0
+                    ? allowBackorder
+                      ? 'text-emerald-400'
+                      : 'text-red-400'
+                    : selectedVariant.stock <= selectedVariant.low_stock_threshold
+                      ? 'text-amber-400'
+                      : 'text-emerald-400'
+                )}
+              >
+                {selectedVariant.stock === 0
+// step 8/12
