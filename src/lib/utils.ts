@@ -197,3 +197,52 @@ export const ORDER_STATUS_CONFIG: Record<
     label: 'Pronto para retirada',
     colorClass: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
     step: 5,
+  },
+  out_for_delivery: {
+    label: 'Saiu para entrega',
+    colorClass: 'bg-indigo-500/15 text-indigo-400 border-indigo-500/30',
+    step: 5,
+  },
+  completed: {
+    label: 'Concluído',
+    colorClass: 'bg-green-500/20 text-green-400 border-green-500/40',
+    step: 6,
+  },
+  cancelled: {
+    label: 'Cancelado',
+    colorClass: 'bg-red-500/15 text-red-400 border-red-500/30',
+    step: 0,
+  },
+};
+
+export const GENDER_LABELS: Record<ProductGender, string> = {
+  masculino: 'Masculino',
+  feminino: 'Feminino',
+  infantil: 'Infantil',
+  unissex: 'Unissex',
+};
+
+export const STANDARD_SHOE_SIZES = [
+  '33',
+  '34',
+  '35',
+  '36',
+  '37',
+  '38',
+  '39',
+  '40',
+  '41',
+  '42',
+  '43',
+  '44',
+];
+
+export function sortShoeSizes(sizes: string[]): string[] {
+  return [...new Set(sizes)].sort((a, b) => {
+    const na = Number(a);
+    const nb = Number(b);
+    if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;
+    return a.localeCompare(b);
+  });
+}
+
