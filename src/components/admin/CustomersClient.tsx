@@ -184,4 +184,35 @@ export function CustomersClient({ initialCustomers }: { initialCustomers: Custom
                   <td className="px-4 py-3.5">
                     <p className="font-bold text-white">{c.full_name}</p>
                     <p className="text-[11px] text-zinc-500">
-// step 6/8
+                      {c.email} • {c.auth_provider === 'google' ? 'Google' : 'E-mail'}
+                    </p>
+                  </td>
+                  <td className="px-4 py-3.5 text-zinc-300">
+                    {c.phone ? (
+                      <a
+                        href={`https://wa.me/${cleanWhatsAppNumber(c.phone)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 hover:text-[#BEFA46]"
+                      >
+                        <MessageCircle className="w-3.5 h-3.5 text-[#BEFA46]" />
+                        {c.phone}
+                      </a>
+                    ) : (
+                      '—'
+                    )}
+                  </td>
+                  <td className="px-4 py-3.5 text-zinc-400">{formatDate(c.created_at)}</td>
+                  <td className="px-4 py-3.5 font-bold text-white">{c.ordersCount}</td>
+                  <td className="px-4 py-3.5 font-black text-[#BEFA46]">
+                    {formatCurrency(c.totalSpent)}
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <span
+                      className={cn(
+                        'px-2.5 py-0.5 rounded-full text-[11px] font-bold',
+                        c.is_active
+                          ? 'bg-emerald-500/15 text-emerald-400'
+                          : 'bg-red-500/15 text-red-400'
+                      )}
+// step 7/8
