@@ -404,4 +404,85 @@ export function CheckoutStep3Customizer({
                               'w-8 h-8 rounded-lg border flex items-center justify-center shrink-0',
                               card.enabled
                                 ? 'border-[#BEFA46]/30 bg-[#BEFA46]/10 text-[#BEFA46]'
-// step 5/24
+                                : 'border-zinc-800 bg-zinc-900 text-zinc-500'
+                            )}
+                          >
+                            <CheckoutIcon
+                              name={card.icon === 'none' ? 'sparkles' : card.icon}
+                              className="w-4 h-4"
+                            />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <span className="text-xs sm:text-sm font-extrabold text-white truncate">
+                                {card.title || `Card Personalizado #${index + 1}`}
+                              </span>
+                              <span
+                                className={cn(
+                                  'px-1.5 py-0.5 rounded text-[10px] font-bold',
+                                  card.card_type === 'option'
+                                    ? 'bg-[#BEFA46]/15 text-[#BEFA46]'
+                                    : 'bg-sky-500/15 text-sky-300'
+                                )}
+                              >
+                                {card.card_type === 'option' ? 'Opção Clicável' : 'Quadro de Aviso'}
+                              </span>
+                              {card.require_address && (
+                                <span className="px-1.5 py-0.5 rounded bg-zinc-800 text-[10px] font-semibold text-zinc-300 inline-flex items-center gap-1">
+                                  <MapPin className="w-2.5 h-2.5 text-[#BEFA46]" />
+                                  Pede endereço
+                                </span>
+                              )}
+                              {!card.enabled && (
+                                <span className="px-1.5 py-0.5 rounded bg-zinc-800 text-[10px] font-semibold text-zinc-400">
+                                  Oculto
+                                </span>
+                              )}
+                            </div>
+                            {card.description && (
+                              <p className="text-[11px] text-zinc-400 truncate mt-0.5">
+                                {card.description}
+                              </p>
+                            )}
+                          </div>
+                        </button>
+
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            type="button"
+                            title={card.enabled ? 'Ocultar no checkout' : 'Mostrar no checkout'}
+                            onClick={() => updateExtraCard(card.id, { enabled: !card.enabled })}
+                            className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition cursor-pointer"
+                          >
+                            {card.enabled ? (
+                              <Eye className="w-4 h-4 text-[#BEFA46]" />
+                            ) : (
+                              <EyeOff className="w-4 h-4 text-zinc-500" />
+                            )}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => toggleExpand(card.id)}
+                            className={cn(
+                              'px-2.5 py-1.5 rounded-lg border text-[11px] font-bold inline-flex items-center gap-1 transition cursor-pointer',
+                              isExpanded
+                                ? 'border-[#BEFA46]/40 bg-[#BEFA46]/10 text-[#BEFA46]'
+                                : 'border-zinc-800 bg-[#18181F] text-zinc-300 hover:text-white'
+                            )}
+                          >
+                            <SlidersHorizontal className="w-3 h-3" />
+                            <span className="hidden sm:inline">Editar</span>
+                            <ChevronDown
+                              className={cn(
+                                'w-3.5 h-3.5 transition-transform',
+                                isExpanded && 'rotate-180'
+                              )}
+                            />
+                          </button>
+                          <button
+                            type="button"
+                            title="Excluir card"
+                            onClick={() => removeExtraCard(card.id)}
+                            className="p-2 rounded-lg text-zinc-500 hover:text-red-400 hover:bg-red-500/10 transition cursor-pointer"
+                          >
+// step 6/24
