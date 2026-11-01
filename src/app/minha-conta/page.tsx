@@ -115,4 +115,33 @@ export default async function MinhaContaDashboardPage() {
             <p className="text-sm text-zinc-300 font-semibold">
               Você ainda não realizou nenhum pedido.
             </p>
-// step 4/6
+            <Link
+              href="/produtos"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#BEFA46] text-[#09090B] text-xs font-extrabold"
+            >
+              Conferir Catálogo
+            </Link>
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-zinc-800 bg-[#17171E] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm font-black text-white">
+                  #{latestOrder.order_number}
+                </span>
+                <span
+                  className={cn(
+                    'px-2.5 py-0.5 rounded-full text-[11px] font-bold border',
+                    ORDER_STATUS_CONFIG[latestOrder.status as OrderStatus]?.colorClass
+                  )}
+                >
+                  {ORDER_STATUS_CONFIG[latestOrder.status as OrderStatus]?.label}
+                </span>
+              </div>
+              <p className="text-xs text-zinc-400">
+                Data: {formatDate(latestOrder.created_at)} •{' '}
+                {latestOrder.delivery_method === 'pickup'
+                  ? 'Retirada na Loja'
+                  : 'Entrega Local'}
+              </p>
+// step 5/6
