@@ -179,4 +179,34 @@ function LoginForm() {
 
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-// step 6/8
+              <label className="text-xs font-semibold text-zinc-300">Senha</label>
+              <Link
+                href="/recuperar-senha"
+                className="text-xs font-semibold text-[#BEFA46] hover:underline"
+              >
+                Esqueci minha senha
+              </Link>
+            </div>
+            <div className="relative">
+              <Lock className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type={showPwd ? 'text' : 'password'}
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full h-11 pl-10 pr-10 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#BEFA46]"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPwd(!showPwd)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+              >
+                {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+// step 7/8
