@@ -173,4 +173,28 @@ export default async function AdminRelatoriosPage() {
                 {products.slice(0, 10).map((p) => {
                   const cost = p.cost_price || 0;
                   const margin = p.effective_price - cost;
-// step 7/8
+                  return (
+                    <tr key={p.id}>
+                      <td className="py-2.5 font-bold text-white">{p.name}</td>
+                      <td className="py-2.5 text-zinc-400">{formatCurrency(cost)}</td>
+                      <td className="py-2.5 text-zinc-200">
+                        {formatCurrency(p.effective_price)}
+                      </td>
+                      <td className="py-2.5 font-extrabold text-emerald-400">
+                        {formatCurrency(margin)}
+                      </td>
+                      <td className="py-2.5 text-right font-black text-[#BEFA46]">
+                        {p.sold_count}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
