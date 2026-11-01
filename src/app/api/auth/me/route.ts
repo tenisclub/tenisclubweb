@@ -34,3 +34,39 @@ export async function GET() {
       supabase
         .from('notifications')
         .select('target_audience, user_id')
+        .eq('is_read', false)
+        .or(`and(target_audience.eq.customer,user_id.eq.${userId}),target_audience.eq.admin`),
+    ]);
+
+  let resolvedProfile = profileRow as UserProfile | null;
+  if (!resolvedProfile) {
+    const fullName =
+      (typeof userMeta.full_name === 'string' && userMeta.full_name) ||
+      (typeof userMeta.name === 'string' && userMeta.name) ||
+      claimEmail.split('@')[0] ||
+      'Cliente';
+    const { data: inserted } = await supabase
+      .from('user_profiles')
+      .upsert({
+        id: userId,
+        email: claimEmail.toLowerCase(),
+        full_name: fullName,
+        phone: typeof userMeta.phone === 'string' ? userMeta.phone : '',
+        avatar_url:
+          (typeof userMeta.avatar_url === 'string' && userMeta.avatar_url) ||
+          (typeof userMeta.picture === 'string' && userMeta.picture) ||
+          null,
+        auth_provider: typeof appMeta.provider === 'string' ? appMeta.provider : 'email',
+        is_active: true,
+      })
+      .select('*')
+      .single();
+    resolvedProfile = inserted as UserProfile;
+  }
+
+  if (!resolvedProfile?.is_active) {
+    return NextResponse.json({
+      authenticated: false,
+      user: null,
+      role: 'visitor',
+      cartCount: 0,
