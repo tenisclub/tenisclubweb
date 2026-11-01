@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { getAuthSession } from '@/lib/auth';
+import { computeUserSyncTag } from '@/lib/revalidate-store';
+import { createClient, createServiceClient } from '@/lib/supabase/server';
+import type { UserProfile, UserRole } from '@/types/database';
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -9,29 +10,26 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) {
-      const session = await getAuthSession();
-      if (!session) {
-        await supabase.auth.signOut();
-        return NextResponse.redirect(`${origin}/login?error=account_disabled`);
-      }
-      const isSafeCustomTarget =
-        next &&
-        next.startsWith('/') &&
-        !next.startsWith('//') &&
-        next !== '/minha-conta' &&
-        !next.startsWith('/minha-conta?') &&
-        !next.startsWith('/login') &&
-        !next.startsWith('/cadastro');
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
-      if (isSafeCustomTarget) {
-        return NextResponse.redirect(`${origin}${next}`);
-      }
-      return NextResponse.redirect(`${origin}/`);
-    }
-  }
+    if (!error && data?.user) {
+      const userId = data.user.id;
+      const email = (data.user.email || '').toLowerCase();
+      const userMeta = data.user.user_metadata || {};
+      const appMeta = data.user.app_metadata || {};
 
-  return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`);
-}
+      const service = createServiceClient();
+      const [{ data: profileRow }, { data: userRoles }] = await Promise.all([
+        service.from('user_profiles').select('*').eq('id', userId).maybeSingle(),
+        service.from('user_roles').select('roles(name)').eq('user_id', userId),
+      ]);
 
+      let profile = profileRow as UserProfile | null;
+      if (!profile) {
+        const fullName =
+          (typeof userMeta.full_name === 'string' && userMeta.full_name) ||
+          (typeof userMeta.name === 'string' && userMeta.name) ||
+          email.split('@')[0] ||
+          'Cliente';
+        const { data: inserted } = await service
+          .from('user_profiles')
