@@ -123,4 +123,29 @@ export default async function AdminRelatoriosPage() {
                 <span className="text-zinc-300">{st.label}</span>
                 <strong className="text-white">{st.count}</strong>
               </div>
-// step 5/8
+            ))}
+          </div>
+        </div>
+
+        <div className="lg:col-span-7 rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-3">
+          <h2 className="text-base font-black text-white">
+            Margem Estimada por Produto
+          </h2>
+
+          {/* Mobile Margin Cards */}
+          <div className="sm:hidden divide-y divide-zinc-800/70">
+            {products.slice(0, 10).map((p) => {
+              const cost = p.cost_price || 0;
+              const margin = p.effective_price - cost;
+              return (
+                <div key={p.id} className="py-3 space-y-1 text-xs">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-bold text-white truncate">{p.name}</span>
+                    <span className="font-black text-[#BEFA46] shrink-0">
+                      {p.sold_count} vend.
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-zinc-400">
+                    <span>Custo: {formatCurrency(cost)}</span>
+                    <span>Venda: {formatCurrency(p.effective_price)}</span>
+// step 6/8
