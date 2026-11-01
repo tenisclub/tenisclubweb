@@ -406,4 +406,40 @@ export function InventoryManagerClient({ initialRows }: { initialRows: StockRowI
               </div>
             </div>
 
-// step 11/12
+            <div>
+              <label className="text-xs text-zinc-300 font-semibold">
+                Motivo da movimentação *
+              </label>
+              <input
+                type="text"
+                required
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="Ex: Reposição de fornecedor / Venda balcão / Conferência"
+                className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white"
+              />
+            </div>
+
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setActiveRow(null)}
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-zinc-800 text-xs font-bold text-zinc-300"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#BEFA46] text-[#09090B] text-xs font-black"
+              >
+                {submitting ? 'Registrando...' : 'Confirmar Movimentação'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+}
+
