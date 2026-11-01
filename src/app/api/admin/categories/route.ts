@@ -1,6 +1,6 @@
-import { revalidateTag } from 'next/cache';
 import { NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
+import { revalidateStoreData } from '@/lib/revalidate-store';
 import { createServiceClient } from '@/lib/supabase/server';
 import { slugify } from '@/lib/utils';
 
@@ -28,77 +28,11 @@ export async function POST(request: Request) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
-  await supabase.from('admin_logs').insert({
-    admin_id: session.userId,
-    action: 'category.create',
-    entity_type: 'category',
-    entity_id: data.id,
-    details: { name: data.name },
-  });
-
-  revalidateTag('catalog', { expire: 0 });
-  return NextResponse.json({ category: data });
-}
-
-export async function PATCH(request: Request) {
-  const session = await getAuthSession();
-  if (!session?.isAdmin) return NextResponse.json({ error: 'Acesso negado.' }, { status: 403 });
-
-  const { id, name, description, sort_order, is_active } = await request.json();
-  if (!id) return NextResponse.json({ error: 'ID inválido.' }, { status: 400 });
-
-  const supabase = createServiceClient();
-  const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
-  if (name !== undefined) {
-    updates.name = name.trim();
-    updates.slug = slugify(name);
-  }
-  if (description !== undefined) updates.description = description;
-  if (sort_order !== undefined) updates.sort_order = Number(sort_order);
-  if (is_active !== undefined) updates.is_active = Boolean(is_active);
-
-  const { data, error } = await supabase
-    .from('categories')
-    .update(updates)
-    .eq('id', id)
-    .select('*')
-    .single();
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
-
-  await supabase.from('admin_logs').insert({
-    admin_id: session.userId,
-    action: 'category.update',
-    entity_type: 'category',
-    entity_id: id,
-    details: updates,
-  });
-
-  revalidateTag('catalog', { expire: 0 });
-  return NextResponse.json({ category: data });
-}
-
-export async function DELETE(request: Request) {
-  const session = await getAuthSession();
-  if (!session?.isAdmin) return NextResponse.json({ error: 'Acesso negado.' }, { status: 403 });
-
-  const { searchParams } = new URL(request.url);
-  const id = searchParams.get('id');
-  if (!id) return NextResponse.json({ error: 'ID inválido.' }, { status: 400 });
-
-  const supabase = createServiceClient();
-  const { error } = await supabase.from('categories').delete().eq('id', id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
-
-  await supabase.from('admin_logs').insert({
-    admin_id: session.userId,
-    action: 'category.delete',
-    entity_type: 'category',
-    entity_id: id,
-    details: {},
-  });
-
-  revalidateTag('catalog', { expire: 0 });
-  return NextResponse.json({ success: true });
-}
-
+  revalidateStoreData('catalog');
+  void supabase
+    .from('admin_logs')
+    .insert({
+      admin_id: session.userId,
+      action: 'category.create',
+      entity_type: 'category',
+      entity_id: data.id,
