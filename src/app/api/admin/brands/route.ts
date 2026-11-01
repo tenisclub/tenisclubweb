@@ -52,4 +52,22 @@ export async function PATCH(request: Request) {
     updates.name = name.trim();
     updates.slug = slugify(name);
   }
-// step 3/6
+  if (is_active !== undefined) updates.is_active = Boolean(is_active);
+
+  const { data, error } = await supabase
+    .from('brands')
+    .update(updates)
+    .eq('id', id)
+    .select('*')
+    .single();
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  revalidateStoreData('catalog');
+  void supabase
+    .from('admin_logs')
+    .insert({
+      admin_id: session.userId,
+      action: 'brand.update',
+      entity_type: 'brand',
+// step 4/6
