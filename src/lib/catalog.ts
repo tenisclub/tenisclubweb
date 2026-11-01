@@ -529,4 +529,57 @@ export const getUserCartView = cache(
           variant_id,
           quantity,
           created_at,
-// step 10/12
+          products (
+            *,
+            brands(*),
+            product_images(*),
+            promotions(*)
+          ),
+          product_variants (
+            *,
+            inventory(*)
+          )
+        )
+      `
+      )
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (!cartRow) {
+      return { items: [], totalItems: 0, subtotal: 0, total: 0 };
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rawItems: any[] = [...((cartRow as any).cart_items || [])].sort(
+      (a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime()
+    );
+
+    const items: CartItemView[] = [];
+    const clampUpdates: PromiseLike<unknown>[] = [];
+
+    for (const row of rawItems) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const prodRaw: any = Array.isArray(row.products) ? row.products[0] : row.products;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const varRaw: any = Array.isArray(row.product_variants)
+        ? row.product_variants[0]
+        : row.product_variants;
+
+      if (!prodRaw || !varRaw) continue;
+
+      const enrichedProd = enrichProductRow({
+        ...prodRaw,
+        product_variants: [varRaw],
+      });
+
+      const inv = Array.isArray(varRaw.inventory) ? varRaw.inventory[0] : varRaw.inventory;
+      const stock = Number(inv?.quantity ?? 0);
+      const allowBackorder = Boolean(prodRaw.allow_backorder);
+      const isAvailable = Boolean(
+        prodRaw.is_active && varRaw.is_active && (stock > 0 || allowBackorder)
+      );
+      const clampedQty = allowBackorder
+        ? Math.min(row.quantity, 99)
+        : stock > 0
+          ? Math.min(row.quantity, stock)
+// step 11/12
