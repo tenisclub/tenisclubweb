@@ -282,4 +282,40 @@ function DesktopRandomWall() {
     if (nextEl) {
       nextEl.muted = true;
       nextEl.currentTime = 0;
-// step 8/12
+      nextEl.play().catch(() => {});
+    }
+
+    // Build set of ALL videos that will be playing on screen right now
+    const nowPlaying = new Set<number>();
+    for (let c = 0; c < colCount; c++) {
+      if (c === colIdx) {
+        nowPlaying.add(incomingVid);
+      } else {
+        nowPlaying.add(snapshot[c].slots[snapshot[c].activeSlot]);
+      }
+    }
+
+    // If any OTHER column had `incomingVid` sitting in its inactive buffer, swap that inactive buffer immediately so it never collides later
+    const nextColumns = snapshot.map((col, c): ColumnSlotState => {
+      if (c === colIdx) {
+        return {
+          activeSlot: nextSlot,
+          slots: col.slots,
+        };
+      }
+      const inactive: 0 | 1 = col.activeSlot === 0 ? 1 : 0;
+      if (col.slots[inactive] === incomingVid) {
+        const replacement = pickRandomExcluding(
+          total,
+          new Set([...nowPlaying, col.slots[col.activeSlot]])
+        );
+        const updatedSlots: [number, number] =
+          inactive === 0 ? [replacement, col.slots[1]] : [col.slots[0], replacement];
+        return { ...col, slots: updatedSlots };
+      }
+      return col;
+    });
+
+    columnsRef.current = nextColumns;
+    setColumns(nextColumns);
+// step 9/12
