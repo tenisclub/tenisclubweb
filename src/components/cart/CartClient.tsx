@@ -62,3 +62,67 @@ export function CartClient({
   const updateQty = async (itemId: string, nextQty: number) => {
     const prevSnapshot = items;
     const optimistic = items.map((i) =>
+      i.id === itemId ? { ...i, quantity: nextQty, subtotal: i.unit_price * nextQty } : i
+    );
+    recomputeAndApply(optimistic);
+    setLoadingId(itemId);
+
+    try {
+      const res = await fetch('/api/cart', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ itemId, quantity: nextQty }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        recomputeAndApply(prevSnapshot);
+        toast(data.error || 'Erro ao atualizar quantidade.', 'error');
+        return;
+      }
+      applyCartData(data);
+    } catch {
+      recomputeAndApply(prevSnapshot);
+      toast('Erro ao atualizar quantidade.', 'error');
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
+  const removeItem = async (itemId: string) => {
+    const prevSnapshot = items;
+    recomputeAndApply(items.filter((i) => i.id !== itemId));
+    toast('Item removido do carrinho.', 'info');
+    setLoadingId(itemId);
+
+    try {
+      const res = await fetch(`/api/cart?itemId=${encodeURIComponent(itemId)}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (res.ok) {
+        applyCartData(data);
+      } else {
+        recomputeAndApply(prevSnapshot);
+        toast(data.error || 'Erro ao remover item.', 'error');
+      }
+    } catch {
+      recomputeAndApply(prevSnapshot);
+      toast('Erro ao remover item.', 'error');
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
+  if (items.length === 0) {
+    return (
+      <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-6 sm:p-12 text-center space-y-4 max-w-xl mx-auto my-6 sm:my-10">
+        <div className="w-16 h-16 rounded-2xl bg-[#BEFA46]/10 border border-[#BEFA46]/30 text-[#BEFA46] flex items-center justify-center mx-auto">
+          <ShoppingBag className="w-8 h-8" />
+        </div>
+        <h2 className="text-xl sm:text-2xl font-black text-white">Seu carrinho está vazio</h2>
+        <p className="text-xs sm:text-sm text-zinc-400">
+          Explore nosso catálogo, escolha sua numeração e adicione seus pares favoritos.
+        </p>
+        <Link
+          href="/produtos"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#BEFA46] text-[#09090B] text-sm font-extrabold"
