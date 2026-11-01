@@ -225,4 +225,49 @@ export function CatalogExplorer({
       {/* Main Layout: Sidebar Filters + Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Sidebar Filters */}
-// step 5/12
+        <aside
+          className={cn(
+            'lg:col-span-3 space-y-6 rounded-2xl border border-zinc-800/90 bg-[#111115] p-5',
+            mobileFiltersOpen ? 'block' : 'hidden lg:block'
+          )}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-extrabold uppercase tracking-widest text-white">
+              Filtros
+            </span>
+            <button
+              type="button"
+              onClick={resetAll}
+              className="inline-flex items-center gap-1 text-xs font-semibold text-[#BEFA46] hover:underline"
+            >
+              <RotateCcw className="w-3 h-3" />
+              Limpar
+            </button>
+          </div>
+
+          {/* Search */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-zinc-400">Busca rápida</label>
+            <div className="relative">
+              <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="search"
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
+                placeholder="Modelo, marca, ref..."
+                className="w-full h-10 pl-9 pr-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#BEFA46]"
+              />
+            </div>
+          </div>
+
+          {/* Gender */}
+          <div className="space-y-2">
+            <span className="text-xs font-semibold text-zinc-400 block">Gênero</span>
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                { v: 'todos', l: 'Todos' },
+                { v: 'masculino', l: 'Masculino' },
+// step 6/12
