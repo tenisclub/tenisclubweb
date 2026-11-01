@@ -656,4 +656,70 @@ export function ProductForm({
                 type="color"
                 value={defaultColorHex}
                 onChange={(e) => setDefaultColorHex(e.target.value)}
-// step 10/12
+                className="w-9 h-9 rounded-lg bg-transparent border border-zinc-700 cursor-pointer shrink-0"
+                title="Cor visual"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => generateStandardSizes(37, 43, allowBackorder ? 0 : 3)}
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 h-9 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-[#BEFA46]"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              Gerar 37 ao 43
+            </button>
+            <button
+              type="button"
+              onClick={() => generateStandardSizes(34, 39, allowBackorder ? 0 : 3)}
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 h-9 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-zinc-200"
+            >
+              Gerar 34 ao 39
+            </button>
+            <button
+              type="button"
+              onClick={addSingleVariant}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-1 px-3.5 h-9 rounded-xl bg-[#BEFA46] text-[#09090B] text-xs font-black"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Adicionar Linha
+            </button>
+          </div>
+        </div>
+
+        {/* Allow Backorder Toggle Box inside Stock Section */}
+        <label
+          className={cn(
+            'flex items-start sm:items-center justify-between gap-3 rounded-2xl border p-3.5 cursor-pointer transition',
+            allowBackorder
+              ? 'border-[#BEFA46]/50 bg-[#BEFA46]/10'
+              : 'border-zinc-800 bg-[#18181F] hover:border-zinc-700'
+          )}
+        >
+          <div className="flex items-start sm:items-center gap-3">
+            <input
+              type="checkbox"
+              checked={allowBackorder}
+              onChange={(e) => setAllowBackorder(e.target.checked)}
+              className="w-4 h-4 accent-[#BEFA46] mt-0.5 sm:mt-0 shrink-0"
+            />
+            <div className="space-y-0.5">
+              <span className="block text-xs sm:text-sm font-extrabold text-white">
+                Vender este produto mesmo sem estoque
+              </span>
+              <span className="block text-[11px] sm:text-xs text-zinc-400">
+                Quando ativado, o cliente pode escolher qualquer numeração abaixo e finalizar o pedido mesmo com saldo 0.
+              </span>
+            </div>
+          </div>
+          <span
+            className={cn(
+              'px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shrink-0',
+              allowBackorder
+                ? 'bg-[#BEFA46] text-[#09090B]'
+                : 'bg-zinc-800 text-zinc-400'
+            )}
+          >
+            {allowBackorder ? 'Ativado' : 'Desativado'}
+          </span>
+        </label>
+// step 11/12
