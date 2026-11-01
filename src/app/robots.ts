@@ -6,4 +6,8 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-// step 2/4
+        allow: '/',
+        disallow: ['/admin/', '/minha-conta/', '/carrinho', '/checkout', '/api/'],
+      },
+    ],
+// step 3/4
