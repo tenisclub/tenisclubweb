@@ -882,3 +882,76 @@ export function CheckoutClient({
                 </div>
               )}
 
+              {/* Custom Action Buttons */}
+              {visibleCustomButtons.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {visibleCustomButtons.map((btn) => (
+                    <a
+                      key={btn.id}
+                      href={btn.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={cn(
+                        'w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition',
+                        btn.variant === 'volt' &&
+                          'bg-[#BEFA46] hover:bg-[#d1ff70] text-[#09090B] font-black',
+                        btn.variant === 'whatsapp' &&
+                          'bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300',
+                        btn.variant === 'outline' &&
+                          'bg-[#18181F] hover:bg-zinc-800 border border-zinc-700 text-white',
+                        btn.variant === 'subtle' &&
+                          'bg-zinc-900 hover:bg-zinc-800 text-zinc-300'
+                      )}
+                    >
+                      {btn.icon !== 'none' && (
+                        <CheckoutIcon name={btn.icon} className="w-4 h-4 shrink-0" />
+                      )}
+                      <span>{btn.label}</span>
+                    </a>
+                  ))}
+                </div>
+              )}
+
+              {/* 4. Dedicated Delivery Address Sub-Panel */}
+              {showAddressForm && (
+                <div className="rounded-2xl border border-zinc-800/90 bg-[#0D0D11] p-4 space-y-3.5">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-xs font-extrabold uppercase tracking-wider text-white flex items-center gap-1.5">
+                      <MapPin className="w-4 h-4 text-[#BEFA46]" />
+                      Endereço
+                    </span>
+                    {savedAddresses.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {savedAddresses.map((addr) => (
+                          <button
+                            key={addr.id}
+                            type="button"
+                            onClick={() => applySavedAddress(addr)}
+                            className="px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-[11px] font-bold text-[#BEFA46] cursor-pointer"
+                          >
+                            {addr.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-12 gap-2.5">
+                    <div className="col-span-5 sm:col-span-4">
+                      <label className="text-[11px] font-semibold text-zinc-400">CEP</label>
+                      <input
+                        type="text"
+                        value={zipCode}
+                        onChange={(e) => setZipCode(e.target.value)}
+                        placeholder="00000-000"
+                        className="mt-1 w-full h-10 px-3 rounded-xl bg-[#15151C] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+                      />
+                    </div>
+                    <div className="col-span-7 sm:col-span-6">
+                      <label className="text-[11px] font-semibold text-zinc-400">Cidade *</label>
+                      <input
+                        type="text"
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                        className="mt-1 w-full h-10 px-3 rounded-xl bg-[#15151C] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+                      />
