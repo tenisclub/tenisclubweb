@@ -161,3 +161,43 @@ export default async function AdminMovimentacoesPage() {
                       {formatDateTime(m.created_at)}
                     </td>
                     <td className="px-4 py-3 font-bold text-white">
+                      {prod?.name || 'Produto'}
+                    </td>
+                    <td className="px-4 py-3 text-zinc-300 whitespace-nowrap">
+                      {pv?.color} • Tam. <strong>{pv?.size}</strong>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <span
+                        className={cn(
+                          'inline-flex items-center px-2.5 py-0.5 rounded-full font-bold whitespace-nowrap',
+                          badge.cls
+                        )}
+                      >
+                        {badge.label}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-zinc-400">{m.previous_quantity}</td>
+                    <td
+                      className={cn(
+                        'px-4 py-3 font-extrabold',
+                        m.moved_quantity >= 0 ? 'text-emerald-400' : 'text-red-400'
+                      )}
+                    >
+                      {m.moved_quantity > 0 ? `+${m.moved_quantity}` : m.moved_quantity}
+                    </td>
+                    <td className="px-4 py-3 font-black text-white">{m.new_quantity}</td>
+                    <td className="px-4 py-3 text-zinc-300">
+                      {user?.full_name || user?.email || 'Sistema'}
+                    </td>
+                    <td className="px-4 py-3 text-zinc-400 max-w-xs">{m.reason}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
