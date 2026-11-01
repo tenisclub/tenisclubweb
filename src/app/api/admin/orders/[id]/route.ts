@@ -32,4 +32,16 @@ export async function PATCH(
     const supabase = createServiceClient();
     const { data, error } = await supabase.rpc('change_order_status_atomic', {
       p_order_id: id,
-// step 3/5
+      p_new_status: status,
+      p_note: note || '',
+      p_store_notes: store_notes ?? null,
+      p_internal_notes: internal_notes ?? null,
+      p_payment_status: payment_status ?? null,
+      p_payment_method_note: payment_method_note ?? null,
+      p_admin_id: session.userId,
+    });
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+// step 4/5
