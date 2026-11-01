@@ -145,4 +145,53 @@ export function CheckoutClient({
     () =>
       calculateCheckoutShipping(
         deliveryCfg,
-// step 3/24
+        activeSelectedOption?.key ?? selectedOptionKey,
+        total
+      ),
+    [deliveryCfg, activeSelectedOption?.key, selectedOptionKey, total]
+  );
+
+  const finalOrderTotal = total + shippingCalc.shippingCost;
+
+  const visibleInfoCards = useMemo(
+    () =>
+      deliveryCfg.extra_cards.filter(
+        (c) =>
+          c.enabled &&
+          c.card_type === 'info' &&
+          (c.title.trim() || c.description.trim()) &&
+          (c.visibility === 'always' || c.visibility === effectiveDeliveryMethod)
+      ),
+    [deliveryCfg.extra_cards, effectiveDeliveryMethod]
+  );
+
+  const visibleCustomButtons = useMemo(
+    () =>
+      deliveryCfg.custom_buttons.filter(
+        (b) =>
+          b.label.trim() &&
+          b.url.trim() &&
+          (b.visibility === 'always' || b.visibility === effectiveDeliveryMethod)
+      ),
+    [deliveryCfg.custom_buttons, effectiveDeliveryMethod]
+  );
+
+  const showAddressForm = useMemo(
+    () =>
+      shouldRequireCheckoutAddress(
+        deliveryCfg,
+        activeSelectedOption,
+        effectiveDeliveryMethod
+      ),
+    [deliveryCfg, activeSelectedOption, effectiveDeliveryMethod]
+  );
+
+  const goToStep = (nextStep: 1 | 2 | 3) => {
+    setErrorMsg('');
+    setStep(nextStep);
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+// step 4/24
