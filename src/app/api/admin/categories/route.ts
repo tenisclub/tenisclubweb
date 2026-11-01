@@ -93,4 +93,21 @@ export async function DELETE(request: Request) {
   if (!id) return NextResponse.json({ error: 'ID inválido.' }, { status: 400 });
 
   const supabase = createServiceClient();
-// step 5/6
+  const { error } = await supabase.from('categories').delete().eq('id', id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  revalidateStoreData('catalog');
+  void supabase
+    .from('admin_logs')
+    .insert({
+      admin_id: session.userId,
+      action: 'category.delete',
+      entity_type: 'category',
+      entity_id: id,
+      details: {},
+    })
+    .then(() => {});
+
+  return NextResponse.json({ success: true });
+}
+
