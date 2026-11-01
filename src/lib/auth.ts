@@ -109,4 +109,32 @@ export const getAuthSession = cache(async (): Promise<AuthSession | null> => {
 
     let role: UserRole = 'customer';
     if (roleNames.includes('super_admin')) role = 'super_admin';
-// step 4/6
+    else if (roleNames.includes('admin_operational')) role = 'admin_operational';
+
+    const record = {
+      profile: { ...resolvedProfile, role },
+      role,
+      isAdmin: role === 'super_admin' || role === 'admin_operational',
+      isSuperAdmin: role === 'super_admin',
+    };
+
+    setCachedAuthRecord(userId, record, 45_000);
+
+    return {
+      userId,
+      email: claimEmail || resolvedProfile.email,
+      ...record,
+    };
+  } catch {
+    return null;
+  }
+});
+
+export async function requireUserId(redirectTo = '/minha-conta'): Promise<string> {
+  const userId = await getAuthenticatedUserId();
+  if (!userId) {
+    redirect(`/login?redirect=${encodeURIComponent(redirectTo)}`);
+  }
+  return userId;
+}
+// step 5/6
