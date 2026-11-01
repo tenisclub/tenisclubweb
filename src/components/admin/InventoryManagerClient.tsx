@@ -332,3 +332,59 @@ export function InventoryManagerClient({ initialRows }: { initialRows: StockRowI
                 </tr>
               ))}
             </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Movement Modal */}
+      {activeRow && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3.5 sm:p-4">
+          <form
+            onSubmit={handleConfirmMove}
+            className="w-full max-w-md max-h-[90dvh] overflow-y-auto rounded-3xl border border-zinc-700 bg-[#131319] p-4 sm:p-6 space-y-4 shadow-2xl"
+          >
+            <div>
+              <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#BEFA46]">
+                Movimentação Auditada
+              </span>
+              <h2 className="text-base sm:text-lg font-black text-white mt-0.5">
+                {activeRow.productName} — Tam. {activeRow.size}
+              </h2>
+              <p className="text-xs text-zinc-400">
+                Saldo atual: <strong className="text-white">{activeRow.quantity} un.</strong> ({activeRow.color})
+              </p>
+            </div>
+
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+              {[
+                { v: 'in', l: 'Adicionar' },
+                { v: 'out', l: 'Remover' },
+                { v: 'adjustment', l: 'Corrigir' },
+              ].map((op) => (
+                <button
+                  key={op.v}
+                  type="button"
+                  onClick={() => setOperation(op.v as typeof operation)}
+                  className={cn(
+                    'py-2 px-1.5 rounded-xl text-[11px] sm:text-xs font-bold border',
+                    operation === op.v
+                      ? 'bg-[#BEFA46] text-[#09090B] border-[#BEFA46]'
+                      : 'bg-[#18181F] text-zinc-300 border-zinc-800'
+                  )}
+                >
+                  {op.l}
+                </button>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-zinc-300 font-semibold">
+                  {operation === 'adjustment' ? 'Novo Saldo Final *' : 'Quantidade *'}
+                </label>
+                <input
+                  type="number"
+                  min={operation === 'adjustment' ? 0 : 1}
+                  required
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
