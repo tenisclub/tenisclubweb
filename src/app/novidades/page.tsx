@@ -14,4 +14,12 @@ export default async function NovidadesPage() {
     getCatalogProducts({ pageSize: 200 }),
     getCategoriesAndBrands(),
     getStoreSettings(),
-// step 2/4
+  ]);
+
+  return (
+    <CatalogExplorer
+      products={allMatching}
+      categories={categories}
+      brands={brands}
+      whatsapp={settings.whatsapp}
+// step 3/4
