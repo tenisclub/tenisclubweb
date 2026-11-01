@@ -23,4 +23,30 @@ export default async function EntregaRetiradaPage() {
       <div className="flex items-center gap-3">
         {cfg.step_icon !== 'none' && (
           <CheckoutIcon name={cfg.step_icon} className="w-6 h-6 sm:w-7 sm:h-7 text-[#BEFA46] shrink-0" />
-// step 1/6
+        )}
+        <h1 className="text-2xl sm:text-3xl font-black text-white">Entrega e Retirada</h1>
+      </div>
+
+      {selectableOptions.length > 0 && (
+        <div
+          className={cn(
+            'grid grid-cols-1 gap-4 sm:gap-5',
+            selectableOptions.length >= 2 && 'md:grid-cols-2'
+          )}
+        >
+          {selectableOptions.map((opt) => (
+            <div
+              key={opt.key}
+              className="rounded-3xl border border-zinc-800 bg-[#121216] p-5 sm:p-6 space-y-3"
+            >
+              <div className="flex items-center justify-between">
+                {opt.icon !== 'none' ? (
+                  <CheckoutIcon name={opt.icon} className="w-7 h-7 text-[#BEFA46]" />
+                ) : (
+                  <span />
+                )}
+                <span
+                  className={cn(
+                    'text-xs font-extrabold',
+                    opt.badgeLabel === 'Grátis' ? 'text-emerald-400' : 'text-zinc-200'
+// step 2/6
