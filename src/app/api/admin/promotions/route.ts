@@ -87,4 +87,26 @@ export async function PATCH(request: Request) {
     .eq('id', id)
     .select('*')
     .single();
-// step 4/6
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  revalidateStoreData('catalog');
+  void supabase
+    .from('admin_logs')
+    .insert({
+      admin_id: session.userId,
+      action: 'promotion.update',
+      entity_type: 'promotion',
+      entity_id: id,
+      details: updates,
+    })
+    .then(() => {});
+
+  return NextResponse.json({ promotion: data });
+}
+
+export async function DELETE(request: Request) {
+  const session = await getAuthSession();
+  if (!session?.isAdmin) return NextResponse.json({ error: 'Acesso negado.' }, { status: 403 });
+
+// step 5/6
