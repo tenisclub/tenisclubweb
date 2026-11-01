@@ -118,4 +118,34 @@ export default async function HomePage() {
               href="/produtos"
               className="text-xs sm:text-sm font-bold text-[#BEFA46] hover:underline inline-flex items-center gap-1 shrink-0 pb-0.5"
             >
-// step 4/8
+              Ver todos <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {featuredProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                whatsapp={settings.whatsapp}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* 5. OFERTAS PROMOCIONAIS */}
+      {offerProducts.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="rounded-3xl border border-[#BEFA46]/25 bg-gradient-to-br from-[#13170D] via-[#111115] to-[#111115] p-4 sm:p-8 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+              <div>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#BEFA46] text-[#09090B] text-[11px] font-black uppercase tracking-wider">
+                  <Tag className="w-3.5 h-3.5" />
+                  Preços Especiais
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-black text-white mt-2">
+                  Ofertas Imperdíveis
+                </h2>
+              </div>
+// step 5/8
