@@ -9,4 +9,9 @@ export function computeUserSyncTag(userId: string): string {
 export function revalidateStoreData(scope: ServerSyncScope = 'all') {
   invalidateServerCache(scope);
   try {
-// step 2/4
+    if (scope === 'all' || scope === 'catalog' || scope === 'orders') {
+      revalidateTag('catalog', { expire: 0 });
+    }
+    if (scope === 'all' || scope === 'settings') {
+      revalidateTag('store-settings', { expire: 0 });
+// step 3/4
