@@ -32,4 +32,15 @@ export function Footer({ settings }: { settings: StoreSettings }) {
         <div className="flex items-center gap-4 text-zinc-500">
           <Link href="/privacidade" className="hover:text-zinc-300 transition">
             Privacidade
-// step 3/5
+          </Link>
+          <span>·</span>
+          <Link href="/termos" className="hover:text-zinc-300 transition">
+            Termos
+          </Link>
+        </div>
+      </div>
+
+      {showTop && (
+        <button
+          type="button"
+// step 4/5
