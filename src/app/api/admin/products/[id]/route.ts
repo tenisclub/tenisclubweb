@@ -279,4 +279,39 @@ export async function PATCH(
 
               for (const cv of createdVars) {
                 const match = newVariantsSpec.find(
-// step 8/12
+                  (nv) => nv.color === cv.color && nv.size === String(cv.size)
+                );
+                const qty = match?.desiredQty ?? 0;
+                invRows.push({
+                  variant_id: cv.id,
+                  quantity: qty,
+                  low_stock_threshold: 3,
+                });
+                if (qty > 0) {
+                  newMovements.push({
+                    variant_id: cv.id,
+                    product_id: id,
+                    previous_quantity: 0,
+                    moved_quantity: qty,
+                    new_quantity: qty,
+                    movement_type: 'in',
+                    reason: 'Nova numeração adicionada na edição do produto',
+                    performed_by: session.userId,
+                  });
+                }
+              }
+
+              await Promise.all([
+                supabase.from('inventory').insert(invRows),
+                newMovements.length > 0
+                  ? supabase.from('inventory_movements').insert(newMovements)
+                  : Promise.resolve(),
+              ]);
+            }
+          })()
+        );
+      }
+
+      if (movementsToInsert.length > 0) {
+        parallelOps.push(supabase.from('inventory_movements').insert(movementsToInsert));
+// step 9/12
