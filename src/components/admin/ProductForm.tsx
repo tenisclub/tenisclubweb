@@ -393,4 +393,69 @@ export function ProductForm({
               min="0"
               value={costPrice}
               onChange={(e) => setCostPrice(e.target.value)}
-// step 6/12
+              className="w-full h-11 px-4 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-zinc-300">
+              Preço de Venda (R$) *
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              required
+              value={basePrice}
+              onChange={(e) => setBasePrice(e.target.value)}
+              className="w-full h-11 px-4 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-zinc-300">
+              Preço Promocional (R$)
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={promoPrice}
+              onChange={(e) => setPromoPrice(e.target.value)}
+              placeholder="Opcional"
+              className="w-full h-11 px-4 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <div>
+            <label className="text-xs font-semibold text-zinc-300">Resumo curto</label>
+            <input
+              type="text"
+              value={shortDesc}
+              onChange={(e) => setShortDesc(e.target.value)}
+              placeholder="Frase de impacto exibida nos cards e SEO"
+              className="mt-1 w-full h-10 px-4 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-zinc-300">Descrição completa</label>
+            <textarea
+              rows={4}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="mt-1 w-full p-4 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+          <div>
+            <label className="text-xs font-semibold text-zinc-400">Material</label>
+            <input
+              type="text"
+              value={material}
+              onChange={(e) => setMaterial(e.target.value)}
+// step 7/12
