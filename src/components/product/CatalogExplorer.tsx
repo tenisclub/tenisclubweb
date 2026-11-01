@@ -497,4 +497,48 @@ export function CatalogExplorer({
                     }}
                     className="h-10 px-3.5 rounded-xl border border-zinc-800 bg-[#141419] text-xs font-bold text-zinc-200 disabled:opacity-40 inline-flex items-center gap-1"
                   >
-// step 11/12
+                    <ChevronLeft className="w-4 h-4" />
+                    Anterior
+                  </button>
+
+                  {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((num) => (
+                    <button
+                      key={num}
+                      type="button"
+                      onClick={() => {
+                        setPage(num);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      className={cn(
+                        'w-10 h-10 rounded-xl text-xs font-extrabold border transition',
+                        num === safePage
+                          ? 'bg-[#BEFA46] text-[#09090B] border-[#BEFA46]'
+                          : 'bg-[#141419] text-zinc-300 border-zinc-800 hover:border-zinc-600'
+                      )}
+                    >
+                      {num}
+                    </button>
+                  ))}
+
+                  <button
+                    type="button"
+                    disabled={safePage >= totalPages}
+                    onClick={() => {
+                      setPage((p) => Math.min(totalPages, p + 1));
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className="h-10 px-3.5 rounded-xl border border-zinc-800 bg-[#141419] text-xs font-bold text-zinc-200 disabled:opacity-40 inline-flex items-center gap-1"
+                  >
+                    Próxima
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
