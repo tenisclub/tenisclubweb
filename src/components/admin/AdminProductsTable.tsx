@@ -151,3 +151,54 @@ export function AdminProductsTable({ initialProducts }: { initialProducts: Produ
                 </p>
                 <div className="flex flex-wrap items-center gap-2 mt-1.5">
                   <span className="text-sm font-black text-[#BEFA46]">
+                    {formatCurrency(p.effective_price)}
+                  </span>
+                  {p.promo_price !== null && p.promo_price < p.base_price && (
+                    <span className="text-[11px] text-zinc-500 line-through">
+                      {formatCurrency(p.base_price)}
+                    </span>
+                  )}
+                  <span
+                    className={cn(
+                      'px-2 py-0.5 rounded-full text-[11px] font-extrabold',
+                      p.total_stock === 0
+                        ? p.allow_backorder
+                          ? 'bg-sky-500/15 text-sky-300'
+                          : 'bg-red-500/15 text-red-400'
+                        : p.total_stock <= 5
+                          ? 'bg-amber-500/15 text-amber-300'
+                          : 'bg-emerald-500/15 text-emerald-400'
+                    )}
+                  >
+                    {p.total_stock} un.
+                  </span>
+                  {p.allow_backorder && (
+                    <span className="px-2 py-0.5 rounded-full bg-[#BEFA46]/15 text-[#BEFA46] text-[10px] font-bold">
+                      Venda s/ estoque
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between gap-2 pt-2.5 border-t border-zinc-800/80">
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => toggleFlag(p.id, 'is_active', !p.is_active)}
+                  className={cn(
+                    'px-2.5 py-1 rounded-full text-[11px] font-bold border transition',
+                    p.is_active
+                      ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                      : 'bg-zinc-800 text-zinc-400 border-zinc-700'
+                  )}
+                >
+                  {p.is_active ? 'Ativo' : 'Inativo'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => toggleFlag(p.id, 'is_featured', !p.is_featured)}
+                  className={cn(
+                    'p-1.5 rounded-lg border transition',
+                    p.is_featured
+                      ? 'border-[#BEFA46] bg-[#BEFA46]/15 text-[#BEFA46]'
