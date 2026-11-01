@@ -52,4 +52,31 @@ export function CheckoutIcon({
       return <Store className={className} />;
     case 'truck':
       return <Truck className={className} />;
-// step 2/6
+    case 'package':
+      return <Package className={className} />;
+    case 'clock':
+      return <Clock className={className} />;
+    case 'zap':
+      return <Zap className={className} />;
+    case 'shield-check':
+      return <ShieldCheck className={className} />;
+    case 'sparkles':
+      return <Sparkles className={className} />;
+    case 'message-circle':
+      return <MessageCircle className={className} />;
+    case 'navigation':
+      return <Navigation className={className} />;
+    case 'gift':
+      return <Gift className={className} />;
+    case 'external-link':
+      return <ExternalLink className={className} />;
+    case 'info':
+      return <Info className={className} />;
+    case 'none':
+    default:
+      return null;
+  }
+}
+
+export function CheckoutIconPicker({
+// step 3/6
