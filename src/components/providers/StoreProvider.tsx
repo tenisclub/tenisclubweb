@@ -309,3 +309,107 @@ export function StoreProvider({
       } catch {
         // Ignore
       }
+      void fetch('/api/auth/logout', { method: 'POST', keepalive: true }).catch(() => {});
+
+      // 3. Immediate client transition without competing router.refresh() race
+      router.replace(redirectTo);
+    },
+    [router]
+  );
+
+  // Hydrate navbar session once on mount (zero requests for anonymous visitors; instant cache restore + background sync for logged-in users)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const hasAuthCookie = document.cookie.includes('-auth-token');
+    if (!hasAuthCookie) {
+      sessionStorage.removeItem(SESSION_CACHE_KEY);
+      setHydratedCache(true);
+      return;
+    }
+
+    // Check for instant OAuth callback bootstrap cookie (0ms first-frame Google login hydration)
+    try {
+      const bootMatch = document.cookie.match(/(?:^|;\s*)tc_oauth_bootstrap=([^;]+)/);
+      if (bootMatch?.[1]) {
+        const parsed = JSON.parse(decodeURIComponent(bootMatch[1]));
+        document.cookie = 'tc_oauth_bootstrap=; Path=/; Max-Age=0; SameSite=Lax';
+        if (parsed?.authenticated && parsed?.user) {
+          const bootSnap: SessionSnapshot = {
+            authenticated: true,
+            user: parsed.user,
+            role: parsed.role || 'customer',
+            syncTag: parsed.syncTag || null,
+            cartCount: 0,
+            favoriteIds: EMPTY_FAVORITES,
+            unreadNotifications: 0,
+          };
+          setAuthenticated(true);
+          setUser(bootSnap.user);
+          setRole(bootSnap.role);
+          setSyncTag(bootSnap.syncTag || null);
+          sessionStorage.setItem(SESSION_CACHE_KEY, JSON.stringify(bootSnap));
+        }
+      }
+    } catch {
+      // Ignore malformed bootstrap cookie
+    }
+
+    try {
+      const raw = sessionStorage.getItem(SESSION_CACHE_KEY);
+      if (raw) {
+        const cached = JSON.parse(raw) as SessionSnapshot;
+        if (cached.authenticated) {
+          setAuthenticated(true);
+          setUser(cached.user);
+          setRole(cached.role);
+          setSyncTag(cached.syncTag || null);
+          setCartCount(cached.cartCount);
+          setFavoriteIds(cached.favoriteIds);
+          setUnreadNotifications(cached.unreadNotifications);
+        }
+      }
+    } catch {
+      // Ignore corrupt cache
+    }
+
+    setHydratedCache(true);
+    void refreshSession();
+  }, [refreshSession]);
+
+  // Keep sessionStorage snapshot synced with optimistic cart/favorite updates
+  useEffect(() => {
+    if (!hydratedCache || typeof window === 'undefined') return;
+    if (!authenticated) {
+      sessionStorage.removeItem(SESSION_CACHE_KEY);
+      return;
+    }
+    const snap: SessionSnapshot = {
+      authenticated,
+      user,
+      role,
+      syncTag,
+      cartCount,
+      favoriteIds,
+      unreadNotifications,
+    };
+    sessionStorage.setItem(SESSION_CACHE_KEY, JSON.stringify(snap));
+  }, [hydratedCache, authenticated, user, role, syncTag, cartCount, favoriteIds, unreadNotifications]);
+
+  // Live reactive references for the persistent Supabase Realtime channel
+  const liveRefs = useRef({
+    authenticated,
+    isAdmin,
+    syncTag,
+    router,
+    refreshSession,
+  });
+  liveRefs.current = {
+    authenticated,
+    isAdmin,
+    syncTag,
+    router,
+    refreshSession,
+  };
+
+  // Global Real-Time Sync across ALL open tabs, devices, visitors, customers & admins
