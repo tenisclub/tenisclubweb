@@ -111,4 +111,42 @@ export default function MeusEnderecosPage() {
         >
           <Plus className="w-4 h-4" />
           {showForm ? 'Cancelar' : 'Novo Endereço'}
-// step 3/8
+        </button>
+      </div>
+
+      {showForm && (
+        <form
+          onSubmit={handleAdd}
+          className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-4"
+        >
+          <h2 className="text-base font-black text-white">Cadastrar Endereço</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+            <div>
+              <label className="text-xs text-zinc-400">Identificação</label>
+              <input
+                type="text"
+                value={label}
+                onChange={(e) => setLabel(e.target.value)}
+                placeholder="Casa, Trabalho..."
+                className="mt-1 w-full h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-zinc-400">CEP</label>
+              <input
+                type="text"
+                value={zipCode}
+                onChange={(e) => setZipCode(e.target.value)}
+                placeholder="00000-000"
+                className="mt-1 w-full h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-zinc-400">Número *</label>
+              <input
+                type="text"
+                required
+                value={number}
+                onChange={(e) => setNumber(e.target.value)}
+                className="mt-1 w-full h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-sm text-white focus:outline-none focus:border-[#BEFA46]"
+// step 4/8
