@@ -406,4 +406,50 @@ export function CatalogExplorer({
                   setPage(1);
                 }}
                 placeholder="Máx"
-// step 9/12
+                className="h-9 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#BEFA46]"
+              />
+            </div>
+          </div>
+
+          {/* Toggles */}
+          <div className="space-y-2.5 pt-2 border-t border-zinc-800">
+            <label className="flex items-center gap-2.5 cursor-pointer text-xs text-zinc-300">
+              <input
+                type="checkbox"
+                checked={onlyAvailable}
+                onChange={(e) => {
+                  setOnlyAvailable(e.target.checked);
+                  setPage(1);
+                }}
+                className="w-4 h-4 accent-[#BEFA46] rounded"
+              />
+              Apenas disponíveis em estoque
+            </label>
+
+            <label className="flex items-center gap-2.5 cursor-pointer text-xs text-zinc-300">
+              <input
+                type="checkbox"
+                checked={onlyPromo}
+                onChange={(e) => {
+                  setOnlyPromo(e.target.checked);
+                  setPage(1);
+                }}
+                className="w-4 h-4 accent-[#BEFA46] rounded"
+              />
+              Em promoção / Ofertas
+            </label>
+
+            <label className="flex items-center gap-2.5 cursor-pointer text-xs text-zinc-300">
+              <input
+                type="checkbox"
+                checked={onlyNew}
+                onChange={(e) => {
+                  setOnlyNew(e.target.checked);
+                  setPage(1);
+                }}
+                className="w-4 h-4 accent-[#BEFA46] rounded"
+              />
+              Lançamentos / Novidades
+            </label>
+          </div>
+// step 10/12
