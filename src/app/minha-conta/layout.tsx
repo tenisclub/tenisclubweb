@@ -4,4 +4,11 @@ import { requireAuth } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
-// step 1/4
+export default async function MinhaContaLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  await requireAuth('/minha-conta');
+
+// step 2/4
