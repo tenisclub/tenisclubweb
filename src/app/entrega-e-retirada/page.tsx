@@ -100,4 +100,30 @@ export default async function EntregaRetiradaPage() {
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   {card.icon !== 'none' && (
-// step 4/6
+                    <CheckoutIcon name={card.icon} className="w-4 h-4 text-[#BEFA46]" />
+                  )}
+                  <h3 className="text-sm font-extrabold text-white">{card.title}</h3>
+                </div>
+                {card.badge && (
+                  <span className="text-xs font-bold text-[#BEFA46]">{card.badge}</span>
+                )}
+              </div>
+              {card.description && (
+                <p className="text-xs text-zinc-300 leading-relaxed whitespace-pre-line">
+                  {card.description}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {cfg.custom_buttons.length > 0 && (
+        <div className="flex flex-wrap gap-3">
+          {cfg.custom_buttons
+            .filter((btn) => btn.label.trim() && btn.url.trim())
+            .map((btn) => (
+              <a
+                key={btn.id}
+                href={btn.url}
+// step 5/6
