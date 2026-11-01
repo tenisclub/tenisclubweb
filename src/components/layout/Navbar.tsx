@@ -140,4 +140,39 @@ export function Navbar({ settings }: { settings: StoreSettings }) {
             </Link>
 
             <Link
-// step 4/8
+              href={authenticated ? '/minha-conta' : '/login'}
+              prefetch={true}
+              className="inline-flex items-center gap-2 px-2.5 sm:px-3 py-2 rounded-full bg-[#15151A] border border-zinc-800 hover:border-zinc-700 text-xs sm:text-sm font-medium text-zinc-200 hover:text-white transition"
+            >
+              <div className="relative">
+                <User className="w-4 h-4 text-[#BEFA46]" />
+                {unreadNotifications > 0 && (
+                  <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#BEFA46]" />
+                )}
+              </div>
+              <span className="hidden sm:inline max-w-[110px] truncate">
+                {authenticated ? user?.full_name?.split(' ')[0] || 'Minha Conta' : 'Entrar'}
+              </span>
+            </Link>
+
+            <Link
+              href="/carrinho"
+              prefetch={true}
+              className="relative inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-2 rounded-full bg-[#BEFA46] hover:bg-[#d0ff6b] text-[#09090B] font-bold text-xs sm:text-sm transition shadow-[0_0_20px_rgba(190,250,70,0.2)]"
+              aria-label="Carrinho de compras"
+            >
+              <ShoppingBag className="w-4 h-4 stroke-[2.4]" />
+              <span className="hidden sm:inline">Carrinho</span>
+              <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-[#09090B] text-[#BEFA46] text-[11px] font-extrabold">
+                {cartCount}
+              </span>
+            </Link>
+          </div>
+        </div>
+
+        {/* Desktop Secondary Category Nav */}
+        <nav className="hidden lg:flex items-center justify-center gap-1 pb-2.5">
+          {NAV_LINKS.map((link) => {
+            const active =
+              link.href === '/'
+// step 5/8
