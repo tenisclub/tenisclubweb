@@ -190,3 +190,51 @@ export default async function HomePage() {
             </Link>
           </div>
 
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {newReleases.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                whatsapp={settings.whatsapp}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* 7. MAIS VENDIDOS */}
+      {bestSellers.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+          <div className="flex items-end justify-between gap-3">
+            <div className="min-w-0">
+              <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#BEFA46]">
+                Preferidos da Galera
+              </span>
+              <h2 className="text-lg sm:text-3xl font-black text-white flex items-center gap-2 mt-0.5">
+                <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-[#BEFA46] shrink-0" />
+                <span>Mais Vendidos</span>
+              </h2>
+            </div>
+            <Link
+              href="/produtos"
+              className="text-xs sm:text-sm font-bold text-[#BEFA46] hover:underline inline-flex items-center gap-1 shrink-0 pb-0.5"
+            >
+              Catálogo completo <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {bestSellers.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                whatsapp={settings.whatsapp}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}
+
