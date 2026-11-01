@@ -18,4 +18,14 @@ export async function POST(request: Request) {
     const rawScope = typeof body?.scope === 'string' ? body.scope : 'all';
     const scope: ServerSyncScope = VALID_SCOPES.has(rawScope as ServerSyncScope)
       ? (rawScope as ServerSyncScope)
-// step 2/4
+      : 'all';
+    const version = typeof body?.version === 'number' ? body.version : undefined;
+
+    const didBust = invalidateServerCache(scope, version);
+    if (didBust) {
+      if (scope === 'all' || scope === 'catalog' || scope === 'orders') {
+        revalidateTag('catalog', { expire: 0 });
+      }
+      if (scope === 'all' || scope === 'settings') {
+        revalidateTag('store-settings', { expire: 0 });
+// step 3/4
