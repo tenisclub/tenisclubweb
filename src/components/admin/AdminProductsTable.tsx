@@ -372,4 +372,36 @@ export function AdminProductsTable({ initialProducts }: { initialProducts: Produ
                         className="p-2 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-[#BEFA46]"
                         title="Editar produto"
                       >
-// step 11/12
+                        {openingId === p.id ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Edit2 className="w-4 h-4" />
+                        )}
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(p)}
+                        className="p-2 rounded-lg bg-zinc-800/80 hover:bg-red-500/20 text-zinc-400 hover:text-red-400"
+                        title="Excluir / Arquivar"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="px-4 py-10 text-center text-zinc-500">
+                    Nenhum produto encontrado.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
