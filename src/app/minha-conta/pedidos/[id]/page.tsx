@@ -156,4 +156,35 @@ export default async function PedidoDetalheClientePage({
           {order.payment_method_note && (
             <div className="flex justify-between text-zinc-300">
               <span>Forma de pagamento</span>
-// step 5/8
+              <span className="font-bold text-white">{order.payment_method_note}</span>
+            </div>
+          )}
+          <div className="flex justify-between items-baseline pt-2">
+            <span className="font-bold text-white">Valor Total</span>
+            <span className="text-xl font-black text-[#BEFA46]">
+              {formatCurrency(order.total)}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Delivery & Timeline */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+        <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-3 text-xs sm:text-sm">
+          <h3 className="text-base font-black text-white flex items-center gap-2">
+            {order.delivery_method === 'pickup' ? (
+              <Store className="w-4 h-4 text-[#BEFA46]" />
+            ) : (
+              <MapPin className="w-4 h-4 text-[#BEFA46]" />
+            )}
+            {formatOrderModalityLabel(order)}
+          </h3>
+
+          {order.shipping_address?.street ? (
+            <div className="text-zinc-300 space-y-1">
+              <p>
+                {order.shipping_address.street}, {order.shipping_address.number}
+                {order.shipping_address.complement
+                  ? ` - ${order.shipping_address.complement}`
+                  : ''}
+// step 6/8
