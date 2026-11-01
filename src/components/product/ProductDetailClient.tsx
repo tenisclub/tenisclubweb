@@ -189,3 +189,67 @@ export function ProductDetailClient({
               </span>
             )}
           </div>
+        </div>
+
+        {product.images.length > 1 && (
+          <div className="flex items-center gap-3 overflow-x-auto pb-1">
+            {product.images.map((img) => (
+              <button
+                key={img.id}
+                type="button"
+                onClick={() => setActiveImage(img.url)}
+                className={cn(
+                  'relative w-20 h-20 rounded-2xl overflow-hidden bg-[#EAE0D5] border-2 shrink-0 transition',
+                  activeImage === img.url
+                    ? 'border-[#BEFA46]'
+                    : 'border-zinc-800 opacity-70 hover:opacity-100'
+                )}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={img.url} alt={img.alt_text || product.name} className="w-full h-full object-cover" />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Right: Commercial Info & Actions */}
+      <div className="lg:col-span-5 flex flex-col space-y-6">
+        <div className="space-y-2">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-bold uppercase tracking-widest text-zinc-400 min-w-0 pt-1">
+              {product.brand?.name && (
+                <span className="text-[#BEFA46]">{product.brand.name}</span>
+              )}
+              <span>•</span>
+              <span>{GENDER_LABELS[product.gender]}</span>
+              {product.sku && (
+                <>
+                  <span>•</span>
+                  <span>{product.sku}</span>
+                </>
+              )}
+            </div>
+
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => toggleFavorite(product.id)}
+                className={cn(
+                  'p-2.5 rounded-full border transition',
+                  isFav
+                    ? 'bg-[#BEFA46] text-[#09090B] border-[#BEFA46]'
+                    : 'bg-[#15151B] text-zinc-300 border-zinc-800 hover:border-zinc-600'
+                )}
+                title={isFav ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
+              >
+                <Heart className={cn('w-4 h-4', isFav && 'fill-current')} />
+              </button>
+              <button
+                type="button"
+                onClick={handleShare}
+                className="p-2.5 rounded-full bg-[#15151B] text-zinc-300 border border-zinc-800 hover:border-zinc-600 transition"
+                title="Compartilhar produto"
+              >
+                {copied ? <Check className="w-4 h-4 text-[#BEFA46]" /> : <Share2 className="w-4 h-4" />}
+              </button>
