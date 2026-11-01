@@ -165,3 +165,59 @@ export function InventoryManagerClient({ initialRows }: { initialRows: StockRowI
             className="rounded-2xl border border-zinc-800 bg-[#121216] p-4 space-y-3"
           >
             <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={r.image}
+                  alt={r.productName}
+                  className="w-12 h-12 rounded-xl object-cover bg-[#EAE0D5] shrink-0"
+                />
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-white truncate">{r.productName}</p>
+                  <p className="text-[11px] text-zinc-400">
+                    Cor: {r.color} • Tam. <strong className="text-white">{r.size}</strong>
+                  </p>
+                  <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                    <span className="text-[10px] text-zinc-500">
+                      Alerta mín.: {r.lowStockThreshold} un.
+                    </span>
+                    {r.allowBackorder && (
+                      <span className="px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 text-[9px] font-bold">
+                        Venda s/ estoque
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <span
+                className={cn(
+                  'px-2.5 py-1 rounded-full text-xs font-extrabold shrink-0',
+                  r.quantity === 0
+                    ? r.allowBackorder
+                      ? 'bg-sky-500/15 text-sky-300'
+                      : 'bg-red-500/15 text-red-400'
+                    : r.quantity <= r.lowStockThreshold
+                      ? 'bg-amber-500/15 text-amber-300'
+                      : 'bg-emerald-500/15 text-emerald-400'
+                )}
+              >
+                {r.quantity} un.
+              </span>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 pt-2 border-t border-zinc-800/80">
+              <button
+                type="button"
+                onClick={() => openModal(r, 'in')}
+                className="h-9 rounded-xl bg-emerald-500/15 text-emerald-300 text-xs font-bold inline-flex items-center justify-center gap-1"
+              >
+                <PlusCircle className="w-3.5 h-3.5" />
+                Entrada
+              </button>
+              <button
+                type="button"
+                onClick={() => openModal(r, 'out')}
+                className="h-9 rounded-xl bg-red-500/15 text-red-300 text-xs font-bold inline-flex items-center justify-center gap-1"
+              >
+                <MinusCircle className="w-3.5 h-3.5" />
+                Saída
