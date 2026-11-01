@@ -94,4 +94,37 @@ export function ProductCard({ product, whatsapp = '5511999999999' }: ProductCard
             <span className="px-2.5 py-1 rounded-full bg-[#BEFA46] text-[#09090B] text-[11px] font-black tracking-wide shadow">
               -{product.discount_percent}%
             </span>
-// step 3/8
+          )}
+          {product.is_new_release && (
+            <span className="px-2.5 py-1 rounded-full bg-[#09090B]/85 backdrop-blur text-white text-[10px] font-bold uppercase tracking-wider">
+              Novo
+            </span>
+          )}
+          {!canPurchase && (
+            <span className="px-2.5 py-1 rounded-full bg-red-600 text-white text-[10px] font-bold uppercase tracking-wider">
+              Esgotado
+            </span>
+          )}
+        </div>
+
+        {/* Favorite Heart */}
+        <button
+          type="button"
+          onClick={() => toggleFavorite(product.id)}
+          className={cn(
+            'absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center backdrop-blur-md transition shadow',
+            isFav
+              ? 'bg-[#BEFA46] text-[#09090B]'
+              : 'bg-[#09090B]/70 text-white hover:bg-[#09090B]'
+          )}
+          aria-label={isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+        >
+          <Heart className={cn('w-4 h-4', isFav && 'fill-current')} />
+        </button>
+      </div>
+
+      {/* Card Body matching TÊNIS CLUB dark studio aesthetic */}
+      <div className="flex flex-1 flex-col p-4 sm:p-5">
+        {/* Eyebrow: GENDER · SKU · BRAND */}
+        <div className="flex items-center justify-between gap-2 text-[11px] font-semibold tracking-wider uppercase text-zinc-400">
+// step 4/8
