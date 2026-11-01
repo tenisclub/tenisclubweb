@@ -43,4 +43,19 @@ export async function PATCH(request: Request) {
       }
       emailMessage = ' Enviamos um link de confirmação para o novo e-mail.';
     }
-// step 3/5
+
+    if (newPassword) {
+      if (String(newPassword).length < 6) {
+        return NextResponse.json(
+          { error: 'A nova senha deve conter pelo menos 6 caracteres.' },
+          { status: 400 }
+        );
+      }
+      const { error: pwdErr } = await supabase.auth.updateUser({
+        password: String(newPassword),
+      });
+      if (pwdErr) {
+        return NextResponse.json({ error: pwdErr.message }, { status: 400 });
+      }
+    }
+// step 4/5
