@@ -15,4 +15,22 @@ export async function GET(request: Request) {
     if (!error && data?.user) {
       const userId = data.user.id;
       const email = (data.user.email || '').toLowerCase();
-// step 1/6
+      const userMeta = data.user.user_metadata || {};
+      const appMeta = data.user.app_metadata || {};
+
+      const service = createServiceClient();
+      const [{ data: profileRow }, { data: userRoles }] = await Promise.all([
+        service.from('user_profiles').select('*').eq('id', userId).maybeSingle(),
+        service.from('user_roles').select('roles(name)').eq('user_id', userId),
+      ]);
+
+      let profile = profileRow as UserProfile | null;
+      if (!profile) {
+        const fullName =
+          (typeof userMeta.full_name === 'string' && userMeta.full_name) ||
+          (typeof userMeta.name === 'string' && userMeta.name) ||
+          email.split('@')[0] ||
+          'Cliente';
+        const { data: inserted } = await service
+          .from('user_profiles')
+// step 2/6
