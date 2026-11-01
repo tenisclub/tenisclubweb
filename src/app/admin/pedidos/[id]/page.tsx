@@ -6,4 +6,13 @@ import type { Order } from '@/types/database';
 export const dynamic = 'force-dynamic';
 
 export default async function AdminPedidoDetailPage({
-// step 1/4
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const supabase = createServiceClient();
+
+  const { data: row } = await supabase
+    .from('orders')
+// step 2/4
