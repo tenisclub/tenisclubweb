@@ -9,4 +9,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]);
 
   const staticRoutes: MetadataRoute.Sitemap = [
-// step 1/4
+    '',
+    '/produtos',
+    '/ofertas',
+    '/novidades',
+    '/sobre',
+    '/contato',
+    '/entrega-e-retirada',
+    '/trocas-e-devolucoes',
+    '/duvidas-frequentes',
+    '/privacidade',
+    '/termos',
+  ].map((route) => ({
+// step 2/4
