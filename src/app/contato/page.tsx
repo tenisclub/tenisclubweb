@@ -42,3 +42,47 @@ export default async function ContatoPage() {
             className="w-full inline-flex items-center justify-center gap-2 h-11 px-5 rounded-xl bg-[#BEFA46] text-[#09090B] text-xs sm:text-sm font-black"
           >
             <MessageCircle className="w-4 h-4 shrink-0" />
+            Iniciar Conversa no WhatsApp
+          </a>
+        </div>
+
+        <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-5 sm:p-6 space-y-4 text-xs sm:text-sm text-zinc-300 break-words">
+          <div className="flex items-start gap-3">
+            <MapPin className="w-5 h-5 text-[#BEFA46] shrink-0 mt-0.5" />
+            <div>
+              <strong className="text-white block text-xs uppercase tracking-wider">Endereço</strong>
+              <span>{settings.address}</span>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <Phone className="w-5 h-5 text-[#BEFA46] shrink-0 mt-0.5" />
+            <div>
+              <strong className="text-white block text-xs uppercase tracking-wider">Telefone</strong>
+              <span>{settings.phone}</span>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <Mail className="w-5 h-5 text-[#BEFA46] shrink-0 mt-0.5" />
+            <div>
+              <strong className="text-white block text-xs uppercase tracking-wider">E-mail</strong>
+              <span>{settings.email}</span>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <Clock className="w-5 h-5 text-[#BEFA46] shrink-0 mt-0.5" />
+            <div>
+              <strong className="text-white block text-xs uppercase tracking-wider">
+                Horário de Funcionamento
+              </strong>
+              <span>{settings.business_hours}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
