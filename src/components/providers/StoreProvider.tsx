@@ -205,4 +205,74 @@ export function StoreProvider({
 
   const replayPendingCartIntent = useCallback(async () => {
     if (typeof window === 'undefined') return;
-// step 3/12
+    const rawIntent = sessionStorage.getItem(PENDING_CART_KEY);
+    if (!rawIntent) return;
+
+    sessionStorage.removeItem(PENDING_CART_KEY);
+    try {
+      const intent: PendingCartIntent = JSON.parse(rawIntent);
+      const cartRes = await fetch('/api/cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId: intent.productId,
+          variantId: intent.variantId,
+          quantity: intent.quantity || 1,
+        }),
+      });
+      if (cartRes.ok) {
+        const updated = await cartRes.json();
+        setCartCount(updated.totalItems || 0);
+        toast('Produto adicionado ao seu carrinho! Continue sua compra.', 'success');
+      }
+    } catch {
+      // Ignore malformed intent
+    }
+  }, [toast]);
+
+  const refreshSession = useCallback(async (): Promise<SessionSnapshot | null> => {
+    try {
+      const res = await fetch('/api/auth/me', { cache: 'no-store' });
+      if (!res.ok) return null;
+      const data = await res.json();
+      const isAuth = Boolean(data.authenticated);
+      const snap: SessionSnapshot = {
+        authenticated: isAuth,
+        user: data.user || null,
+        role: data.role || 'visitor',
+        syncTag: data.syncTag || null,
+        cartCount: data.cartCount || 0,
+        favoriteIds: data.favoriteIds || [],
+        unreadNotifications: data.unreadNotifications || 0,
+      };
+
+      setAuthenticated(snap.authenticated);
+      setUser(snap.user);
+      setRole(snap.role);
+      setSyncTag(snap.syncTag || null);
+      setCartCount(snap.cartCount);
+      setFavoriteIds(snap.favoriteIds);
+      setUnreadNotifications(snap.unreadNotifications);
+
+      if (typeof window !== 'undefined') {
+        if (isAuth) {
+          sessionStorage.setItem(SESSION_CACHE_KEY, JSON.stringify(snap));
+        } else {
+          clearClientAuthStorage();
+        }
+      }
+
+      if (isAuth) {
+        await replayPendingCartIntent();
+      }
+      return snap;
+    } catch {
+      return null;
+    }
+  }, [replayPendingCartIntent]);
+
+  const hydrateSession = useCallback(
+    (snap: SessionSnapshot) => {
+      setAuthenticated(snap.authenticated);
+      setUser(snap.user);
+// step 4/12
