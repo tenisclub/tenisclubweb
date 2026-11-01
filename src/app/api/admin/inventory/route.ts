@@ -22,4 +22,16 @@ export async function POST(request: Request) {
     const supabase = createServiceClient();
     const { data, error } = await supabase.rpc('adjust_stock_atomic', {
       p_variant_id: variantId,
-// step 2/4
+      p_operation: operation,
+      p_amount: Number(amount),
+      p_reason: reason.trim(),
+      p_low_stock_threshold:
+        lowStockThreshold !== undefined && lowStockThreshold !== null
+          ? Number(lowStockThreshold)
+          : null,
+      p_admin_id: session.userId,
+    });
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+// step 3/4
