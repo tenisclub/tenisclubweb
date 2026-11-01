@@ -341,4 +341,54 @@ export function CheckoutClient({
               onClick={() => isCompleted && goToStep(s.n)}
               className={cn(
                 'rounded-xl border px-2.5 py-2.5 flex items-center justify-center gap-1.5 text-xs font-extrabold transition min-w-0',
-// step 7/24
+                isActive &&
+                  'border-[#BEFA46] bg-[#BEFA46] text-[#09090B] shadow-[0_4px_18px_rgba(190,250,70,0.2)]',
+                isCompleted &&
+                  'border-[#BEFA46]/40 bg-[#BEFA46]/10 text-[#BEFA46] hover:bg-[#BEFA46]/15 cursor-pointer',
+                !isActive &&
+                  !isCompleted &&
+                  'border-zinc-800/90 bg-[#121216] text-zinc-500 cursor-default'
+              )}
+            >
+              <span
+                className={cn(
+                  'w-5 h-5 rounded-full text-[11px] font-black inline-flex items-center justify-center shrink-0',
+                  isActive && 'bg-[#09090B] text-[#BEFA46]',
+                  isCompleted && 'bg-[#BEFA46] text-[#09090B]',
+                  !isActive && !isCompleted && 'bg-zinc-800 text-zinc-400'
+                )}
+              >
+                {isCompleted ? <Check className="w-3 h-3 stroke-[3]" /> : s.n}
+              </span>
+              <span className="truncate sm:hidden">{s.short}</span>
+              <span className="truncate hidden sm:inline">{s.full}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Mobile Collapsible Bag Strip on Steps 2 & 3 (Replaces bottom redundant Resumo box) */}
+      {step > 1 && (
+        <div className="lg:hidden rounded-2xl border border-zinc-800/90 bg-[#121216] overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setMobileItemsOpen((v) => !v)}
+            className="w-full px-3.5 py-3 flex items-center justify-between gap-2 text-left cursor-pointer"
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <ShoppingBag className="w-4 h-4 text-[#BEFA46] shrink-0" />
+              <span className="text-xs font-bold text-zinc-200 truncate">
+                {mobileItemsOpen ? 'Ocultar itens' : 'Ver itens da sacola'} ({totalUnits})
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span className="text-sm font-black text-[#BEFA46]">
+                {formatCurrency(finalOrderTotal)}
+              </span>
+              <ChevronDown
+                className={cn(
+                  'w-4 h-4 text-zinc-400 transition-transform',
+                  mobileItemsOpen && 'rotate-180'
+                )}
+              />
+// step 8/24
