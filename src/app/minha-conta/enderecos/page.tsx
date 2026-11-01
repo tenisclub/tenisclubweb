@@ -240,3 +240,63 @@ export default function MeusEnderecosPage() {
           <MapPin className="w-8 h-8 text-zinc-600 mx-auto" />
           <p className="text-sm font-bold text-white">Nenhum endereço cadastrado</p>
           <p className="text-xs text-zinc-400">
+            Adicione um endereço para utilizá-lo automaticamente nos pedidos com entrega local.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {addresses.map((addr) => (
+            <div
+              key={addr.id}
+              className="rounded-2xl border border-zinc-800 bg-[#121216] p-5 flex flex-col justify-between gap-4"
+            >
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-extrabold text-white">{addr.label}</span>
+                  {addr.is_default && (
+                    <span className="px-2.5 py-0.5 rounded-full bg-[#BEFA46]/15 text-[#BEFA46] text-[10px] font-bold">
+                      Principal
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-zinc-300">
+                  {addr.street}, {addr.number}
+                  {addr.complement ? ` - ${addr.complement}` : ''}
+                </p>
+                <p className="text-xs text-zinc-400">
+                  {addr.neighborhood} • {addr.city}/{addr.state}{' '}
+                  {addr.zip_code ? `• CEP ${addr.zip_code}` : ''}
+                </p>
+                {addr.reference && (
+                  <p className="text-xs text-zinc-500">Ref: {addr.reference}</p>
+                )}
+              </div>
+
+              <div className="flex items-center gap-3 pt-2 border-t border-zinc-800/80 text-xs">
+                {!addr.is_default && (
+                  <button
+                    type="button"
+                    onClick={() => handleSetDefault(addr.id)}
+                    className="inline-flex items-center gap-1 font-bold text-[#BEFA46] hover:underline"
+                  >
+                    <Star className="w-3.5 h-3.5" />
+                    Tornar principal
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => handleDelete(addr.id)}
+                  className="inline-flex items-center gap-1 font-semibold text-zinc-400 hover:text-red-400 ml-auto"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Excluir
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
