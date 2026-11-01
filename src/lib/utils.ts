@@ -193,4 +193,36 @@ export const ORDER_STATUS_CONFIG: Record<
     label: 'Aguardando confirmação',
     colorClass: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
     step: 2,
-// step 6/8
+  },
+  confirmed: {
+    label: 'Confirmado',
+    colorClass: 'bg-[#BEFA46]/15 text-[#BEFA46] border-[#BEFA46]/30',
+    step: 3,
+  },
+  separating: {
+    label: 'Em separação',
+    colorClass: 'bg-purple-500/15 text-purple-400 border-purple-500/30',
+    step: 4,
+  },
+  ready_for_pickup: {
+    label: 'Pronto para retirada',
+    colorClass: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+    step: 5,
+  },
+  out_for_delivery: {
+    label: 'Saiu para entrega',
+    colorClass: 'bg-indigo-500/15 text-indigo-400 border-indigo-500/30',
+    step: 5,
+  },
+  completed: {
+    label: 'Concluído',
+    colorClass: 'bg-green-500/20 text-green-400 border-green-500/40',
+    step: 6,
+  },
+  cancelled: {
+    label: 'Cancelado',
+    colorClass: 'bg-red-500/15 text-red-400 border-red-500/30',
+    step: 0,
+  },
+};
+// step 7/8
