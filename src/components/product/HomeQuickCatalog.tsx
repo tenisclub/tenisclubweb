@@ -158,4 +158,36 @@ export function HomeQuickCatalog({
               <span className="md:w-20 shrink-0 text-[11px] font-extrabold uppercase tracking-widest text-zinc-500">
                 Tipo
               </span>
-// step 5/8
+              <div className="grid grid-cols-3 sm:flex sm:flex-wrap gap-2 flex-1">
+                {categoryItems.map((cat) => {
+                  const active = categorySlug === cat.slug;
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => setCategorySlug(cat.slug)}
+                      className={cn(
+                        'h-9 px-2 sm:px-3.5 rounded-xl sm:rounded-full text-xs font-bold border transition text-center truncate cursor-pointer',
+                        active
+                          ? 'bg-[#BEFA46] text-[#09090B] border-[#BEFA46] font-extrabold shadow-[0_2px_10px_rgba(190,250,70,0.18)]'
+                          : 'bg-[#17171E] text-zinc-300 border-zinc-800/90 hover:border-zinc-600 hover:text-white'
+                      )}
+                    >
+                      {cat.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* NÚMERO */}
+            <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 pt-3 border-t border-white/[0.05]">
+              <span className="md:w-20 shrink-0 text-[11px] font-extrabold uppercase tracking-widest text-zinc-500">
+                Número
+              </span>
+              <div className="grid grid-cols-6 sm:flex sm:flex-wrap gap-1.5 sm:gap-2 flex-1">
+                {STANDARD_SHOE_SIZES.map((sz) => {
+                  const active = selectedSize === sz;
+                  return (
+                    <button
+// step 6/8
