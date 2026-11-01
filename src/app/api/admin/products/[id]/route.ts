@@ -103,3 +103,56 @@ export async function PATCH(
       Array.isArray(images)
         ? supabase
             .from('product_images')
+            .select('url, is_primary, sort_order')
+            .eq('product_id', id)
+            .order('sort_order', { ascending: true })
+        : Promise.resolve({ data: null }),
+      Array.isArray(variants)
+        ? supabase
+            .from('product_variants')
+            .select('id, color, color_hex, size, is_active, inventory(quantity, low_stock_threshold)')
+            .eq('product_id', id)
+        : Promise.resolve({ data: null }),
+    ]);
+
+    const { data: product, error: prodErr } = prodRes;
+    if (prodErr || !product) {
+      return NextResponse.json(
+        { error: prodErr?.message || 'Produto não encontrado.' },
+        { status: 400 }
+      );
+    }
+
+    const parallelOps: PromiseLike<unknown>[] = [];
+
+    // Sync images ONLY if they actually changed
+    if (Array.isArray(images)) {
+      const hasExplicitPrimary = images.some((i: { is_primary?: boolean }) => i.is_primary);
+      const normalizedIncoming = images.map(
+        (img: { url: string; is_primary?: boolean }, idx: number) => ({
+          url: img.url,
+          is_primary: hasExplicitPrimary ? Boolean(img.is_primary) : idx === 0,
+          sort_order: idx,
+        })
+      );
+      const currentImgs = existingImagesRes.data || [];
+      const imagesUnchanged =
+        currentImgs.length === normalizedIncoming.length &&
+        currentImgs.every(
+          (cur, idx) =>
+            cur.url === normalizedIncoming[idx].url &&
+            Boolean(cur.is_primary) === normalizedIncoming[idx].is_primary &&
+            Number(cur.sort_order ?? idx) === idx
+        );
+
+      if (!imagesUnchanged) {
+        parallelOps.push(
+          (async () => {
+            await supabase.from('product_images').delete().eq('product_id', id);
+            if (normalizedIncoming.length > 0) {
+              await supabase.from('product_images').insert(
+                normalizedIncoming.map((img) => ({
+                  product_id: id,
+                  url: img.url,
+                  alt_text: product.name,
+                  is_primary: img.is_primary,
