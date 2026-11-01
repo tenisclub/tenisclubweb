@@ -13,4 +13,12 @@ export default async function PrivacidadePage() {
         <p className="whitespace-pre-line">{settings.privacy_policy}</p>
         <h2 className="text-base font-extrabold text-white pt-2">1. Dados Coletados</h2>
         <p className="text-zinc-400">
-// step 2/4
+          Coletamos apenas nome completo, e-mail, telefone/WhatsApp e endereço de entrega necessários para autenticação, registro de pedidos e contato comercial.
+        </p>
+        <h2 className="text-base font-extrabold text-white pt-2">2. Login com Google (OAuth 2.0)</h2>
+        <p className="text-zinc-400">
+          Quando você opta por entrar com o Google, utilizamos exclusivamente o protocolo oficial OAuth 2.0/OpenID Connect. Nunca temos acesso nem armazenamos sua senha do Google.
+        </p>
+        <h2 className="text-base font-extrabold text-white pt-2">3. Seus Direitos (LGPD)</h2>
+        <p className="text-zinc-400">
+// step 3/4
