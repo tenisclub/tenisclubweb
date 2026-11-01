@@ -71,4 +71,28 @@ export async function PATCH(request: Request) {
       .maybeSingle();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-// step 3/6
+    const cartOwner = Array.isArray((item as any)?.carts) ? (item as any)?.carts[0]?.user_id : (item as any)?.carts?.user_id;
+
+    if (!item || cartOwner !== userId) {
+      return NextResponse.json({ error: 'Item não encontrado.' }, { status: 404 });
+    }
+
+    if (Number(quantity) <= 0) {
+      await supabase.from('cart_items').delete().eq('id', itemId);
+    } else {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const prod: any = Array.isArray((item as any).products)
+        ? (item as any).products[0]
+        : (item as any).products;
+      const allowBackorder = Boolean(prod?.allow_backorder);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const pv: any = Array.isArray((item as any).product_variants) ? (item as any).product_variants[0] : (item as any).product_variants;
+      const inv = Array.isArray(pv?.inventory) ? pv?.inventory[0] : pv?.inventory;
+      const stock = Number(inv?.quantity ?? 0);
+
+      if (!allowBackorder && Number(quantity) > stock) {
+        return NextResponse.json(
+          { error: `Estoque máximo disponível na numeração ${pv?.size}: ${stock} un.` },
+          { status: 400 }
+        );
+// step 4/6
