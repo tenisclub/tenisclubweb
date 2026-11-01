@@ -30,4 +30,37 @@ export function formatDateTime(iso: string | Date): string {
     hour: '2-digit',
     minute: '2-digit',
   }).format(new Date(iso));
-// step 1/8
+}
+
+export function slugify(text: string): string {
+  return text
+    .toString()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+export function cleanWhatsAppNumber(phone: string): string {
+  const digits = (phone || '').replace(/\D/g, '');
+  if (!digits) return '5511999999999';
+  return digits.startsWith('55') && digits.length >= 12 ? digits : `55${digits}`;
+}
+
+export function buildProductWhatsAppUrl(params: {
+  whatsapp: string;
+  productName: string;
+  sku?: string | null;
+  size?: string;
+  price: number;
+}): string {
+  const phone = cleanWhatsAppNumber(params.whatsapp);
+  const skuPart = params.sku ? ` (${params.sku})` : '';
+  const sizePart = params.size ? ` na numeração *${params.size}*` : '';
+  const msg = `Olá, Tênis Club! Tenho interesse no *${params.productName}*${skuPart}${sizePart} por *${formatCurrency(params.price)}*. Está disponível?`;
+  return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+}
+// step 2/8
