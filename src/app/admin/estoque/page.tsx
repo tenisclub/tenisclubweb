@@ -2,21 +2,17 @@ import {
   InventoryManagerClient,
   type StockRowItem,
 } from '@/components/admin/InventoryManagerClient';
-import { enrichProductRow } from '@/lib/catalog';
-import { createServiceClient } from '@/lib/supabase/server';
+import { getAdminProducts } from '@/lib/catalog';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminEstoquePage() {
-  const supabase = createServiceClient();
-  const { data: rows } = await supabase
-    .from('products')
-    .select('*, product_images(*), product_variants(*, inventory(*))')
-    .order('name', { ascending: true });
+  const products = [...(await getAdminProducts())].sort((a, b) =>
+    a.name.localeCompare(b.name, 'pt-BR')
+  );
 
   const stockRows: StockRowItem[] = [];
-  for (const prodRow of rows || []) {
-    const prod = enrichProductRow(prodRow, true);
+  for (const prod of products) {
     for (const v of prod.variants) {
       stockRows.push({
         variantId: v.id,
@@ -28,10 +24,10 @@ export default async function AdminEstoquePage() {
         size: v.size,
         quantity: v.stock,
         lowStockThreshold: v.low_stock_threshold,
+        allowBackorder: prod.allow_backorder,
       });
     }
   }
 
   return <InventoryManagerClient initialRows={stockRows} />;
 }
-
