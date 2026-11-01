@@ -9,4 +9,16 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: 'Acesso negado.' }, { status: 403 });
   }
 
-// step 1/4
+  const { userId, is_active, reason } = await request.json();
+  if (!userId || is_active === undefined) {
+    return NextResponse.json({ error: 'Dados inválidos.' }, { status: 400 });
+  }
+
+  if (userId === session.userId && !is_active) {
+    return NextResponse.json(
+      { error: 'Você não pode desativar sua própria conta.' },
+      { status: 400 }
+    );
+  }
+
+// step 2/4
