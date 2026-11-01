@@ -63,4 +63,36 @@ export function buildProductWhatsAppUrl(params: {
   const msg = `Olá, Tênis Club! Tenho interesse no *${params.productName}*${skuPart}${sizePart} por *${formatCurrency(params.price)}*. Está disponível?`;
   return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
 }
-// step 2/8
+
+export function formatOrderModalityLabel(order: Order): string {
+  const addr = order.shipping_address;
+  const customTitle = addr?.custom_option_title?.trim();
+  if (customTitle) return customTitle;
+
+  const hasStreet = Boolean(addr?.street?.trim());
+  if (hasStreet) return 'Entrega Local';
+
+  const hasPickupAddress = Boolean(addr?.pickup_address?.trim());
+  if (hasPickupAddress) return 'Retirada na Loja';
+
+  const shippingLabel = addr?.shipping_label?.trim();
+  if (shippingLabel) return shippingLabel;
+
+  return 'A combinar';
+}
+
+export function buildOrderWhatsAppUrl(
+  whatsapp: string,
+  order: Order,
+  storeName = 'Tênis Club'
+): string {
+  const phone = cleanWhatsAppNumber(whatsapp);
+  const itemsLines = (order.items || [])
+    .map((item) => {
+      const brand = item.brand_name?.trim() || '';
+      const nameHasBrand =
+        brand && item.product_name.toLowerCase().startsWith(brand.toLowerCase());
+      const title = brand && !nameHasBrand ? `${brand} ${item.product_name}` : item.product_name;
+      const skuInfo = item.product_sku?.trim() ? ` [SKU: ${item.product_sku.trim()}]` : '';
+      const colorInfo = item.color?.trim() ? `Cor: ${item.color.trim()} | ` : '';
+// step 3/8
