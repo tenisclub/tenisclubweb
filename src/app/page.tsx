@@ -142,3 +142,51 @@ export default async function HomePage() {
               <div>
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#BEFA46] text-[#09090B] text-[11px] font-black uppercase tracking-wider">
                   <Tag className="w-3.5 h-3.5" />
+                  Preços Especiais
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-black text-white mt-2">
+                  Ofertas Imperdíveis
+                </h2>
+              </div>
+              <Link
+                href="/ofertas"
+                className="text-xs sm:text-sm font-bold text-[#BEFA46] hover:underline inline-flex items-center gap-1 shrink-0"
+              >
+                Ver todas as ofertas <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {offerProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  whatsapp={settings.whatsapp}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* 6. LANÇAMENTOS */}
+      {newReleases.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+          <div className="flex items-end justify-between gap-3">
+            <div className="min-w-0">
+              <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#BEFA46]">
+                Acabaram de Chegar
+              </span>
+              <h2 className="text-lg sm:text-3xl font-black text-white flex items-center gap-2 mt-0.5">
+                <Flame className="w-5 h-5 sm:w-6 sm:h-6 text-[#BEFA46] shrink-0" />
+                <span>Lançamentos & Novidades</span>
+              </h2>
+            </div>
+            <Link
+              href="/novidades"
+              className="text-xs sm:text-sm font-bold text-[#BEFA46] hover:underline inline-flex items-center gap-1 shrink-0 pb-0.5"
+            >
+              Ver novidades <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
