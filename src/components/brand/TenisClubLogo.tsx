@@ -116,4 +116,26 @@ export function TenisClubLogo({
       >
         TÊNIS
       </span>
-// step 5/6
+
+      <div className="flex items-center gap-3 md:gap-4 mt-2 w-full justify-center">
+        <span className="h-[2.5px] w-10 md:w-14 bg-white/90 rounded-full" />
+        <span
+          className={cn(
+            'font-extrabold tracking-[0.38em] text-white uppercase pl-[0.38em]',
+            size === 'lg' ? 'text-sm' : 'text-lg md:text-2xl'
+          )}
+        >
+          CLUB
+        </span>
+        <span className="h-[2.5px] w-10 md:w-14 bg-white/90 rounded-full" />
+      </div>
+
+      {showTagline && tagline && (
+        <p className="mt-3 text-[11px] md:text-xs font-medium tracking-[0.28em] text-zinc-400 uppercase text-center">
+          {tagline}
+        </p>
+      )}
+    </div>
+  );
+}
+
