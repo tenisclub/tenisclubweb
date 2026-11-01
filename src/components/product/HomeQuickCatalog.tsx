@@ -94,4 +94,36 @@ export function HomeQuickCatalog({
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar produto, marca ou modelo..."
-// step 3/8
+                className="w-full h-11 pl-10 pr-4 rounded-2xl bg-[#17171E] border border-zinc-800/90 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#BEFA46] transition"
+              />
+            </div>
+
+            <div className="flex items-center justify-between sm:justify-end gap-2.5">
+              {hasFilters ? (
+                <button
+                  type="button"
+                  onClick={resetFilters}
+                  className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-zinc-800/90 hover:bg-zinc-700 text-xs font-bold text-zinc-200 transition cursor-pointer"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  Limpar
+                </button>
+              ) : (
+                <span className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 sm:hidden">
+                  Busca rápida
+                </span>
+              )}
+
+              <Link
+                href="/produtos"
+                className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl border border-[#BEFA46]/30 bg-[#BEFA46]/10 hover:bg-[#BEFA46]/15 text-xs font-extrabold text-[#BEFA46] transition"
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                Filtros avançados
+              </Link>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            {/* GÊNERO */}
+// step 4/8
