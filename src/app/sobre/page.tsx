@@ -28,3 +28,33 @@ export default async function SobrePage() {
           <h2 className="text-base font-extrabold text-white">Curadoria de Estilo</h2>
           <p className="text-xs text-zinc-400 leading-relaxed">
             Selecionamos tênis casuais, esportivos, mocassins e modelos infantis com foco em conforto e durabilidade.
+          </p>
+        </div>
+        <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-6 space-y-2">
+          <ShieldCheck className="w-6 h-6 text-[#BEFA46]" />
+          <h2 className="text-base font-extrabold text-white">Estoque Transparente</h2>
+          <p className="text-xs text-zinc-400 leading-relaxed">
+            Controle individualizado por cor e numeração para garantir que o par escolhido está pronto para você.
+          </p>
+        </div>
+        <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-6 space-y-2">
+          <Users className="w-6 h-6 text-[#BEFA46]" />
+          <h2 className="text-base font-extrabold text-white">Atendimento Próximo</h2>
+          <p className="text-xs text-zinc-400 leading-relaxed">
+            Pedido registrado no site e acompanhamento direto com nossa equipe para máxima agilidade.
+          </p>
+        </div>
+      </div>
+
+      <div className="text-center">
+        <Link
+          href="/produtos"
+          className="inline-flex px-6 py-3 rounded-full bg-[#BEFA46] text-[#09090B] text-sm font-black"
+        >
+          Conhecer Nosso Catálogo
+        </Link>
+      </div>
+    </div>
+  );
+}
+
