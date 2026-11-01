@@ -40,4 +40,25 @@ export async function POST(request: Request) {
   if (!street?.trim() || !number?.trim() || !neighborhood?.trim() || !city?.trim()) {
     return NextResponse.json(
       { error: 'Rua, número, bairro e cidade são obrigatórios.' },
-// step 2/6
+      { status: 400 }
+    );
+  }
+
+  const supabase = createServiceClient();
+
+  if (is_default) {
+    await supabase
+      .from('user_addresses')
+      .update({ is_default: false })
+      .eq('user_id', session.userId);
+  }
+
+  const { data, error } = await supabase
+    .from('user_addresses')
+    .insert({
+      user_id: session.userId,
+      label: label || 'Casa',
+      recipient_name: recipient_name || session.profile.full_name,
+      zip_code: zip_code || '',
+      street: street.trim(),
+// step 3/6
