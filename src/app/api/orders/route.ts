@@ -111,4 +111,32 @@ export async function POST(request: Request) {
       if (matchedOption.kind === 'pickup' && !requiresAddress) {
         optionMetadata.pickup_address =
           deliveryCfg.pickup_subtitle.trim() || settings.address;
-// step 4/8
+      }
+    } else {
+      optionMetadata.custom_option_title = 'A combinar';
+      optionMetadata.shipping_label = 'A combinar';
+    }
+
+    const finalShippingAddress =
+      addressPayload || Object.keys(optionMetadata).length > 0
+        ? {
+            ...optionMetadata,
+            ...(addressPayload || {}),
+          }
+        : null;
+
+    const supabase = createServiceClient();
+
+    const phoneUpdatePromise =
+      !session.profile.phone && customerPhone
+        ? supabase
+            .from('user_profiles')
+            .update({ phone: customerPhone.trim() })
+            .eq('id', session.userId)
+        : Promise.resolve();
+
+    const [{ data: rpcResult, error: rpcError }] = await Promise.all([
+      supabase.rpc('create_order_from_cart', {
+        p_user_id: session.userId,
+        p_customer_name: customerName.trim(),
+// step 5/8
