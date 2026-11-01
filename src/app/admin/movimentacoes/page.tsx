@@ -38,3 +38,44 @@ export default async function AdminMovimentacoesPage() {
           <ArrowLeft className="w-3.5 h-3.5" />
           Voltar para Controle de Estoque
         </Link>
+        <h1 className="text-2xl font-black text-white mt-1">
+          Histórico de Movimentações de Estoque
+        </h1>
+        <p className="text-xs sm:text-sm text-zinc-400">
+          Rastreabilidade completa de todas as entradas, saídas, reservas de pedidos e correções.
+        </p>
+      </div>
+
+      {/* Mobile Movement Cards */}
+      <div className="md:hidden space-y-3">
+        {(movements || []).map((m) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const prod: any = Array.isArray(m.products) ? m.products[0] : m.products;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const pv: any = Array.isArray(m.product_variants)
+            ? m.product_variants[0]
+            : m.product_variants;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const user: any = Array.isArray(m.user_profiles)
+            ? m.user_profiles[0]
+            : m.user_profiles;
+          const badge = MOVE_TYPE_LABELS[m.movement_type] || {
+            label: m.movement_type,
+            cls: 'bg-zinc-800 text-zinc-300',
+          };
+
+          return (
+            <div
+              key={m.id}
+              className="rounded-2xl border border-zinc-800 bg-[#121216] p-4 space-y-2.5 text-xs"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="font-extrabold text-white truncate">
+                    {prod?.name || 'Produto'}
+                  </p>
+                  <p className="text-[11px] text-zinc-400">
+                    {pv?.color} • Tam. <strong className="text-white">{pv?.size}</strong>
+                  </p>
+                </div>
+                <span className={cn('px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0', badge.cls)}>
