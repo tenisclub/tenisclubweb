@@ -46,3 +46,51 @@ export async function POST(request: Request) {
       typeof selectedOptionKey === 'string' && selectedOptionKey
         ? selectedOptionKey
         : deliveryMethod === 'local_delivery'
+          ? 'local_delivery'
+          : 'pickup';
+
+    const matchedOption =
+      selectableOptions.find((opt) => opt.key === requestedKey) ??
+      selectableOptions[0] ??
+      null;
+
+    const initialDeliveryMethod = matchedOption
+      ? matchedOption.deliveryMethod
+      : deliveryMethod === 'local_delivery'
+        ? 'local_delivery'
+        : 'pickup';
+
+    const requiresAddress = shouldRequireCheckoutAddress(
+      deliveryCfg,
+      matchedOption,
+      initialDeliveryMethod
+    );
+
+    const effectiveDeliveryMethod =
+      !matchedOption && requiresAddress ? 'local_delivery' : initialDeliveryMethod;
+
+    if (requiresAddress) {
+      if (
+        !shippingAddress?.street?.trim() ||
+        !shippingAddress?.number?.trim() ||
+        !shippingAddress?.neighborhood?.trim() ||
+        !shippingAddress?.city?.trim()
+      ) {
+        return NextResponse.json(
+          { error: 'Preencha o endereço completo (rua, número, bairro e cidade).' },
+          { status: 400 }
+        );
+      }
+    }
+
+    const addressPayload =
+      requiresAddress && shippingAddress && typeof shippingAddress === 'object'
+        ? {
+            zip_code: shippingAddress.zip_code || '',
+            street: shippingAddress.street || '',
+            number: shippingAddress.number || '',
+            complement: shippingAddress.complement || '',
+            neighborhood: shippingAddress.neighborhood || '',
+            city: shippingAddress.city || '',
+            state: shippingAddress.state || 'SP',
+            reference: shippingAddress.reference || '',
