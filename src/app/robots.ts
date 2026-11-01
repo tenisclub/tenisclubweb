@@ -10,4 +10,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/admin/', '/minha-conta/', '/carrinho', '/checkout', '/api/'],
       },
     ],
-// step 3/4
+    sitemap: `${baseUrl}/sitemap.xml`,
+  };
+}
+
