@@ -76,3 +76,81 @@ export default async function AdminDashboardPage() {
   ).length;
   const completedOrders = orders.filter((o) => o.status === 'completed').length;
 
+  const validOrders = orders.filter((o) => o.status !== 'cancelled');
+  const registeredRevenue = validOrders.reduce((acc, o) => acc + Number(o.total || 0), 0);
+
+  // Build Last 7 Days Chart Data
+  const days: { label: string; key: string; ordersCount: number; salesTotal: number }[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    const label = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+    days.push({ label, key, ordersCount: 0, salesTotal: 0 });
+  }
+
+  for (const o of validOrders) {
+    const dayKey = String(o.created_at).slice(0, 10);
+    const bucket = days.find((d) => d.key === dayKey);
+    if (bucket) {
+      bucket.ordersCount += 1;
+      bucket.salesTotal += Number(o.total || 0);
+    }
+  }
+
+  const maxOrdersDay = Math.max(1, ...days.map((d) => d.ordersCount));
+  const maxSalesDay = Math.max(1, ...days.map((d) => d.salesTotal));
+
+  const topSelling = [...products]
+    .sort((a, b) => b.sold_count - a.sold_count)
+    .slice(0, 5);
+
+  return (
+    <div className="space-y-8">
+      {/* Header & Quick Shortcuts */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <span className="text-xs font-extrabold uppercase tracking-widest text-[#BEFA46]">
+            Visão Executiva
+          </span>
+          <h1 className="text-2xl sm:text-3xl font-black text-white mt-0.5">
+            Dashboard Administrativo
+          </h1>
+        </div>
+
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
+          <Link
+            href="/admin/produtos/novo"
+            className="col-span-2 sm:col-span-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#BEFA46] text-[#09090B] text-xs font-black"
+          >
+            <Plus className="w-4 h-4" />
+            Cadastrar Produto
+          </Link>
+          <Link
+            href="/admin/estoque"
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2.5 rounded-xl bg-[#16161D] border border-zinc-800 text-xs font-bold text-white hover:border-zinc-600"
+          >
+            <Boxes className="w-4 h-4 text-[#BEFA46] shrink-0" />
+            Ajustar Estoque
+          </Link>
+          <Link
+            href="/admin/promocoes"
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2.5 rounded-xl bg-[#16161D] border border-zinc-800 text-xs font-bold text-white hover:border-zinc-600"
+          >
+            <Tag className="w-4 h-4 text-[#BEFA46] shrink-0" />
+            Promoções
+          </Link>
+        </div>
+      </div>
+
+      {/* Primary KPI Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="rounded-2xl border border-[#BEFA46]/30 bg-[#121216] p-4 sm:p-5 space-y-1">
+          <div className="flex items-center justify-between text-xs font-semibold text-zinc-400">
+            <span>Valor Registrado em Pedidos</span>
+            <DollarSign className="w-4 h-4 text-[#BEFA46]" />
+          </div>
+          <p className="text-2xl sm:text-3xl font-black text-[#BEFA46]">
+            {formatCurrency(registeredRevenue)}
+          </p>
+          <p className="text-[11px] text-zinc-500">
