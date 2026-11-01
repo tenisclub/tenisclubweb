@@ -86,4 +86,26 @@ export default async function ProdutoDetailPage({
       {/* Breadcrumbs */}
       <nav className="flex flex-wrap items-center gap-1.5 text-xs text-zinc-400">
         <Link href="/" className="hover:text-[#BEFA46]">Início</Link>
-// step 4/6
+        <ChevronRight className="w-3.5 h-3.5 text-zinc-600" />
+        <Link href="/produtos" className="hover:text-[#BEFA46]">Produtos</Link>
+        {product.category && (
+          <>
+            <ChevronRight className="w-3.5 h-3.5 text-zinc-600" />
+            <Link
+              href={`/categoria/${product.category.slug}`}
+              className="hover:text-[#BEFA46]"
+            >
+              {product.category.name}
+            </Link>
+          </>
+        )}
+        <ChevronRight className="w-3.5 h-3.5 text-zinc-600" />
+        <span className="text-zinc-200 font-semibold truncate max-w-[220px]">
+          {product.name}
+        </span>
+      </nav>
+
+      {/* Main Product View */}
+      <ProductDetailClient product={product} whatsapp={settings.whatsapp} />
+
+// step 5/6
