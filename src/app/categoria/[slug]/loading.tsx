@@ -19,4 +19,9 @@ export default function CategoryLoading() {
               <div className="h-6 w-28 rounded-lg bg-zinc-800/70" />
             </div>
           </div>
-// step 3/4
+        ))}
+      </div>
+    </div>
+  );
+}
+
