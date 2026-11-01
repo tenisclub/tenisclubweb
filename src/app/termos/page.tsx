@@ -16,4 +16,9 @@ export default async function TermosPage() {
           <li>Os preços e quantidades disponíveis por numeração são validados automaticamente no ato da criação do pedido.</li>
           <li>O pedido gerado no site constitui registro comercial oficial, sendo o pagamento e a entrega/retirada confirmados junto à loja.</li>
           <li>Pedidos não confirmados dentro do prazo de reserva informado poderão ser cancelados com retorno automático ao estoque.</li>
-// step 3/4
+        </ul>
+      </div>
+    </div>
+  );
+}
+
