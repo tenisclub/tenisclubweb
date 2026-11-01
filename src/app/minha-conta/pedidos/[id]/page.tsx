@@ -124,4 +124,36 @@ export default async function PedidoDetalheClientePage({
                 )}
                 <div className="min-w-0">
                   <p className="text-xs sm:text-sm font-extrabold text-white line-clamp-2 break-words">
-// step 4/8
+                    {item.product_name}
+                  </p>
+                  <p className="text-[11px] sm:text-xs text-zinc-400">
+                    Cor: {item.color} • Tam. <strong>{item.size}</strong> • Qtd:{' '}
+                    <strong>{item.quantity}</strong>
+                  </p>
+                  <p className="text-[11px] sm:text-xs text-zinc-500">
+                    Unitário: {formatCurrency(item.unit_price)}
+                  </p>
+                </div>
+              </div>
+              <span className="text-xs sm:text-base font-black text-[#BEFA46] shrink-0">
+                {formatCurrency(item.subtotal)}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div className="border-t border-zinc-800 pt-4 space-y-1.5 text-xs sm:text-sm">
+          <div className="flex justify-between text-zinc-400">
+            <span>Subtotal</span>
+            <span>{formatCurrency(order.subtotal)}</span>
+          </div>
+          {order.discount_total > 0 && (
+            <div className="flex justify-between text-emerald-400">
+              <span>Descontos</span>
+              <span>-{formatCurrency(order.discount_total)}</span>
+            </div>
+          )}
+          {order.payment_method_note && (
+            <div className="flex justify-between text-zinc-300">
+              <span>Forma de pagamento</span>
+// step 5/8
