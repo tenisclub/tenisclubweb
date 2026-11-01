@@ -10,4 +10,16 @@ export async function POST(request: Request) {
   }
 
   try {
-// step 1/4
+    const { variantId, operation, amount, reason, lowStockThreshold } = await request.json();
+
+    if (!variantId || !operation || amount === undefined || !reason?.trim()) {
+      return NextResponse.json(
+        { error: 'Informe a variação, operação, quantidade e o motivo da movimentação.' },
+        { status: 400 }
+      );
+    }
+
+    const supabase = createServiceClient();
+    const { data, error } = await supabase.rpc('adjust_stock_atomic', {
+      p_variant_id: variantId,
+// step 2/4
