@@ -461,4 +461,50 @@ export function SettingsClient({ initialSettings }: { initialSettings: StoreSett
               <label className="text-[11px] font-semibold text-zinc-400">TikTok URL</label>
               <input
                 type="text"
-// step 10/12
+                value={form.tiktok_url || ''}
+                onChange={(e) => setField('tiktok_url', e.target.value)}
+                className="mt-1 w-full h-10 px-3.5 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. Checkout Etapa 3 Customizer + Live Preview */}
+      {(activeTab === 'all' || activeTab === 'checkout') && (
+        <CheckoutStep3Customizer
+          form={form}
+          deliveryCfg={deliveryCfg}
+          setField={setField}
+          updateDeliveryCfg={updateDeliveryCfg}
+          onResetDefault={resetEtapa3ToDefault}
+        />
+      )}
+
+      {/* 4. Institutional Policies */}
+      {(activeTab === 'all' || activeTab === 'policies') && (
+        <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-4 sm:p-6 space-y-4">
+          <div className="border-b border-zinc-800/80 pb-4">
+            <span className="text-[11px] font-black uppercase tracking-widest text-[#BEFA46] block">
+              Páginas Institucionais
+            </span>
+            <h2 className="text-base sm:text-lg font-black text-white">
+              Políticas de Troca, Privacidade & Sobre Nós
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="sm:col-span-2">
+              <label className="text-[11px] font-semibold text-zinc-400">
+                Política de Troca e Devolução
+              </label>
+              <textarea
+                rows={2}
+                value={form.exchange_policy}
+                onChange={(e) => setField('exchange_policy', e.target.value)}
+                className="mt-1 w-full p-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="text-[11px] font-semibold text-zinc-400">
+// step 11/12
