@@ -33,4 +33,40 @@ function pickRandomExcluding(total: number, excluded: Set<number>): number {
     if (!excluded.has(i)) {
       candidates.push(i);
     }
-// step 1/12
+  }
+  if (candidates.length === 0) {
+    return Math.floor(Math.random() * total);
+  }
+  return candidates[Math.floor(Math.random() * candidates.length)];
+}
+
+/**
+ * Mobile (< 640px):
+ * - Starts with a random video on every page load/refresh (never repeating the last refresh's opener).
+ * - Whenever a video finishes, crossfades seamlessly to a random next video without repeating
+ *   the video currently playing or the previous video(s).
+ */
+function MobileRandomPlayer() {
+  const total = ALL_HERO_VIDEOS.length;
+
+  const [initPair] = useState<[number, number]>(() => {
+    let lastStart = -1;
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = sessionStorage.getItem(LAST_HERO_START_KEY);
+        if (raw !== null) lastStart = Number(raw);
+      } catch {
+        // Ignore storage restrictions
+      }
+    }
+    const first = pickRandomExcluding(total, lastStart >= 0 ? new Set([lastStart]) : new Set());
+    if (typeof window !== 'undefined') {
+      try {
+        sessionStorage.setItem(LAST_HERO_START_KEY, String(first));
+      } catch {
+        // Ignore storage restrictions
+      }
+    }
+    const second = pickRandomExcluding(total, new Set([first, lastStart]));
+    return [first, second];
+// step 2/12
