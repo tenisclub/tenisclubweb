@@ -3,7 +3,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Search, Eye } from 'lucide-react';
-import { cn, formatCurrency, formatDateTime, ORDER_STATUS_CONFIG } from '@/lib/utils';
+import {
+  cn,
+  formatCurrency,
+  formatDateTime,
+  formatOrderModalityLabel,
+  ORDER_STATUS_CONFIG,
+} from '@/lib/utils';
 import type { Order, OrderStatus } from '@/types/database';
 
 export function OrdersListClient({ initialOrders }: { initialOrders: Order[] }) {
@@ -99,9 +105,7 @@ export function OrdersListClient({ initialOrders }: { initialOrders: Order[] }) 
       <div className="md:hidden space-y-3">
         {filtered.map((o) => {
           const st = ORDER_STATUS_CONFIG[o.status as OrderStatus];
-          const deliveryLabel =
-            o.shipping_address?.custom_option_title ||
-            (o.delivery_method === 'pickup' ? 'Retirada Loja' : 'Entrega Local');
+          const deliveryLabel = formatOrderModalityLabel(o);
           return (
             <div
               key={o.id}
@@ -190,9 +194,7 @@ export function OrdersListClient({ initialOrders }: { initialOrders: Order[] }) 
             <tbody className="divide-y divide-zinc-800/80">
               {filtered.map((o) => {
                 const st = ORDER_STATUS_CONFIG[o.status as OrderStatus];
-                const deliveryLabel =
-                  o.shipping_address?.custom_option_title ||
-                  (o.delivery_method === 'pickup' ? 'Retirada Loja' : 'Entrega Local');
+                const deliveryLabel = formatOrderModalityLabel(o);
                 return (
                   <tr key={o.id} className="hover:bg-zinc-900/40">
                     <td className="px-4 py-3.5 font-black text-white">#{o.order_number}</td>

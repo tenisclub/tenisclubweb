@@ -9,6 +9,7 @@ import {
   cn,
   formatCurrency,
   formatDateTime,
+  formatOrderModalityLabel,
   ORDER_STATUS_CONFIG,
 } from '@/lib/utils';
 import type { Order, OrderStatus } from '@/types/database';
@@ -176,10 +177,7 @@ export default async function PedidoDetalheClientePage({
             ) : (
               <MapPin className="w-4 h-4 text-[#BEFA46]" />
             )}
-            {order.shipping_address?.custom_option_title ||
-              (order.delivery_method === 'pickup'
-                ? 'Retirada na Loja'
-                : 'Endereço de Entrega')}
+            {formatOrderModalityLabel(order)}
           </h3>
 
           {order.shipping_address?.street ? (
@@ -198,9 +196,9 @@ export default async function PedidoDetalheClientePage({
                 <p className="text-zinc-400">Ref: {order.shipping_address.reference}</p>
               )}
             </div>
-          ) : order.delivery_method === 'pickup' ? (
+          ) : order.shipping_address?.pickup_address ? (
             <div className="text-zinc-300 space-y-1">
-              <p>{settings.address}</p>
+              <p>{order.shipping_address.pickup_address}</p>
               <p className="text-zinc-400 text-xs">{settings.business_hours}</p>
             </div>
           ) : (

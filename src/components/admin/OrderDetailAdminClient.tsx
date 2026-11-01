@@ -17,6 +17,7 @@ import {
   cn,
   formatCurrency,
   formatDateTime,
+  formatOrderModalityLabel,
   ORDER_STATUS_CONFIG,
 } from '@/lib/utils';
 import type { Order, OrderStatus, PaymentStatus } from '@/types/database';
@@ -237,10 +238,7 @@ export function OrderDetailAdminClient({ initialOrder }: { initialOrder: Order }
             )}
             <p className="text-zinc-300">
               <strong className="text-white">Modalidade:</strong>{' '}
-              {initialOrder.shipping_address?.custom_option_title ||
-                (initialOrder.delivery_method === 'pickup'
-                  ? 'Retirada na Loja'
-                  : 'Entrega Local')}
+              {formatOrderModalityLabel(initialOrder)}
             </p>
             {initialOrder.shipping_address?.street && (
               <div className="rounded-xl bg-[#18181F] p-3 text-zinc-300">
