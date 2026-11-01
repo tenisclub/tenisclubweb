@@ -33,4 +33,14 @@ export async function PATCH(request: Request) {
   void supabase
     .from('admin_logs')
     .insert({
-// step 3/4
+      admin_id: session.userId,
+      action: is_active ? 'customer.activate' : 'customer.deactivate',
+      entity_type: 'user_profile',
+      entity_id: userId,
+      details: { reason: reason || 'Operação administrativa' },
+    })
+    .then(() => {});
+
+  return NextResponse.json({ success: true });
+}
+
