@@ -81,4 +81,25 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: signUpError?.message || 'Erro ao criar conta.' },
         { status: 400 }
-// step 4/6
+      );
+    }
+
+    const nowIso = new Date().toISOString();
+    const userId = signUpData.user.id;
+
+    return NextResponse.json({
+      success: true,
+      userId,
+      hasSession: Boolean(signUpData.session),
+      sessionSnapshot: signUpData.session
+        ? {
+            authenticated: true,
+            user: {
+              id: userId,
+              email: cleanEmail,
+              full_name: fullName.trim(),
+              phone: cleanPhone,
+              avatar_url: null,
+              auth_provider: 'email',
+              is_active: true,
+// step 5/6
