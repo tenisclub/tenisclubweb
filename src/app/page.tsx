@@ -148,4 +148,34 @@ export default async function HomePage() {
                   Ofertas Imperdíveis
                 </h2>
               </div>
-// step 5/8
+              <Link
+                href="/ofertas"
+                className="text-xs sm:text-sm font-bold text-[#BEFA46] hover:underline inline-flex items-center gap-1 shrink-0"
+              >
+                Ver todas as ofertas <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {offerProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  whatsapp={settings.whatsapp}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* 6. LANÇAMENTOS */}
+      {newReleases.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+          <div className="flex items-end justify-between gap-3">
+            <div className="min-w-0">
+              <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#BEFA46]">
+                Acabaram de Chegar
+              </span>
+              <h2 className="text-lg sm:text-3xl font-black text-white flex items-center gap-2 mt-0.5">
+// step 6/8
