@@ -195,3 +195,102 @@ export function ProductForm({
 
   const addSingleVariant = () => {
     setVariants((prev) => [
+      ...prev,
+      {
+        color: defaultColor || 'Padrão',
+        color_hex: defaultColorHex,
+        size: '40',
+        stock: allowBackorder ? 0 : 2,
+      },
+    ]);
+  };
+
+  const updateVariant = (idx: number, patch: Partial<EditableVariant>) => {
+    setVariants((prev) =>
+      prev.map((v, i) => (i === idx ? { ...v, ...patch } : v))
+    );
+  };
+
+  const removeVariant = (idx: number) => {
+    setVariants((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !basePrice) {
+      toast('Preencha o nome do calçado e o preço de venda.', 'error');
+      return;
+    }
+
+    if (variants.length === 0) {
+      toast('Adicione pelo menos uma numeração ao produto.', 'error');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const additionalInfo: Record<string, string> = {};
+      if (material.trim()) additionalInfo.Material = material.trim();
+      if (solado.trim()) additionalInfo.Solado = solado.trim();
+      if (garantia.trim()) additionalInfo.Garantia = garantia.trim();
+
+      const payload = {
+        name,
+        sku,
+        brand_id: brandId || null,
+        category_id: categoryId || null,
+        gender,
+        short_description: shortDesc,
+        description,
+        additional_info: additionalInfo,
+        cost_price: Number(costPrice || 0),
+        base_price: Number(basePrice),
+        promo_price: promoPrice ? Number(promoPrice) : null,
+        is_active: isActive,
+        is_featured: isFeatured,
+        is_new_release: isNewRelease,
+        allow_backorder: allowBackorder,
+        images,
+        variants,
+      };
+
+      const res = await fetch(
+        isEditing ? `/api/admin/products/${initialProduct!.id}` : '/api/admin/products',
+        {
+          method: isEditing ? 'PATCH' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const data = await res.json();
+      if (!res.ok) {
+        toast(data.error || 'Erro ao salvar produto.', 'error');
+        return;
+      }
+
+      toast(
+        isEditing ? 'Produto atualizado com sucesso!' : 'Produto cadastrado com sucesso!',
+        'success'
+      );
+      router.push('/admin/produtos');
+      setTimeout(() => {
+        React.startTransition(() => {
+          router.refresh();
+        });
+      }, 60);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-8 max-w-5xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="min-w-0">
+          <Link
+            href="/admin/produtos"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-400 hover:text-white"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            Voltar para Produtos
