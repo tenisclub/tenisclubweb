@@ -126,4 +126,28 @@ export default async function EntregaRetiradaPage() {
               <a
                 key={btn.id}
                 href={btn.url}
-// step 5/6
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cn(
+                  'w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition',
+                  btn.variant === 'volt' &&
+                    'bg-[#BEFA46] hover:bg-[#d1ff70] text-[#09090B] font-black',
+                  btn.variant === 'whatsapp' &&
+                    'bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300',
+                  btn.variant === 'outline' &&
+                    'bg-[#18181F] hover:bg-zinc-800 border border-zinc-700 text-white',
+                  btn.variant === 'subtle' &&
+                    'bg-zinc-900 hover:bg-zinc-800 text-zinc-300'
+                )}
+              >
+                {btn.icon !== 'none' && (
+                  <CheckoutIcon name={btn.icon} className="w-4 h-4 shrink-0" />
+                )}
+                <span>{btn.label}</span>
+              </a>
+            ))}
+        </div>
+      )}
+    </div>
+  );
+}
