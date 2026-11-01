@@ -16,4 +16,22 @@ export async function GET() {
       favoriteIds: [],
       unreadNotifications: 0,
     });
-// step 1/6
+  }
+
+  const userId = claims.sub;
+  const claimEmail = typeof claims.email === 'string' ? claims.email : '';
+  const userMeta = claims.user_metadata || {};
+  const appMeta = claims.app_metadata || {};
+
+  const supabase = createServiceClient();
+
+  // Single parallel wave instead of 2 sequential round-trips to Postgres
+  const [{ data: profileRow }, { data: userRoles }, navState, { data: unreadRows }] =
+    await Promise.all([
+      supabase.from('user_profiles').select('*').eq('id', userId).maybeSingle(),
+      supabase.from('user_roles').select('roles(name)').eq('user_id', userId),
+      getUserNavbarState(userId),
+      supabase
+        .from('notifications')
+        .select('target_audience, user_id')
+// step 2/6
