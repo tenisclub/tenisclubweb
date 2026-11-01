@@ -489,4 +489,53 @@ export function CheckoutClient({
                           </span>
                         </div>
                       </div>
-// step 10/24
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="text-sm sm:text-base font-black text-[#BEFA46] block">
+                        {formatCurrency(item.subtotal)}
+                      </span>
+                      {item.quantity > 1 && (
+                        <span className="text-[10px] text-zinc-500 block">
+                          {formatCurrency(item.unit_price)} cada
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Mobile Inline Total Strip */}
+              <div className="lg:hidden rounded-2xl border border-zinc-800/90 bg-[#0B0B0E] px-4 py-3 flex items-center justify-between gap-2">
+                <div>
+                  <span className="text-[11px] text-zinc-400 block">Subtotal dos itens</span>
+                  {subtotal > total && (
+                    <span className="text-[11px] font-bold text-emerald-400">
+                      Economia de {formatCurrency(subtotal - total)}
+                    </span>
+                  )}
+                </div>
+                <span className="text-lg font-black text-[#BEFA46]">
+                  {formatCurrency(total)}
+                </span>
+              </div>
+
+              <div className="space-y-2.5 pt-1">
+                <button
+                  type="button"
+                  onClick={() => goToStep(2)}
+                  className="w-full h-12 rounded-2xl bg-[#BEFA46] hover:bg-[#d1ff70] text-[#09090B] text-sm font-black inline-flex items-center justify-center gap-2 shadow-[0_6px_22px_rgba(190,250,70,0.22)] transition cursor-pointer"
+                >
+                  <span>Continuar para Seus Dados</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 2: CUSTOMER INFO */}
+          {step === 2 && (
+            <div className="space-y-5">
+              <div>
+                <h2 className="text-base sm:text-xl font-black text-white flex items-center gap-2">
+                  <User className="w-5 h-5 text-[#BEFA46] shrink-0" />
+// step 11/24
