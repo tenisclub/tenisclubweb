@@ -138,4 +138,39 @@ export async function PATCH(
       const currentImgs = existingImagesRes.data || [];
       const imagesUnchanged =
         currentImgs.length === normalizedIncoming.length &&
-// step 4/12
+        currentImgs.every(
+          (cur, idx) =>
+            cur.url === normalizedIncoming[idx].url &&
+            Boolean(cur.is_primary) === normalizedIncoming[idx].is_primary &&
+            Number(cur.sort_order ?? idx) === idx
+        );
+
+      if (!imagesUnchanged) {
+        parallelOps.push(
+          (async () => {
+            await supabase.from('product_images').delete().eq('product_id', id);
+            if (normalizedIncoming.length > 0) {
+              await supabase.from('product_images').insert(
+                normalizedIncoming.map((img) => ({
+                  product_id: id,
+                  url: img.url,
+                  alt_text: product.name,
+                  is_primary: img.is_primary,
+                  sort_order: img.sort_order,
+                }))
+              );
+            }
+          })()
+        );
+      }
+    }
+
+    // Sync variants & inventory with zero sequential N+1 loops
+    if (Array.isArray(variants)) {
+      const existingVars = existingVarsRes.data || [];
+      const existingById = new Map(existingVars.map((ev) => [ev.id, ev]));
+      const existingByKey = new Map(
+        existingVars.map((ev) => [`${ev.color}::${ev.size}`, ev])
+      );
+      const keptIds = new Set<string>();
+// step 5/12
