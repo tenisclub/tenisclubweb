@@ -68,4 +68,22 @@ export async function GET(request: Request) {
 
       const isSafeCustomTarget =
         next &&
-// step 4/6
+        next.startsWith('/') &&
+        !next.startsWith('//') &&
+        next !== '/minha-conta' &&
+        !next.startsWith('/minha-conta?') &&
+        !next.startsWith('/login') &&
+        !next.startsWith('/cadastro');
+
+      const redirectUrl = isSafeCustomTarget ? `${origin}${next}` : `${origin}/`;
+      const response = NextResponse.redirect(redirectUrl);
+
+      // Instant 0ms first-frame session bootstrap for StoreProvider on destination page
+      try {
+        const bootstrapPayload = encodeURIComponent(
+          JSON.stringify({
+            authenticated: true,
+            user: { ...profile, role },
+            role,
+            syncTag: computeUserSyncTag(userId),
+// step 5/6
