@@ -21,3 +21,26 @@ export async function PATCH(request: Request) {
     );
   }
 
+  const supabase = createServiceClient();
+  const { error } = await supabase
+    .from('user_profiles')
+    .update({ is_active: Boolean(is_active), updated_at: new Date().toISOString() })
+    .eq('id', userId);
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  revalidateStoreData('users');
+  void supabase
+    .from('admin_logs')
+    .insert({
+      admin_id: session.userId,
+      action: is_active ? 'customer.activate' : 'customer.deactivate',
+      entity_type: 'user_profile',
+      entity_id: userId,
+      details: { reason: reason || 'Operação administrativa' },
+    })
+    .then(() => {});
+
+  return NextResponse.json({ success: true });
+}
+
