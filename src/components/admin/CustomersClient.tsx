@@ -215,4 +215,34 @@ export function CustomersClient({ initialCustomers }: { initialCustomers: Custom
                           ? 'bg-emerald-500/15 text-emerald-400'
                           : 'bg-red-500/15 text-red-400'
                       )}
-// step 7/8
+                    >
+                      {c.is_active ? 'Ativo' : 'Desativado'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3.5 text-right space-x-2">
+                    {c.lastOrderId && (
+                      <Link
+                        href={`/admin/pedidos/${c.lastOrderId}`}
+                        className="px-2.5 py-1.5 rounded-lg bg-zinc-800 text-xs font-bold text-zinc-200 hover:text-white"
+                      >
+                        Último Pedido
+                      </Link>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => toggleStatus(c)}
+                      className="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-zinc-300"
+                    >
+                      {c.is_active ? 'Desativar' : 'Reativar'}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
