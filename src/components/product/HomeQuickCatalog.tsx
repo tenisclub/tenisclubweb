@@ -202,3 +202,54 @@ export function HomeQuickCatalog({
                     >
                       {sz}
                     </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Results Grid */}
+        {filtered.length === 0 ? (
+          <div className="rounded-3xl border border-zinc-800 bg-[#121216] p-6 sm:p-12 text-center space-y-3">
+            <p className="text-base sm:text-lg font-bold text-white">
+              Nenhum calçado encontrado com esses filtros.
+            </p>
+            <p className="text-xs sm:text-sm text-zinc-400">
+              Experimente selecionar outra numeração ou limpar os filtros ativos.
+            </p>
+            <button
+              type="button"
+              onClick={resetFilters}
+              className="mt-2 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#BEFA46] text-[#09090B] text-xs font-extrabold"
+            >
+              Mostrar todos os produtos
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-xs sm:text-sm text-zinc-400">
+                Exibindo <strong className="text-white">{Math.min(filtered.length, 8)}</strong> de{' '}
+                <strong className="text-white">{filtered.length}</strong> pares encontrados
+              </p>
+              <Link
+                href="/produtos"
+                className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#BEFA46] hover:underline shrink-0"
+              >
+                Ver catálogo completo
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {filtered.slice(0, 8).map((product) => (
+                <ProductCard key={product.id} product={product} whatsapp={whatsapp} />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </section>
+  );
+}
