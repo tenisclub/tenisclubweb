@@ -12,4 +12,18 @@ const inter = Inter({
   display: 'swap',
 });
 
-// step 1/5
+const montserrat = Montserrat({
+  subsets: ['latin'],
+  weight: ['700', '800', '900'],
+  style: ['normal', 'italic'],
+  variable: '--font-montserrat',
+  display: 'swap',
+});
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getStoreSettings();
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://tenisclub.vercel.app';
+  const ogImage = settings.hero_banner_url || settings.logo_url || undefined;
+
+  return {
+// step 2/5
