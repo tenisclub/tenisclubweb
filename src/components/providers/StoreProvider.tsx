@@ -621,4 +621,73 @@ export function StoreProvider({
               return;
             }
             if (!res.ok) {
-// step 9/12
+              setCartCount((prev) => Math.max(0, prev - quantity));
+              toast(data.error || 'Não foi possível adicionar ao carrinho.', 'error');
+              return;
+            }
+            if (typeof data.totalItems === 'number') {
+              setCartCount(data.totalItems);
+            }
+          })
+          .catch(() => {
+            setCartCount((prev) => Math.max(0, prev - quantity));
+            toast('Erro de conexão ao adicionar ao carrinho.', 'error');
+          });
+
+        return true;
+      }
+
+      const res = await fetch('/api/cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId, variantId, quantity }),
+      });
+
+      const data = await res.json();
+
+      if (res.status === 401) {
+        if (typeof window !== 'undefined') {
+          const returnUrl = '/carrinho';
+          sessionStorage.setItem(
+            PENDING_CART_KEY,
+            JSON.stringify({ productId, variantId, quantity, returnUrl })
+          );
+          toast('Faça login para continuar. Guardamos sua numeração!', 'info');
+          router.push(`/login?redirect=${encodeURIComponent(returnUrl)}`);
+        }
+        return false;
+      }
+
+      if (!res.ok) {
+        toast(data.error || 'Não foi possível adicionar ao carrinho.', 'error');
+        return false;
+      }
+
+      setCartCount(data.totalItems || 0);
+      toast('Adicionado ao carrinho com sucesso!', 'success');
+      router.push('/carrinho');
+      return true;
+    },
+    [authenticated, router, toast]
+  );
+
+  const toggleFavorite = useCallback(
+    async (productId: string) => {
+      if (!authenticated) {
+        toast('Entre na sua conta para salvar seus tênis favoritos!', 'info');
+        router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+        return;
+      }
+
+      const wasFav = favoriteIds.includes(productId);
+      setFavoriteIds((prev) =>
+        wasFav ? prev.filter((id) => id !== productId) : [...prev, productId]
+      );
+      toast(
+        wasFav ? 'Removido da sua lista de favoritos.' : 'Salvo nos seus favoritos!',
+        'info'
+      );
+
+      try {
+        const res = await fetch('/api/favorites', {
+// step 10/12
