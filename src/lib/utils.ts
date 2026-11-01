@@ -147,3 +147,53 @@ export function buildOrderWhatsAppUrl(
 
   const notesBlock = order.customer_notes?.trim()
     ? [`*Observações:* ${order.customer_notes.trim()}`, ``]
+    : [];
+
+  const msg = [
+    `Olá, *${storeName || 'Tênis Club'}*! Acabei de finalizar meu pedido pelo site:`,
+    ``,
+    `*Pedido:* #${order.order_number}`,
+    ...customerLines,
+    ``,
+    `*Itens do pedido:*`,
+    itemsLines,
+    ``,
+    ...receiptLines,
+    ``,
+    ...financialLines,
+    ``,
+    ...notesBlock,
+    `Aguardo retorno para alinharmos o pagamento e a confirmação!`,
+  ].join('\n');
+
+  return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+}
+
+export const ORDER_STATUS_CONFIG: Record<
+  OrderStatus,
+  { label: string; colorClass: string; step: number }
+> = {
+  received: {
+    label: 'Pedido recebido',
+    colorClass: 'bg-sky-500/15 text-sky-400 border-sky-500/30',
+    step: 1,
+  },
+  awaiting_confirmation: {
+    label: 'Aguardando confirmação',
+    colorClass: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+    step: 2,
+  },
+  confirmed: {
+    label: 'Confirmado',
+    colorClass: 'bg-[#BEFA46]/15 text-[#BEFA46] border-[#BEFA46]/30',
+    step: 3,
+  },
+  separating: {
+    label: 'Em separação',
+    colorClass: 'bg-purple-500/15 text-purple-400 border-purple-500/30',
+    step: 4,
+  },
+  ready_for_pickup: {
+    label: 'Pronto para retirada',
+    colorClass: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+    step: 5,
