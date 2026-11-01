@@ -42,4 +42,27 @@ export async function POST(request: Request) {
       highlight_home: Boolean(highlight_home),
     })
     .select('*')
-// step 2/6
+    .single();
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  if (highlight_home) {
+    await supabase.from('products').update({ is_featured: true }).eq('id', product_id);
+  }
+
+  revalidateStoreData('catalog');
+  void supabase
+    .from('admin_logs')
+    .insert({
+      admin_id: session.userId,
+      action: 'promotion.create',
+      entity_type: 'promotion',
+      entity_id: data.id,
+      details: { name: data.name, promo_price: promoNum },
+    })
+    .then(() => {});
+
+  return NextResponse.json({ promotion: data });
+}
+
+// step 3/6
