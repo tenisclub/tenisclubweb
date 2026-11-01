@@ -164,4 +164,37 @@ export function PromotionsClient({
             <input
               type="datetime-local"
               value={startsAt}
-// step 5/8
+              onChange={(e) => setStartsAt(e.target.value)}
+              className="mt-1 w-full h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs text-zinc-400">Término Programado (Opcional)</label>
+            <input
+              type="datetime-local"
+              value={endsAt}
+              onChange={(e) => setEndsAt(e.target.value)}
+              className="mt-1 w-full h-10 px-3 rounded-xl bg-[#18181F] border border-zinc-800 text-xs text-white"
+            />
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+            <label className="flex items-center gap-2 text-xs font-bold text-zinc-300 h-10">
+              <input
+                type="checkbox"
+                checked={highlightHome}
+                onChange={(e) => setHighlightHome(e.target.checked)}
+                className="w-4 h-4 accent-[#BEFA46]"
+              />
+              Destacar na Home
+            </label>
+            <button
+              type="submit"
+              className="w-full sm:w-auto h-10 px-5 rounded-xl bg-[#BEFA46] text-[#09090B] text-xs font-black inline-flex items-center justify-center gap-1.5"
+            >
+              <Plus className="w-4 h-4" />
+              Criar
+            </button>
+          </div>
+// step 6/8
