@@ -59,4 +59,34 @@ export function AdminsManagerClient({
           password,
           roleName,
         }),
-// step 2/8
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast(data.error || 'Erro ao configurar administrador.', 'error');
+        return;
+      }
+      toast('Permissão administrativa configurada!', 'success');
+      setFullName('');
+      setEmail('');
+      setPhone('');
+      setPassword('');
+      router.refresh();
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const updateRoleOrStatus = async (
+    userId: string,
+    patch: { roleName?: string; is_active?: boolean }
+  ) => {
+    const res = await fetch('/api/admin/admins', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, ...patch }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      toast(data.error || 'Operação não permitida.', 'error');
+      return;
+// step 3/8
