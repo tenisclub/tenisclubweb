@@ -268,4 +268,49 @@ function CadastroForm() {
                 />
               </div>
             </div>
-// step 6/8
+          </div>
+
+          {/* Password strength bar */}
+          {password.length > 0 && (
+            <div className="space-y-1">
+              <div className="grid grid-cols-4 gap-1.5">
+                {[1, 2, 3, 4].map((level) => (
+                  <div
+                    key={level}
+                    className={cn(
+                      'h-1.5 rounded-full transition-colors',
+                      pwdStrength >= level
+                        ? pwdStrength <= 1
+                          ? 'bg-red-500'
+                          : pwdStrength === 2
+                            ? 'bg-amber-400'
+                            : 'bg-[#BEFA46]'
+                        : 'bg-zinc-800'
+                    )}
+                  />
+                ))}
+              </div>
+              <p className="text-[11px] text-zinc-400">
+                Segurança da senha:{' '}
+                <strong className="text-zinc-200">
+                  {pwdStrength <= 1
+                    ? 'Fraca'
+                    : pwdStrength === 2
+                      ? 'Média'
+                      : pwdStrength === 3
+                        ? 'Boa'
+                        : 'Excelente'}
+                </strong>
+              </p>
+            </div>
+          )}
+
+          <label className="flex items-start gap-2.5 cursor-pointer pt-1">
+            <input
+              type="checkbox"
+              checked={acceptedTerms}
+              onChange={(e) => setAcceptedTerms(e.target.checked)}
+              className="mt-0.5 w-4 h-4 accent-[#BEFA46] rounded"
+            />
+            <span className="text-xs text-zinc-400 leading-relaxed">
+// step 7/8
