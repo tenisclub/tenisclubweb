@@ -727,4 +727,23 @@ export function FinancialPanelClient({
 
         <div className="rounded-2xl border border-amber-500/25 bg-dark-900/90 p-4">
           <div className="flex items-center justify-between">
-// etapa 39/85
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-300/90">
+              Custo das Vendas
+            </span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/15 text-amber-400">
+              <Package className="h-4 w-4" />
+            </span>
+          </div>
+          <p className="mt-2 font-display text-2xl font-black text-amber-400">
+            {formatCurrency(metrics.salesCost)}
+          </p>
+          <p className="mt-1 text-[11px] text-zinc-400">
+            Quanto você gastou para realizar essas vendas
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-red-500/25 bg-dark-900/90 p-4">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+              Saídas / Despesas da Loja
+// etapa 40/85
