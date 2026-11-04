@@ -1532,4 +1532,23 @@ function SpreadsheetRow({
         {profitMargin !== null && (
           <div className="text-[10px] text-zinc-400">
             Margem: {profitMargin.toFixed(0)}%
-// etapa 82/85
+          </div>
+        )}
+      </td>
+
+      {/* Células das Colunas Personalizadas pelo Usuário */}
+      {customColumns.map((col) => {
+        const val = customVals[col.column_key] ?? '';
+        return (
+          <td
+            key={col.id}
+            className="border-l border-dark-800 px-2.5 py-2.5 align-middle"
+          >
+            <input
+              type={col.column_type === 'number' ? 'number' : 'text'}
+              value={val}
+              onChange={(e) =>
+                setCustomVals((prev) => ({
+                  ...prev,
+                  [col.column_key]: e.target.value,
+// etapa 83/85
