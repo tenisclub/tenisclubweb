@@ -18,4 +18,10 @@ export default async function AdminFinancialPage() {
       `
       )
       .order('entry_date', { ascending: false })
-// etapa 4/10
+      .order('occurred_at', { ascending: false })
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('financial_custom_columns')
+      .select('*')
+      .order('sort_order', { ascending: true })
+// etapa 5/10
