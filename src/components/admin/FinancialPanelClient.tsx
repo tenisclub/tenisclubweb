@@ -409,4 +409,23 @@ export function FinancialPanelClient({
   };
 
   const handleDeleteEntry = async (entry: FinancialEntry) => {
-// etapa 22/85
+    if (
+      !window.confirm(
+        `Deseja realmente remover o lançamento "${entry.description}" da planilha financeira?`
+      )
+    ) {
+      return;
+    }
+
+    setSavingRowId(entry.id);
+    try {
+      const res = await fetch(`/api/admin/finance/${entry.id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        showToast('Erro ao excluir lançamento.', 'error');
+        return;
+      }
+      setEntries((prev) => prev.filter((item) => item.id !== entry.id));
+      showToast('Lançamento removido da planilha.', 'info');
+    } catch {
+      showToast('Erro ao excluir lançamento.', 'error');
+// etapa 23/85
