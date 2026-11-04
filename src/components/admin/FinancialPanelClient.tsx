@@ -1570,4 +1570,21 @@ function SpreadsheetRow({
         );
       })}
 
-// etapa 84/85
+      {/* Ações */}
+      <td className="px-3 py-2.5 text-center align-middle">
+        {isSaving ? (
+          <Loader2 className="mx-auto h-4 w-4 animate-spin text-neon" />
+        ) : (
+          <button
+            type="button"
+            onClick={() => onDelete(entry)}
+            className="rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-red-500/15 hover:text-red-400"
+            title="Excluir linha da planilha"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        )}
+      </td>
+    </tr>
+  );
+}
