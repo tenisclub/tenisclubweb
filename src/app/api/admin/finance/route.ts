@@ -73,4 +73,12 @@ export async function POST(request: Request) {
   }
 
   try {
-// etapa 9/22
+    const body = await request.json();
+    const supabase = createServiceClient();
+
+    // Create a custom user column
+    if (body.action === 'create_column') {
+      const name = String(body.name || '').trim();
+      if (!name) {
+        return NextResponse.json({ error: 'Informe o nome da nova coluna.' }, { status: 400 });
+// etapa 10/22
