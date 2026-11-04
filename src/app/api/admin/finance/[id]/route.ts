@@ -86,4 +86,13 @@ export async function PATCH(
       updates.cost_amount = Math.max(0, Number(body.cost_amount) || 0);
     }
     if (body.payment_method !== undefined) {
-// etapa 10/20
+      updates.payment_method = String(body.payment_method).trim();
+    }
+    if (body.occurred_at !== undefined) {
+      const iso = new Date(body.occurred_at).toISOString();
+      updates.occurred_at = iso;
+      if (body.entry_date === undefined) {
+        updates.entry_date = toSaoPauloDateStr(iso);
+      }
+    }
+// etapa 11/20
