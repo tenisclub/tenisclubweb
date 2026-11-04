@@ -1046,4 +1046,22 @@ export function FinancialPanelClient({
           </div>
 
           <div className="mt-4 flex items-center justify-end gap-2.5 border-t border-dark-800 pt-3">
-// etapa 56/85
+            <button
+              type="button"
+              onClick={() => setShowEntryForm(false)}
+              className="rounded-xl border border-dark-700 px-4 py-2 text-xs font-bold text-zinc-300 hover:bg-dark-800"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={savingEntry}
+              className="inline-flex items-center gap-2 rounded-xl bg-neon px-5 py-2 text-xs font-extrabold uppercase tracking-wider text-dark-950 hover:bg-neon-300 disabled:opacity-50"
+            >
+              {savingEntry ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+              Salvar na Planilha
+            </button>
+          </div>
+        </form>
+      )}
+// etapa 57/85
