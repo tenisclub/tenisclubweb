@@ -1158,4 +1158,23 @@ export function FinancialPanelClient({
           >
             Entradas (+)
           </button>
-// etapa 62/85
+          <button
+            type="button"
+            onClick={() => setTypeFilter('expense')}
+            className={cn(
+              'rounded-lg px-3 py-1.5 text-xs font-bold transition-colors',
+              typeFilter === 'expense'
+                ? 'bg-red-500 text-white'
+                : 'bg-dark-800 text-red-400 hover:bg-red-500/20'
+            )}
+          >
+            Saídas (−)
+          </button>
+        </div>
+
+        <div className="relative w-full sm:w-80">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+          <input
+            type="text"
+            value={searchQuery}
+// etapa 63/85
