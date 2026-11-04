@@ -96,4 +96,54 @@ export function AdminShell({
   useEffect(() => {
     setLivePendingOrders(pendingOrdersCount);
   }, [pendingOrdersCount]);
-// etapa 2/8
+
+  useEffect(() => {
+    setLiveUnreadNotifs(unreadAdminNotifs);
+  }, [unreadAdminNotifs]);
+
+  const fetchAdminStats = useCallback(async (force = false) => {
+    if (loggingOutRef.current) return;
+    const now = Date.now();
+    if (!force && now - lastStatsFetchRef.current < 10_000) return;
+    lastStatsFetchRef.current = now;
+
+    try {
+      const res = await fetch('/api/admin/stats', { cache: 'no-store' });
+      if (!res.ok || loggingOutRef.current) return;
+      const data = await res.json();
+      if (typeof data.pendingOrdersCount === 'number') {
+        setLivePendingOrders(data.pendingOrdersCount);
+      }
+      if (typeof data.unreadAdminNotifs === 'number') {
+        setLiveUnreadNotifs(data.unreadAdminNotifs);
+      }
+    } catch {
+      // Ignore transient errors
+    }
+  }, []);
+
+  useEffect(() => {
+    const onSync = (e: Event) => {
+      const custom = e as CustomEvent<{ pendingOrdersCount?: number }>;
+      if (typeof custom.detail?.pendingOrdersCount === 'number') {
+        setLivePendingOrders(custom.detail.pendingOrdersCount);
+      } else {
+        void fetchAdminStats(true);
+      }
+    };
+    const onFocus = () => {
+      if (document.visibilityState === 'visible') {
+        void fetchAdminStats(false);
+      }
+    };
+
+    window.addEventListener('tc:admin-stats-sync', onSync);
+    document.addEventListener('visibilitychange', onFocus);
+    return () => {
+      window.removeEventListener('tc:admin-stats-sync', onSync);
+      document.removeEventListener('visibilitychange', onFocus);
+    };
+  }, [fetchAdminStats]);
+
+  const handleLogout = () => {
+// etapa 3/8
