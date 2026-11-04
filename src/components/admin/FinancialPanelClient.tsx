@@ -203,4 +203,23 @@ export function FinancialPanelClient({
   // New custom column modal state
   const [showColumnModal, setShowColumnModal] = useState(false);
   const [newColumnName, setNewColumnName] = useState('');
-// etapa 11/85
+  const [newColumnType, setNewColumnType] = useState<FinancialCustomColumnType>('text');
+  const [savingColumn, setSavingColumn] = useState(false);
+
+  // Track row saving spinner
+  const [savingRowId, setSavingRowId] = useState<string | null>(null);
+
+  const openNewEntryForm = (type: FinancialEntryType) => {
+    setFormType(type);
+    setFormDescription('');
+    setFormCategory(type === 'income' ? 'Venda de Produto' : 'Compra de Mercadoria / Fornecedor');
+    setFormStoreLink('Tênis Club — Loja Online');
+    setFormProductId('');
+    setFormAmount('');
+    setFormCostAmount('');
+    setFormPaymentMethod('Pix');
+    setFormOccurredAt(getNowLocalInputValue(selectedDatePage));
+    setFormCustomValues({});
+    setShowEntryForm(true);
+  };
+// etapa 12/85
