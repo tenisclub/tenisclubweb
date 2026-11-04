@@ -121,4 +121,35 @@ export interface UserProfile {
   created_at: string;
   role?: UserRole;
 }
-// etapa 4/10
+
+export interface UserAddress {
+  id: string;
+  user_id: string;
+  label: string;
+  recipient_name: string;
+  zip_code: string;
+  street: string;
+  number: string;
+  complement: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+  reference: string;
+  is_default: boolean;
+}
+
+export interface CartItemView {
+  id: string;
+  cart_id: string;
+  product_id: string;
+  variant_id: string;
+  quantity: number;
+  product_name: string;
+  product_slug: string;
+  product_sku: string;
+  product_image: string;
+  brand_name: string;
+  color: string;
+  color_hex: string;
+  size: string;
+// etapa 5/10
