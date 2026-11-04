@@ -1401,4 +1401,23 @@ function SpreadsheetRow({
               'inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider',
               entry.entry_type === 'income'
                 ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
-// etapa 75/85
+                : 'bg-red-500/15 text-red-400 border border-red-500/30'
+            )}
+          >
+            {entry.entry_type === 'income' ? 'Entrada' : 'Saída'}
+          </span>
+
+          {entry.source_type === 'order_sale' && entry.order ? (
+            <Link
+              href={`/admin/pedidos/${entry.order.id}`}
+              className="inline-flex items-center gap-1 rounded bg-neon/10 px-1.5 py-0.5 text-[10px] font-bold text-neon hover:underline"
+              title="Ver pedido que gerou esta venda automática"
+            >
+              <Sparkles className="h-2.5 w-2.5" />
+              #{entry.order.order_number}
+              <ExternalLink className="h-2.5 w-2.5" />
+            </Link>
+          ) : (
+            <span className="text-[10px] text-zinc-500">{entry.category}</span>
+          )}
+// etapa 76/85
