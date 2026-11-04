@@ -404,4 +404,85 @@ CREATE TABLE IF NOT EXISTS public.notifications (
   is_read BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
--- etapa 5/25
+
+CREATE TABLE IF NOT EXISTS public.admin_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  admin_id UUID REFERENCES public.user_profiles(id) ON DELETE SET NULL,
+  action TEXT NOT NULL,
+  entity_type TEXT NOT NULL,
+  entity_id TEXT,
+  details JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.store_settings (
+  id INT PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+  store_name TEXT NOT NULL DEFAULT 'Tênis Club',
+  tagline TEXT NOT NULL DEFAULT 'Estilo para toda a família',
+  hero_badge TEXT NOT NULL DEFAULT 'DROP NOVO · CATÁLOGO',
+  hero_title TEXT NOT NULL DEFAULT 'Seu próximo par tá aqui. Bora?',
+  hero_subtitle TEXT NOT NULL DEFAULT 'Tênis, mocassins, sociais e lançamentos exclusivos com numeração garantida e atendimento ágil.',
+  hero_banner_url TEXT,
+  logo_url TEXT,
+  whatsapp TEXT NOT NULL DEFAULT '5511999999999',
+  phone TEXT NOT NULL DEFAULT '(11) 99999-9999',
+  email TEXT NOT NULL DEFAULT 'tenisclub.contato@gmail.com',
+  address TEXT NOT NULL DEFAULT 'Av. Paulista, 1000 - Bela Vista, São Paulo - SP',
+  business_hours TEXT NOT NULL DEFAULT 'Seg a Sex: 09h às 19h | Sáb: 09h às 16h',
+  instagram_url TEXT DEFAULT 'https://instagram.com/tenisclub',
+  facebook_url TEXT DEFAULT '',
+  tiktok_url TEXT DEFAULT '',
+  pickup_info TEXT NOT NULL DEFAULT 'Retirada gratuita na loja física mediante confirmação de separação do pedido.',
+  delivery_info TEXT NOT NULL DEFAULT 'Entrega local rápida via motoboy ou transportadora parceira. Valor e prazo confirmados no atendimento.',
+  exchange_policy TEXT NOT NULL DEFAULT 'Você pode solicitar a troca de numeração ou modelo em até 7 dias corridos após o recebimento, desde que o calçado esteja sem sinais de uso e na caixa original.',
+  privacy_policy TEXT NOT NULL DEFAULT 'Em conformidade com a LGPD (Lei nº 13.709/2018), coletamos apenas os dados essenciais para processar seus pedidos, entrega e atendimento.',
+  terms_of_use TEXT NOT NULL DEFAULT 'Ao realizar um pedido na Tênis Club, os itens selecionados têm preço e disponibilidade validados no momento da confirmação.',
+  about_text TEXT NOT NULL DEFAULT 'A Tênis Club nasceu com a missão de unir estilo, conforto e autenticidade para toda a família. Trabalhamos com curadoria rigorosa de tênis casuais, esportivos, sapatos sociais e lançamentos.',
+  checkout_delivery_config JSONB NOT NULL DEFAULT '{}'::jsonb,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ----------------------------------------------------------------------------
+-- 8. INDEXES FOR PERFORMANCE
+-- ----------------------------------------------------------------------------
+CREATE INDEX IF NOT EXISTS idx_products_slug ON public.products(slug);
+CREATE INDEX IF NOT EXISTS idx_products_active ON public.products(is_active, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_products_gender ON public.products(gender);
+CREATE INDEX IF NOT EXISTS idx_products_category ON public.products(category_id);
+CREATE INDEX IF NOT EXISTS idx_products_brand ON public.products(brand_id);
+CREATE INDEX IF NOT EXISTS idx_variants_product ON public.product_variants(product_id);
+CREATE INDEX IF NOT EXISTS idx_variants_size ON public.product_variants(size);
+CREATE INDEX IF NOT EXISTS idx_inventory_variant ON public.inventory(variant_id);
+CREATE INDEX IF NOT EXISTS idx_orders_user ON public.orders(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_orders_status ON public.orders(status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON public.notifications(user_id, is_read, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_notifications_admin ON public.notifications(target_audience, is_read, created_at DESC);
+
+-- ----------------------------------------------------------------------------
+-- 9. AUTH USER CREATION & SYNC TRIGGER (RN01 & RN16)
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_customer_role_id UUID;
+  v_full_name TEXT;
+  v_phone TEXT;
+  v_avatar TEXT;
+  v_provider TEXT;
+BEGIN
+  v_full_name := COALESCE(
+    NULLIF(TRIM(NEW.raw_user_meta_data->>'full_name'), ''),
+    NULLIF(TRIM(NEW.raw_user_meta_data->>'name'), ''),
+    SPLIT_PART(NEW.email, '@', 1)
+  );
+  v_phone := COALESCE(NEW.raw_user_meta_data->>'phone', '');
+  v_avatar := COALESCE(NEW.raw_user_meta_data->>'avatar_url', NEW.raw_user_meta_data->>'picture');
+  v_provider := COALESCE(NEW.raw_app_meta_data->>'provider', 'email');
+
+  INSERT INTO public.user_profiles (id, email, full_name, phone, avatar_url, auth_provider, is_active, accepted_terms_at)
+  VALUES (NEW.id, LOWER(NEW.email), v_full_name, v_phone, v_avatar, v_provider, TRUE, NOW())
+-- etapa 6/25
