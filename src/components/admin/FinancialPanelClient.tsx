@@ -1027,4 +1027,23 @@ export function FinancialPanelClient({
                         {col.name}
                       </label>
                       <input
-// etapa 55/85
+                        type={col.column_type === 'number' ? 'number' : 'text'}
+                        value={formCustomValues[col.column_key] || ''}
+                        onChange={(e) =>
+                          setFormCustomValues((prev) => ({
+                            ...prev,
+                            [col.column_key]: e.target.value,
+                          }))
+                        }
+                        placeholder={`Preencher ${col.name}...`}
+                        className="w-full rounded-lg border border-dark-700 bg-dark-950 px-3 py-1.5 text-xs text-white focus:border-neon focus:outline-none"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-4 flex items-center justify-end gap-2.5 border-t border-dark-800 pt-3">
+// etapa 56/85
