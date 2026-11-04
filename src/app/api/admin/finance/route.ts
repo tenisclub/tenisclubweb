@@ -64,4 +64,13 @@ export async function GET() {
       { status: 500 }
     );
   }
-// etapa 8/22
+}
+
+export async function POST(request: Request) {
+  const session = await getAuthSession();
+  if (!session?.isAdmin) {
+    return NextResponse.json({ error: 'Acesso negado.' }, { status: 403 });
+  }
+
+  try {
+// etapa 9/22
