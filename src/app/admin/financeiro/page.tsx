@@ -13,4 +13,9 @@ export default async function AdminFinancialPage() {
       .select(
         `
         *,
-// etapa 3/10
+        order:orders(id, order_number, customer_name, status, payment_status),
+        product:products(id, name, sku)
+      `
+      )
+      .order('entry_date', { ascending: false })
+// etapa 4/10
