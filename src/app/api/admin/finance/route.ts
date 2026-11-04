@@ -115,4 +115,12 @@ export async function POST(request: Request) {
 
     // Create a financial entry (income or expense)
     const entryType = body.entry_type === 'expense' ? 'expense' : 'income';
-// etapa 14/22
+    const description = String(body.description || '').trim();
+    if (!description) {
+      return NextResponse.json(
+        { error: 'Informe uma descrição para o lançamento.' },
+        { status: 400 }
+      );
+    }
+
+// etapa 15/22
