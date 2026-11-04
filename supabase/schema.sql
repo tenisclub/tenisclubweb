@@ -647,4 +647,85 @@ BEGIN
       AND pr.is_active = TRUE
       AND (pr.starts_at IS NULL OR pr.starts_at <= NOW())
       AND (pr.ends_at IS NULL OR pr.ends_at >= NOW())
--- etapa 8/25
+    ORDER BY pr.promo_price ASC
+    LIMIT 1;
+
+    v_unit_price := COALESCE(v_promo_price, v_item.product_promo_price, v_item.base_price);
+    IF v_unit_price > v_item.base_price THEN
+      v_unit_price := v_item.base_price;
+    END IF;
+
+    v_subtotal := v_subtotal + (v_item.base_price * v_item.cart_qty);
+    v_discount_total := v_discount_total + ((v_item.base_price - v_unit_price) * v_item.cart_qty);
+    v_items_total := v_items_total + (v_unit_price * v_item.cart_qty);
+  END LOOP;
+
+  IF p_shipping_address IS NOT NULL AND (p_shipping_address ? 'custom_option_id') THEN
+    SELECT elem INTO v_custom_card
+    FROM jsonb_array_elements(COALESCE(v_delivery_cfg->'extra_cards', '[]'::jsonb)) AS elem
+    WHERE elem->>'id' = (p_shipping_address->>'custom_option_id')
+      AND COALESCE((elem->>'enabled')::boolean, TRUE) = TRUE
+      AND elem->>'card_type' = 'option'
+    LIMIT 1;
+  END IF;
+
+  IF v_custom_card IS NOT NULL THEN
+    IF COALESCE(v_custom_card->>'fee_mode', 'to_combine') = 'fixed' THEN
+      BEGIN
+        v_fee := GREATEST(COALESCE(NULLIF(v_custom_card->>'fee', '')::NUMERIC(10, 2), 0), 0);
+        v_free_min := GREATEST(COALESCE(NULLIF(v_custom_card->>'free_threshold', '')::NUMERIC(10, 2), 0), 0);
+      EXCEPTION WHEN OTHERS THEN
+        v_fee := 0;
+        v_free_min := 0;
+      END;
+      IF v_free_min > 0 AND v_items_total >= v_free_min THEN
+        v_shipping_cost := 0;
+      ELSE
+        v_shipping_cost := v_fee;
+      END IF;
+    ELSE
+      v_shipping_cost := 0;
+    END IF;
+  ELSIF p_delivery_method = 'local_delivery'
+    AND NOT COALESCE((v_delivery_cfg->>'delivery_removed')::boolean, FALSE)
+    AND COALESCE((v_delivery_cfg->>'delivery_enabled')::boolean, TRUE)
+    AND COALESCE(v_delivery_cfg->>'delivery_fee_mode', 'to_combine') = 'fixed'
+  THEN
+    BEGIN
+      v_fee := GREATEST(COALESCE(NULLIF(v_delivery_cfg->>'delivery_fee', '')::NUMERIC(10, 2), 0), 0);
+      v_free_min := GREATEST(COALESCE(NULLIF(v_delivery_cfg->>'free_delivery_threshold', '')::NUMERIC(10, 2), 0), 0);
+    EXCEPTION WHEN OTHERS THEN
+      v_fee := 0;
+      v_free_min := 0;
+    END;
+    IF v_free_min > 0 AND v_items_total >= v_free_min THEN
+      v_shipping_cost := 0;
+    ELSE
+      v_shipping_cost := v_fee;
+    END IF;
+  ELSIF p_delivery_method = 'pickup'
+    AND NOT COALESCE((v_delivery_cfg->>'pickup_removed')::boolean, FALSE)
+    AND COALESCE((v_delivery_cfg->>'pickup_enabled')::boolean, TRUE)
+  THEN
+    BEGIN
+      v_shipping_cost := GREATEST(COALESCE(NULLIF(v_delivery_cfg->>'pickup_fee', '')::NUMERIC(10, 2), 0), 0);
+    EXCEPTION WHEN OTHERS THEN
+      v_shipping_cost := 0;
+    END;
+  END IF;
+
+  v_total := v_items_total + v_shipping_cost;
+
+  -- Create Order record
+  INSERT INTO public.orders (
+    order_number,
+    user_id,
+    customer_name,
+    customer_email,
+    customer_phone,
+    delivery_method,
+    shipping_address,
+    subtotal,
+    discount_total,
+    shipping_cost,
+-- etapa 9/25
