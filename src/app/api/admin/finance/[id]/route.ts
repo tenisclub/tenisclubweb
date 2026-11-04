@@ -59,4 +59,13 @@ export async function PATCH(
     }
 
     const updates: Record<string, unknown> = {};
-// etapa 7/20
+
+    if (body.description !== undefined) {
+      const desc = String(body.description).trim();
+      if (!desc) {
+        return NextResponse.json({ error: 'A descrição não pode ficar vazia.' }, { status: 400 });
+      }
+      updates.description = desc;
+    }
+    if (body.entry_type !== undefined) {
+// etapa 8/20
