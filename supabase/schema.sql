@@ -1134,4 +1134,86 @@ BEGIN
   END IF;
 
   -- If reopening a cancelled order, re-validate and deduct stock
--- etapa 14/25
+  IF v_order.status = 'cancelled' AND p_new_status <> 'cancelled' AND v_order.stock_deducted = FALSE THEN
+    FOR v_item IN
+      SELECT * FROM public.order_items WHERE order_id = p_order_id
+    LOOP
+      v_allow_backorder := FALSE;
+      IF v_item.product_id IS NOT NULL THEN
+        SELECT COALESCE(allow_backorder, FALSE) INTO v_allow_backorder
+        FROM public.products
+        WHERE id = v_item.product_id;
+      END IF;
+
+      IF v_item.variant_id IS NOT NULL THEN
+        SELECT quantity INTO v_inv_qty
+        FROM public.inventory
+        WHERE variant_id = v_item.variant_id
+        FOR UPDATE;
+
+        IF NOT COALESCE(v_allow_backorder, FALSE) AND COALESCE(v_inv_qty, 0) < v_item.quantity THEN
+          RAISE EXCEPTION 'Não é possível reativar o pedido: estoque insuficiente para "%" (Tam. %).', v_item.product_name, v_item.size;
+        END IF;
+
+        v_deduct_qty := GREATEST(0, LEAST(COALESCE(v_inv_qty, 0), v_item.quantity));
+
+        UPDATE public.order_items
+        SET stock_deducted_qty = v_deduct_qty
+        WHERE id = v_item.id;
+
+        IF v_deduct_qty > 0 THEN
+          UPDATE public.inventory
+          SET quantity = v_inv_qty - v_deduct_qty, updated_at = NOW()
+          WHERE variant_id = v_item.variant_id;
+
+          INSERT INTO public.inventory_movements (
+            variant_id,
+            product_id,
+            previous_quantity,
+            moved_quantity,
+            new_quantity,
+            movement_type,
+            reason,
+            order_id,
+            performed_by
+          ) VALUES (
+            v_item.variant_id,
+            v_item.product_id,
+            v_inv_qty,
+            -v_deduct_qty,
+            v_inv_qty - v_deduct_qty,
+            'order_reserve',
+            'Reativação do pedido ' || v_order.order_number,
+            p_order_id,
+            p_admin_id
+          );
+        END IF;
+      END IF;
+
+      IF v_item.product_id IS NOT NULL THEN
+        UPDATE public.products
+        SET sold_count = sold_count + v_item.quantity, updated_at = NOW()
+        WHERE id = v_item.product_id;
+      END IF;
+    END LOOP;
+    v_stock_deducted := TRUE;
+  END IF;
+
+  UPDATE public.orders
+  SET
+    status = p_new_status,
+    store_notes = COALESCE(p_store_notes, store_notes),
+    internal_notes = COALESCE(p_internal_notes, internal_notes),
+    payment_status = COALESCE(p_payment_status, payment_status),
+    payment_method_note = COALESCE(p_payment_method_note, payment_method_note),
+    paid_at = CASE
+      WHEN p_payment_status = 'paid_manual' AND paid_at IS NULL THEN NOW()
+      WHEN p_payment_status = 'pending' THEN NULL
+      ELSE paid_at
+    END,
+    stock_deducted = v_stock_deducted,
+    updated_at = NOW()
+  WHERE id = p_order_id;
+
+  IF v_order.status <> p_new_status OR TRIM(COALESCE(p_note, '')) <> '' THEN
+-- etapa 15/25
