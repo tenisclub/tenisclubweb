@@ -276,4 +276,33 @@ export interface FinancialCustomColumn {
 export interface FinancialEntry {
   id: string;
   entry_type: FinancialEntryType;
-// etapa 9/10
+  source_type: FinancialSourceType;
+  description: string;
+  category: string;
+  store_link: string;
+  order_id: string | null;
+  product_id: string | null;
+  amount: number;
+  cost_amount: number;
+  payment_method: string;
+  custom_values: Record<string, string>;
+  occurred_at: string;
+  entry_date: string;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+  order?: {
+    id: string;
+    order_number: string;
+    customer_name: string;
+    status: OrderStatus;
+    payment_status: PaymentStatus;
+  } | null;
+  product?: {
+    id: string;
+    name: string;
+    sku: string | null;
+  } | null;
+}
+
+
