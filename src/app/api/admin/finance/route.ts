@@ -56,4 +56,12 @@ export async function GET() {
     return NextResponse.json({
       entries: entriesRes.data || [],
       customColumns: columnsRes.data || [],
-// etapa 7/22
+      products: productsRes.data || [],
+    });
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Erro ao carregar painel financeiro.' },
+      { status: 500 }
+    );
+  }
+// etapa 8/22
