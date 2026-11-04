@@ -54,4 +54,22 @@ const STORE_LINK_PRESETS = [
   'Custos Fixos da Loja',
 ];
 
-// etapa 3/85
+const CATEGORY_PRESETS_INCOME = [
+  'Venda de Produto',
+  'Entrada Loja Física',
+  'Recebimento Pix / Cartão',
+  'Aporte / Caixa',
+  'Outras Entradas',
+];
+
+const CATEGORY_PRESETS_EXPENSE = [
+  'Compra de Mercadoria / Fornecedor',
+  'Frete / Motoboy / Correios',
+  'Embalagens / Sacolas / Caixas',
+  'Marketing / Tráfego Pago',
+  'Taxa de Maquininha / Gateway',
+  'Aluguel / Internet / Energia',
+  'Retirada / Pró-labore',
+  'Outras Saídas',
+];
+// etapa 4/85
