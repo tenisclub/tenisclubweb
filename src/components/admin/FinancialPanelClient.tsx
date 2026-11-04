@@ -428,4 +428,23 @@ export function FinancialPanelClient({
       showToast('Lançamento removido da planilha.', 'info');
     } catch {
       showToast('Erro ao excluir lançamento.', 'error');
-// etapa 23/85
+    } finally {
+      setSavingRowId(null);
+    }
+  };
+
+  const handleCreateColumn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newColumnName.trim()) {
+      showToast('Digite o nome da nova coluna.', 'error');
+      return;
+    }
+    setSavingColumn(true);
+    try {
+      const res = await fetch('/api/admin/finance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create_column',
+          name: newColumnName.trim(),
+// etapa 24/85
