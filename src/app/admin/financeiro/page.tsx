@@ -34,4 +34,9 @@ export default async function AdminFinancialPage() {
   return (
     <FinancialPanelClient
       initialEntries={(entriesRes.data || []) as FinancialEntry[]}
-// etapa 7/10
+      initialColumns={(columnsRes.data || []) as FinancialCustomColumn[]}
+      products={
+        (productsRes.data || []) as Array<{
+          id: string;
+          name: string;
+// etapa 8/10
