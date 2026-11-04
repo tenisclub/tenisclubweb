@@ -131,4 +131,13 @@ export async function POST(request: Request) {
     const paymentMethod = String(body.payment_method || '').trim();
     const occurredAt = body.occurred_at
       ? new Date(body.occurred_at).toISOString()
-// etapa 16/22
+      : new Date().toISOString();
+    const entryDate = body.entry_date
+      ? String(body.entry_date).slice(0, 10)
+      : toSaoPauloDateStr(occurredAt);
+
+    const customValues =
+      body.custom_values && typeof body.custom_values === 'object' && !Array.isArray(body.custom_values)
+        ? body.custom_values
+        : {};
+// etapa 17/22
