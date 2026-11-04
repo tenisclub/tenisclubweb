@@ -1177,4 +1177,22 @@ export function FinancialPanelClient({
           <input
             type="text"
             value={searchQuery}
-// etapa 63/85
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Buscar descrição, pedido, produto, loja..."
+            className="w-full rounded-xl border border-dark-700 bg-dark-950 py-1.5 pl-9 pr-3 text-xs text-white placeholder-zinc-500 focus:border-neon focus:outline-none"
+          />
+        </div>
+      </div>
+
+      {/* Main Spreadsheet Table */}
+      <div className="overflow-hidden rounded-2xl border border-dark-700 bg-dark-900 shadow-xl">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[1100px] border-collapse text-left text-xs">
+            <thead>
+              <tr className="border-b border-dark-700 bg-dark-950/90 text-[11px] font-extrabold uppercase tracking-wider text-zinc-400">
+                <th className="px-3.5 py-3.5">Data & Hora</th>
+                <th className="px-3 py-3.5">Tipo</th>
+                <th className="min-w-[260px] px-3.5 py-3.5">
+                  Descrição (O que foi a Entrada / Saída)
+                </th>
+// etapa 64/85
