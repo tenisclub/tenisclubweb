@@ -91,4 +91,23 @@ function getNowLocalInputValue(targetDate?: string): string {
   return `${ymd}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
 }
 
-// etapa 5/85
+function isoToLocalInputValue(iso: string): string {
+  try {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return getNowLocalInputValue();
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
+      d.getHours()
+    )}:${pad(d.getMinutes())}`;
+  } catch {
+    return getNowLocalInputValue();
+  }
+}
+
+function formatDatePageTab(ymd: string, todayYmd: string): { title: string; badge?: string } {
+  const [y, m, d] = ymd.split('-');
+  const formatted = d && m && y ? `${d}/${m}/${y}` : ymd;
+  if (ymd === todayYmd) {
+    return { title: formatted, badge: 'Hoje' };
+  }
+// etapa 6/85
