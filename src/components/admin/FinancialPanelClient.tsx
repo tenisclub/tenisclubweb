@@ -765,4 +765,23 @@ export function FinancialPanelClient({
             metrics.netProfit >= 0
               ? 'border-neon/35 bg-gradient-to-br from-dark-900 to-neon/5'
               : 'border-red-500/35 bg-gradient-to-br from-dark-900 to-red-500/5'
-// etapa 41/85
+          )}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-zinc-300">
+              Lucro Líquido Real
+            </span>
+            <span
+              className={cn(
+                'rounded-md px-2 py-0.5 text-[10px] font-black uppercase',
+                metrics.netProfit >= 0
+                  ? 'bg-neon/20 text-neon'
+                  : 'bg-red-500/20 text-red-400'
+              )}
+            >
+              Margem {metrics.marginPercent.toFixed(1)}%
+            </span>
+          </div>
+          <p
+            className={cn(
+// etapa 42/85
