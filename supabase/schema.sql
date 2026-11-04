@@ -241,4 +241,85 @@ CREATE TABLE IF NOT EXISTS public.inventory (
 );
 
 CREATE TABLE IF NOT EXISTS public.inventory_movements (
--- etapa 3/25
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  variant_id UUID NOT NULL REFERENCES public.product_variants(id) ON DELETE CASCADE,
+  product_id UUID NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
+  previous_quantity INT NOT NULL,
+  moved_quantity INT NOT NULL,
+  new_quantity INT NOT NULL,
+  movement_type TEXT NOT NULL CHECK (movement_type IN ('in', 'out', 'adjustment', 'order_reserve', 'order_cancel_return')),
+  reason TEXT NOT NULL,
+  order_id UUID,
+  performed_by UUID REFERENCES public.user_profiles(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ----------------------------------------------------------------------------
+-- 4. PROMOTIONS
+-- ----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.promotions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  description TEXT DEFAULT '',
+  product_id UUID NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
+  discount_percent NUMERIC(5, 2),
+  promo_price NUMERIC(10, 2) NOT NULL CHECK (promo_price >= 0),
+  starts_at TIMESTAMPTZ,
+  ends_at TIMESTAMPTZ,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  highlight_home BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ----------------------------------------------------------------------------
+-- 5. CARTS, CART ITEMS & FAVORITES
+-- ----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.carts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID UNIQUE NOT NULL REFERENCES public.user_profiles(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.cart_items (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  cart_id UUID NOT NULL REFERENCES public.carts(id) ON DELETE CASCADE,
+  product_id UUID NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
+  variant_id UUID NOT NULL REFERENCES public.product_variants(id) ON DELETE CASCADE,
+  quantity INT NOT NULL DEFAULT 1 CHECK (quantity > 0),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (cart_id, variant_id)
+);
+
+CREATE TABLE IF NOT EXISTS public.favorites (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES public.user_profiles(id) ON DELETE CASCADE,
+  product_id UUID NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (user_id, product_id)
+);
+
+-- ----------------------------------------------------------------------------
+-- 6. ORDERS, ORDER ITEMS & ORDER STATUS HISTORY
+-- ----------------------------------------------------------------------------
+CREATE SEQUENCE IF NOT EXISTS public.order_number_seq START 1001;
+
+CREATE TABLE IF NOT EXISTS public.orders (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_number TEXT UNIQUE NOT NULL,
+  user_id UUID NOT NULL REFERENCES public.user_profiles(id) ON DELETE RESTRICT,
+  customer_name TEXT NOT NULL,
+  customer_email TEXT NOT NULL,
+  customer_phone TEXT NOT NULL,
+  delivery_method TEXT NOT NULL CHECK (delivery_method IN ('pickup', 'local_delivery')),
+  shipping_address JSONB,
+  subtotal NUMERIC(10, 2) NOT NULL CHECK (subtotal >= 0),
+  discount_total NUMERIC(10, 2) NOT NULL DEFAULT 0 CHECK (discount_total >= 0),
+  shipping_cost NUMERIC(10, 2) NOT NULL DEFAULT 0 CHECK (shipping_cost >= 0),
+  total NUMERIC(10, 2) NOT NULL CHECK (total >= 0),
+  status TEXT NOT NULL DEFAULT 'received' CHECK (status IN (
+    'received',
+    'awaiting_confirmation',
+-- etapa 4/25
