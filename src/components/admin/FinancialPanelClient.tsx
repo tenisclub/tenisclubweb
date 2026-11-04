@@ -316,4 +316,22 @@ export function FinancialPanelClient({
   };
 
   const handleCreateEntry = async (e: React.FormEvent) => {
-// etapa 17/85
+    e.preventDefault();
+    if (!formDescription.trim()) {
+      showToast('Informe a descrição do lançamento.', 'error');
+      return;
+    }
+
+    const numAmount = Number(String(formAmount).replace(',', '.')) || 0;
+    const numCost = Number(String(formCostAmount).replace(',', '.')) || 0;
+
+    setSavingEntry(true);
+    try {
+      const occurredIso = formOccurredAt
+        ? new Date(formOccurredAt).toISOString()
+        : new Date().toISOString();
+      const entryDateYmd = formOccurredAt
+        ? formOccurredAt.slice(0, 10)
+        : selectedDatePage !== 'all'
+          ? selectedDatePage
+// etapa 18/85
