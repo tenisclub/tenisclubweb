@@ -1784,4 +1784,85 @@ CREATE TRIGGER trg_realtime_user_addresses
 
 DO $$
 BEGIN
--- etapa 22/25
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime'
+      AND schemaname = 'public'
+      AND tablename = 'site_sync_state'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.site_sync_state;
+  END IF;
+END $$;
+
+-- ----------------------------------------------------------------------------
+-- 17. PAINEL FINANCEIRO & PLANILHA AUTOMÁTICA DE ENTRADAS/SAÍDAS
+-- ----------------------------------------------------------------------------
+ALTER TABLE public.products
+  ADD COLUMN IF NOT EXISTS cost_price NUMERIC(10, 2) NOT NULL DEFAULT 0 CHECK (cost_price >= 0);
+
+CREATE TABLE IF NOT EXISTS public.financial_custom_columns (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  column_key TEXT UNIQUE NOT NULL,
+  column_type TEXT NOT NULL DEFAULT 'text' CHECK (column_type IN ('text', 'currency', 'number')),
+  sort_order INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.financial_entries (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  entry_type TEXT NOT NULL CHECK (entry_type IN ('income', 'expense')),
+  source_type TEXT NOT NULL DEFAULT 'manual' CHECK (source_type IN ('order_sale', 'manual', 'product_link')),
+  description TEXT NOT NULL,
+  category TEXT NOT NULL DEFAULT 'Geral',
+  store_link TEXT NOT NULL DEFAULT 'Tênis Club — Loja Online',
+  order_id UUID UNIQUE REFERENCES public.orders(id) ON DELETE CASCADE,
+  product_id UUID REFERENCES public.products(id) ON DELETE SET NULL,
+  amount NUMERIC(12, 2) NOT NULL DEFAULT 0 CHECK (amount >= 0),
+  cost_amount NUMERIC(12, 2) NOT NULL DEFAULT 0 CHECK (cost_amount >= 0),
+  payment_method TEXT NOT NULL DEFAULT '',
+  custom_values JSONB NOT NULL DEFAULT '{}'::jsonb,
+  occurred_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  entry_date DATE NOT NULL DEFAULT ((NOW() AT TIME ZONE 'America/Sao_Paulo')::DATE),
+  created_by UUID REFERENCES public.user_profiles(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_financial_entries_date
+  ON public.financial_entries(entry_date DESC, occurred_at DESC);
+CREATE INDEX IF NOT EXISTS idx_financial_entries_type
+  ON public.financial_entries(entry_type);
+CREATE INDEX IF NOT EXISTS idx_financial_entries_order
+  ON public.financial_entries(order_id);
+CREATE INDEX IF NOT EXISTS idx_financial_entries_product
+  ON public.financial_entries(product_id);
+
+CREATE OR REPLACE FUNCTION public.set_updated_at()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  NEW.updated_at := NOW();
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_financial_entries_updated_at ON public.financial_entries;
+CREATE TRIGGER trg_financial_entries_updated_at
+  BEFORE UPDATE ON public.financial_entries
+  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+ALTER TABLE public.financial_custom_columns ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.financial_entries ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "financial_custom_columns_admin_all" ON public.financial_custom_columns;
+CREATE POLICY "financial_custom_columns_admin_all" ON public.financial_custom_columns
+  FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "financial_entries_admin_all" ON public.financial_entries;
+CREATE POLICY "financial_entries_admin_all" ON public.financial_entries
+  FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+-- etapa 23/25
