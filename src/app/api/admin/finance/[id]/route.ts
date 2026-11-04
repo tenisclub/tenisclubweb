@@ -157,4 +157,13 @@ export async function DELETE(
       }
       revalidateStoreData('orders');
       return NextResponse.json({ deleted: true });
-// etapa 18/20
+    }
+
+    const { error } = await supabase.from('financial_entries').delete().eq('id', id);
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
+    revalidateStoreData('orders');
+    return NextResponse.json({ deleted: true });
+// etapa 19/20
