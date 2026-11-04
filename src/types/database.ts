@@ -152,4 +152,35 @@ export interface CartItemView {
   color: string;
   color_hex: string;
   size: string;
-// etapa 5/10
+  base_price: number;
+  unit_price: number;
+  available_stock: number;
+  allow_backorder: boolean;
+  is_available: boolean;
+  subtotal: number;
+}
+
+export interface OrderItem {
+  id: string;
+  order_id: string;
+  product_id: string | null;
+  variant_id: string | null;
+  product_name: string;
+  product_sku: string;
+  product_image: string;
+  brand_name: string;
+  color: string;
+  size: string;
+  unit_price: number;
+  original_price: number;
+  quantity: number;
+  stock_deducted_qty?: number;
+  subtotal: number;
+}
+
+export interface OrderStatusHistory {
+  id: string;
+  order_id: string;
+  previous_status: OrderStatus | null;
+  new_status: OrderStatus;
+// etapa 6/10
