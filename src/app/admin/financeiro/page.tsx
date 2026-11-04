@@ -3,4 +3,9 @@ import { FinancialPanelClient } from '@/components/admin/FinancialPanelClient';
 import type { FinancialCustomColumn, FinancialEntry } from '@/types/database';
 
 export const dynamic = 'force-dynamic';
-// etapa 1/10
+
+export default async function AdminFinancialPage() {
+  const supabase = createServiceClient();
+
+  const [entriesRes, columnsRes, productsRes] = await Promise.all([
+// etapa 2/10
