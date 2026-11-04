@@ -391,4 +391,22 @@ export function FinancialPanelClient({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates),
       });
-// etapa 21/85
+      const data = await res.json();
+      if (!res.ok) {
+        showToast(data.error || 'Erro ao atualizar linha.', 'error');
+        return;
+      }
+      const updated = data.entry as FinancialEntry;
+      setEntries((prev) => prev.map((item) => (item.id === entryId ? updated : item)));
+      if (!silent) {
+        showToast('Planilha atualizada!', 'success');
+      }
+    } catch {
+      showToast('Erro ao salvar alteração na planilha.', 'error');
+    } finally {
+      setSavingRowId(null);
+    }
+  };
+
+  const handleDeleteEntry = async (entry: FinancialEntry) => {
+// etapa 22/85
