@@ -637,14 +637,14 @@ export function FinancialPanelClient({
           : 'bg-[#0E0E12] text-zinc-100'
       )}
     >
-      {/* Top Action Toolbar (Texts removed as requested) */}
+      {/* Top Action Toolbar (Minimalist & Clean) */}
       <div className="flex flex-wrap items-center justify-between gap-2.5">
-        {/* Theme Switcher (Scoped only to Painel Financeiro) */}
+        {/* Theme Switcher */}
         <div
           className={cn(
             'inline-flex items-center rounded-xl p-0.5 border',
             isLight
-              ? 'bg-white border-slate-200 shadow-2xs'
+              ? 'bg-slate-100 border-slate-200/90'
               : 'bg-zinc-900 border-zinc-800'
           )}
           title="Alternar tema apenas do Painel Financeiro"
@@ -653,26 +653,26 @@ export function FinancialPanelClient({
             type="button"
             onClick={() => toggleTheme('light')}
             className={cn(
-              'inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold transition-all',
+              'inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all',
               isLight
-                ? 'bg-amber-50 text-amber-700 border border-amber-200/80 shadow-2xs'
+                ? 'bg-white text-slate-800 shadow-2xs'
                 : 'text-zinc-400 hover:text-zinc-200'
             )}
           >
-            <Sun className="h-3.5 w-3.5 text-amber-500" />
+            <Sun className="h-3.5 w-3.5 text-slate-500" />
             Claro
           </button>
           <button
             type="button"
             onClick={() => toggleTheme('dark')}
             className={cn(
-              'inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold transition-all',
+              'inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all',
               !isLight
                 ? 'bg-zinc-800 text-white shadow-sm'
                 : 'text-slate-500 hover:text-slate-800'
             )}
           >
-            <Moon className="h-3.5 w-3.5 text-indigo-500" />
+            <Moon className="h-3.5 w-3.5 text-slate-500" />
             Escuro
           </button>
         </div>
@@ -681,18 +681,28 @@ export function FinancialPanelClient({
           <button
             type="button"
             onClick={() => openNewEntryForm('income')}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white shadow-xs transition-all hover:bg-emerald-700 active:scale-[0.99]"
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-xs font-bold transition-all',
+              isLight
+                ? 'border-slate-200 bg-white text-slate-800 hover:bg-slate-50 shadow-2xs'
+                : 'border-zinc-700 bg-zinc-900 text-zinc-100 hover:bg-zinc-800'
+            )}
           >
-            <Plus className="h-3.5 w-3.5 stroke-[2.5]" />
+            <Plus className="h-3.5 w-3.5 stroke-[2.5] text-emerald-600" />
             Nova Entrada
           </button>
 
           <button
             type="button"
             onClick={() => openNewEntryForm('expense')}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-rose-600 px-3.5 py-2 text-xs font-bold text-white shadow-xs transition-all hover:bg-rose-700 active:scale-[0.99]"
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-xs font-bold transition-all',
+              isLight
+                ? 'border-slate-200 bg-white text-slate-800 hover:bg-slate-50 shadow-2xs'
+                : 'border-zinc-700 bg-zinc-900 text-zinc-100 hover:bg-zinc-800'
+            )}
           >
-            <TrendingDown className="h-3.5 w-3.5 stroke-[2.5]" />
+            <TrendingDown className="h-3.5 w-3.5 stroke-[2.5] text-rose-600" />
             Nova Saída
           </button>
 
@@ -700,13 +710,13 @@ export function FinancialPanelClient({
             type="button"
             onClick={() => setShowColumnModal(true)}
             className={cn(
-              'inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold transition-all',
+              'inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-semibold transition-all',
               isLight
-                ? 'border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
-                : 'border-indigo-500/30 bg-indigo-500/10 text-indigo-300 hover:bg-indigo-500/20'
+                ? 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs'
+                : 'border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800'
             )}
           >
-            <Columns3 className="h-3.5 w-3.5" />
+            <Columns3 className="h-3.5 w-3.5 text-slate-500" />
             + Nova Coluna
           </button>
 
@@ -721,13 +731,13 @@ export function FinancialPanelClient({
             )}
             title="Baixar planilha em formato Excel (.CSV)"
           >
-            <Download className="h-3.5 w-3.5" />
+            <Download className="h-3.5 w-3.5 text-slate-500" />
             Exportar CSV
           </button>
         </div>
       </div>
 
-      {/* KPI Cards Row (Compact & Proportional) */}
+      {/* KPI Cards Row (Neutral & Clean — Only Essential Accents) */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {/* Card 1: Entradas Brutas */}
         <div
@@ -751,17 +761,17 @@ export function FinancialPanelClient({
               className={cn(
                 'flex h-7 w-7 items-center justify-center rounded-lg border',
                 isLight
-                  ? 'bg-emerald-50 border-emerald-200 text-emerald-600'
-                  : 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
+                  ? 'bg-slate-50 border-slate-200 text-slate-500'
+                  : 'bg-zinc-800 border-zinc-700 text-zinc-400'
               )}
             >
-              <ArrowUpRight className="h-4 w-4" />
+              <ArrowUpRight className="h-4 w-4 text-emerald-600" />
             </span>
           </div>
           <p
             className={cn(
               'mt-1.5 text-xl font-extrabold tracking-tight tabular-nums',
-              isLight ? 'text-emerald-600' : 'text-emerald-400'
+              isLight ? 'text-slate-800' : 'text-zinc-100'
             )}
           >
             {formatCurrency(metrics.grossIncome)}
@@ -774,7 +784,7 @@ export function FinancialPanelClient({
             <span
               className={cn(
                 'font-semibold',
-                isLight ? 'text-slate-700' : 'text-zinc-300'
+                isLight ? 'text-slate-600' : 'text-zinc-300'
               )}
             >
               {activePageLabel}
@@ -787,15 +797,15 @@ export function FinancialPanelClient({
           className={cn(
             'relative overflow-hidden rounded-xl border p-3.5 transition-all',
             isLight
-              ? 'bg-white border-amber-200/90 shadow-2xs'
-              : 'bg-zinc-900/90 border-amber-500/25'
+              ? 'bg-white border-slate-200/90 shadow-2xs'
+              : 'bg-zinc-900/90 border-zinc-800'
           )}
         >
           <div className="flex items-center justify-between">
             <span
               className={cn(
                 'text-[11px] font-bold uppercase tracking-wider',
-                isLight ? 'text-amber-800' : 'text-amber-300'
+                isLight ? 'text-slate-500' : 'text-zinc-400'
               )}
             >
               Custo das Vendas
@@ -804,8 +814,8 @@ export function FinancialPanelClient({
               className={cn(
                 'flex h-7 w-7 items-center justify-center rounded-lg border',
                 isLight
-                  ? 'bg-amber-50 border-amber-200 text-amber-600'
-                  : 'bg-amber-500/15 border-amber-500/30 text-amber-400'
+                  ? 'bg-slate-50 border-slate-200 text-slate-500'
+                  : 'bg-zinc-800 border-zinc-700 text-zinc-400'
               )}
             >
               <Package className="h-4 w-4" />
@@ -814,7 +824,7 @@ export function FinancialPanelClient({
           <p
             className={cn(
               'mt-1.5 text-xl font-extrabold tracking-tight tabular-nums',
-              isLight ? 'text-amber-600' : 'text-amber-400'
+              isLight ? 'text-slate-800' : 'text-zinc-100'
             )}
           >
             {formatCurrency(metrics.salesCost)}
@@ -851,17 +861,17 @@ export function FinancialPanelClient({
               className={cn(
                 'flex h-7 w-7 items-center justify-center rounded-lg border',
                 isLight
-                  ? 'bg-rose-50 border-rose-200 text-rose-600'
-                  : 'bg-rose-500/15 border-rose-500/30 text-rose-400'
+                  ? 'bg-slate-50 border-slate-200 text-slate-500'
+                  : 'bg-zinc-800 border-zinc-700 text-zinc-400'
               )}
             >
-              <ArrowDownRight className="h-4 w-4" />
+              <ArrowDownRight className="h-4 w-4 text-rose-500" />
             </span>
           </div>
           <p
             className={cn(
               'mt-1.5 text-xl font-extrabold tracking-tight tabular-nums',
-              isLight ? 'text-rose-600' : 'text-rose-400'
+              isLight ? 'text-slate-800' : 'text-zinc-100'
             )}
           >
             {formatCurrency(metrics.totalExpenses)}
@@ -881,42 +891,29 @@ export function FinancialPanelClient({
         <div
           className={cn(
             'relative overflow-hidden rounded-xl border p-3.5 transition-all',
-            metrics.netProfit >= 0
-              ? isLight
-                ? 'bg-emerald-50/70 border-emerald-200 text-slate-900 shadow-2xs'
-                : 'bg-zinc-950 border-[#BEFA46]/40 text-white shadow-sm'
-              : isLight
-                ? 'bg-rose-50/80 border-rose-200 text-slate-900 shadow-2xs'
-                : 'bg-rose-950/60 border-rose-500/40 text-white shadow-sm'
+            isLight
+              ? 'bg-white border-slate-200/90 shadow-2xs'
+              : 'bg-zinc-900/90 border-zinc-800'
           )}
         >
           <div className="flex items-center justify-between">
             <span
               className={cn(
                 'text-[11px] font-bold uppercase tracking-wider',
-                metrics.netProfit >= 0
-                  ? isLight
-                    ? 'text-emerald-900'
-                    : 'text-slate-300'
-                  : isLight
-                    ? 'text-rose-900'
-                    : 'text-slate-300'
+                isLight ? 'text-slate-500' : 'text-zinc-400'
               )}
             >
               Lucro Líquido Real
             </span>
             <span
               className={cn(
-                'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold',
-                metrics.netProfit >= 0
-                  ? isLight
-                    ? 'bg-emerald-600 text-white'
-                    : 'bg-[#BEFA46] text-slate-950'
-                  : 'bg-rose-600 text-white'
+                'inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-semibold',
+                isLight
+                  ? 'bg-slate-50 border-slate-200 text-slate-600'
+                  : 'bg-zinc-800 border-zinc-700 text-zinc-300'
               )}
             >
-              <Percent className="h-2.5 w-2.5" />
-              Margem {metrics.marginPercent.toFixed(1)}%
+              Margem {metrics.marginPercent.toFixed(0)}%
             </span>
           </div>
           <p
@@ -924,11 +921,11 @@ export function FinancialPanelClient({
               'mt-1.5 text-xl font-extrabold tracking-tight tabular-nums',
               metrics.netProfit >= 0
                 ? isLight
-                  ? 'text-emerald-700'
-                  : 'text-[#BEFA46]'
+                  ? 'text-emerald-600'
+                  : 'text-emerald-400'
                 : isLight
                   ? 'text-rose-600'
-                  : 'text-rose-300'
+                  : 'text-rose-400'
             )}
           >
             {formatCurrency(metrics.netProfit)}
@@ -936,7 +933,7 @@ export function FinancialPanelClient({
           <p
             className={cn(
               'mt-1 text-[11px]',
-              isLight ? 'text-slate-600' : 'text-slate-300'
+              isLight ? 'text-slate-500' : 'text-zinc-400'
             )}
           >
             Entradas − Custo das Vendas − Saídas
@@ -1468,7 +1465,7 @@ export function FinancialPanelClient({
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <FileSpreadsheet
-                className={cn('h-4 w-4', isLight ? 'text-emerald-600' : 'text-[#BEFA46]')}
+                className={cn('h-4 w-4', isLight ? 'text-slate-500' : 'text-zinc-400')}
               />
               <span
                 className={cn(
@@ -1482,7 +1479,7 @@ export function FinancialPanelClient({
                 className={cn(
                   'rounded-full px-2 py-0.5 text-[11px] font-semibold',
                   isLight
-                    ? 'bg-slate-200/80 text-slate-700'
+                    ? 'bg-slate-200/80 text-slate-600'
                     : 'bg-zinc-800 text-zinc-400'
                 )}
               >
@@ -1510,8 +1507,8 @@ export function FinancialPanelClient({
                 className={cn(
                   'rounded-lg border px-2.5 py-1 text-xs font-semibold focus:outline-none',
                   isLight
-                    ? 'border-slate-300 bg-white text-slate-800 focus:border-slate-900'
-                    : 'border-zinc-700 bg-zinc-900 text-white focus:border-[#BEFA46]'
+                    ? 'border-slate-300 bg-white text-slate-800 focus:border-slate-500'
+                    : 'border-zinc-700 bg-zinc-900 text-white focus:border-zinc-500'
                 )}
               />
             </div>
@@ -1533,10 +1530,10 @@ export function FinancialPanelClient({
                     'group flex shrink-0 items-center gap-2.5 rounded-xl border px-3.5 py-2 text-left transition-all',
                     isSelected
                       ? isLight
-                        ? 'border-emerald-500 bg-emerald-50/90 text-emerald-950 shadow-2xs ring-2 ring-emerald-500/15'
-                        : 'border-[#BEFA46] bg-[#BEFA46]/15 text-white'
+                        ? 'border-slate-400 bg-white text-slate-900 shadow-xs ring-2 ring-slate-300/60'
+                        : 'border-zinc-500 bg-zinc-800 text-white'
                       : isLight
-                        ? 'border-slate-200/90 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-100/70'
+                        ? 'border-slate-200/90 bg-white/70 text-slate-600 hover:border-slate-300 hover:bg-white'
                         : 'border-zinc-800 bg-zinc-900 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
                   )}
                 >
@@ -1545,8 +1542,8 @@ export function FinancialPanelClient({
                       'h-4 w-4 shrink-0',
                       isSelected
                         ? isLight
-                          ? 'text-emerald-600'
-                          : 'text-[#BEFA46]'
+                          ? 'text-slate-700'
+                          : 'text-zinc-200'
                         : isLight
                           ? 'text-slate-400 group-hover:text-slate-600'
                           : 'text-zinc-500'
@@ -1558,14 +1555,10 @@ export function FinancialPanelClient({
                       {badge && (
                         <span
                           className={cn(
-                            'rounded-md px-1.5 py-0.2 text-[10px] font-extrabold uppercase',
-                            isSelected
-                              ? isLight
-                                ? 'bg-emerald-600 text-white'
-                                : 'bg-[#BEFA46] text-slate-950'
-                              : isLight
-                                ? 'bg-slate-200 text-slate-700'
-                                : 'bg-zinc-800 text-zinc-300'
+                            'rounded px-1.5 py-0.2 text-[10px] font-bold uppercase',
+                            isLight
+                              ? 'bg-slate-200/80 text-slate-700'
+                              : 'bg-zinc-700 text-zinc-200'
                           )}
                         >
                           {badge}
@@ -1573,34 +1566,14 @@ export function FinancialPanelClient({
                       )}
                     </div>
                     <div className="mt-0.5 flex items-center gap-2 text-[10px]">
-                      <span
-                        className={
-                          isSelected
-                            ? isLight
-                              ? 'text-emerald-800/80'
-                              : 'text-slate-300'
-                            : isLight
-                              ? 'text-slate-500'
-                              : 'text-zinc-500'
-                        }
-                      >
+                      <span className={isLight ? 'text-slate-500' : 'text-zinc-500'}>
                         {stat.count} {stat.count === 1 ? 'item' : 'itens'}
                       </span>
                       {stat.count > 0 && (
                         <span
                           className={cn(
                             'font-bold tabular-nums',
-                            stat.net >= 0
-                              ? isSelected
-                                ? isLight
-                                  ? 'text-emerald-700'
-                                  : 'text-[#BEFA46]'
-                                : 'text-emerald-600'
-                              : isSelected
-                                ? isLight
-                                  ? 'text-rose-600'
-                                  : 'text-rose-300'
-                                : 'text-rose-600'
+                            stat.net >= 0 ? 'text-emerald-600' : 'text-rose-600'
                           )}
                         >
                           {stat.net >= 0 ? '+' : ''}
@@ -1620,27 +1593,16 @@ export function FinancialPanelClient({
                 'flex shrink-0 items-center gap-2 rounded-xl border px-3.5 py-2 text-left transition-all',
                 selectedDatePage === 'all'
                   ? isLight
-                    ? 'border-emerald-500 bg-emerald-50/90 text-emerald-950 shadow-2xs ring-2 ring-emerald-500/15'
-                    : 'border-[#BEFA46] bg-[#BEFA46]/15 text-white'
+                    ? 'border-slate-400 bg-white text-slate-900 shadow-xs ring-2 ring-slate-300/60'
+                    : 'border-zinc-500 bg-zinc-800 text-white'
                   : isLight
-                    ? 'border-slate-200/90 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-100/70'
+                    ? 'border-slate-200/90 bg-white/70 text-slate-600 hover:border-slate-300 hover:bg-white'
                     : 'border-zinc-800 bg-zinc-900 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
               )}
             >
               <div>
                 <div className="text-xs font-bold">Todas as Datas</div>
-                <div
-                  className={cn(
-                    'text-[10px]',
-                    selectedDatePage === 'all'
-                      ? isLight
-                        ? 'text-emerald-800/80'
-                        : 'text-slate-300'
-                      : isLight
-                        ? 'text-slate-500'
-                        : 'text-zinc-500'
-                  )}
-                >
+                <div className={cn('text-[10px]', isLight ? 'text-slate-500' : 'text-zinc-500')}>
                   {entries.length} registros no total
                 </div>
               </div>
@@ -1651,23 +1613,28 @@ export function FinancialPanelClient({
         {/* Filter & Search Sub-Toolbar */}
         <div
           className={cn(
-            'flex flex-col gap-3 border-b px-4 py-3 sm:flex-row sm:items-center sm:justify-between',
+            'flex flex-col gap-3 border-b px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between',
             isLight ? 'bg-white border-slate-200' : 'bg-zinc-900 border-zinc-800'
           )}
         >
-          <div className="flex flex-wrap items-center gap-1.5">
+          <div
+            className={cn(
+              'inline-flex flex-wrap items-center gap-1 rounded-xl p-1 border',
+              isLight ? 'bg-slate-100 border-slate-200/80' : 'bg-zinc-950 border-zinc-800'
+            )}
+          >
             <button
               type="button"
               onClick={() => setTypeFilter('all')}
               className={cn(
-                'rounded-lg px-3 py-1.5 text-xs font-bold transition-all',
+                'rounded-lg px-3 py-1 text-xs font-semibold transition-all',
                 typeFilter === 'all'
                   ? isLight
-                    ? 'bg-indigo-600 text-white shadow-2xs'
-                    : 'bg-[#BEFA46] text-slate-950'
+                    ? 'bg-white text-slate-900 shadow-2xs'
+                    : 'bg-zinc-800 text-white'
                   : isLight
-                    ? 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                    : 'bg-zinc-800 text-zinc-400 hover:text-white'
+                    ? 'text-slate-600 hover:text-slate-900'
+                    : 'text-zinc-400 hover:text-white'
               )}
             >
               Todos ({pageEntries.length})
@@ -1676,12 +1643,14 @@ export function FinancialPanelClient({
               type="button"
               onClick={() => setTypeFilter('income')}
               className={cn(
-                'rounded-lg px-3 py-1.5 text-xs font-bold transition-all',
+                'rounded-lg px-3 py-1 text-xs font-semibold transition-all',
                 typeFilter === 'income'
-                  ? 'bg-emerald-600 text-white'
+                  ? isLight
+                    ? 'bg-white text-emerald-700 shadow-2xs'
+                    : 'bg-zinc-800 text-emerald-400'
                   : isLight
-                    ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                    : 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'
+                    ? 'text-slate-600 hover:text-slate-900'
+                    : 'text-zinc-400 hover:text-white'
               )}
             >
               Entradas ({metrics.incomeCount})
@@ -1690,12 +1659,14 @@ export function FinancialPanelClient({
               type="button"
               onClick={() => setTypeFilter('expense')}
               className={cn(
-                'rounded-lg px-3 py-1.5 text-xs font-bold transition-all',
+                'rounded-lg px-3 py-1 text-xs font-semibold transition-all',
                 typeFilter === 'expense'
-                  ? 'bg-rose-600 text-white'
+                  ? isLight
+                    ? 'bg-white text-rose-700 shadow-2xs'
+                    : 'bg-zinc-800 text-rose-400'
                   : isLight
-                    ? 'bg-rose-50 text-rose-700 hover:bg-rose-100'
-                    : 'bg-rose-500/10 text-rose-400 hover:bg-rose-500/20'
+                    ? 'text-slate-600 hover:text-slate-900'
+                    : 'text-zinc-400 hover:text-white'
               )}
             >
               Saídas ({metrics.expenseCount})
@@ -1717,8 +1688,8 @@ export function FinancialPanelClient({
               className={cn(
                 'w-full rounded-xl border py-1.5 pl-9 pr-3 text-xs transition-colors focus:outline-none',
                 isLight
-                  ? 'border-slate-300 bg-slate-50/70 text-slate-900 placeholder-slate-400 focus:border-slate-900 focus:bg-white'
-                  : 'border-zinc-700 bg-zinc-950 text-white placeholder-zinc-500 focus:border-[#BEFA46]'
+                  ? 'border-slate-200 bg-slate-50/70 text-slate-900 placeholder-slate-400 focus:border-slate-400 focus:bg-white'
+                  : 'border-zinc-700 bg-zinc-950 text-white placeholder-zinc-500 focus:border-zinc-500'
               )}
             />
           </div>
@@ -1732,7 +1703,7 @@ export function FinancialPanelClient({
                 className={cn(
                   'border-b text-[11px] font-bold uppercase tracking-wider',
                   isLight
-                    ? 'bg-slate-100/90 border-slate-200 text-slate-600'
+                    ? 'bg-slate-50 border-slate-200 text-slate-500'
                     : 'bg-zinc-950 border-zinc-800 text-zinc-400'
                 )}
               >
@@ -1787,16 +1758,14 @@ export function FinancialPanelClient({
                 <th
                   className={cn(
                     'w-36 border-r px-2.5 py-2.5 text-right',
-                    isLight
-                      ? 'bg-amber-50/90 border-amber-200/80 text-amber-900'
-                      : 'bg-amber-500/10 border-zinc-800 text-amber-300'
+                    isLight ? 'border-slate-200/80' : 'border-zinc-800'
                   )}
                 >
                   <div>Custo da Venda (R$)</div>
                   <div
                     className={cn(
                       'text-[9px] font-medium normal-case',
-                      isLight ? 'text-amber-700' : 'text-amber-300/75'
+                      isLight ? 'text-slate-400' : 'text-zinc-500'
                     )}
                   >
                     Quanto gastei p/ vender
@@ -1805,16 +1774,14 @@ export function FinancialPanelClient({
                 <th
                   className={cn(
                     'w-32 border-r px-2.5 py-2.5 text-right',
-                    isLight
-                      ? 'bg-emerald-50/60 border-slate-200/80 text-emerald-950'
-                      : 'bg-emerald-500/5 border-zinc-800 text-[#BEFA46]'
+                    isLight ? 'border-slate-200/80' : 'border-zinc-800'
                   )}
                 >
                   <div>Lucro Real</div>
                   <div
                     className={cn(
                       'text-[9px] font-medium normal-case',
-                      isLight ? 'text-emerald-700' : 'text-zinc-400'
+                      isLight ? 'text-slate-400' : 'text-zinc-500'
                     )}
                   >
                     Resultado líquido
@@ -1825,10 +1792,8 @@ export function FinancialPanelClient({
                   <th
                     key={col.id}
                     className={cn(
-                      'min-w-[155px] border-r px-3 py-3',
-                      isLight
-                        ? 'bg-indigo-50/50 border-slate-200/80 text-indigo-950'
-                        : 'bg-indigo-950/20 border-zinc-800 text-indigo-200'
+                      'min-w-[145px] border-r px-2.5 py-2.5',
+                      isLight ? 'border-slate-200/80' : 'border-zinc-800'
                     )}
                   >
                     <div className="flex items-center justify-between gap-1.5">
@@ -1841,8 +1806,8 @@ export function FinancialPanelClient({
                         className={cn(
                           'rounded p-0.5 transition-colors',
                           isLight
-                            ? 'text-slate-400 hover:bg-rose-100 hover:text-rose-600'
-                            : 'text-zinc-500 hover:bg-rose-500/20 hover:text-rose-400'
+                            ? 'text-slate-400 hover:bg-slate-200 hover:text-slate-700'
+                            : 'text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300'
                         )}
                         title={`Remover coluna "${col.name}"`}
                       >
@@ -1852,7 +1817,7 @@ export function FinancialPanelClient({
                     <div
                       className={cn(
                         'text-[9px] font-medium normal-case',
-                        isLight ? 'text-indigo-600/80' : 'text-indigo-400/70'
+                        isLight ? 'text-slate-400' : 'text-zinc-500'
                       )}
                     >
                       Coluna personalizada
@@ -1860,7 +1825,7 @@ export function FinancialPanelClient({
                   </th>
                 ))}
 
-                <th className="w-12 px-2.5 py-3 text-center">Ações</th>
+                <th className="w-12 px-2.5 py-2.5 text-center">Ações</th>
               </tr>
             </thead>
 
@@ -1874,16 +1839,16 @@ export function FinancialPanelClient({
                 <tr>
                   <td
                     colSpan={9 + customColumns.length}
-                    className="px-6 py-14 text-center"
+                    className="px-6 py-12 text-center"
                   >
                     <div className="mx-auto max-w-md space-y-2">
                       <div
                         className={cn(
-                          'mx-auto flex h-12 w-12 items-center justify-center rounded-2xl',
+                          'mx-auto flex h-10 w-10 items-center justify-center rounded-xl',
                           isLight ? 'bg-slate-100 text-slate-400' : 'bg-zinc-800 text-zinc-500'
                         )}
                       >
-                        <FileSpreadsheet className="h-6 w-6" />
+                        <FileSpreadsheet className="h-5 w-5" />
                       </div>
                       <p
                         className={cn(
@@ -1922,23 +1887,23 @@ export function FinancialPanelClient({
               {/* Quick Inline Add Row at the bottom of the spreadsheet */}
               <tr
                 className={cn(
-                  'border-t-2',
+                  'border-t',
                   isLight
-                    ? 'bg-slate-50/90 border-slate-200'
+                    ? 'bg-slate-50/60 border-slate-200'
                     : 'bg-zinc-950/60 border-zinc-800'
                 )}
               >
                 <td
                   className={cn(
-                    'border-r px-3 py-2.5 text-center font-bold',
-                    isLight ? 'border-slate-200 text-emerald-600' : 'border-zinc-800 text-[#BEFA46]'
+                    'border-r px-2 py-2 text-center font-bold',
+                    isLight ? 'border-slate-200 text-slate-400' : 'border-zinc-800 text-zinc-500'
                   )}
                 >
                   +
                 </td>
                 <td
                   className={cn(
-                    'border-r px-3.5 py-2.5 text-[11px] font-semibold',
+                    'border-r px-2.5 py-2 text-[11px] font-medium',
                     isLight ? 'border-slate-200 text-slate-500' : 'border-zinc-800 text-zinc-400'
                   )}
                 >
@@ -1946,7 +1911,7 @@ export function FinancialPanelClient({
                 </td>
                 <td
                   className={cn(
-                    'border-r px-2.5 py-2',
+                    'border-r px-2 py-2',
                     isLight ? 'border-slate-200' : 'border-zinc-800'
                   )}
                 >
@@ -1954,14 +1919,10 @@ export function FinancialPanelClient({
                     value={quickType}
                     onChange={(e) => setQuickType(e.target.value as FinancialEntryType)}
                     className={cn(
-                      'w-full rounded-lg border px-2 py-1.5 text-xs font-bold focus:outline-none',
-                      quickType === 'income'
-                        ? isLight
-                          ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
-                          : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300'
-                        : isLight
-                          ? 'border-rose-300 bg-rose-50 text-rose-800'
-                          : 'border-rose-500/40 bg-rose-500/10 text-rose-300'
+                      'w-full rounded-lg border px-2 py-1 text-xs font-semibold focus:outline-none',
+                      isLight
+                        ? 'border-slate-200 bg-white text-slate-700'
+                        : 'border-zinc-700 bg-zinc-900 text-zinc-200'
                     )}
                   >
                     <option value="income">Entrada (+)</option>
@@ -1970,7 +1931,7 @@ export function FinancialPanelClient({
                 </td>
                 <td
                   className={cn(
-                    'border-r px-2.5 py-2',
+                    'border-r px-2 py-2',
                     isLight ? 'border-slate-200' : 'border-zinc-800'
                   )}
                 >
@@ -1983,16 +1944,16 @@ export function FinancialPanelClient({
                     }}
                     placeholder="Digite a descrição da entrada ou saída rápida..."
                     className={cn(
-                      'w-full rounded-lg border px-2.5 py-1.5 text-xs focus:outline-none',
+                      'w-full rounded-lg border px-2.5 py-1 text-xs focus:outline-none',
                       isLight
-                        ? 'border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:border-slate-900'
-                        : 'border-zinc-700 bg-zinc-900 text-white placeholder-zinc-500 focus:border-[#BEFA46]'
+                        ? 'border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:border-slate-400'
+                        : 'border-zinc-700 bg-zinc-900 text-white placeholder-zinc-500 focus:border-zinc-500'
                     )}
                   />
                 </td>
                 <td
                   className={cn(
-                    'border-r px-2.5 py-2',
+                    'border-r px-2 py-2',
                     isLight ? 'border-slate-200' : 'border-zinc-800'
                   )}
                 >
@@ -2002,16 +1963,16 @@ export function FinancialPanelClient({
                     value={quickStore}
                     onChange={(e) => setQuickStore(e.target.value)}
                     className={cn(
-                      'w-full rounded-lg border px-2 py-1.5 text-xs focus:outline-none',
+                      'w-full rounded-lg border px-2 py-1 text-xs focus:outline-none',
                       isLight
-                        ? 'border-slate-300 bg-white text-slate-800 focus:border-slate-900'
-                        : 'border-zinc-700 bg-zinc-900 text-zinc-200 focus:border-[#BEFA46]'
+                        ? 'border-slate-200 bg-white text-slate-700 focus:border-slate-400'
+                        : 'border-zinc-700 bg-zinc-900 text-zinc-200 focus:border-zinc-500'
                     )}
                   />
                 </td>
                 <td
                   className={cn(
-                    'border-r px-2.5 py-2',
+                    'border-r px-2 py-2',
                     isLight ? 'border-slate-200' : 'border-zinc-800'
                   )}
                 >
@@ -2026,17 +1987,17 @@ export function FinancialPanelClient({
                     }}
                     placeholder="Valor R$"
                     className={cn(
-                      'w-full rounded-lg border px-2 py-1.5 text-right text-xs font-bold focus:outline-none',
+                      'w-full rounded-lg border px-2 py-1 text-right text-xs font-semibold focus:outline-none',
                       isLight
-                        ? 'border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:border-slate-900'
-                        : 'border-zinc-700 bg-zinc-900 text-white placeholder-zinc-500 focus:border-[#BEFA46]'
+                        ? 'border-slate-200 bg-white text-slate-800 placeholder-slate-400 focus:border-slate-400'
+                        : 'border-zinc-700 bg-zinc-900 text-white placeholder-zinc-500 focus:border-zinc-500'
                     )}
                   />
                 </td>
                 <td
                   className={cn(
-                    'border-r px-2.5 py-2',
-                    isLight ? 'bg-amber-50/40 border-slate-200' : 'bg-amber-500/5 border-zinc-800'
+                    'border-r px-2 py-2',
+                    isLight ? 'border-slate-200' : 'border-zinc-800'
                   )}
                 >
                   {quickType === 'income' ? (
@@ -2051,10 +2012,10 @@ export function FinancialPanelClient({
                       }}
                       placeholder="Custo R$"
                       className={cn(
-                        'w-full rounded-lg border px-2 py-1.5 text-right text-xs font-bold focus:outline-none',
+                        'w-full rounded-lg border px-2 py-1 text-right text-xs font-semibold focus:outline-none',
                         isLight
-                          ? 'border-amber-300 bg-white text-amber-900 placeholder-amber-400 focus:border-amber-600'
-                          : 'border-amber-500/40 bg-zinc-900 text-amber-300 placeholder-zinc-500'
+                          ? 'border-slate-200 bg-white text-slate-800 placeholder-slate-400 focus:border-slate-400'
+                          : 'border-zinc-700 bg-zinc-900 text-white placeholder-zinc-500'
                       )}
                     />
                   ) : (
@@ -2064,7 +2025,7 @@ export function FinancialPanelClient({
                 <td
                   colSpan={1 + customColumns.length}
                   className={cn(
-                    'border-r px-3 py-2 text-right',
+                    'border-r px-2.5 py-2 text-right',
                     isLight ? 'border-slate-200' : 'border-zinc-800'
                   )}
                 >
@@ -2073,10 +2034,10 @@ export function FinancialPanelClient({
                     disabled={savingQuick}
                     onClick={handleQuickAdd}
                     className={cn(
-                      'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold text-white shadow-2xs transition-all',
-                      quickType === 'income'
-                        ? 'bg-emerald-600 hover:bg-emerald-700'
-                        : 'bg-rose-600 hover:bg-rose-700'
+                      'inline-flex items-center gap-1 rounded-lg border px-3 py-1 text-xs font-semibold transition-all',
+                      isLight
+                        ? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100 shadow-2xs'
+                        : 'border-zinc-700 bg-zinc-800 text-zinc-200 hover:bg-zinc-700'
                     )}
                   >
                     {savingQuick ? (
@@ -2096,18 +2057,18 @@ export function FinancialPanelClient({
               <tfoot>
                 <tr
                   className={cn(
-                    'border-t-2 font-extrabold',
+                    'border-t font-bold',
                     isLight
-                      ? 'bg-slate-100 border-slate-300 text-slate-900'
-                      : 'bg-zinc-950 border-zinc-700 text-white'
+                      ? 'bg-slate-50 border-slate-200 text-slate-800'
+                      : 'bg-zinc-950 border-zinc-800 text-white'
                   )}
                 >
                   <td
                     colSpan={5}
                     className={cn(
-                      'border-r px-4 py-3.5 text-right text-xs uppercase tracking-wider',
+                      'border-r px-4 py-3 text-right text-xs uppercase tracking-wider',
                       isLight
-                        ? 'border-slate-200 text-slate-600'
+                        ? 'border-slate-200 text-slate-500'
                         : 'border-zinc-800 text-zinc-400'
                     )}
                   >
@@ -2116,18 +2077,16 @@ export function FinancialPanelClient({
                   </td>
                   <td
                     className={cn(
-                      'border-r px-3.5 py-3.5 text-right tabular-nums',
-                      isLight ? 'border-slate-200' : 'border-zinc-800'
+                      'border-r px-2.5 py-3 text-right tabular-nums',
+                      isLight ? 'border-slate-200 text-slate-800' : 'border-zinc-800 text-zinc-200'
                     )}
                   >
-                    <div className={isLight ? 'text-emerald-700' : 'text-emerald-400'}>
-                      +{formatCurrency(metrics.grossIncome)}
-                    </div>
+                    <div>{formatCurrency(metrics.grossIncome)}</div>
                     {metrics.totalExpenses > 0 && (
                       <div
                         className={cn(
-                          'text-[11px]',
-                          isLight ? 'text-rose-600' : 'text-rose-400'
+                          'text-[11px] font-normal',
+                          isLight ? 'text-slate-500' : 'text-zinc-400'
                         )}
                       >
                         −{formatCurrency(metrics.totalExpenses)} saídas
@@ -2136,24 +2095,22 @@ export function FinancialPanelClient({
                   </td>
                   <td
                     className={cn(
-                      'border-r px-3.5 py-3.5 text-right tabular-nums',
-                      isLight
-                        ? 'bg-amber-100/70 border-amber-200 text-amber-900'
-                        : 'bg-amber-500/10 border-zinc-800 text-amber-300'
+                      'border-r px-2.5 py-3 text-right tabular-nums',
+                      isLight ? 'border-slate-200 text-slate-700' : 'border-zinc-800 text-zinc-300'
                     )}
                   >
                     {formatCurrency(metrics.salesCost)}
                   </td>
                   <td
                     className={cn(
-                      'border-r px-3.5 py-3.5 text-right text-sm tabular-nums',
+                      'border-r px-2.5 py-3 text-right text-sm font-extrabold tabular-nums',
                       isLight ? 'border-slate-200' : 'border-zinc-800',
                       metrics.netProfit >= 0
                         ? isLight
-                          ? 'bg-emerald-100/70 text-emerald-900'
-                          : 'text-[#BEFA46]'
+                          ? 'text-emerald-600'
+                          : 'text-emerald-400'
                         : isLight
-                          ? 'bg-rose-100 text-rose-800'
+                          ? 'text-rose-600'
                           : 'text-rose-400'
                     )}
                   >
@@ -2164,7 +2121,7 @@ export function FinancialPanelClient({
                     <td
                       key={col.id}
                       className={cn(
-                        'border-r px-3 py-3.5',
+                        'border-r px-2.5 py-3',
                         isLight ? 'border-slate-200' : 'border-zinc-800'
                       )}
                     />
@@ -2230,15 +2187,15 @@ function SpreadsheetRow({
     <tr
       className={cn(
         'group transition-colors',
-        isLight ? 'hover:bg-slate-50/90' : 'hover:bg-zinc-800/40'
+        isLight ? 'hover:bg-slate-50/80' : 'hover:bg-zinc-800/40'
       )}
     >
       {/* Row # */}
       <td
         className={cn(
-          'border-r px-2.5 py-3 text-center font-mono text-[11px]',
+          'border-r px-2 py-2.5 text-center font-mono text-[11px]',
           isLight
-            ? 'border-slate-200/80 bg-slate-50/50 text-slate-400'
+            ? 'border-slate-200/80 bg-slate-50/40 text-slate-400'
             : 'border-zinc-800 bg-zinc-950/40 text-zinc-500'
         )}
       >
@@ -2248,7 +2205,7 @@ function SpreadsheetRow({
       {/* Data e Hora */}
       <td
         className={cn(
-          'whitespace-nowrap border-r px-3.5 py-2.5 align-middle',
+          'whitespace-nowrap border-r px-2.5 py-2 align-middle',
           isLight ? 'border-slate-200/80' : 'border-zinc-800'
         )}
       >
@@ -2268,8 +2225,8 @@ function SpreadsheetRow({
             className={cn(
               'rounded-lg border px-2 py-1 text-[11px] focus:outline-none',
               isLight
-                ? 'border-slate-900 bg-white text-slate-900'
-                : 'border-[#BEFA46] bg-zinc-950 text-white'
+                ? 'border-slate-400 bg-white text-slate-900'
+                : 'border-zinc-600 bg-zinc-950 text-white'
             )}
             autoFocus
           />
@@ -2282,10 +2239,10 @@ function SpreadsheetRow({
           >
             <div
               className={cn(
-                'font-bold tabular-nums',
+                'font-semibold tabular-nums',
                 isLight
-                  ? 'text-slate-800 group-hover/dt:text-indigo-600'
-                  : 'text-zinc-200 group-hover/dt:text-[#BEFA46]'
+                  ? 'text-slate-800 group-hover/dt:text-slate-950'
+                  : 'text-zinc-200 group-hover/dt:text-white'
               )}
             >
               {dtDisplay.date}
@@ -2293,7 +2250,7 @@ function SpreadsheetRow({
             <div
               className={cn(
                 'mt-0.5 inline-flex items-center gap-1 text-[11px] tabular-nums',
-                isLight ? 'text-slate-500' : 'text-zinc-400'
+                isLight ? 'text-slate-400' : 'text-zinc-500'
               )}
             >
               <Clock className="h-3 w-3 opacity-70" />
@@ -2306,20 +2263,20 @@ function SpreadsheetRow({
       {/* Tipo / Origem */}
       <td
         className={cn(
-          'whitespace-nowrap border-r px-3 py-2.5 align-middle',
+          'whitespace-nowrap border-r px-2.5 py-2 align-middle',
           isLight ? 'border-slate-200/80' : 'border-zinc-800'
         )}
       >
         <div className="flex flex-col items-start gap-1">
           <span
             className={cn(
-              'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider',
+              'inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider',
               entry.entry_type === 'income'
                 ? isLight
-                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/80'
                   : 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
                 : isLight
-                  ? 'bg-rose-100 text-rose-800 border border-rose-200'
+                  ? 'bg-rose-50 text-rose-700 border border-rose-200/80'
                   : 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
             )}
           >
@@ -2330,14 +2287,13 @@ function SpreadsheetRow({
             <Link
               href={`/admin/pedidos/${entry.order.id}`}
               className={cn(
-                'inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold transition-colors',
+                'inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium transition-colors',
                 isLight
-                  ? 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
-                  : 'bg-indigo-500/15 text-indigo-300 hover:underline'
+                  ? 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'
+                  : 'text-zinc-400 hover:text-zinc-200'
               )}
               title="Abrir detalhes do pedido"
             >
-              <Sparkles className="h-2.5 w-2.5" />
               #{entry.order.order_number}
               <ExternalLink className="h-2.5 w-2.5" />
             </Link>
@@ -2345,7 +2301,7 @@ function SpreadsheetRow({
             <span
               className={cn(
                 'text-[10px] font-medium',
-                isLight ? 'text-slate-500' : 'text-zinc-500'
+                isLight ? 'text-slate-400' : 'text-zinc-500'
               )}
             >
               {entry.category}
@@ -2357,7 +2313,7 @@ function SpreadsheetRow({
       {/* Descrição Editável */}
       <td
         className={cn(
-          'border-r px-3 py-2.5 align-middle',
+          'border-r px-2.5 py-2 align-middle',
           isLight ? 'border-slate-200/80' : 'border-zinc-800'
         )}
       >
@@ -2374,23 +2330,23 @@ function SpreadsheetRow({
           }}
           placeholder="Descreva esta entrada/saída..."
           className={cn(
-            'w-full rounded-lg border border-transparent bg-transparent px-2 py-1.5 text-xs font-semibold transition-all focus:outline-none',
+            'w-full rounded-lg border border-transparent bg-transparent px-2 py-1 text-xs font-medium transition-all focus:outline-none',
             isLight
-              ? 'text-slate-900 hover:border-slate-300 hover:bg-white focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/15'
-              : 'text-white hover:border-zinc-700 focus:border-[#BEFA46] focus:bg-zinc-950'
+              ? 'text-slate-800 hover:border-slate-200 hover:bg-white focus:border-slate-400 focus:bg-white'
+              : 'text-white hover:border-zinc-700 focus:border-zinc-500 focus:bg-zinc-950'
           )}
         />
         {entry.product && (
           <div
             className={cn(
               'mt-0.5 flex items-center gap-1 px-2 text-[11px]',
-              isLight ? 'text-slate-500' : 'text-zinc-400'
+              isLight ? 'text-slate-400' : 'text-zinc-500'
             )}
           >
             <Package className="h-3 w-3 shrink-0 opacity-70" />
             <span>
               Produto:{' '}
-              <strong className={isLight ? 'text-slate-700' : 'text-zinc-200'}>
+              <strong className={isLight ? 'text-slate-600' : 'text-zinc-300'}>
                 {entry.product.name}
               </strong>
             </span>
@@ -2401,7 +2357,7 @@ function SpreadsheetRow({
       {/* Vínculo com a Loja */}
       <td
         className={cn(
-          'border-r px-3 py-2.5 align-middle',
+          'border-r px-2.5 py-2 align-middle',
           isLight ? 'border-slate-200/80' : 'border-zinc-800'
         )}
       >
@@ -2425,10 +2381,10 @@ function SpreadsheetRow({
               }
             }}
             className={cn(
-              'w-full rounded-lg border border-transparent bg-transparent px-2 py-1 text-xs font-medium transition-all focus:outline-none',
+              'w-full rounded-lg border border-transparent bg-transparent px-1.5 py-1 text-xs transition-all focus:outline-none',
               isLight
-                ? 'text-slate-700 hover:border-slate-300 hover:bg-white focus:border-indigo-500 focus:bg-white'
-                : 'text-zinc-300 hover:border-zinc-700 focus:border-[#BEFA46] focus:bg-zinc-950'
+                ? 'text-slate-600 hover:border-slate-200 hover:bg-white focus:border-slate-400 focus:bg-white'
+                : 'text-zinc-300 hover:border-zinc-700 focus:border-zinc-500 focus:bg-zinc-950'
             )}
           />
         </div>
@@ -2437,14 +2393,14 @@ function SpreadsheetRow({
       {/* Valor Bruto */}
       <td
         className={cn(
-          'whitespace-nowrap border-r px-3 py-2.5 text-right align-middle',
+          'whitespace-nowrap border-r px-2.5 py-2 text-right align-middle',
           isLight ? 'border-slate-200/80' : 'border-zinc-800'
         )}
       >
         <div className="inline-flex items-center justify-end gap-1">
           <span
             className={cn(
-              'text-[10px] font-bold',
+              'text-[10px] font-medium',
               isLight ? 'text-slate-400' : 'text-zinc-500'
             )}
           >
@@ -2463,17 +2419,10 @@ function SpreadsheetRow({
               }
             }}
             className={cn(
-              'w-24 rounded-lg border border-transparent bg-transparent px-2 py-1 text-right text-xs font-extrabold tabular-nums transition-all focus:outline-none',
+              'w-20 rounded-lg border border-transparent bg-transparent px-1.5 py-1 text-right text-xs font-bold tabular-nums transition-all focus:outline-none',
               isLight
-                ? 'hover:border-slate-300 hover:bg-white focus:border-indigo-500 focus:bg-white'
-                : 'hover:border-zinc-700 focus:border-[#BEFA46] focus:bg-zinc-950',
-              entry.entry_type === 'income'
-                ? isLight
-                  ? 'text-emerald-700'
-                  : 'text-emerald-400'
-                : isLight
-                  ? 'text-rose-600'
-                  : 'text-rose-400'
+                ? 'text-slate-800 hover:border-slate-200 hover:bg-white focus:border-slate-400 focus:bg-white'
+                : 'text-zinc-100 hover:border-zinc-700 focus:border-zinc-500 focus:bg-zinc-950'
             )}
           />
         </div>
@@ -2482,18 +2431,16 @@ function SpreadsheetRow({
       {/* Custo da Venda ("Quanto gastei pra fazer essa venda?") */}
       <td
         className={cn(
-          'whitespace-nowrap border-r px-3.5 py-2.5 text-right align-middle',
-          isLight
-            ? 'bg-amber-50/45 border-amber-200/70'
-            : 'bg-amber-500/5 border-zinc-800'
+          'whitespace-nowrap border-r px-2.5 py-2 text-right align-middle',
+          isLight ? 'border-slate-200/80' : 'border-zinc-800'
         )}
       >
         {entry.entry_type === 'income' ? (
           <div className="inline-flex items-center justify-end gap-1">
             <span
               className={cn(
-                'text-[10px] font-bold',
-                isLight ? 'text-amber-700/70' : 'text-amber-400/70'
+                'text-[10px] font-medium',
+                isLight ? 'text-slate-400' : 'text-zinc-500'
               )}
             >
               R$
@@ -2513,10 +2460,10 @@ function SpreadsheetRow({
               placeholder="0,00"
               title="Informe quanto você gastou para realizar esta venda"
               className={cn(
-                'w-24 rounded-lg border px-2 py-1 text-right text-xs font-extrabold tabular-nums transition-all focus:outline-none',
+                'w-20 rounded-lg border px-2 py-1 text-right text-xs font-semibold tabular-nums transition-all focus:outline-none',
                 isLight
-                  ? 'border-amber-300/90 bg-white text-amber-900 shadow-2xs hover:border-amber-400 focus:border-amber-600 focus:ring-2 focus:ring-amber-500/15'
-                  : 'border-amber-500/30 bg-zinc-950 text-amber-300 hover:border-amber-400 focus:border-amber-400'
+                  ? 'border-slate-200 bg-slate-50/70 text-slate-700 hover:border-slate-300 focus:border-slate-400 focus:bg-white'
+                  : 'border-zinc-700 bg-zinc-950 text-zinc-200 hover:border-zinc-600 focus:border-zinc-500'
               )}
             />
           </div>
@@ -2530,19 +2477,17 @@ function SpreadsheetRow({
       {/* Lucro Real / Resultado */}
       <td
         className={cn(
-          'whitespace-nowrap border-r px-3.5 py-2.5 text-right align-middle',
-          isLight
-            ? 'bg-emerald-50/25 border-slate-200/80'
-            : 'border-zinc-800'
+          'whitespace-nowrap border-r px-2.5 py-2 text-right align-middle',
+          isLight ? 'border-slate-200/80' : 'border-zinc-800'
         )}
       >
         <div
           className={cn(
-            'font-extrabold tabular-nums',
+            'font-bold tabular-nums',
             netResult >= 0
               ? isLight
-                ? 'text-emerald-700'
-                : 'text-[#BEFA46]'
+                ? 'text-emerald-600'
+                : 'text-emerald-400'
               : isLight
                 ? 'text-rose-600'
                 : 'text-rose-400'
@@ -2554,14 +2499,8 @@ function SpreadsheetRow({
         {profitMargin !== null && (
           <div
             className={cn(
-              'mt-0.5 inline-block rounded px-1.5 py-0.2 text-[10px] font-semibold',
-              profitMargin >= 30
-                ? isLight
-                  ? 'bg-emerald-100 text-emerald-800'
-                  : 'bg-emerald-500/15 text-emerald-300'
-                : isLight
-                  ? 'bg-slate-200 text-slate-700'
-                  : 'bg-zinc-800 text-zinc-300'
+              'text-[10px] font-medium',
+              isLight ? 'text-slate-400' : 'text-zinc-500'
             )}
           >
             Margem {profitMargin.toFixed(0)}%
@@ -2576,7 +2515,7 @@ function SpreadsheetRow({
           <td
             key={col.id}
             className={cn(
-              'border-r px-2.5 py-2.5 align-middle',
+              'border-r px-2 py-2 align-middle',
               isLight ? 'border-slate-200/80' : 'border-zinc-800'
             )}
           >
@@ -2599,12 +2538,12 @@ function SpreadsheetRow({
                   onUpdateField(entry.id, { custom_values: nextCustom }, true);
                 }
               }}
-              placeholder="Preencher..."
+              placeholder="—"
               className={cn(
                 'w-full rounded-lg border border-transparent bg-transparent px-2 py-1 text-xs transition-all focus:outline-none',
                 isLight
-                  ? 'text-slate-800 placeholder-slate-300 hover:border-slate-300 hover:bg-white focus:border-indigo-500 focus:bg-white'
-                  : 'text-zinc-200 placeholder-zinc-600 hover:border-zinc-700 focus:border-[#BEFA46] focus:bg-zinc-950'
+                  ? 'text-slate-700 placeholder-slate-300 hover:border-slate-200 hover:bg-white focus:border-slate-400 focus:bg-white'
+                  : 'text-zinc-200 placeholder-zinc-600 hover:border-zinc-700 focus:border-zinc-500 focus:bg-zinc-950'
               )}
             />
           </td>
@@ -2612,12 +2551,12 @@ function SpreadsheetRow({
       })}
 
       {/* Ações */}
-      <td className="px-2.5 py-2.5 text-center align-middle">
+      <td className="px-2 py-2 text-center align-middle">
         {isSaving ? (
           <Loader2
             className={cn(
               'mx-auto h-4 w-4 animate-spin',
-              isLight ? 'text-indigo-600' : 'text-[#BEFA46]'
+              isLight ? 'text-slate-500' : 'text-zinc-400'
             )}
           />
         ) : (
@@ -2627,8 +2566,8 @@ function SpreadsheetRow({
             className={cn(
               'rounded-lg p-1.5 transition-colors',
               isLight
-                ? 'text-slate-400 hover:bg-rose-50 hover:text-rose-600'
-                : 'text-zinc-500 hover:bg-rose-500/15 hover:text-rose-400'
+                ? 'text-slate-400 hover:bg-slate-100 hover:text-rose-600'
+                : 'text-zinc-500 hover:bg-zinc-800 hover:text-rose-400'
             )}
             title="Excluir lançamento"
           >
