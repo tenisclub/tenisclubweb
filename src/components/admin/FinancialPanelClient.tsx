@@ -690,4 +690,23 @@ export function FinancialPanelClient({
 
           <button
             type="button"
-// etapa 37/85
+            onClick={() => setSelectedDatePage('all')}
+            className={cn(
+              'flex shrink-0 items-center gap-2 rounded-xl border px-3.5 py-2 text-left transition-all',
+              selectedDatePage === 'all'
+                ? 'border-neon bg-neon/15 text-white'
+                : 'border-dark-700 bg-dark-950/70 text-zinc-400 hover:border-dark-600 hover:text-zinc-200'
+            )}
+          >
+            <div>
+              <div className="text-xs font-extrabold">Todas as Datas</div>
+              <div className="text-[10px] text-zinc-400">{entries.length} registros no total</div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* KPI Cards for the Selected Date Page */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="rounded-2xl border border-emerald-500/25 bg-dark-900/90 p-4">
+// etapa 38/85
