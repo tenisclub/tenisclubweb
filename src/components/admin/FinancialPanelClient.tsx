@@ -1551,4 +1551,23 @@ function SpreadsheetRow({
                 setCustomVals((prev) => ({
                   ...prev,
                   [col.column_key]: e.target.value,
-// etapa 83/85
+                }))
+              }
+              onBlur={() => {
+                const prevVal = entry.custom_values?.[col.column_key] ?? '';
+                if (val !== prevVal) {
+                  const nextCustom = {
+                    ...(entry.custom_values || {}),
+                    [col.column_key]: val,
+                  };
+                  onUpdateField(entry.id, { custom_values: nextCustom }, true);
+                }
+              }}
+              placeholder="—"
+              className="w-full rounded-lg border border-transparent bg-transparent px-2 py-1 text-xs text-zinc-200 placeholder-zinc-600 transition-colors hover:border-dark-700 focus:border-neon focus:bg-dark-950 focus:outline-none"
+            />
+          </td>
+        );
+      })}
+
+// etapa 84/85
