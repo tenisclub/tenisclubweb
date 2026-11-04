@@ -1289,4 +1289,23 @@ export function FinancialPanelClient({
                     {formatCurrency(metrics.salesCost)}
                   </td>
                   <td
-// etapa 69/85
+                    className={cn(
+                      'px-3.5 py-3.5 text-right text-sm',
+                      metrics.netProfit >= 0 ? 'text-neon' : 'text-red-400'
+                    )}
+                  >
+                    {metrics.netProfit >= 0 ? '+' : ''}
+                    {formatCurrency(metrics.netProfit)}
+                  </td>
+                  {customColumns.map((col) => (
+                    <td key={col.id} className="border-l border-dark-800 px-3 py-3.5" />
+                  ))}
+                  <td />
+                </tr>
+              </tfoot>
+            )}
+          </table>
+        </div>
+      </div>
+    </div>
+// etapa 70/85
