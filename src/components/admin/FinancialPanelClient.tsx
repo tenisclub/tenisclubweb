@@ -634,4 +634,23 @@ export function FinancialPanelClient({
             const isSelected = selectedDatePage === ymd;
 
             return (
-// etapa 34/85
+              <button
+                key={ymd}
+                type="button"
+                onClick={() => setSelectedDatePage(ymd)}
+                className={cn(
+                  'group relative flex shrink-0 items-center gap-2.5 rounded-xl border px-3.5 py-2 text-left transition-all',
+                  isSelected
+                    ? 'border-neon bg-neon/15 text-white shadow-sm shadow-neon/10'
+                    : 'border-dark-700 bg-dark-950/70 text-zinc-400 hover:border-dark-600 hover:text-zinc-200'
+                )}
+              >
+                <Calendar
+                  className={cn(
+                    'h-4 w-4 shrink-0',
+                    isSelected ? 'text-neon' : 'text-zinc-500 group-hover:text-zinc-300'
+                  )}
+                />
+                <div>
+                  <div className="flex items-center gap-1.5">
+// etapa 35/85
