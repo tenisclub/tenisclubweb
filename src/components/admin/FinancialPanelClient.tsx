@@ -1064,4 +1064,23 @@ export function FinancialPanelClient({
           </div>
         </form>
       )}
-// etapa 57/85
+
+      {/* New Custom Column Modal */}
+      {showColumnModal && (
+        <form
+          onSubmit={handleCreateColumn}
+          className="rounded-2xl border border-neon/40 bg-dark-900 p-4 sm:p-5"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-dark-800 pb-3">
+            <div>
+              <h3 className="text-sm font-extrabold uppercase tracking-wider text-white">
+                Adicionar Coluna Personalizada na Planilha
+              </h3>
+              <p className="text-xs text-zinc-400">
+                Crie colunas do seu interesse (ex.: Fornecedor, Taxa Maquininha, Motoboy, Observação). Elas ficam em branco para você preencher manualmente em cada linha.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowColumnModal(false)}
+// etapa 58/85
