@@ -578,4 +578,22 @@ export function FinancialPanelClient({
             Nova Saída
           </button>
 
-// etapa 31/85
+          <button
+            type="button"
+            onClick={() => setShowColumnModal(true)}
+            className="inline-flex items-center gap-2 rounded-xl border border-neon/40 bg-neon/10 px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider text-neon transition-all hover:bg-neon/20"
+          >
+            <Columns3 className="h-4 w-4" />
+            + Nova Coluna
+          </button>
+
+          <button
+            type="button"
+            onClick={handleExportCsv}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-dark-700 bg-dark-900 px-3.5 py-2.5 text-xs font-bold text-zinc-300 transition-colors hover:border-zinc-500 hover:text-white"
+            title="Exportar página atual para Excel (.CSV)"
+          >
+            <Download className="h-4 w-4" />
+            Exportar CSV
+          </button>
+// etapa 32/85
