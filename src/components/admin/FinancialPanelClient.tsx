@@ -971,4 +971,23 @@ export function FinancialPanelClient({
                   )
                 )}
               </datalist>
-// etapa 52/85
+            </div>
+
+            <div className="md:col-span-3">
+              <label className="mb-1 block text-xs font-bold text-zinc-300">
+                Vincular a Produto da Loja (opcional)
+              </label>
+              <select
+                value={formProductId}
+                onChange={(e) => {
+                  const pid = e.target.value;
+                  setFormProductId(pid);
+                  const found = products.find((p) => p.id === pid);
+                  if (found && formType === 'income' && !formAmount) {
+                    setFormAmount(String(found.promo_price ?? found.base_price ?? ''));
+                    if (found.cost_price && !formCostAmount) {
+                      setFormCostAmount(String(found.cost_price));
+                    }
+                  }
+                }}
+// etapa 53/85
