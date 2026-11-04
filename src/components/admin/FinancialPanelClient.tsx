@@ -1476,4 +1476,23 @@ function SpreadsheetRow({
             step="0.01"
             min="0"
             value={amountStr}
-// etapa 79/85
+            onChange={(e) => setAmountStr(e.target.value)}
+            onBlur={() => {
+              const parsed = Math.max(0, Number(String(amountStr).replace(',', '.')) || 0);
+              if (parsed !== Number(entry.amount)) {
+                onUpdateField(entry.id, { amount: parsed }, true);
+              }
+            }}
+            className={cn(
+              'w-24 rounded-lg border border-transparent bg-transparent px-2 py-1 text-right text-xs font-extrabold transition-colors hover:border-dark-700 focus:border-neon focus:bg-dark-950 focus:outline-none',
+              entry.entry_type === 'income' ? 'text-emerald-400' : 'text-red-400'
+            )}
+          />
+        </div>
+      </td>
+
+      {/* Custo da Venda ("Quanto gastei pra fazer essa venda?") */}
+      <td className="whitespace-nowrap bg-amber-500/5 px-3.5 py-2.5 text-right align-middle">
+        {entry.entry_type === 'income' ? (
+          <div className="inline-flex items-center justify-end gap-1">
+// etapa 80/85
