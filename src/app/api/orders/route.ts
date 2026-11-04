@@ -26,4 +26,33 @@ export async function POST(request: Request) {
       selectedOptionKey,
       shippingAddress,
       customerNotes,
-// etapa 1/8
+    } = body;
+
+    const cleanPaymentMethod =
+      typeof paymentMethod === 'string' ? paymentMethod.trim() : '';
+
+    if (!customerName?.trim() || !customerEmail?.trim() || !customerPhone?.trim()) {
+      return NextResponse.json(
+        { error: 'Preencha nome completo, e-mail e telefone/WhatsApp.' },
+        { status: 400 }
+      );
+    }
+
+    const settings = await getStoreSettings();
+    const deliveryCfg = normalizeCheckoutDeliveryConfig(settings.checkout_delivery_config);
+    const selectableOptions = getSelectableCheckoutOptions(deliveryCfg, settings.address, 0);
+
+    const requestedKey =
+      typeof selectedOptionKey === 'string' && selectedOptionKey
+        ? selectedOptionKey
+        : deliveryMethod === 'local_delivery'
+          ? 'local_delivery'
+          : 'pickup';
+
+    const matchedOption =
+      selectableOptions.find((opt) => opt.key === requestedKey) ??
+      selectableOptions[0] ??
+      null;
+
+    const initialDeliveryMethod = matchedOption
+// etapa 2/8
