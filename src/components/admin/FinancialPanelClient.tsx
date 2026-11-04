@@ -1083,4 +1083,23 @@ export function FinancialPanelClient({
             <button
               type="button"
               onClick={() => setShowColumnModal(false)}
-// etapa 58/85
+              className="rounded-lg p-1 text-zinc-400 hover:text-white"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+
+          <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end">
+            <div className="flex-1">
+              <label className="mb-1 block text-xs font-bold text-zinc-300">
+                Nome da Coluna *
+              </label>
+              <input
+                type="text"
+                required
+                value={newColumnName}
+                onChange={(e) => setNewColumnName(e.target.value)}
+                placeholder="Ex.: Fornecedor, Taxa Cartão, Entregador, Comissão..."
+                className="w-full rounded-xl border border-dark-700 bg-dark-950 px-3.5 py-2 text-sm text-white focus:border-neon focus:outline-none"
+              />
+// etapa 59/85
