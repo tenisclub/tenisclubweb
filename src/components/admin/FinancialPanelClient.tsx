@@ -915,4 +915,22 @@ export function FinancialPanelClient({
                 placeholder="0,00"
                 className="w-full rounded-xl border border-dark-700 bg-dark-950 px-3 py-2.5 text-sm font-bold text-white focus:border-neon focus:outline-none"
               />
-// etapa 49/85
+            </div>
+
+            {formType === 'income' && (
+              <div className="md:col-span-2">
+                <label className="mb-1 block text-xs font-bold text-amber-300">
+                  Custo desta Venda (R$)
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formCostAmount}
+                  onChange={(e) => setFormCostAmount(e.target.value)}
+                  placeholder="Quanto gastou?"
+                  className="w-full rounded-xl border border-amber-500/40 bg-dark-950 px-3 py-2.5 text-sm font-bold text-amber-300 placeholder-zinc-500 focus:border-amber-400 focus:outline-none"
+                />
+              </div>
+            )}
+// etapa 50/85
