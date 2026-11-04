@@ -121,4 +121,13 @@ export async function PATCH(
       .single();
 
     if (error) {
-// etapa 14/20
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
+    revalidateStoreData('orders');
+    return NextResponse.json({ entry });
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Erro ao atualizar lançamento.' },
+      { status: 500 }
+// etapa 15/20
