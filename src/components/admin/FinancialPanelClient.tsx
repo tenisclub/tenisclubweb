@@ -1214,4 +1214,23 @@ export function FinancialPanelClient({
                   <th
                     key={col.id}
                     className="min-w-[150px] border-l border-dark-800 bg-dark-950 px-3 py-3.5 text-zinc-200"
-// etapa 65/85
+                  >
+                    <div className="flex items-center justify-between gap-1.5">
+                      <span className="truncate" title={col.name}>
+                        {col.name}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteColumn(col)}
+                        className="rounded p-0.5 text-zinc-500 hover:bg-red-500/20 hover:text-red-400"
+                        title={`Excluir coluna "${col.name}"`}
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                    <div className="text-[9px] font-normal normal-case text-zinc-500">
+                      Coluna manual
+                    </div>
+                  </th>
+                ))}
+// etapa 66/85
