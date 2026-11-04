@@ -522,4 +522,22 @@ export function FinancialPanelClient({
         `"${(e.payment_method || '').replace(/"/g, '""')}"`,
         amt.toFixed(2).replace('.', ','),
         cost.toFixed(2).replace('.', ','),
-// etapa 28/85
+        net.toFixed(2).replace('.', ','),
+        ...customColumns.map(
+          (c) => `"${String(e.custom_values?.[c.column_key] || '').replace(/"/g, '""')}"`
+        ),
+      ].join(';');
+    });
+
+    const csvContent = '\uFEFF' + [headers.join(';'), ...rows].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `planilha-financeira-${selectedDatePage === 'all' ? 'completa' : selectedDatePage}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+// etapa 29/85
