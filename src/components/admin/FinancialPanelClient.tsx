@@ -1439,4 +1439,22 @@ function SpreadsheetRow({
           placeholder="Descreva esta entrada/saída..."
           className="w-full rounded-lg border border-transparent bg-transparent px-2 py-1.5 text-xs font-medium text-white transition-colors hover:border-dark-700 focus:border-neon focus:bg-dark-950 focus:outline-none"
         />
-// etapa 77/85
+        {entry.product && (
+          <div className="px-2 text-[10px] text-zinc-400">
+            Produto vinculado: <strong className="text-zinc-300">{entry.product.name}</strong>
+          </div>
+        )}
+      </td>
+
+      {/* Vínculo com a Loja */}
+      <td className="px-3 py-2.5 align-middle">
+        <div className="flex items-center gap-1.5">
+          <Store className="h-3.5 w-3.5 shrink-0 text-zinc-500" />
+          <input
+            type="text"
+            list="store-link-presets"
+            value={storeLink}
+            onChange={(e) => setStoreLink(e.target.value)}
+            onBlur={() => {
+              if (storeLink.trim() && storeLink.trim() !== entry.store_link) {
+// etapa 78/85
