@@ -90,4 +90,12 @@ export async function POST(request: Request) {
       const baseKey = slugify(name).replace(/-/g, '_') || 'coluna';
       const columnKey = `${baseKey}_${Date.now().toString(36).slice(-4)}`;
 
-// etapa 11/22
+      const { count } = await supabase
+        .from('financial_custom_columns')
+        .select('*', { count: 'exact', head: true });
+
+      const { data: column, error } = await supabase
+        .from('financial_custom_columns')
+        .insert({
+          name,
+// etapa 12/22
