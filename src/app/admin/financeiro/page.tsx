@@ -8,4 +8,9 @@ export default async function AdminFinancialPage() {
   const supabase = createServiceClient();
 
   const [entriesRes, columnsRes, productsRes] = await Promise.all([
-// etapa 2/10
+    supabase
+      .from('financial_entries')
+      .select(
+        `
+        *,
+// etapa 3/10
