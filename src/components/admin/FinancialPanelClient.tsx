@@ -784,4 +784,22 @@ export function FinancialPanelClient({
           </div>
           <p
             className={cn(
-// etapa 42/85
+              'mt-2 font-display text-2xl font-black',
+              metrics.netProfit >= 0 ? 'text-neon' : 'text-red-400'
+            )}
+          >
+            {formatCurrency(metrics.netProfit)}
+          </p>
+          <p className="mt-1 text-[11px] text-zinc-400">
+            Entradas − Custo das Vendas − Saídas
+          </p>
+        </div>
+      </div>
+
+      {/* New Entry Inline Card (when opened) */}
+      {showEntryForm && (
+        <form
+          onSubmit={handleCreateEntry}
+          className="rounded-2xl border border-neon/40 bg-dark-900 p-5 shadow-2xl"
+        >
+// etapa 43/85
