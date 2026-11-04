@@ -1345,4 +1345,23 @@ function SpreadsheetRow({
   const numericAmount = Number(String(amountStr).replace(',', '.')) || 0;
   const numericCost = Number(String(costStr).replace(',', '.')) || 0;
   const netResult =
-// etapa 72/85
+    entry.entry_type === 'income'
+      ? numericAmount - numericCost
+      : -(numericAmount + numericCost);
+  const profitMargin =
+    entry.entry_type === 'income' && numericAmount > 0
+      ? ((numericAmount - numericCost) / numericAmount) * 100
+      : null;
+
+  return (
+    <tr className="group transition-colors hover:bg-dark-800/50">
+      {/* Data e Hora */}
+      <td className="whitespace-nowrap px-3.5 py-2.5 align-middle">
+        {editingDateTime ? (
+          <div className="flex items-center gap-1">
+            <input
+              type="datetime-local"
+              value={dateTimeVal}
+              onChange={(e) => setDateTimeVal(e.target.value)}
+              onBlur={() => {
+// etapa 73/85
