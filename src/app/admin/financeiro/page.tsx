@@ -29,4 +29,9 @@ export default async function AdminFinancialPage() {
       .from('products')
       .select('id, name, sku, base_price, promo_price, cost_price')
       .order('name', { ascending: true }),
-// etapa 6/10
+  ]);
+
+  return (
+    <FinancialPanelClient
+      initialEntries={(entriesRes.data || []) as FinancialEntry[]}
+// etapa 7/10
