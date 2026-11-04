@@ -1946,4 +1946,84 @@ BEGIN
   ON CONFLICT (order_id) DO UPDATE SET
     description = CASE
       WHEN public.financial_entries.description LIKE 'Venda Pedido %' THEN EXCLUDED.description
--- etapa 24/25
+      ELSE public.financial_entries.description
+    END,
+    product_id = COALESCE(public.financial_entries.product_id, EXCLUDED.product_id),
+    amount = EXCLUDED.amount,
+    cost_amount = CASE
+      WHEN public.financial_entries.cost_amount > 0 THEN public.financial_entries.cost_amount
+      ELSE EXCLUDED.cost_amount
+    END,
+    payment_method = CASE
+      WHEN EXCLUDED.payment_method <> 'A combinar' THEN EXCLUDED.payment_method
+      ELSE public.financial_entries.payment_method
+    END,
+    updated_at = NOW();
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.trg_fn_sync_order_financial()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  PERFORM public.sync_order_financial_entry(NEW.id);
+  RETURN NEW;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.trg_fn_sync_order_items_financial()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_oid UUID;
+BEGIN
+  v_oid := CASE WHEN TG_OP = 'DELETE' THEN OLD.order_id ELSE NEW.order_id END;
+  IF v_oid IS NOT NULL THEN
+    PERFORM public.sync_order_financial_entry(v_oid);
+  END IF;
+  RETURN NULL;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.sync_order_financial_entry(UUID) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.sync_order_financial_entry(UUID) TO postgres, service_role;
+
+DROP TRIGGER IF EXISTS trg_orders_sync_financial ON public.orders;
+CREATE TRIGGER trg_orders_sync_financial
+  AFTER INSERT OR UPDATE ON public.orders
+  FOR EACH ROW
+  EXECUTE FUNCTION public.trg_fn_sync_order_financial();
+
+DROP TRIGGER IF EXISTS trg_order_items_sync_financial ON public.order_items;
+CREATE TRIGGER trg_order_items_sync_financial
+  AFTER INSERT OR UPDATE OR DELETE ON public.order_items
+  FOR EACH ROW
+  EXECUTE FUNCTION public.trg_fn_sync_order_items_financial();
+
+DROP TRIGGER IF EXISTS trg_realtime_financial_entries ON public.financial_entries;
+CREATE TRIGGER trg_realtime_financial_entries
+  AFTER INSERT OR UPDATE OR DELETE ON public.financial_entries
+  FOR EACH STATEMENT
+  EXECUTE FUNCTION internal.trg_sync_global('orders');
+
+DROP TRIGGER IF EXISTS trg_realtime_financial_columns ON public.financial_custom_columns;
+CREATE TRIGGER trg_realtime_financial_columns
+  AFTER INSERT OR UPDATE OR DELETE ON public.financial_custom_columns
+  FOR EACH STATEMENT
+  EXECUTE FUNCTION internal.trg_sync_global('orders');
+
+-- Backfill existing non-cancelled orders into financial_entries
+DO $$
+DECLARE
+  r RECORD;
+BEGIN
+  FOR r IN SELECT id FROM public.orders WHERE status <> 'cancelled' LOOP
+    PERFORM public.sync_order_financial_entry(r.id);
+  END LOOP;
+END $$;
