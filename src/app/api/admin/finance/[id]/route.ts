@@ -130,4 +130,13 @@ export async function PATCH(
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Erro ao atualizar lançamento.' },
       { status: 500 }
-// etapa 15/20
+    );
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await getAuthSession();
+// etapa 16/20
