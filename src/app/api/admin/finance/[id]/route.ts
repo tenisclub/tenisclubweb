@@ -6,4 +6,13 @@ import { createServiceClient } from '@/lib/supabase/server';
 function toSaoPauloDateStr(isoDate: string): string {
   try {
     const dt = new Date(isoDate);
-// etapa 1/20
+    if (Number.isNaN(dt.getTime())) {
+      return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date());
+    }
+    return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(dt);
+  } catch {
+    return new Date().toISOString().slice(0, 10);
+  }
+}
+
+// etapa 2/20
