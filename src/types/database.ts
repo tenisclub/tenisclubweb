@@ -183,4 +183,35 @@ export interface OrderStatusHistory {
   order_id: string;
   previous_status: OrderStatus | null;
   new_status: OrderStatus;
-// etapa 6/10
+  note: string;
+  changed_by: string | null;
+  created_at: string;
+}
+
+export type OrderShippingAddress = Partial<UserAddress> & {
+  custom_option_id?: string;
+  custom_option_title?: string;
+  shipping_label?: string;
+  pickup_address?: string;
+};
+
+export interface Order {
+  id: string;
+  order_number: string;
+  user_id: string;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  delivery_method: DeliveryMethod;
+  shipping_address: OrderShippingAddress | null;
+  subtotal: number;
+  discount_total: number;
+  shipping_cost: number;
+  total: number;
+  status: OrderStatus;
+  payment_status: PaymentStatus;
+  payment_method_note: string;
+  paid_at: string | null;
+  customer_notes: string;
+  store_notes: string;
+// etapa 7/10
