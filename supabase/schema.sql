@@ -1865,4 +1865,85 @@ DROP POLICY IF EXISTS "financial_entries_admin_all" ON public.financial_entries;
 CREATE POLICY "financial_entries_admin_all" ON public.financial_entries
   FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
 
--- etapa 23/25
+CREATE OR REPLACE FUNCTION public.sync_order_financial_entry(p_order_id UUID)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_order RECORD;
+  v_items_summary TEXT;
+  v_calc_cost NUMERIC(12, 2) := 0;
+  v_first_product_id UUID := NULL;
+  v_desc TEXT;
+  v_payment TEXT;
+BEGIN
+  SELECT * INTO v_order
+  FROM public.orders
+  WHERE id = p_order_id;
+
+  IF NOT FOUND THEN
+    RETURN;
+  END IF;
+
+  IF v_order.status = 'cancelled' THEN
+    DELETE FROM public.financial_entries
+    WHERE order_id = p_order_id AND source_type = 'order_sale';
+    RETURN;
+  END IF;
+
+  SELECT
+    STRING_AGG(
+      oi.quantity || 'x ' || oi.product_name || ' (' || oi.color || ' Tam. ' || oi.size || ')',
+      ', '
+      ORDER BY oi.created_at ASC
+    ),
+    COALESCE(SUM(COALESCE(p.cost_price, 0) * oi.quantity), 0),
+    (ARRAY_AGG(oi.product_id ORDER BY oi.created_at ASC))[1]
+  INTO v_items_summary, v_calc_cost, v_first_product_id
+  FROM public.order_items oi
+  LEFT JOIN public.products p ON p.id = oi.product_id
+  WHERE oi.order_id = p_order_id;
+
+  IF v_items_summary IS NOT NULL AND v_items_summary <> '' THEN
+    v_desc := 'Venda Pedido ' || v_order.order_number || ' (' || v_order.customer_name || ') — ' || v_items_summary;
+  ELSE
+    v_desc := 'Venda Pedido ' || v_order.order_number || ' (' || v_order.customer_name || ')';
+  END IF;
+
+  v_payment := COALESCE(NULLIF(TRIM(v_order.payment_method_note), ''), 'A combinar');
+
+  INSERT INTO public.financial_entries (
+    entry_type,
+    source_type,
+    description,
+    category,
+    store_link,
+    order_id,
+    product_id,
+    amount,
+    cost_amount,
+    payment_method,
+    custom_values,
+    occurred_at,
+    entry_date
+  ) VALUES (
+    'income',
+    'order_sale',
+    v_desc,
+    'Venda de Produto',
+    'Tênis Club — Loja Online',
+    v_order.id,
+    v_first_product_id,
+    GREATEST(COALESCE(v_order.total, 0), 0),
+    GREATEST(COALESCE(v_calc_cost, 0), 0),
+    v_payment,
+    '{}'::jsonb,
+    COALESCE(v_order.created_at, NOW()),
+    (COALESCE(v_order.created_at, NOW()) AT TIME ZONE 'America/Sao_Paulo')::DATE
+  )
+  ON CONFLICT (order_id) DO UPDATE SET
+    description = CASE
+      WHEN public.financial_entries.description LIKE 'Venda Pedido %' THEN EXCLUDED.description
+-- etapa 24/25
