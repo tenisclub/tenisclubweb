@@ -33,4 +33,13 @@ export async function PATCH(
     if (body.target === 'column') {
       const updates: Record<string, unknown> = {};
       if (body.name !== undefined) {
-// etapa 4/20
+        const cleanName = String(body.name).trim();
+        if (!cleanName) {
+          return NextResponse.json({ error: 'O nome da coluna não pode ficar vazio.' }, { status: 400 });
+        }
+        updates.name = cleanName;
+      }
+      if (body.column_type && ['text', 'currency', 'number'].includes(body.column_type)) {
+        updates.column_type = body.column_type;
+      }
+// etapa 5/20
