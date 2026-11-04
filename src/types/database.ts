@@ -214,4 +214,35 @@ export interface Order {
   paid_at: string | null;
   customer_notes: string;
   store_notes: string;
-// etapa 7/10
+  internal_notes?: string;
+  stock_deducted: boolean;
+  created_at: string;
+  updated_at: string;
+  items?: OrderItem[];
+  history?: OrderStatusHistory[];
+}
+
+export interface NotificationItem {
+  id: string;
+  user_id: string | null;
+  target_audience: 'customer' | 'admin';
+  type: string;
+  title: string;
+  message: string;
+  link: string | null;
+  is_read: boolean;
+  created_at: string;
+}
+
+export interface StoreSettings {
+  id: number;
+  store_name: string;
+  tagline: string;
+  hero_badge: string;
+  hero_title: string;
+  hero_subtitle: string;
+  hero_banner_url: string | null;
+  logo_url: string | null;
+  whatsapp: string;
+  phone: string;
+// etapa 8/10
