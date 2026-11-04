@@ -1364,4 +1364,23 @@ function SpreadsheetRow({
               value={dateTimeVal}
               onChange={(e) => setDateTimeVal(e.target.value)}
               onBlur={() => {
-// etapa 73/85
+                setEditingDateTime(false);
+                if (dateTimeVal) {
+                  const iso = new Date(dateTimeVal).toISOString();
+                  const ymd = dateTimeVal.slice(0, 10);
+                  onUpdateField(entry.id, { occurred_at: iso, entry_date: ymd }, true);
+                }
+              }}
+              className="rounded border border-neon bg-dark-950 px-1.5 py-1 text-[11px] text-white focus:outline-none"
+              autoFocus
+            />
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setEditingDateTime(true)}
+            className="text-left group/dt"
+            title="Clique para alterar data e hora"
+          >
+            <div className="font-bold text-zinc-200 group-hover/dt:text-neon">
+// etapa 74/85
