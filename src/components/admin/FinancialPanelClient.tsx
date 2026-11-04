@@ -990,4 +990,22 @@ export function FinancialPanelClient({
                     }
                   }
                 }}
-// etapa 53/85
+                className="w-full rounded-xl border border-dark-700 bg-dark-950 px-3 py-2 text-xs text-white focus:border-neon focus:outline-none"
+              >
+                <option value="">Sem produto específico (Geral da Loja)</option>
+                {products.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} {p.sku ? `(${p.sku})` : ''} — {formatCurrency(p.promo_price ?? p.base_price)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="md:col-span-3">
+              <label className="mb-1 block text-xs font-bold text-zinc-300">
+                Forma de Pagamento
+              </label>
+              <input
+                type="text"
+                value={formPaymentMethod}
+// etapa 54/85
