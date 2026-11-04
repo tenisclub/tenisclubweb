@@ -671,4 +671,23 @@ export function FinancialPanelClient({
                     <span className="text-zinc-400">
                       {stat.count} {stat.count === 1 ? 'registro' : 'registros'}
                     </span>
-// etapa 36/85
+                    {stat.count > 0 && (
+                      <span
+                        className={cn(
+                          'font-bold',
+                          stat.net >= 0 ? 'text-emerald-400' : 'text-red-400'
+                        )}
+                      >
+                        {stat.net >= 0 ? '+' : ''}
+                        {formatCurrency(stat.net)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+
+          <button
+            type="button"
+// etapa 37/85
