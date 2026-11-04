@@ -106,4 +106,13 @@ export async function POST(request: Request) {
         .single();
 
       if (error) {
-// etapa 13/22
+        return NextResponse.json({ error: error.message }, { status: 400 });
+      }
+
+      revalidateStoreData('orders');
+      return NextResponse.json({ column });
+    }
+
+    // Create a financial entry (income or expense)
+    const entryType = body.entry_type === 'expense' ? 'expense' : 'income';
+// etapa 14/22
