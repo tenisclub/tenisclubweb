@@ -877,4 +877,23 @@ export function FinancialPanelClient({
               <input
                 type="text"
                 required
-// etapa 47/85
+                value={formDescription}
+                onChange={(e) => setFormDescription(e.target.value)}
+                placeholder={
+                  formType === 'income'
+                    ? 'Ex.: Venda presencial Nike Air Force 1 Tam. 40'
+                    : 'Ex.: Pagamento fornecedor 10 pares / Compra de caixas e sacolas'
+                }
+                className="w-full rounded-xl border border-dark-700 bg-dark-950 px-3.5 py-2.5 text-sm text-white placeholder-zinc-500 focus:border-neon focus:outline-none"
+              />
+            </div>
+
+            <div className="md:col-span-3">
+              <label className="mb-1 block text-xs font-bold text-zinc-300">
+                Data e Hora do Registro *
+              </label>
+              <input
+                type="datetime-local"
+                required
+                value={formOccurredAt}
+// etapa 48/85
