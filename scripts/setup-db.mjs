@@ -522,4 +522,107 @@ async function run() {
         images: [
           'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=1000&q=85',
         ],
-// etapa 5/6
+        color: 'Branco / Azul',
+        color_hex: '#3B82F6',
+        sizes: [
+          ['33', 5], ['34', 6], ['35', 6], ['36', 4],
+        ],
+        specs: { Peso: '185g', Fechamento: 'Cadarço Elástico', Solado: 'EVA Antiderrapante' },
+      },
+    ];
+
+    for (const p of seedProducts) {
+      const prodRes = await client.query(
+        `INSERT INTO public.products (
+          name, slug, sku, brand_id, category_id, gender, short_description, description,
+          additional_info, cost_price, base_price, promo_price, is_active, is_featured,
+          is_new_release, sold_count, meta_title, meta_description
+        ) VALUES (
+          $1, $2, $3, $4, $5, $6, $7, $8,
+          $9::jsonb, $10, $11, $12, TRUE, $13,
+          $14, $15, $16, $17
+        ) RETURNING id`,
+        [
+          p.name,
+          p.slug,
+          p.sku,
+          brandMap[p.brand],
+          catMap[p.category],
+          p.gender,
+          p.short_description,
+          p.description,
+          JSON.stringify(p.specs),
+          p.cost_price,
+          p.base_price,
+          p.promo_price,
+          p.is_featured,
+          p.is_new_release,
+          p.sold_count,
+          `${p.name} | Tênis Club`,
+          p.short_description,
+        ]
+      );
+      const productId = prodRes.rows[0].id;
+
+      for (let i = 0; i < p.images.length; i++) {
+        await client.query(
+          `INSERT INTO public.product_images (product_id, url, alt_text, is_primary, sort_order)
+           VALUES ($1, $2, $3, $4, $5)`,
+          [productId, p.images[i], p.name, i === 0, i]
+        );
+      }
+
+      for (const [size, qty] of p.sizes) {
+        const varRes = await client.query(
+          `INSERT INTO public.product_variants (product_id, color, color_hex, size, variant_sku, is_active)
+           VALUES ($1, $2, $3, $4, $5, TRUE)
+           RETURNING id`,
+          [productId, p.color, p.color_hex, size, `${p.sku.replace(/\s+/g, '')}-${size}`]
+        );
+        const variantId = varRes.rows[0].id;
+
+        await client.query(
+          `INSERT INTO public.inventory (variant_id, quantity, low_stock_threshold)
+           VALUES ($1, $2, 3)`,
+          [variantId, qty]
+        );
+
+        await client.query(
+          `INSERT INTO public.inventory_movements (
+            variant_id, product_id, previous_quantity, moved_quantity, new_quantity,
+            movement_type, reason, performed_by
+          ) VALUES ($1, $2, 0, $3, $3, 'in', 'Estoque inicial de inauguração do catálogo', $4)`,
+          [variantId, productId, qty, adminUser.id]
+        );
+      }
+
+      if (p.promo_price) {
+        const discountPct = Math.round(((p.base_price - p.promo_price) / p.base_price) * 100);
+        await client.query(
+          `INSERT INTO public.promotions (name, description, product_id, discount_percent, promo_price, is_active, highlight_home)
+           VALUES ($1, $2, $3, $4, $5, TRUE, $6)`,
+          [
+            `Oferta Drop Novo - ${p.name}`,
+            `Desconto especial de lançamento`,
+            productId,
+            discountPct,
+            p.promo_price,
+            p.is_featured,
+          ]
+        );
+      }
+    }
+    console.log(`   Seeded ${seedProducts.length} products with variants, per-size inventory & promotions!`);
+  } else {
+    console.log(`   Catalog already contains ${existingProds[0].cnt} products.`);
+  }
+
+  await client.end();
+  console.log('Database setup complete!');
+}
+
+run().catch((err) => {
+  console.error('Database setup failed:', err);
+  process.exit(1);
+});
+
