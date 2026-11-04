@@ -104,4 +104,13 @@ export async function PATCH(
       typeof body.custom_values === 'object' &&
       !Array.isArray(body.custom_values)
     ) {
-// etapa 12/20
+      updates.custom_values = body.custom_values;
+    }
+
+    const { data: entry, error } = await supabase
+      .from('financial_entries')
+      .update(updates)
+      .eq('id', id)
+      .select(
+        `
+// etapa 13/20
