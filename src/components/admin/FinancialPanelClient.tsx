@@ -559,4 +559,23 @@ export function FinancialPanelClient({
           </div>
         </div>
 
-// etapa 30/85
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            type="button"
+            onClick={() => openNewEntryForm('income')}
+            className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-xs font-extrabold uppercase tracking-wider text-dark-950 shadow-lg shadow-emerald-500/20 transition-all hover:bg-emerald-400"
+          >
+            <Plus className="h-4 w-4 stroke-[2.5]" />
+            Nova Entrada
+          </button>
+
+          <button
+            type="button"
+            onClick={() => openNewEntryForm('expense')}
+            className="inline-flex items-center gap-2 rounded-xl bg-red-500/90 px-4 py-2.5 text-xs font-extrabold uppercase tracking-wider text-white shadow-lg shadow-red-500/20 transition-all hover:bg-red-500"
+          >
+            <TrendingDown className="h-4 w-4 stroke-[2.5]" />
+            Nova Saída
+          </button>
+
+// etapa 31/85
