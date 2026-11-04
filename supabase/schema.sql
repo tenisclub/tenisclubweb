@@ -1540,4 +1540,86 @@ BEGIN
       CASE
         WHEN COALESCE(p.allow_backorder, FALSE) THEN ci.quantity
         ELSE LEAST(ci.quantity, COALESCE(inv.quantity, 0))
--- etapa 19/25
+      END
+    ),
+    0
+  )::INT
+  INTO v_total_items
+  FROM public.cart_items ci
+  JOIN public.products p ON p.id = ci.product_id
+  JOIN public.product_variants pv ON pv.id = ci.variant_id
+  LEFT JOIN public.inventory inv ON inv.variant_id = pv.id
+  WHERE ci.cart_id = v_cart_id
+    AND p.is_active = true
+    AND pv.is_active = true
+    AND (COALESCE(inv.quantity, 0) > 0 OR COALESCE(p.allow_backorder, FALSE) = true);
+
+  RETURN jsonb_build_object(
+    'totalItems', v_total_items,
+    'cartId', v_cart_id
+  );
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.add_to_cart_fast(UUID, UUID, UUID, INT) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.add_to_cart_fast(UUID, UUID, UUID, INT) TO postgres, service_role;
+
+-- ----------------------------------------------------------------------------
+-- 16. REAL-TIME GLOBAL & SCOPED SYNC ENGINE (SUPABASE REALTIME)
+-- ----------------------------------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS internal;
+REVOKE ALL ON SCHEMA internal FROM PUBLIC, anon, authenticated;
+GRANT USAGE ON SCHEMA internal TO postgres, service_role, anon, authenticated;
+
+CREATE SEQUENCE IF NOT EXISTS public.site_sync_version_seq START WITH 100;
+GRANT USAGE, SELECT ON SEQUENCE public.site_sync_version_seq TO postgres, service_role;
+
+CREATE TABLE IF NOT EXISTS public.site_sync_state (
+  id INT PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+  version BIGINT NOT NULL DEFAULT 1,
+  scope TEXT NOT NULL DEFAULT 'all',
+  entity TEXT NOT NULL DEFAULT 'init',
+  actor_tag TEXT,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+INSERT INTO public.site_sync_state (id, version, scope, entity, actor_tag)
+VALUES (1, 1, 'all', 'init', NULL)
+ON CONFLICT (id) DO NOTHING;
+
+ALTER TABLE public.site_sync_state REPLICA IDENTITY FULL;
+ALTER TABLE public.site_sync_state ENABLE ROW LEVEL SECURITY;
+
+GRANT SELECT ON public.site_sync_state TO anon, authenticated;
+GRANT ALL ON public.site_sync_state TO postgres, service_role;
+
+DROP POLICY IF EXISTS "site_sync_state_public_read" ON public.site_sync_state;
+CREATE POLICY "site_sync_state_public_read"
+  ON public.site_sync_state
+  FOR SELECT
+  TO anon, authenticated
+  USING (TRUE);
+
+CREATE OR REPLACE FUNCTION internal.emit_site_sync(
+  p_scope TEXT,
+  p_entity TEXT,
+  p_user_id UUID DEFAULT NULL
+)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  INSERT INTO public.site_sync_state (id, version, scope, entity, actor_tag, updated_at)
+  VALUES (
+    1,
+    nextval('public.site_sync_version_seq'),
+    p_scope,
+    p_entity,
+    CASE WHEN p_user_id IS NOT NULL THEN md5('tc:' || p_user_id::text) ELSE NULL END,
+    NOW()
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    version = EXCLUDED.version,
+-- etapa 20/25
