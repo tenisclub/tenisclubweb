@@ -1308,4 +1308,22 @@ export function FinancialPanelClient({
         </div>
       </div>
     </div>
-// etapa 70/85
+  );
+}
+
+function SpreadsheetRow({
+  entry,
+  customColumns,
+  isSaving,
+  onUpdateField,
+  onDelete,
+}: {
+  entry: FinancialEntry;
+  customColumns: FinancialCustomColumn[];
+  isSaving: boolean;
+  onUpdateField: (id: string, updates: Record<string, unknown>, silent?: boolean) => Promise<void>;
+  onDelete: (entry: FinancialEntry) => Promise<void>;
+}) {
+  const [desc, setDesc] = useState(entry.description || '');
+  const [storeLink, setStoreLink] = useState(entry.store_link || 'Tênis Club — Loja Online');
+// etapa 71/85
