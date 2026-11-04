@@ -15,4 +15,13 @@ function toSaoPauloDateStr(isoDate: string): string {
   }
 }
 
-// etapa 2/20
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await getAuthSession();
+  if (!session?.isAdmin) {
+    return NextResponse.json({ error: 'Acesso negado.' }, { status: 403 });
+  }
+
+// etapa 3/20
