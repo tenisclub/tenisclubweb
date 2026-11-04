@@ -1195,4 +1195,23 @@ export function FinancialPanelClient({
                 <th className="min-w-[260px] px-3.5 py-3.5">
                   Descrição (O que foi a Entrada / Saída)
                 </th>
-// etapa 64/85
+                <th className="min-w-[180px] px-3 py-3.5">Vínculo com a Loja</th>
+                <th className="px-3 py-3.5 text-right">Valor Bruto (R$)</th>
+                <th className="bg-amber-500/10 px-3.5 py-3.5 text-right text-amber-300">
+                  <div>Custo da Venda (R$)</div>
+                  <div className="text-[9px] font-semibold normal-case text-amber-300/75">
+                    Quanto gastei p/ fazer a venda
+                  </div>
+                </th>
+                <th className="px-3.5 py-3.5 text-right text-neon">
+                  <div>Lucro / Resultado</div>
+                  <div className="text-[9px] font-semibold normal-case text-zinc-400">
+                    Valor líquido real
+                  </div>
+                </th>
+
+                {customColumns.map((col) => (
+                  <th
+                    key={col.id}
+                    className="min-w-[150px] border-l border-dark-800 bg-dark-950 px-3 py-3.5 text-zinc-200"
+// etapa 65/85
