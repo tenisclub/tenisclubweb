@@ -1326,4 +1326,23 @@ function SpreadsheetRow({
 }) {
   const [desc, setDesc] = useState(entry.description || '');
   const [storeLink, setStoreLink] = useState(entry.store_link || 'Tênis Club — Loja Online');
-// etapa 71/85
+  const [amountStr, setAmountStr] = useState(String(entry.amount ?? 0));
+  const [costStr, setCostStr] = useState(String(entry.cost_amount ?? 0));
+  const [editingDateTime, setEditingDateTime] = useState(false);
+  const [dateTimeVal, setDateTimeVal] = useState(() => isoToLocalInputValue(entry.occurred_at));
+  const [customVals, setCustomVals] = useState<Record<string, string>>(entry.custom_values || {});
+
+  useEffect(() => {
+    setDesc(entry.description || '');
+    setStoreLink(entry.store_link || 'Tênis Club — Loja Online');
+    setAmountStr(String(entry.amount ?? 0));
+    setCostStr(String(entry.cost_amount ?? 0));
+    setDateTimeVal(isoToLocalInputValue(entry.occurred_at));
+    setCustomVals(entry.custom_values || {});
+  }, [entry]);
+
+  const dtDisplay = formatDateTimeDisplay(entry.occurred_at);
+  const numericAmount = Number(String(amountStr).replace(',', '.')) || 0;
+  const numericCost = Number(String(costStr).replace(',', '.')) || 0;
+  const netResult =
+// etapa 72/85
