@@ -207,4 +207,109 @@ async function run() {
   const brandMap = {};
   for (const b of brands) {
     const res = await client.query(
-// etapa 2/6
+      `INSERT INTO public.brands (name, slug)
+       VALUES ($1, $2)
+       ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name
+       RETURNING id`,
+      [b.name, b.slug]
+    );
+    brandMap[b.slug] = res.rows[0].id;
+  }
+
+  // Check if products already seeded
+  const { rows: existingProds } = await client.query('SELECT COUNT(*)::int AS cnt FROM public.products');
+  if (existingProds[0].cnt === 0) {
+    const seedProducts = [
+      {
+        name: 'Mocassim Couro Caramelo',
+        slug: 'mocassim-couro-caramelo',
+        sku: 'REF. 003',
+        brand: 'tenis-club',
+        category: 'sapato',
+        gender: 'masculino',
+        short_description: 'Mocassim clássico em couro legítimo acabamento caramelo acetinado.',
+        description: 'Desenvolvido para homens que valorizam elegância sem abrir mão do conforto. O Mocassim Couro Caramelo possui acabamento artesanal escovado, palmilha anatômica macia e solado blaqueado antiderrapante.',
+        cost_price: 115.00,
+        base_price: 229.90,
+        promo_price: null,
+        is_featured: true,
+        is_new_release: true,
+        sold_count: 42,
+        images: [
+          'https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?auto=format&fit=crop&w=1000&q=85',
+          'https://images.unsplash.com/photo-1533867617858-e7b97e060509?auto=format&fit=crop&w=1000&q=85',
+        ],
+        color: 'Caramelo',
+        color_hex: '#8B4513',
+        sizes: [
+          ['37', 3], ['38', 5], ['39', 6], ['40', 8], ['41', 6], ['42', 4], ['43', 3], ['44', 2],
+        ],
+        specs: { Material: 'Couro Bovino Legítimo', Solado: 'Borracha Gel Costurada', Forro: 'Couro Macio Respirável', Garantia: '90 dias contra defeitos' },
+      },
+      {
+        name: 'Loafer Social Marrom',
+        slug: 'loafer-social-marrom',
+        sku: 'REF. 007',
+        brand: 'tenis-club',
+        category: 'sapato',
+        gender: 'masculino',
+        short_description: 'Loafer penny social em couro nobre marrom café com corte italiano.',
+        description: 'O Loafer Social Marrom traz design italiano atemporal com tira penny clássica no cabedal. Ideal para alfaiataria, eventos sociais ou composições smart casual com jeans escuro e camisa.',
+        cost_price: 120.00,
+        base_price: 239.90,
+        promo_price: null,
+        is_featured: true,
+        is_new_release: true,
+        sold_count: 38,
+        images: [
+          'https://images.unsplash.com/photo-1533867617858-e7b97e060509?auto=format&fit=crop&w=1000&q=85',
+          'https://images.unsplash.com/photo-1614252369475-531eba835eb1?auto=format&fit=crop&w=1000&q=85',
+        ],
+        color: 'Marrom Café',
+        color_hex: '#4A2511',
+        sizes: [
+          ['37', 2], ['38', 4], ['39', 7], ['40', 6], ['41', 5], ['42', 4], ['43', 2], ['44', 2],
+        ],
+        specs: { Material: 'Couro Premium', Solado: ' Salto Baixo Social Antiderrapante', Palmilha: 'Espuma de Alta Densidade' },
+      },
+      {
+        name: 'Nike Air Max Pulse Street',
+        slug: 'nike-air-max-pulse-street',
+        sku: 'REF. 001',
+        brand: 'nike',
+        category: 'tenis',
+        gender: 'masculino',
+        short_description: 'Amortecimento Air encapsulado com visual urbano e detalhes de alta resposta.',
+        description: 'Inspirado na cena musical underground de Londres, o Air Max Pulse traz atitude urbana para a icônica linha Air Max. Sua entressola envolta em tecido e detalhes selados a vácuo elevam a durabilidade e o conforto para uso diário.',
+        cost_price: 360.00,
+        base_price: 799.90,
+        promo_price: 649.90,
+        is_featured: true,
+        is_new_release: true,
+        sold_count: 64,
+        images: [
+          'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1000&q=85',
+          'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?auto=format&fit=crop&w=1000&q=85',
+        ],
+        color: 'Vermelho / Preto',
+        color_hex: '#DC2626',
+        sizes: [
+          ['38', 4], ['39', 6], ['40', 8], ['41', 5], ['42', 3], ['43', 2], ['44', 0],
+        ],
+        specs: { Amortecimento: ' Cápsula Air Point-Loaded', Cabedal: 'Mesh Respirável + Sintético', Indicado: 'Dia a dia / Lifestyle' },
+      },
+      {
+        name: 'Nike Air Force Volt Edition',
+        slug: 'nike-air-force-volt-edition',
+        sku: 'REF. 002',
+        brand: 'nike',
+        category: 'tenis',
+        gender: 'unissex',
+        short_description: 'Silhueta lendária em verde neon vibrante com assinatura streetwear Tênis Club.',
+        description: 'Destaque absoluto por onde passa. O Air Force Volt combina linhas clássicas do basquete anos 80 com acabamento ousado em verde neon, colarinho acolchoado e entressola robusta de longa duração.',
+        cost_price: 310.00,
+        base_price: 699.90,
+        promo_price: 579.90,
+        is_featured: true,
+        is_new_release: true,
+// etapa 3/6
