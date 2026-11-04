@@ -353,4 +353,23 @@ export function FinancialPanelClient({
           custom_values: formCustomValues,
         }),
       });
-// etapa 19/85
+
+      const data = await res.json();
+      if (!res.ok) {
+        showToast(data.error || 'Erro ao registrar lançamento.', 'error');
+        return;
+      }
+
+      const created = data.entry as FinancialEntry;
+      setEntries((prev) => [created, ...prev]);
+      if (created.entry_date) {
+        handleOpenOrJumpDate(created.entry_date.slice(0, 10));
+      }
+      setShowEntryForm(false);
+      showToast(
+        formType === 'income'
+          ? 'Entrada registrada na planilha financeira!'
+          : 'Saída registrada na planilha financeira!',
+        'success'
+      );
+// etapa 20/85
