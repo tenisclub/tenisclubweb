@@ -1495,4 +1495,23 @@ function SpreadsheetRow({
       <td className="whitespace-nowrap bg-amber-500/5 px-3.5 py-2.5 text-right align-middle">
         {entry.entry_type === 'income' ? (
           <div className="inline-flex items-center justify-end gap-1">
-// etapa 80/85
+            <span className="text-[10px] font-bold text-amber-400/70">R$</span>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={costStr}
+              onChange={(e) => setCostStr(e.target.value)}
+              onBlur={() => {
+                const parsed = Math.max(0, Number(String(costStr).replace(',', '.')) || 0);
+                if (parsed !== Number(entry.cost_amount)) {
+                  onUpdateField(entry.id, { cost_amount: parsed }, true);
+                }
+              }}
+              placeholder="0,00"
+              title="Informe quanto você gastou para realizar esta venda (ex.: custo do tênis, frete, embalagem, comissão)"
+              className="w-24 rounded-lg border border-amber-500/30 bg-dark-950/90 px-2 py-1 text-right text-xs font-extrabold text-amber-300 transition-colors hover:border-amber-400 focus:border-amber-400 focus:outline-none"
+            />
+          </div>
+        ) : (
+// etapa 81/85
