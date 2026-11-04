@@ -39,4 +39,9 @@ export default async function AdminFinancialPage() {
         (productsRes.data || []) as Array<{
           id: string;
           name: string;
-// etapa 8/10
+          sku: string | null;
+          base_price: number;
+          promo_price: number | null;
+          cost_price?: number;
+        }>
+// etapa 9/10
