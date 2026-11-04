@@ -77,4 +77,13 @@ export async function PATCH(
       updates.store_link = String(body.store_link).trim() || 'Tênis Club — Loja Online';
     }
     if (body.product_id !== undefined) {
-// etapa 9/20
+      updates.product_id = body.product_id ? String(body.product_id) : null;
+    }
+    if (body.amount !== undefined) {
+      updates.amount = Math.max(0, Number(body.amount) || 0);
+    }
+    if (body.cost_amount !== undefined) {
+      updates.cost_amount = Math.max(0, Number(body.cost_amount) || 0);
+    }
+    if (body.payment_method !== undefined) {
+// etapa 10/20
