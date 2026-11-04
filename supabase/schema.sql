@@ -485,4 +485,85 @@ BEGIN
 
   INSERT INTO public.user_profiles (id, email, full_name, phone, avatar_url, auth_provider, is_active, accepted_terms_at)
   VALUES (NEW.id, LOWER(NEW.email), v_full_name, v_phone, v_avatar, v_provider, TRUE, NOW())
--- etapa 6/25
+  ON CONFLICT (id) DO UPDATE SET
+    email = EXCLUDED.email,
+    full_name = CASE WHEN public.user_profiles.full_name = '' THEN EXCLUDED.full_name ELSE public.user_profiles.full_name END,
+    avatar_url = COALESCE(public.user_profiles.avatar_url, EXCLUDED.avatar_url),
+    updated_at = NOW();
+
+  -- RN01: Every new account is created strictly as customer
+  SELECT id INTO v_customer_role_id FROM public.roles WHERE name = 'customer' LIMIT 1;
+  IF v_customer_role_id IS NOT NULL THEN
+    INSERT INTO public.user_roles (user_id, role_id)
+    VALUES (NEW.id, v_customer_role_id)
+    ON CONFLICT (user_id, role_id) DO NOTHING;
+  END IF;
+
+  -- Ensure persistent cart exists
+  INSERT INTO public.carts (user_id)
+  VALUES (NEW.id)
+  ON CONFLICT (user_id) DO NOTHING;
+
+  -- Customer welcome notification
+  INSERT INTO public.notifications (user_id, target_audience, type, title, message, link)
+  VALUES (
+    NEW.id,
+    'customer',
+    'welcome',
+    'Bem-vindo(a) à Tênis Club!',
+    'Seu cadastro foi realizado com sucesso. Explore nosso catálogo e garanta seu próximo par!',
+    '/produtos'
+  );
+
+  -- Admin notification
+  INSERT INTO public.notifications (user_id, target_audience, type, title, message, link)
+  VALUES (
+    NULL,
+    'admin',
+    'new_customer',
+    'Novo cliente cadastrado',
+    v_full_name || ' (' || NEW.email || ') acabou de criar uma conta.',
+    '/admin/clientes'
+  );
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- ----------------------------------------------------------------------------
+-- 10. TRANSACTIONAL ORDER CREATION RPC (RN04, RN05, RN07, RN08, RN09, RN10, RN13, RN18)
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.create_order_from_cart(
+  p_user_id UUID,
+  p_customer_name TEXT,
+  p_customer_email TEXT,
+  p_customer_phone TEXT,
+  p_delivery_method TEXT,
+  p_shipping_address JSONB DEFAULT NULL,
+  p_customer_notes TEXT DEFAULT ''
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_cart_id UUID;
+  v_item RECORD;
+  v_subtotal NUMERIC(10, 2) := 0;
+  v_discount_total NUMERIC(10, 2) := 0;
+  v_shipping_cost NUMERIC(10, 2) := 0;
+  v_items_total NUMERIC(10, 2) := 0;
+  v_total NUMERIC(10, 2) := 0;
+  v_unit_price NUMERIC(10, 2);
+  v_promo_price NUMERIC(10, 2);
+  v_order_id UUID;
+  v_order_number TEXT;
+  v_items_count INT := 0;
+  v_primary_img TEXT;
+-- etapa 7/25
