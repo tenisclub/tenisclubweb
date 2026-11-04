@@ -110,4 +110,23 @@ function formatDatePageTab(ymd: string, todayYmd: string): { title: string; badg
   if (ymd === todayYmd) {
     return { title: formatted, badge: 'Hoje' };
   }
-// etapa 6/85
+  const yesterday = new Date(`${todayYmd}T12:00:00`);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yestYmd = yesterday.toISOString().slice(0, 10);
+  if (ymd === yestYmd) {
+    return { title: formatted, badge: 'Ontem' };
+  }
+  return { title: formatted };
+}
+
+function formatDateTimeDisplay(iso: string): { date: string; time: string } {
+  try {
+    const d = new Date(iso);
+    return {
+      date: new Intl.DateTimeFormat('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        timeZone: 'America/Sao_Paulo',
+      }).format(d),
+// etapa 7/85
