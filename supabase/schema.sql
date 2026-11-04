@@ -1297,4 +1297,85 @@ DO $$
 DECLARE
   pol RECORD;
 BEGIN
--- etapa 16/25
+  FOR pol IN
+    SELECT policyname, tablename FROM pg_policies WHERE schemaname = 'public'
+  LOOP
+    EXECUTE format('DROP POLICY IF EXISTS %I ON public.%I', pol.policyname, pol.tablename);
+  END LOOP;
+END $$;
+
+-- Roles & Permissions
+CREATE POLICY "roles_read_all" ON public.roles FOR SELECT USING (TRUE);
+CREATE POLICY "permissions_read_admin" ON public.permissions FOR SELECT USING (public.is_admin());
+CREATE POLICY "role_permissions_read_admin" ON public.role_permissions FOR SELECT USING (public.is_admin());
+
+-- User Profiles
+CREATE POLICY "profiles_select_own_or_admin" ON public.user_profiles
+  FOR SELECT USING (auth.uid() = id OR public.is_admin());
+CREATE POLICY "profiles_update_own_or_admin" ON public.user_profiles
+  FOR UPDATE USING (auth.uid() = id OR public.is_admin())
+  WITH CHECK (auth.uid() = id OR public.is_admin());
+
+-- User Roles (RN01: only super_admin can insert/update/delete roles)
+CREATE POLICY "user_roles_select_own_or_admin" ON public.user_roles
+  FOR SELECT USING (auth.uid() = user_id OR public.is_admin());
+CREATE POLICY "user_roles_manage_super_admin" ON public.user_roles
+  FOR ALL USING (public.is_super_admin()) WITH CHECK (public.is_super_admin());
+
+-- User Addresses
+CREATE POLICY "addresses_own_or_admin" ON public.user_addresses
+  FOR ALL USING (auth.uid() = user_id OR public.is_admin())
+  WITH CHECK (auth.uid() = user_id OR public.is_admin());
+
+-- Storefront Catalog (Public read for active items, full access for admins)
+CREATE POLICY "categories_public_read" ON public.categories
+  FOR SELECT USING (is_active = TRUE OR public.is_admin());
+CREATE POLICY "categories_admin_write" ON public.categories
+  FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+CREATE POLICY "brands_public_read" ON public.brands
+  FOR SELECT USING (is_active = TRUE OR public.is_admin());
+CREATE POLICY "brands_admin_write" ON public.brands
+  FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+CREATE POLICY "products_public_read" ON public.products
+  FOR SELECT USING (is_active = TRUE OR public.is_admin());
+CREATE POLICY "products_admin_write" ON public.products
+  FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+CREATE POLICY "product_images_public_read" ON public.product_images
+  FOR SELECT USING (TRUE);
+CREATE POLICY "product_images_admin_write" ON public.product_images
+  FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+CREATE POLICY "product_variants_public_read" ON public.product_variants
+  FOR SELECT USING (TRUE);
+CREATE POLICY "product_variants_admin_write" ON public.product_variants
+  FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+CREATE POLICY "inventory_public_read" ON public.inventory
+  FOR SELECT USING (TRUE);
+CREATE POLICY "inventory_admin_write" ON public.inventory
+  FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+CREATE POLICY "inventory_movements_admin_only" ON public.inventory_movements
+  FOR SELECT USING (public.is_admin());
+
+CREATE POLICY "promotions_public_read" ON public.promotions
+  FOR SELECT USING (is_active = TRUE OR public.is_admin());
+CREATE POLICY "promotions_admin_write" ON public.promotions
+  FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+-- Carts & Cart Items (RN06)
+CREATE POLICY "carts_own" ON public.carts
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "cart_items_own" ON public.cart_items
+  FOR ALL USING (
+    EXISTS (SELECT 1 FROM public.carts c WHERE c.id = cart_id AND c.user_id = auth.uid())
+  )
+  WITH CHECK (
+    EXISTS (SELECT 1 FROM public.carts c WHERE c.id = cart_id AND c.user_id = auth.uid())
+  );
+
+-- etapa 17/25
