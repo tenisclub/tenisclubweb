@@ -90,4 +90,35 @@ export interface Product {
   promo_price: number | null;
   effective_price: number;
   discount_percent: number;
-// etapa 3/10
+  is_active: boolean;
+  is_featured: boolean;
+  is_new_release: boolean;
+  allow_backorder: boolean;
+  sold_count: number;
+  views_count: number;
+  meta_title: string | null;
+  meta_description: string | null;
+  created_at: string;
+  brand?: Brand | null;
+  category?: Category | null;
+  images: ProductImage[];
+  primary_image: string;
+  variants: EnrichedVariant[];
+  available_sizes: string[];
+  all_sizes: string[];
+  total_stock: number;
+  size_range_label: string;
+}
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  full_name: string;
+  phone: string;
+  avatar_url: string | null;
+  auth_provider: string;
+  is_active: boolean;
+  created_at: string;
+  role?: UserRole;
+}
+// etapa 4/10
