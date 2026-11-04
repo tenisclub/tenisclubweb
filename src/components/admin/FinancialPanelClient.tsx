@@ -503,4 +503,23 @@ export function FinancialPanelClient({
       'Valor Bruto (R$)',
       'Custo da Venda (R$)',
       'Lucro Liquido (R$)',
-// etapa 27/85
+      ...customColumns.map((c) => c.name),
+    ];
+
+    const rows = pageEntries.map((e) => {
+      const dt = formatDateTimeDisplay(e.occurred_at);
+      const amt = Number(e.amount) || 0;
+      const cost = Number(e.cost_amount) || 0;
+      const net = e.entry_type === 'income' ? amt - cost : -(amt + cost);
+      return [
+        dt.date,
+        dt.time,
+        e.entry_type === 'income' ? 'Entrada' : 'Saída',
+        e.source_type === 'order_sale' ? 'Venda Automática' : 'Manual',
+        `"${(e.description || '').replace(/"/g, '""')}"`,
+        `"${(e.store_link || '').replace(/"/g, '""')}"`,
+        `"${(e.category || '').replace(/"/g, '""')}"`,
+        `"${(e.payment_method || '').replace(/"/g, '""')}"`,
+        amt.toFixed(2).replace('.', ','),
+        cost.toFixed(2).replace('.', ','),
+// etapa 28/85
