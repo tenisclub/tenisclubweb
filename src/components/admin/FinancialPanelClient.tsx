@@ -746,4 +746,23 @@ export function FinancialPanelClient({
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">
               Saídas / Despesas da Loja
-// etapa 40/85
+            </span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/15 text-red-400">
+              <ArrowDownRight className="h-4 w-4" />
+            </span>
+          </div>
+          <p className="mt-2 font-display text-2xl font-black text-red-400">
+            {formatCurrency(metrics.totalExpenses)}
+          </p>
+          <p className="mt-1 text-[11px] text-zinc-400">
+            {metrics.expenseCount} {metrics.expenseCount === 1 ? 'saída lançada' : 'saídas lançadas'} nesta página
+          </p>
+        </div>
+
+        <div
+          className={cn(
+            'rounded-2xl border p-4',
+            metrics.netProfit >= 0
+              ? 'border-neon/35 bg-gradient-to-br from-dark-900 to-neon/5'
+              : 'border-red-500/35 bg-gradient-to-br from-dark-900 to-red-500/5'
+// etapa 41/85
