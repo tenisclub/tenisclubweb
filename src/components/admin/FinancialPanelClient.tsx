@@ -222,4 +222,23 @@ export function FinancialPanelClient({
     setFormCustomValues({});
     setShowEntryForm(true);
   };
-// etapa 12/85
+
+  // Filtered entries for the current date page
+  const pageEntries = useMemo(() => {
+    return entries.filter((entry) => {
+      const entryYmd = (entry.entry_date || '').slice(0, 10);
+      if (selectedDatePage !== 'all' && entryYmd !== selectedDatePage) {
+        return false;
+      }
+      if (typeFilter !== 'all' && entry.entry_type !== typeFilter) {
+        return false;
+      }
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const inDesc = (entry.description || '').toLowerCase().includes(q);
+        const inStore = (entry.store_link || '').toLowerCase().includes(q);
+        const inCat = (entry.category || '').toLowerCase().includes(q);
+        const inOrder = (entry.order?.order_number || '').toLowerCase().includes(q);
+        const inProd = (entry.product?.name || '').toLowerCase().includes(q);
+        const inCustom = Object.values(entry.custom_values || {}).some((v) =>
+// etapa 13/85
