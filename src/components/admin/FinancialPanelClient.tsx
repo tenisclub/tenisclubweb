@@ -653,4 +653,22 @@ export function FinancialPanelClient({
                 />
                 <div>
                   <div className="flex items-center gap-1.5">
-// etapa 35/85
+                    <span className="text-xs font-extrabold tracking-tight">{title}</span>
+                    {badge && (
+                      <span
+                        className={cn(
+                          'rounded px-1.5 py-0.2 text-[10px] font-black uppercase',
+                          isSelected
+                            ? 'bg-neon text-dark-950'
+                            : 'bg-dark-800 text-zinc-300'
+                        )}
+                      >
+                        {badge}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 text-[10px]">
+                    <span className="text-zinc-400">
+                      {stat.count} {stat.count === 1 ? 'registro' : 'registros'}
+                    </span>
+// etapa 36/85
