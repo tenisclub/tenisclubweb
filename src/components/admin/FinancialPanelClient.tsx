@@ -1420,4 +1420,23 @@ function SpreadsheetRow({
           ) : (
             <span className="text-[10px] text-zinc-500">{entry.category}</span>
           )}
-// etapa 76/85
+        </div>
+      </td>
+
+      {/* Descrição Editável */}
+      <td className="px-3.5 py-2.5 align-middle">
+        <input
+          type="text"
+          value={desc}
+          onChange={(e) => setDesc(e.target.value)}
+          onBlur={() => {
+            if (desc.trim() && desc.trim() !== entry.description) {
+              onUpdateField(entry.id, { description: desc.trim() }, true);
+            } else {
+              setDesc(entry.description);
+            }
+          }}
+          placeholder="Descreva esta entrada/saída..."
+          className="w-full rounded-lg border border-transparent bg-transparent px-2 py-1.5 text-xs font-medium text-white transition-colors hover:border-dark-700 focus:border-neon focus:bg-dark-950 focus:outline-none"
+        />
+// etapa 77/85
