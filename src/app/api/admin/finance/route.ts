@@ -123,4 +123,12 @@ export async function POST(request: Request) {
       );
     }
 
-// etapa 15/22
+    const amount = Math.max(0, Number(body.amount) || 0);
+    const costAmount = Math.max(0, Number(body.cost_amount) || 0);
+    const category = String(body.category || (entryType === 'income' ? 'Entrada Loja' : 'Saída / Custo')).trim();
+    const storeLink = String(body.store_link || 'Tênis Club — Loja Online').trim();
+    const productId = body.product_id ? String(body.product_id) : null;
+    const paymentMethod = String(body.payment_method || '').trim();
+    const occurredAt = body.occurred_at
+      ? new Date(body.occurred_at).toISOString()
+// etapa 16/22
