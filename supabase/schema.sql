@@ -891,4 +891,85 @@ BEGIN
   VALUES (v_order_id, NULL, 'received', 'Pedido criado pelo cliente na loja virtual.', p_user_id);
 
   -- Clear cart
--- etapa 11/25
+  DELETE FROM public.cart_items WHERE cart_id = v_cart_id;
+
+  -- Customer & Admin notifications
+  INSERT INTO public.notifications (user_id, target_audience, type, title, message, link)
+  VALUES (
+    p_user_id,
+    'customer',
+    'order_received',
+    'Pedido ' || v_order_number || ' recebido!',
+    'Recebemos sua solicitação. Nossa equipe já vai conferir e confirmar os detalhes.',
+    '/minha-conta/pedidos/' || v_order_id
+  );
+
+  INSERT INTO public.notifications (user_id, target_audience, type, title, message, link)
+  VALUES (
+    NULL,
+    'admin',
+    'new_order',
+    'Novo pedido ' || v_order_number,
+    p_customer_name || ' realizou um pedido no valor de R$ ' || TO_CHAR(v_total, 'FM999G990D00') || '.',
+    '/admin/pedidos/' || v_order_id
+  );
+
+  RETURN jsonb_build_object(
+    'order_id', v_order_id,
+    'order_number', v_order_number,
+    'total', v_total
+  );
+END;
+$$;
+
+-- ----------------------------------------------------------------------------
+-- 11. TRANSACTIONAL INVENTORY ADJUSTMENT RPC (RN13)
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.adjust_stock_atomic(
+  p_variant_id UUID,
+  p_operation TEXT, -- 'in', 'out', 'adjustment'
+  p_amount INT,
+  p_reason TEXT,
+  p_low_stock_threshold INT DEFAULT NULL,
+  p_admin_id UUID DEFAULT auth.uid()
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_inv RECORD;
+  v_new_qty INT;
+  v_moved INT;
+BEGIN
+  IF p_admin_id IS NOT NULL AND NOT public.is_admin(p_admin_id) THEN
+    RAISE EXCEPTION 'Acesso negado: apenas administradores podem movimentar o estoque.';
+  END IF;
+
+  IF TRIM(COALESCE(p_reason, '')) = '' THEN
+    RAISE EXCEPTION 'Informe o motivo da movimentação de estoque.';
+  END IF;
+
+  SELECT
+    inv.id,
+    inv.quantity,
+    inv.low_stock_threshold,
+    pv.product_id,
+    pv.color,
+    pv.size,
+    p.name AS product_name
+  INTO v_inv
+  FROM public.inventory inv
+  JOIN public.product_variants pv ON pv.id = inv.variant_id
+  JOIN public.products p ON p.id = pv.product_id
+  WHERE inv.variant_id = p_variant_id
+  FOR UPDATE OF inv;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Variação de estoque não encontrada.';
+  END IF;
+
+  IF p_operation = 'in' THEN
+    IF p_amount <= 0 THEN RAISE EXCEPTION 'A quantidade de entrada deve ser maior que zero.'; END IF;
+-- etapa 12/25
