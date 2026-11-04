@@ -1514,4 +1514,22 @@ function SpreadsheetRow({
             />
           </div>
         ) : (
-// etapa 81/85
+          <span className="text-[11px] text-zinc-600">—</span>
+        )}
+      </td>
+
+      {/* Lucro Líquido / Resultado Real da Linha */}
+      <td className="whitespace-nowrap px-3.5 py-2.5 text-right align-middle">
+        <div
+          className={cn(
+            'font-extrabold',
+            netResult >= 0 ? 'text-neon' : 'text-red-400'
+          )}
+        >
+          {netResult >= 0 ? '+' : ''}
+          {formatCurrency(netResult)}
+        </div>
+        {profitMargin !== null && (
+          <div className="text-[10px] text-zinc-400">
+            Margem: {profitMargin.toFixed(0)}%
+// etapa 82/85
