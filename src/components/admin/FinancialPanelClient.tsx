@@ -447,4 +447,22 @@ export function FinancialPanelClient({
         body: JSON.stringify({
           action: 'create_column',
           name: newColumnName.trim(),
-// etapa 24/85
+          column_type: newColumnType,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showToast(data.error || 'Erro ao criar coluna.', 'error');
+        return;
+      }
+      setCustomColumns((prev) => [...prev, data.column as FinancialCustomColumn]);
+      setNewColumnName('');
+      setNewColumnType('text');
+      setShowColumnModal(false);
+      showToast('Nova coluna adicionada à planilha!', 'success');
+    } catch {
+      showToast('Erro ao criar coluna personalizada.', 'error');
+    } finally {
+      setSavingColumn(false);
+    }
+// etapa 25/85
