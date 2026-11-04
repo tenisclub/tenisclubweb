@@ -166,4 +166,23 @@ export function FinancialPanelClient({
   // Date pages management
   const [extraDates, setExtraDates] = useState<string[]>([todayYmd]);
   const allDatePages = useMemo(() => {
-// etapa 9/85
+    const set = new Set<string>(extraDates);
+    set.add(todayYmd);
+    for (const e of entries) {
+      if (e.entry_date) set.add(e.entry_date.slice(0, 10));
+    }
+    return Array.from(set).sort((a, b) => b.localeCompare(a));
+  }, [entries, extraDates, todayYmd]);
+
+  // Default to the most recent date page that has entries, or today
+  const [selectedDatePage, setSelectedDatePage] = useState<string>(() => {
+    if (initialEntries.length > 0 && initialEntries[0].entry_date) {
+      return initialEntries[0].entry_date.slice(0, 10);
+    }
+    return todayYmd;
+  });
+
+  const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [jumpDateInput, setJumpDateInput] = useState('');
+// etapa 10/85
