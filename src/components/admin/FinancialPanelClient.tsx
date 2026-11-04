@@ -1383,4 +1383,22 @@ function SpreadsheetRow({
             title="Clique para alterar data e hora"
           >
             <div className="font-bold text-zinc-200 group-hover/dt:text-neon">
-// etapa 74/85
+              {dtDisplay.date}
+            </div>
+            <div className="flex items-center gap-1 text-[11px] text-zinc-400">
+              <Clock className="h-3 w-3 text-zinc-500" />
+              {dtDisplay.time}
+            </div>
+          </button>
+        )}
+      </td>
+
+      {/* Tipo (Entrada / Saída + Badge Venda Automática) */}
+      <td className="whitespace-nowrap px-3 py-2.5 align-middle">
+        <div className="flex flex-col items-start gap-1">
+          <span
+            className={cn(
+              'inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider',
+              entry.entry_type === 'income'
+                ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+// etapa 75/85
