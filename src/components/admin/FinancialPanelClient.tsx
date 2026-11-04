@@ -372,4 +372,23 @@ export function FinancialPanelClient({
           : 'Saída registrada na planilha financeira!',
         'success'
       );
-// etapa 20/85
+    } catch {
+      showToast('Erro de conexão ao salvar lançamento.', 'error');
+    } finally {
+      setSavingEntry(false);
+    }
+  };
+
+  const handleUpdateEntryField = async (
+    entryId: string,
+    updates: Record<string, unknown>,
+    silent = false
+  ) => {
+    setSavingRowId(entryId);
+    try {
+      const res = await fetch(`/api/admin/finance/${entryId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+// etapa 21/85
