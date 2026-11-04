@@ -81,4 +81,13 @@ export async function POST(request: Request) {
       const name = String(body.name || '').trim();
       if (!name) {
         return NextResponse.json({ error: 'Informe o nome da nova coluna.' }, { status: 400 });
-// etapa 10/22
+      }
+
+      const columnType = ['text', 'currency', 'number'].includes(body.column_type)
+        ? body.column_type
+        : 'text';
+
+      const baseKey = slugify(name).replace(/-/g, '_') || 'coluna';
+      const columnKey = `${baseKey}_${Date.now().toString(36).slice(-4)}`;
+
+// etapa 11/22
