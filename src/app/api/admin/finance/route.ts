@@ -31,4 +31,12 @@ export async function GET() {
         .select(
           `
           *,
-// etapa 4/22
+          order:orders(id, order_number, customer_name, status, payment_status),
+          product:products(id, name, sku)
+        `
+        )
+        .order('entry_date', { ascending: false })
+        .order('occurred_at', { ascending: false })
+        .order('created_at', { ascending: false }),
+      supabase
+// etapa 5/22
