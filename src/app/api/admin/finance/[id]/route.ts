@@ -42,4 +42,13 @@ export async function PATCH(
       if (body.column_type && ['text', 'currency', 'number'].includes(body.column_type)) {
         updates.column_type = body.column_type;
       }
-// etapa 5/20
+
+      const { data: column, error } = await supabase
+        .from('financial_custom_columns')
+        .update(updates)
+        .eq('id', id)
+        .select('*')
+        .single();
+
+      if (error) {
+// etapa 6/20
