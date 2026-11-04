@@ -59,4 +59,35 @@ export interface ProductVariant {
   size: string;
   variant_sku: string | null;
   is_active: boolean;
-// etapa 2/10
+  inventory?: InventoryRecord | InventoryRecord[] | null;
+}
+
+export interface EnrichedVariant {
+  id: string;
+  product_id: string;
+  color: string;
+  color_hex: string;
+  size: string;
+  variant_sku: string | null;
+  is_active: boolean;
+  stock: number;
+  low_stock_threshold: number;
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  slug: string;
+  sku: string | null;
+  brand_id: string | null;
+  category_id: string | null;
+  gender: ProductGender;
+  short_description: string;
+  description: string;
+  additional_info: Record<string, string>;
+  cost_price?: number;
+  base_price: number;
+  promo_price: number | null;
+  effective_price: number;
+  discount_percent: number;
+// etapa 3/10
