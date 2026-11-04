@@ -47,4 +47,53 @@ const ADMIN_NAV = [
 export function AdminShell({
   children,
   profile,
-// etapa 1/8
+  role,
+  pendingOrdersCount,
+  unreadAdminNotifs,
+}: {
+  children: React.ReactNode;
+  profile: UserProfile;
+  role: UserRole;
+  pendingOrdersCount: number;
+  unreadAdminNotifs: number;
+}) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const { logout, toast } = useStore();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [optimisticHref, setOptimisticHref] = useState<string | null>(null);
+  const [livePendingOrders, setLivePendingOrders] = useState(pendingOrdersCount);
+  const [liveUnreadNotifs, setLiveUnreadNotifs] = useState(unreadAdminNotifs);
+  const loggingOutRef = useRef(false);
+  const lastStatsFetchRef = useRef(Date.now());
+
+  const isSuper = role === 'super_admin';
+  const effectivePath = optimisticHref || pathname;
+  const isNavigating = Boolean(optimisticHref && optimisticHref !== pathname);
+
+  useEffect(() => {
+    setOptimisticHref(null);
+    setSidebarOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const startY = window.scrollY;
+    const handleScroll = () => {
+      if (Math.abs(window.scrollY - startY) > 10) {
+        setSidebarOpen(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [sidebarOpen]);
+
+  useEffect(() => {
+    router.prefetch('/login');
+  }, [router]);
+
+  useEffect(() => {
+    setLivePendingOrders(pendingOrdersCount);
+  }, [pendingOrdersCount]);
+// etapa 2/8
