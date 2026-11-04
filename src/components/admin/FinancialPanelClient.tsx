@@ -629,114 +629,70 @@ export function FinancialPanelClient({
 
   return (
     <div
+      style={{ zoom: 0.85 }}
       className={cn(
-        'rounded-3xl border p-4 sm:p-6 lg:p-8 transition-colors duration-200 shadow-xl space-y-6',
+        '-m-3.5 sm:-m-6 lg:-m-8 min-h-[calc(118dvh-4rem)] p-3.5 sm:p-5 lg:p-6 transition-colors duration-200 space-y-4',
         isLight
-          ? 'bg-[#F8FAFC] border-slate-200/90 text-slate-900'
-          : 'bg-[#0E0E12] border-zinc-800/90 text-zinc-100'
+          ? 'bg-[#F8FAFC] text-slate-800'
+          : 'bg-[#0E0E12] text-zinc-100'
       )}
     >
-      {/* Top Executive Header */}
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-        <div className="flex items-start gap-3.5">
-          <div
+      {/* Top Action Toolbar (Texts removed as requested) */}
+      <div className="flex flex-wrap items-center justify-between gap-2.5">
+        {/* Theme Switcher (Scoped only to Painel Financeiro) */}
+        <div
+          className={cn(
+            'inline-flex items-center rounded-xl p-0.5 border',
+            isLight
+              ? 'bg-white border-slate-200 shadow-2xs'
+              : 'bg-zinc-900 border-zinc-800'
+          )}
+          title="Alternar tema apenas do Painel Financeiro"
+        >
+          <button
+            type="button"
+            onClick={() => toggleTheme('light')}
             className={cn(
-              'flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border shadow-sm',
+              'inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold transition-all',
               isLight
-                ? 'bg-slate-900 border-slate-800 text-[#BEFA46]'
-                : 'bg-zinc-900 border-zinc-700 text-[#BEFA46]'
+                ? 'bg-amber-50 text-amber-700 border border-amber-200/80 shadow-2xs'
+                : 'text-zinc-400 hover:text-zinc-200'
             )}
           >
-            <Wallet className="h-6 w-6" />
-          </div>
-          <div>
-            <div className="flex flex-wrap items-center gap-2.5">
-              <h1
-                className={cn(
-                  'text-xl sm:text-2xl font-extrabold tracking-tight',
-                  isLight ? 'text-slate-900' : 'text-white'
-                )}
-              >
-                Painel Financeiro & Planilha de Caixa
-              </h1>
-              <span
-                className={cn(
-                  'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
-                  isLight
-                    ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                    : 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
-                )}
-              >
-                <Sparkles className="h-3 w-3" />
-                Vendas Sincronizadas Automaticamente
-              </span>
-            </div>
-            <p
-              className={cn(
-                'mt-1 text-xs sm:text-sm',
-                isLight ? 'text-slate-500' : 'text-zinc-400'
-              )}
-            >
-              Controle diário de entradas, custos por venda, saídas da loja e colunas personalizadas.
-            </p>
-          </div>
+            <Sun className="h-3.5 w-3.5 text-amber-500" />
+            Claro
+          </button>
+          <button
+            type="button"
+            onClick={() => toggleTheme('dark')}
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold transition-all',
+              !isLight
+                ? 'bg-zinc-800 text-white shadow-sm'
+                : 'text-slate-500 hover:text-slate-800'
+            )}
+          >
+            <Moon className="h-3.5 w-3.5 text-indigo-500" />
+            Escuro
+          </button>
         </div>
 
-        {/* Action Toolbar */}
-        <div className="flex flex-wrap items-center gap-2.5">
-          {/* Theme Switcher (Scoped only to Painel Financeiro) */}
-          <div
-            className={cn(
-              'inline-flex items-center rounded-xl p-1 border',
-              isLight
-                ? 'bg-slate-200/75 border-slate-300/80'
-                : 'bg-zinc-900 border-zinc-800'
-            )}
-            title="Alternar tema apenas do Painel Financeiro"
-          >
-            <button
-              type="button"
-              onClick={() => toggleTheme('light')}
-              className={cn(
-                'inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all',
-                isLight
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-zinc-400 hover:text-zinc-200'
-              )}
-            >
-              <Sun className="h-3.5 w-3.5 text-amber-500" />
-              Claro
-            </button>
-            <button
-              type="button"
-              onClick={() => toggleTheme('dark')}
-              className={cn(
-                'inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all',
-                !isLight
-                  ? 'bg-zinc-800 text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
-              )}
-            >
-              <Moon className="h-3.5 w-3.5 text-indigo-500" />
-              Escuro
-            </button>
-          </div>
-
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => openNewEntryForm('income')}
-            className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-emerald-700 active:scale-[0.99]"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white shadow-xs transition-all hover:bg-emerald-700 active:scale-[0.99]"
           >
-            <Plus className="h-4 w-4 stroke-[2.5]" />
+            <Plus className="h-3.5 w-3.5 stroke-[2.5]" />
             Nova Entrada
           </button>
 
           <button
             type="button"
             onClick={() => openNewEntryForm('expense')}
-            className="inline-flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-rose-700 active:scale-[0.99]"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-rose-600 px-3.5 py-2 text-xs font-bold text-white shadow-xs transition-all hover:bg-rose-700 active:scale-[0.99]"
           >
-            <TrendingDown className="h-4 w-4 stroke-[2.5]" />
+            <TrendingDown className="h-3.5 w-3.5 stroke-[2.5]" />
             Nova Saída
           </button>
 
@@ -744,13 +700,13 @@ export function FinancialPanelClient({
             type="button"
             onClick={() => setShowColumnModal(true)}
             className={cn(
-              'inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-2.5 text-xs font-bold transition-all',
+              'inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold transition-all',
               isLight
                 ? 'border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
                 : 'border-indigo-500/30 bg-indigo-500/10 text-indigo-300 hover:bg-indigo-500/20'
             )}
           >
-            <Columns3 className="h-4 w-4" />
+            <Columns3 className="h-3.5 w-3.5" />
             + Nova Coluna
           </button>
 
@@ -758,34 +714,34 @@ export function FinancialPanelClient({
             type="button"
             onClick={handleExportCsv}
             className={cn(
-              'inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-2.5 text-xs font-semibold transition-all',
+              'inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-semibold transition-all',
               isLight
-                ? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs'
+                ? 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs'
                 : 'border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800'
             )}
             title="Baixar planilha em formato Excel (.CSV)"
           >
-            <Download className="h-4 w-4" />
+            <Download className="h-3.5 w-3.5" />
             Exportar CSV
           </button>
         </div>
       </div>
 
-      {/* KPI Cards Row */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {/* KPI Cards Row (Compact & Proportional) */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {/* Card 1: Entradas Brutas */}
         <div
           className={cn(
-            'relative overflow-hidden rounded-2xl border p-5 transition-all',
+            'relative overflow-hidden rounded-xl border p-3.5 transition-all',
             isLight
-              ? 'bg-white border-slate-200/90 shadow-xs'
+              ? 'bg-white border-slate-200/90 shadow-2xs'
               : 'bg-zinc-900/90 border-zinc-800'
           )}
         >
           <div className="flex items-center justify-between">
             <span
               className={cn(
-                'text-xs font-bold uppercase tracking-wider',
+                'text-[11px] font-bold uppercase tracking-wider',
                 isLight ? 'text-slate-500' : 'text-zinc-400'
               )}
             >
@@ -793,24 +749,24 @@ export function FinancialPanelClient({
             </span>
             <span
               className={cn(
-                'flex h-9 w-9 items-center justify-center rounded-xl border',
+                'flex h-7 w-7 items-center justify-center rounded-lg border',
                 isLight
                   ? 'bg-emerald-50 border-emerald-200 text-emerald-600'
                   : 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
               )}
             >
-              <ArrowUpRight className="h-5 w-5" />
+              <ArrowUpRight className="h-4 w-4" />
             </span>
           </div>
           <p
             className={cn(
-              'mt-3 text-2xl sm:text-3xl font-extrabold tracking-tight tabular-nums',
+              'mt-1.5 text-xl font-extrabold tracking-tight tabular-nums',
               isLight ? 'text-emerald-600' : 'text-emerald-400'
             )}
           >
             {formatCurrency(metrics.grossIncome)}
           </p>
-          <div className="mt-2 flex items-center justify-between text-xs">
+          <div className="mt-1 flex items-center justify-between text-[11px]">
             <span className={isLight ? 'text-slate-500' : 'text-zinc-400'}>
               {metrics.incomeCount}{' '}
               {metrics.incomeCount === 1 ? 'entrada registrada' : 'entradas registradas'}
@@ -829,16 +785,16 @@ export function FinancialPanelClient({
         {/* Card 2: Custo das Vendas */}
         <div
           className={cn(
-            'relative overflow-hidden rounded-2xl border p-5 transition-all',
+            'relative overflow-hidden rounded-xl border p-3.5 transition-all',
             isLight
-              ? 'bg-white border-amber-200/90 shadow-xs'
+              ? 'bg-white border-amber-200/90 shadow-2xs'
               : 'bg-zinc-900/90 border-amber-500/25'
           )}
         >
           <div className="flex items-center justify-between">
             <span
               className={cn(
-                'text-xs font-bold uppercase tracking-wider',
+                'text-[11px] font-bold uppercase tracking-wider',
                 isLight ? 'text-amber-800' : 'text-amber-300'
               )}
             >
@@ -846,18 +802,18 @@ export function FinancialPanelClient({
             </span>
             <span
               className={cn(
-                'flex h-9 w-9 items-center justify-center rounded-xl border',
+                'flex h-7 w-7 items-center justify-center rounded-lg border',
                 isLight
                   ? 'bg-amber-50 border-amber-200 text-amber-600'
                   : 'bg-amber-500/15 border-amber-500/30 text-amber-400'
               )}
             >
-              <Package className="h-5 w-5" />
+              <Package className="h-4 w-4" />
             </span>
           </div>
           <p
             className={cn(
-              'mt-3 text-2xl sm:text-3xl font-extrabold tracking-tight tabular-nums',
+              'mt-1.5 text-xl font-extrabold tracking-tight tabular-nums',
               isLight ? 'text-amber-600' : 'text-amber-400'
             )}
           >
@@ -865,7 +821,7 @@ export function FinancialPanelClient({
           </p>
           <p
             className={cn(
-              'mt-2 text-xs',
+              'mt-1 text-[11px]',
               isLight ? 'text-slate-500' : 'text-zinc-400'
             )}
           >
@@ -876,16 +832,16 @@ export function FinancialPanelClient({
         {/* Card 3: Saídas / Despesas */}
         <div
           className={cn(
-            'relative overflow-hidden rounded-2xl border p-5 transition-all',
+            'relative overflow-hidden rounded-xl border p-3.5 transition-all',
             isLight
-              ? 'bg-white border-slate-200/90 shadow-xs'
+              ? 'bg-white border-slate-200/90 shadow-2xs'
               : 'bg-zinc-900/90 border-zinc-800'
           )}
         >
           <div className="flex items-center justify-between">
             <span
               className={cn(
-                'text-xs font-bold uppercase tracking-wider',
+                'text-[11px] font-bold uppercase tracking-wider',
                 isLight ? 'text-slate-500' : 'text-zinc-400'
               )}
             >
@@ -893,18 +849,18 @@ export function FinancialPanelClient({
             </span>
             <span
               className={cn(
-                'flex h-9 w-9 items-center justify-center rounded-xl border',
+                'flex h-7 w-7 items-center justify-center rounded-lg border',
                 isLight
                   ? 'bg-rose-50 border-rose-200 text-rose-600'
                   : 'bg-rose-500/15 border-rose-500/30 text-rose-400'
               )}
             >
-              <ArrowDownRight className="h-5 w-5" />
+              <ArrowDownRight className="h-4 w-4" />
             </span>
           </div>
           <p
             className={cn(
-              'mt-3 text-2xl sm:text-3xl font-extrabold tracking-tight tabular-nums',
+              'mt-1.5 text-xl font-extrabold tracking-tight tabular-nums',
               isLight ? 'text-rose-600' : 'text-rose-400'
             )}
           >
@@ -912,7 +868,7 @@ export function FinancialPanelClient({
           </p>
           <p
             className={cn(
-              'mt-2 text-xs',
+              'mt-1 text-[11px]',
               isLight ? 'text-slate-500' : 'text-zinc-400'
             )}
           >
@@ -924,41 +880,65 @@ export function FinancialPanelClient({
         {/* Card 4: Lucro Líquido Real */}
         <div
           className={cn(
-            'relative overflow-hidden rounded-2xl border p-5 transition-all shadow-sm',
+            'relative overflow-hidden rounded-xl border p-3.5 transition-all',
             metrics.netProfit >= 0
               ? isLight
-                ? 'bg-slate-900 border-slate-800 text-white'
-                : 'bg-zinc-950 border-[#BEFA46]/40 text-white'
+                ? 'bg-emerald-50/70 border-emerald-200 text-slate-900 shadow-2xs'
+                : 'bg-zinc-950 border-[#BEFA46]/40 text-white shadow-sm'
               : isLight
-                ? 'bg-rose-950 border-rose-800 text-white'
-                : 'bg-rose-950/60 border-rose-500/40 text-white'
+                ? 'bg-rose-50/80 border-rose-200 text-slate-900 shadow-2xs'
+                : 'bg-rose-950/60 border-rose-500/40 text-white shadow-sm'
           )}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
+            <span
+              className={cn(
+                'text-[11px] font-bold uppercase tracking-wider',
+                metrics.netProfit >= 0
+                  ? isLight
+                    ? 'text-emerald-900'
+                    : 'text-slate-300'
+                  : isLight
+                    ? 'text-rose-900'
+                    : 'text-slate-300'
+              )}
+            >
               Lucro Líquido Real
             </span>
             <span
               className={cn(
-                'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold',
+                'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold',
                 metrics.netProfit >= 0
-                  ? 'bg-[#BEFA46] text-slate-950'
-                  : 'bg-rose-500 text-white'
+                  ? isLight
+                    ? 'bg-emerald-600 text-white'
+                    : 'bg-[#BEFA46] text-slate-950'
+                  : 'bg-rose-600 text-white'
               )}
             >
-              <Percent className="h-3 w-3" />
+              <Percent className="h-2.5 w-2.5" />
               Margem {metrics.marginPercent.toFixed(1)}%
             </span>
           </div>
           <p
             className={cn(
-              'mt-3 text-2xl sm:text-3xl font-extrabold tracking-tight tabular-nums',
-              metrics.netProfit >= 0 ? 'text-[#BEFA46]' : 'text-rose-300'
+              'mt-1.5 text-xl font-extrabold tracking-tight tabular-nums',
+              metrics.netProfit >= 0
+                ? isLight
+                  ? 'text-emerald-700'
+                  : 'text-[#BEFA46]'
+                : isLight
+                  ? 'text-rose-600'
+                  : 'text-rose-300'
             )}
           >
             {formatCurrency(metrics.netProfit)}
           </p>
-          <p className="mt-2 text-xs text-slate-300">
+          <p
+            className={cn(
+              'mt-1 text-[11px]',
+              isLight ? 'text-slate-600' : 'text-slate-300'
+            )}
+          >
             Entradas − Custo das Vendas − Saídas
           </p>
         </div>
@@ -1363,12 +1343,12 @@ export function FinancialPanelClient({
             <button
               type="submit"
               disabled={savingEntry}
-              className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-slate-800 disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 disabled:opacity-50"
             >
               {savingEntry ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <Check className="h-4 w-4 text-[#BEFA46]" />
+                <Check className="h-4 w-4" />
               )}
               Salvar na Planilha
             </button>
@@ -1553,7 +1533,7 @@ export function FinancialPanelClient({
                     'group flex shrink-0 items-center gap-2.5 rounded-xl border px-3.5 py-2 text-left transition-all',
                     isSelected
                       ? isLight
-                        ? 'border-slate-900 bg-slate-900 text-white shadow-sm'
+                        ? 'border-emerald-500 bg-emerald-50/90 text-emerald-950 shadow-2xs ring-2 ring-emerald-500/15'
                         : 'border-[#BEFA46] bg-[#BEFA46]/15 text-white'
                       : isLight
                         ? 'border-slate-200/90 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-100/70'
@@ -1564,7 +1544,9 @@ export function FinancialPanelClient({
                     className={cn(
                       'h-4 w-4 shrink-0',
                       isSelected
-                        ? 'text-[#BEFA46]'
+                        ? isLight
+                          ? 'text-emerald-600'
+                          : 'text-[#BEFA46]'
                         : isLight
                           ? 'text-slate-400 group-hover:text-slate-600'
                           : 'text-zinc-500'
@@ -1578,7 +1560,9 @@ export function FinancialPanelClient({
                           className={cn(
                             'rounded-md px-1.5 py-0.2 text-[10px] font-extrabold uppercase',
                             isSelected
-                              ? 'bg-[#BEFA46] text-slate-950'
+                              ? isLight
+                                ? 'bg-emerald-600 text-white'
+                                : 'bg-[#BEFA46] text-slate-950'
                               : isLight
                                 ? 'bg-slate-200 text-slate-700'
                                 : 'bg-zinc-800 text-zinc-300'
@@ -1592,7 +1576,9 @@ export function FinancialPanelClient({
                       <span
                         className={
                           isSelected
-                            ? 'text-slate-300'
+                            ? isLight
+                              ? 'text-emerald-800/80'
+                              : 'text-slate-300'
                             : isLight
                               ? 'text-slate-500'
                               : 'text-zinc-500'
@@ -1606,10 +1592,14 @@ export function FinancialPanelClient({
                             'font-bold tabular-nums',
                             stat.net >= 0
                               ? isSelected
-                                ? 'text-[#BEFA46]'
+                                ? isLight
+                                  ? 'text-emerald-700'
+                                  : 'text-[#BEFA46]'
                                 : 'text-emerald-600'
                               : isSelected
-                                ? 'text-rose-300'
+                                ? isLight
+                                  ? 'text-rose-600'
+                                  : 'text-rose-300'
                                 : 'text-rose-600'
                           )}
                         >
@@ -1630,7 +1620,7 @@ export function FinancialPanelClient({
                 'flex shrink-0 items-center gap-2 rounded-xl border px-3.5 py-2 text-left transition-all',
                 selectedDatePage === 'all'
                   ? isLight
-                    ? 'border-slate-900 bg-slate-900 text-white shadow-sm'
+                    ? 'border-emerald-500 bg-emerald-50/90 text-emerald-950 shadow-2xs ring-2 ring-emerald-500/15'
                     : 'border-[#BEFA46] bg-[#BEFA46]/15 text-white'
                   : isLight
                     ? 'border-slate-200/90 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-100/70'
@@ -1643,7 +1633,9 @@ export function FinancialPanelClient({
                   className={cn(
                     'text-[10px]',
                     selectedDatePage === 'all'
-                      ? 'text-slate-300'
+                      ? isLight
+                        ? 'text-emerald-800/80'
+                        : 'text-slate-300'
                       : isLight
                         ? 'text-slate-500'
                         : 'text-zinc-500'
@@ -1671,7 +1663,7 @@ export function FinancialPanelClient({
                 'rounded-lg px-3 py-1.5 text-xs font-bold transition-all',
                 typeFilter === 'all'
                   ? isLight
-                    ? 'bg-slate-900 text-white'
+                    ? 'bg-indigo-600 text-white shadow-2xs'
                     : 'bg-[#BEFA46] text-slate-950'
                   : isLight
                     ? 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -1734,7 +1726,7 @@ export function FinancialPanelClient({
 
         {/* Spreadsheet Grid */}
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1120px] border-collapse text-left text-xs">
+          <table className="w-full border-collapse text-left text-xs">
             <thead>
               <tr
                 className={cn(
@@ -1746,7 +1738,7 @@ export function FinancialPanelClient({
               >
                 <th
                   className={cn(
-                    'w-10 border-r px-3 py-3 text-center font-mono',
+                    'w-9 border-r px-2 py-2.5 text-center font-mono',
                     isLight ? 'border-slate-200/80 text-slate-400' : 'border-zinc-800 text-zinc-500'
                   )}
                 >
@@ -1754,7 +1746,7 @@ export function FinancialPanelClient({
                 </th>
                 <th
                   className={cn(
-                    'w-32 border-r px-3.5 py-3',
+                    'w-28 border-r px-2.5 py-2.5',
                     isLight ? 'border-slate-200/80' : 'border-zinc-800'
                   )}
                 >
@@ -1762,7 +1754,7 @@ export function FinancialPanelClient({
                 </th>
                 <th
                   className={cn(
-                    'w-36 border-r px-3 py-3',
+                    'w-32 border-r px-2.5 py-2.5',
                     isLight ? 'border-slate-200/80' : 'border-zinc-800'
                   )}
                 >
@@ -1770,7 +1762,7 @@ export function FinancialPanelClient({
                 </th>
                 <th
                   className={cn(
-                    'min-w-[280px] border-r px-3.5 py-3',
+                    'min-w-[210px] border-r px-3 py-2.5',
                     isLight ? 'border-slate-200/80' : 'border-zinc-800'
                   )}
                 >
@@ -1778,7 +1770,7 @@ export function FinancialPanelClient({
                 </th>
                 <th
                   className={cn(
-                    'min-w-[190px] border-r px-3 py-3',
+                    'min-w-[155px] border-r px-2.5 py-2.5',
                     isLight ? 'border-slate-200/80' : 'border-zinc-800'
                   )}
                 >
@@ -1786,7 +1778,7 @@ export function FinancialPanelClient({
                 </th>
                 <th
                   className={cn(
-                    'w-36 border-r px-3.5 py-3 text-right',
+                    'w-32 border-r px-2.5 py-2.5 text-right',
                     isLight ? 'border-slate-200/80' : 'border-zinc-800'
                   )}
                 >
@@ -1794,7 +1786,7 @@ export function FinancialPanelClient({
                 </th>
                 <th
                   className={cn(
-                    'w-44 border-r px-3.5 py-3 text-right',
+                    'w-36 border-r px-2.5 py-2.5 text-right',
                     isLight
                       ? 'bg-amber-50/90 border-amber-200/80 text-amber-900'
                       : 'bg-amber-500/10 border-zinc-800 text-amber-300'
@@ -1803,7 +1795,7 @@ export function FinancialPanelClient({
                   <div>Custo da Venda (R$)</div>
                   <div
                     className={cn(
-                      'text-[10px] font-medium normal-case',
+                      'text-[9px] font-medium normal-case',
                       isLight ? 'text-amber-700' : 'text-amber-300/75'
                     )}
                   >
@@ -1812,7 +1804,7 @@ export function FinancialPanelClient({
                 </th>
                 <th
                   className={cn(
-                    'w-40 border-r px-3.5 py-3 text-right',
+                    'w-32 border-r px-2.5 py-2.5 text-right',
                     isLight
                       ? 'bg-emerald-50/60 border-slate-200/80 text-emerald-950'
                       : 'bg-emerald-500/5 border-zinc-800 text-[#BEFA46]'
@@ -1821,7 +1813,7 @@ export function FinancialPanelClient({
                   <div>Lucro Real</div>
                   <div
                     className={cn(
-                      'text-[10px] font-medium normal-case',
+                      'text-[9px] font-medium normal-case',
                       isLight ? 'text-emerald-700' : 'text-zinc-400'
                     )}
                   >
