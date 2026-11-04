@@ -95,4 +95,13 @@ export async function PATCH(
         updates.entry_date = toSaoPauloDateStr(iso);
       }
     }
-// etapa 11/20
+    if (body.entry_date !== undefined) {
+      updates.entry_date = String(body.entry_date).slice(0, 10);
+    }
+    if (
+      body.custom_values !== undefined &&
+      body.custom_values &&
+      typeof body.custom_values === 'object' &&
+      !Array.isArray(body.custom_values)
+    ) {
+// etapa 12/20
