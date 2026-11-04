@@ -709,4 +709,22 @@ export function FinancialPanelClient({
       {/* KPI Cards for the Selected Date Page */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <div className="rounded-2xl border border-emerald-500/25 bg-dark-900/90 p-4">
-// etapa 38/85
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+              Entradas Brutas
+            </span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-400">
+              <ArrowUpRight className="h-4 w-4" />
+            </span>
+          </div>
+          <p className="mt-2 font-display text-2xl font-black text-emerald-400">
+            {formatCurrency(metrics.grossIncome)}
+          </p>
+          <p className="mt-1 text-[11px] text-zinc-400">
+            {metrics.incomeCount} {metrics.incomeCount === 1 ? 'entrada registrada' : 'entradas registradas'} nesta página
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-amber-500/25 bg-dark-900/90 p-4">
+          <div className="flex items-center justify-between">
+// etapa 39/85
