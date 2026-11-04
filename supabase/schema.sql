@@ -79,4 +79,85 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
 AS $$
--- etapa 1/25
+DECLARE
+  v_uid UUID;
+BEGIN
+  v_uid := CASE
+    WHEN current_user IN ('anon', 'authenticated') THEN auth.uid()
+    ELSE check_user_id
+  END;
+  IF v_uid IS NULL THEN
+    RETURN FALSE;
+  END IF;
+  RETURN EXISTS (
+    SELECT 1
+    FROM public.user_roles ur
+    JOIN public.roles r ON r.id = ur.role_id
+    JOIN public.user_profiles up ON up.id = ur.user_id
+    WHERE ur.user_id = v_uid
+      AND up.is_active = TRUE
+      AND r.name IN ('admin_operational', 'super_admin')
+  );
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.is_super_admin(check_user_id UUID DEFAULT auth.uid())
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_uid UUID;
+BEGIN
+  v_uid := CASE
+    WHEN current_user IN ('anon', 'authenticated') THEN auth.uid()
+    ELSE check_user_id
+  END;
+  IF v_uid IS NULL THEN
+    RETURN FALSE;
+  END IF;
+  RETURN EXISTS (
+    SELECT 1
+    FROM public.user_roles ur
+    JOIN public.roles r ON r.id = ur.role_id
+    JOIN public.user_profiles up ON up.id = ur.user_id
+    WHERE ur.user_id = v_uid
+      AND up.is_active = TRUE
+      AND r.name = 'super_admin'
+  );
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_user_role(check_user_id UUID DEFAULT auth.uid())
+RETURNS TEXT
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_role TEXT;
+BEGIN
+  IF check_user_id IS NULL THEN
+    RETURN 'visitor';
+  END IF;
+  SELECT r.name INTO v_role
+  FROM public.user_roles ur
+  JOIN public.roles r ON r.id = ur.role_id
+  JOIN public.user_profiles up ON up.id = ur.user_id
+  WHERE ur.user_id = check_user_id
+    AND up.is_active = TRUE
+  ORDER BY
+    CASE r.name
+      WHEN 'super_admin' THEN 1
+      WHEN 'admin_operational' THEN 2
+      ELSE 3
+    END
+  LIMIT 1;
+
+  RETURN COALESCE(v_role, 'customer');
+END;
+$$;
+
+-- ----------------------------------------------------------------------------
+-- etapa 2/25
