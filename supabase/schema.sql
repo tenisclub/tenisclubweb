@@ -1622,4 +1622,85 @@ BEGIN
   )
   ON CONFLICT (id) DO UPDATE SET
     version = EXCLUDED.version,
--- etapa 20/25
+    scope = EXCLUDED.scope,
+    entity = EXCLUDED.entity,
+    actor_tag = EXCLUDED.actor_tag,
+    updated_at = EXCLUDED.updated_at;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION internal.trg_sync_global()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  PERFORM internal.emit_site_sync(TG_ARGV[0], TG_TABLE_NAME, NULL);
+  RETURN NULL;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION internal.trg_sync_by_user_col()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_rec JSONB;
+  v_uid_text TEXT;
+  v_uid UUID;
+BEGIN
+  v_rec := CASE WHEN TG_OP = 'DELETE' THEN to_jsonb(OLD) ELSE to_jsonb(NEW) END;
+  v_uid_text := v_rec ->> TG_ARGV[1];
+  IF v_uid_text IS NOT NULL AND v_uid_text <> '' THEN
+    v_uid := v_uid_text::UUID;
+  END IF;
+  PERFORM internal.emit_site_sync(TG_ARGV[0], TG_TABLE_NAME, v_uid);
+  RETURN NULL;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION internal.trg_sync_cart_items()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_cart_id UUID;
+  v_uid UUID;
+BEGIN
+  v_cart_id := CASE WHEN TG_OP = 'DELETE' THEN OLD.cart_id ELSE NEW.cart_id END;
+  SELECT c.user_id INTO v_uid FROM public.carts c WHERE c.id = v_cart_id;
+  PERFORM internal.emit_site_sync('user_private', 'cart_items', v_uid);
+  RETURN NULL;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION internal.trg_sync_global() TO postgres, service_role, authenticated, anon;
+GRANT EXECUTE ON FUNCTION internal.trg_sync_by_user_col() TO postgres, service_role, authenticated, anon;
+GRANT EXECUTE ON FUNCTION internal.trg_sync_cart_items() TO postgres, service_role, authenticated, anon;
+REVOKE ALL ON FUNCTION internal.emit_site_sync(TEXT, TEXT, UUID) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION internal.emit_site_sync(TEXT, TEXT, UUID) TO postgres, service_role;
+
+DROP TRIGGER IF EXISTS trg_realtime_products_ins_del ON public.products;
+CREATE TRIGGER trg_realtime_products_ins_del
+  AFTER INSERT OR DELETE ON public.products
+  FOR EACH STATEMENT
+  EXECUTE FUNCTION internal.trg_sync_global('catalog');
+
+DROP TRIGGER IF EXISTS trg_realtime_products_upd ON public.products;
+CREATE TRIGGER trg_realtime_products_upd
+  AFTER UPDATE ON public.products
+  FOR EACH ROW
+  WHEN ((to_jsonb(OLD) - 'views_count' - 'updated_at') IS DISTINCT FROM (to_jsonb(NEW) - 'views_count' - 'updated_at'))
+  EXECUTE FUNCTION internal.trg_sync_global('catalog');
+
+DROP TRIGGER IF EXISTS trg_realtime_product_variants ON public.product_variants;
+CREATE TRIGGER trg_realtime_product_variants
+  AFTER INSERT OR UPDATE OR DELETE ON public.product_variants
+  FOR EACH STATEMENT
+  EXECUTE FUNCTION internal.trg_sync_global('catalog');
+-- etapa 21/25
