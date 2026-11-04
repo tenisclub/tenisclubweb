@@ -629,15 +629,15 @@ export function FinancialPanelClient({
 
   return (
     <div
-      style={{ zoom: 0.85 }}
       className={cn(
-        '-m-3.5 sm:-m-6 lg:-m-8 min-h-[calc(118dvh-4rem)] p-3.5 sm:p-5 lg:p-6 transition-colors duration-200 space-y-4',
+        'min-h-dvh w-full transition-colors duration-200',
         isLight
           ? 'bg-[#F8FAFC] text-slate-800'
           : 'bg-[#0E0E12] text-zinc-100'
       )}
     >
-      {/* Top Action Toolbar (Minimalist & Clean) */}
+      <div style={{ zoom: 0.72 }} className="p-4 sm:p-6 space-y-4">
+        {/* Top Action Toolbar (Minimalist & Clean) */}
       <div className="flex flex-wrap items-center justify-between gap-2.5">
         {/* Theme Switcher */}
         <div
@@ -2132,6 +2132,7 @@ export function FinancialPanelClient({
             )}
           </table>
         </div>
+      </div>
       </div>
     </div>
   );

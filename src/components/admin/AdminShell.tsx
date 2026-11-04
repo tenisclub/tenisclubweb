@@ -314,7 +314,9 @@ export function AdminShell({
           </div>
         )}
 
-        <div className="p-3.5 sm:p-6 lg:p-8 flex-1 min-w-0">{children}</div>
+        <div className={cn('flex-1 min-w-0', !isFinancePage && 'p-3.5 sm:p-6 lg:p-8')}>
+          {children}
+        </div>
       </div>
 
       {/* Mobile Sidebar Overlay */}
