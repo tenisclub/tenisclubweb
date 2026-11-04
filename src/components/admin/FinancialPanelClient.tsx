@@ -185,4 +185,22 @@ export function FinancialPanelClient({
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [jumpDateInput, setJumpDateInput] = useState('');
-// etapa 10/85
+
+  // New entry form modal / drawer state
+  const [showEntryForm, setShowEntryForm] = useState(false);
+  const [formType, setFormType] = useState<FinancialEntryType>('income');
+  const [formDescription, setFormDescription] = useState('');
+  const [formCategory, setFormCategory] = useState('Venda de Produto');
+  const [formStoreLink, setFormStoreLink] = useState('Tênis Club — Loja Online');
+  const [formProductId, setFormProductId] = useState('');
+  const [formAmount, setFormAmount] = useState('');
+  const [formCostAmount, setFormCostAmount] = useState('');
+  const [formPaymentMethod, setFormPaymentMethod] = useState('Pix');
+  const [formOccurredAt, setFormOccurredAt] = useState(() => getNowLocalInputValue());
+  const [formCustomValues, setFormCustomValues] = useState<Record<string, string>>({});
+  const [savingEntry, setSavingEntry] = useState(false);
+
+  // New custom column modal state
+  const [showColumnModal, setShowColumnModal] = useState(false);
+  const [newColumnName, setNewColumnName] = useState('');
+// etapa 11/85
