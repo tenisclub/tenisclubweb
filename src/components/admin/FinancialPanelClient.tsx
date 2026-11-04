@@ -952,4 +952,23 @@ export function FinancialPanelClient({
                 ))}
               </datalist>
             </div>
-// etapa 51/85
+
+            <div className="md:col-span-3">
+              <label className="mb-1 block text-xs font-bold text-zinc-300">
+                Categoria
+              </label>
+              <input
+                type="text"
+                list="category-presets"
+                value={formCategory}
+                onChange={(e) => setFormCategory(e.target.value)}
+                className="w-full rounded-xl border border-dark-700 bg-dark-950 px-3 py-2 text-xs text-white focus:border-neon focus:outline-none"
+              />
+              <datalist id="category-presets">
+                {(formType === 'income' ? CATEGORY_PRESETS_INCOME : CATEGORY_PRESETS_EXPENSE).map(
+                  (cat) => (
+                    <option key={cat} value={cat} />
+                  )
+                )}
+              </datalist>
+// etapa 52/85
