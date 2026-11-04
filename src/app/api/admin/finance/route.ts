@@ -140,4 +140,12 @@ export async function POST(request: Request) {
       body.custom_values && typeof body.custom_values === 'object' && !Array.isArray(body.custom_values)
         ? body.custom_values
         : {};
-// etapa 17/22
+
+    const { data: entry, error } = await supabase
+      .from('financial_entries')
+      .insert({
+        entry_type: entryType,
+        source_type: productId ? 'product_link' : 'manual',
+        description,
+        category,
+// etapa 18/22
