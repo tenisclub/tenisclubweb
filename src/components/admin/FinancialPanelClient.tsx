@@ -615,4 +615,23 @@ export function FinancialPanelClient({
           <div className="flex items-center gap-2">
             <label className="text-[11px] font-semibold text-zinc-400">Abrir/Criar página de data:</label>
             <input
-// etapa 33/85
+              type="date"
+              value={jumpDateInput}
+              onChange={(e) => {
+                const val = e.target.value;
+                setJumpDateInput(val);
+                if (val) handleOpenOrJumpDate(val);
+              }}
+              className="rounded-lg border border-dark-700 bg-dark-950 px-2.5 py-1 text-xs font-semibold text-white focus:border-neon focus:outline-none"
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
+          {allDatePages.map((ymd) => {
+            const { title, badge } = formatDatePageTab(ymd, todayYmd);
+            const stat = datePageStats[ymd] || { count: 0, net: 0 };
+            const isSelected = selectedDatePage === ymd;
+
+            return (
+// etapa 34/85
