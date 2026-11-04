@@ -166,4 +166,11 @@ export async function DELETE(
 
     revalidateStoreData('orders');
     return NextResponse.json({ deleted: true });
-// etapa 19/20
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Erro ao excluir registro.' },
+      { status: 500 }
+    );
+  }
+}
+
