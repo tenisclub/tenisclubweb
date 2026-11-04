@@ -14,4 +14,13 @@ function toSaoPauloDateStr(isoDate: string): string {
   } catch {
     return new Date().toISOString().slice(0, 10);
   }
-// etapa 2/22
+}
+
+export async function GET() {
+  const session = await getAuthSession();
+  if (!session?.isAdmin) {
+    return NextResponse.json({ error: 'Acesso negado.' }, { status: 403 });
+  }
+
+  try {
+// etapa 3/22
