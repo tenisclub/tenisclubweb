@@ -55,4 +55,32 @@ export async function POST(request: Request) {
       null;
 
     const initialDeliveryMethod = matchedOption
-// etapa 2/8
+      ? matchedOption.deliveryMethod
+      : deliveryMethod === 'local_delivery'
+        ? 'local_delivery'
+        : 'pickup';
+
+    const requiresAddress = shouldRequireCheckoutAddress(
+      deliveryCfg,
+      matchedOption,
+      initialDeliveryMethod
+    );
+
+    const effectiveDeliveryMethod =
+      !matchedOption && requiresAddress ? 'local_delivery' : initialDeliveryMethod;
+
+    if (requiresAddress) {
+      if (
+        !shippingAddress?.street?.trim() ||
+        !shippingAddress?.number?.trim() ||
+        !shippingAddress?.neighborhood?.trim() ||
+        !shippingAddress?.city?.trim()
+      ) {
+        return NextResponse.json(
+          { error: 'Preencha o endereço completo (rua, número, bairro e cidade).' },
+          { status: 400 }
+        );
+      }
+    }
+
+// etapa 3/8
