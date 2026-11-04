@@ -484,4 +484,23 @@ export function FinancialPanelClient({
         return;
       }
       setCustomColumns((prev) => prev.filter((c) => c.id !== col.id));
-// etapa 26/85
+      showToast(`Coluna "${col.name}" removida.`, 'info');
+    } catch {
+      showToast('Erro ao remover coluna.', 'error');
+    }
+  };
+
+  const handleExportCsv = () => {
+    const headers = [
+      'Data',
+      'Hora',
+      'Tipo',
+      'Origem',
+      'Descricao',
+      'Vinculo Loja',
+      'Categoria',
+      'Pagamento',
+      'Valor Bruto (R$)',
+      'Custo da Venda (R$)',
+      'Lucro Liquido (R$)',
+// etapa 27/85
