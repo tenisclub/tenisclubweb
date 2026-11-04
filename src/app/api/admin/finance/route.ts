@@ -23,4 +23,12 @@ export async function GET() {
   }
 
   try {
-// etapa 3/22
+    const supabase = createServiceClient();
+
+    const [entriesRes, columnsRes, productsRes] = await Promise.all([
+      supabase
+        .from('financial_entries')
+        .select(
+          `
+          *,
+// etapa 4/22
