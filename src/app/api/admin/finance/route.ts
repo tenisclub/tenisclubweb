@@ -173,4 +173,11 @@ export async function POST(request: Request) {
 
     revalidateStoreData('orders');
     return NextResponse.json({ entry });
-// etapa 21/22
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Erro ao salvar lançamento financeiro.' },
+      { status: 500 }
+    );
+  }
+}
+
