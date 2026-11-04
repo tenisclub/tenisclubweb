@@ -821,4 +821,23 @@ export function FinancialPanelClient({
                     : 'Cadastrar Nova Saída / Custo da Loja'}
                 </h2>
                 <p className="text-xs text-zinc-400">
-// etapa 44/85
+                  Todo registro fica salvo com data, hora, vínculo com a loja e descrição detalhada
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="inline-flex rounded-lg border border-dark-700 bg-dark-950 p-0.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFormType('income');
+                    setFormCategory('Venda de Produto');
+                  }}
+                  className={cn(
+                    'rounded-md px-3 py-1 text-xs font-bold transition-colors',
+                    formType === 'income'
+                      ? 'bg-emerald-500 text-dark-950'
+                      : 'text-zinc-400 hover:text-white'
+                  )}
+// etapa 45/85
