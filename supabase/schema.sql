@@ -728,4 +728,86 @@ BEGIN
     subtotal,
     discount_total,
     shipping_cost,
--- etapa 9/25
+    total,
+    status,
+    payment_status,
+    customer_notes,
+    stock_deducted
+  ) VALUES (
+    v_order_number,
+    p_user_id,
+    TRIM(p_customer_name),
+    LOWER(TRIM(p_customer_email)),
+    TRIM(p_customer_phone),
+    p_delivery_method,
+    p_shipping_address,
+    v_subtotal,
+    v_discount_total,
+    v_shipping_cost,
+    v_total,
+    'received',
+    'pending',
+    COALESCE(p_customer_notes, ''),
+    TRUE
+  ) RETURNING id INTO v_order_id;
+
+  -- Second pass: insert immutable order_items, deduct inventory, log movements
+  FOR v_item IN
+    SELECT
+      ci.quantity AS cart_qty,
+      p.id AS product_id,
+      p.name AS product_name,
+      p.sku AS product_sku,
+      p.base_price,
+      p.promo_price AS product_promo_price,
+      COALESCE(p.allow_backorder, FALSE) AS allow_backorder,
+      b.name AS brand_name,
+      pv.id AS variant_id,
+      pv.color,
+      pv.size,
+      inv.quantity AS stock_qty,
+      inv.low_stock_threshold
+    FROM public.cart_items ci
+    JOIN public.products p ON p.id = ci.product_id
+    LEFT JOIN public.brands b ON b.id = p.brand_id
+    JOIN public.product_variants pv ON pv.id = ci.variant_id
+    JOIN public.inventory inv ON inv.variant_id = pv.id
+    WHERE ci.cart_id = v_cart_id
+  LOOP
+    SELECT pr.promo_price INTO v_promo_price
+    FROM public.promotions pr
+    WHERE pr.product_id = v_item.product_id
+      AND pr.is_active = TRUE
+      AND (pr.starts_at IS NULL OR pr.starts_at <= NOW())
+      AND (pr.ends_at IS NULL OR pr.ends_at >= NOW())
+    ORDER BY pr.promo_price ASC
+    LIMIT 1;
+
+    v_unit_price := COALESCE(v_promo_price, v_item.product_promo_price, v_item.base_price);
+    IF v_unit_price > v_item.base_price THEN
+      v_unit_price := v_item.base_price;
+    END IF;
+
+    SELECT url INTO v_primary_img
+    FROM public.product_images
+    WHERE product_id = v_item.product_id
+    ORDER BY is_primary DESC, sort_order ASC
+    LIMIT 1;
+
+    v_deduct_qty := GREATEST(0, LEAST(v_item.stock_qty, v_item.cart_qty));
+
+    INSERT INTO public.order_items (
+      order_id,
+      product_id,
+      variant_id,
+      product_name,
+      product_sku,
+      product_image,
+      brand_name,
+      color,
+      size,
+      unit_price,
+      original_price,
+      quantity,
+      stock_deducted_qty,
+-- etapa 10/25
