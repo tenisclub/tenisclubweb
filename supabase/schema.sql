@@ -2018,12 +2018,3 @@ CREATE TRIGGER trg_realtime_financial_columns
   FOR EACH STATEMENT
   EXECUTE FUNCTION internal.trg_sync_global('orders');
 
--- Backfill existing non-cancelled orders into financial_entries
-DO $$
-DECLARE
-  r RECORD;
-BEGIN
-  FOR r IN SELECT id FROM public.orders WHERE status <> 'cancelled' LOOP
-    PERFORM public.sync_order_financial_entry(r.id);
-  END LOOP;
-END $$;
