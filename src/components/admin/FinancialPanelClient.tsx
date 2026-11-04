@@ -1139,4 +1139,23 @@ export function FinancialPanelClient({
             onClick={() => setTypeFilter('all')}
             className={cn(
               'rounded-lg px-3 py-1.5 text-xs font-bold transition-colors',
-// etapa 61/85
+              typeFilter === 'all'
+                ? 'bg-neon text-dark-950'
+                : 'bg-dark-800 text-zinc-400 hover:text-white'
+            )}
+          >
+            Todos ({pageEntries.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setTypeFilter('income')}
+            className={cn(
+              'rounded-lg px-3 py-1.5 text-xs font-bold transition-colors',
+              typeFilter === 'income'
+                ? 'bg-emerald-500 text-dark-950'
+                : 'bg-dark-800 text-emerald-400 hover:bg-emerald-500/20'
+            )}
+          >
+            Entradas (+)
+          </button>
+// etapa 62/85
