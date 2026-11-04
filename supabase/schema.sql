@@ -1053,4 +1053,85 @@ CREATE OR REPLACE FUNCTION public.change_order_status_atomic(
 )
 RETURNS JSONB
 LANGUAGE plpgsql
--- etapa 13/25
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_order RECORD;
+  v_item RECORD;
+  v_inv_qty INT;
+  v_restore_qty INT;
+  v_deduct_qty INT;
+  v_allow_backorder BOOLEAN;
+  v_status_label TEXT;
+  v_stock_deducted BOOLEAN;
+BEGIN
+  IF p_admin_id IS NOT NULL AND NOT public.is_admin(p_admin_id) THEN
+    RAISE EXCEPTION 'Acesso negado: apenas administradores podem gerenciar pedidos.';
+  END IF;
+
+  SELECT * INTO v_order
+  FROM public.orders
+  WHERE id = p_order_id
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Pedido não encontrado.';
+  END IF;
+
+  v_stock_deducted := v_order.stock_deducted;
+
+  -- RN12: Handle stock return on cancellation without duplicate movements
+  IF p_new_status = 'cancelled' AND v_order.status <> 'cancelled' AND v_order.stock_deducted = TRUE THEN
+    FOR v_item IN
+      SELECT * FROM public.order_items WHERE order_id = p_order_id
+    LOOP
+      v_restore_qty := GREATEST(0, COALESCE(v_item.stock_deducted_qty, v_item.quantity));
+
+      IF v_item.variant_id IS NOT NULL AND v_restore_qty > 0 THEN
+        SELECT quantity INTO v_inv_qty
+        FROM public.inventory
+        WHERE variant_id = v_item.variant_id
+        FOR UPDATE;
+
+        IF FOUND THEN
+          UPDATE public.inventory
+          SET quantity = v_inv_qty + v_restore_qty, updated_at = NOW()
+          WHERE variant_id = v_item.variant_id;
+
+          INSERT INTO public.inventory_movements (
+            variant_id,
+            product_id,
+            previous_quantity,
+            moved_quantity,
+            new_quantity,
+            movement_type,
+            reason,
+            order_id,
+            performed_by
+          ) VALUES (
+            v_item.variant_id,
+            v_item.product_id,
+            v_inv_qty,
+            v_restore_qty,
+            v_inv_qty + v_restore_qty,
+            'order_cancel_return',
+            'Estorno de estoque por cancelamento do pedido ' || v_order.order_number,
+            p_order_id,
+            p_admin_id
+          );
+        END IF;
+      END IF;
+
+      IF v_item.product_id IS NOT NULL THEN
+        UPDATE public.products
+        SET sold_count = GREATEST(0, sold_count - v_item.quantity), updated_at = NOW()
+        WHERE id = v_item.product_id;
+      END IF;
+    END LOOP;
+
+    v_stock_deducted := FALSE;
+  END IF;
+
+  -- If reopening a cancelled order, re-validate and deduct stock
+-- etapa 14/25
