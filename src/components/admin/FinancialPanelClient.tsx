@@ -241,4 +241,23 @@ export function FinancialPanelClient({
         const inOrder = (entry.order?.order_number || '').toLowerCase().includes(q);
         const inProd = (entry.product?.name || '').toLowerCase().includes(q);
         const inCustom = Object.values(entry.custom_values || {}).some((v) =>
-// etapa 13/85
+          String(v).toLowerCase().includes(q)
+        );
+        if (!inDesc && !inStore && !inCat && !inOrder && !inProd && !inCustom) {
+          return false;
+        }
+      }
+      return true;
+    });
+  }, [entries, selectedDatePage, typeFilter, searchQuery]);
+
+  // Summary metrics for the active page
+  const metrics = useMemo(() => {
+    let grossIncome = 0;
+    let salesCost = 0;
+    let totalExpenses = 0;
+    let incomeCount = 0;
+    let expenseCount = 0;
+
+    for (const e of pageEntries) {
+// etapa 14/85
