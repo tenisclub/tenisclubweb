@@ -98,4 +98,12 @@ export async function POST(request: Request) {
         .from('financial_custom_columns')
         .insert({
           name,
-// etapa 12/22
+          column_key: columnKey,
+          column_type: columnType,
+          sort_order: (count ?? 0) + 1,
+        })
+        .select('*')
+        .single();
+
+      if (error) {
+// etapa 13/22
