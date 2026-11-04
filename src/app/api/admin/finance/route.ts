@@ -165,4 +165,12 @@ export async function POST(request: Request) {
         product:products(id, name, sku)
       `
       )
-// etapa 20/22
+      .single();
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
+    revalidateStoreData('orders');
+    return NextResponse.json({ entry });
+// etapa 21/22
