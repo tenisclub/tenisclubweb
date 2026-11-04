@@ -48,4 +48,12 @@ export async function GET() {
         .select('id, name, sku, base_price, promo_price, cost_price')
         .order('name', { ascending: true }),
     ]);
-// etapa 6/22
+
+    if (entriesRes.error) {
+      return NextResponse.json({ error: entriesRes.error.message }, { status: 400 });
+    }
+
+    return NextResponse.json({
+      entries: entriesRes.data || [],
+      customColumns: columnsRes.data || [],
+// etapa 7/22
