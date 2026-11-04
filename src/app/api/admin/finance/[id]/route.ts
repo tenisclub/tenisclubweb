@@ -51,4 +51,12 @@ export async function PATCH(
         .single();
 
       if (error) {
-// etapa 6/20
+        return NextResponse.json({ error: error.message }, { status: 400 });
+      }
+
+      revalidateStoreData('orders');
+      return NextResponse.json({ column });
+    }
+
+    const updates: Record<string, unknown> = {};
+// etapa 7/20
