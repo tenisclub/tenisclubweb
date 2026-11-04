@@ -16,4 +16,23 @@ import {
   Download,
   Search,
   ExternalLink,
-// etapa 1/85
+  Check,
+  X,
+  Loader2,
+  Sparkles,
+  ArrowUpRight,
+  ArrowDownRight,
+  Package,
+  FileSpreadsheet,
+} from 'lucide-react';
+import { useStore } from '@/components/providers/StoreProvider';
+import { cn, formatCurrency } from '@/lib/utils';
+import type {
+  FinancialCustomColumn,
+  FinancialCustomColumnType,
+  FinancialEntry,
+  FinancialEntryType,
+} from '@/types/database';
+
+interface ProductSummary {
+// etapa 2/85
