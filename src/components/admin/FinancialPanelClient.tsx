@@ -1121,4 +1121,22 @@ export function FinancialPanelClient({
 
             <button
               type="submit"
-// etapa 60/85
+              disabled={savingColumn}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-neon px-5 py-2.5 text-xs font-extrabold uppercase tracking-wider text-dark-950 hover:bg-neon-300 disabled:opacity-50"
+            >
+              {savingColumn ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+              Criar Coluna
+            </button>
+          </div>
+        </form>
+      )}
+
+      {/* Spreadsheet Toolbar (Filters & Search) */}
+      <div className="flex flex-col gap-3 rounded-2xl border border-dark-700 bg-dark-900 p-3.5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setTypeFilter('all')}
+            className={cn(
+              'rounded-lg px-3 py-1.5 text-xs font-bold transition-colors',
+// etapa 61/85
