@@ -44,4 +44,8 @@ export default async function AdminFinancialPage() {
           promo_price: number | null;
           cost_price?: number;
         }>
-// etapa 9/10
+      }
+    />
+  );
+}
+
