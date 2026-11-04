@@ -1216,4 +1216,85 @@ BEGIN
   WHERE id = p_order_id;
 
   IF v_order.status <> p_new_status OR TRIM(COALESCE(p_note, '')) <> '' THEN
--- etapa 15/25
+    INSERT INTO public.order_status_history (order_id, previous_status, new_status, note, changed_by)
+    VALUES (p_order_id, v_order.status, p_new_status, COALESCE(p_note, ''), p_admin_id);
+  END IF;
+
+  IF v_order.status <> p_new_status THEN
+    v_status_label := CASE p_new_status
+      WHEN 'received' THEN 'Pedido recebido'
+      WHEN 'awaiting_confirmation' THEN 'Aguardando confirmação'
+      WHEN 'confirmed' THEN 'Confirmado'
+      WHEN 'separating' THEN 'Em separação'
+      WHEN 'ready_for_pickup' THEN 'Pronto para retirada na loja!'
+      WHEN 'out_for_delivery' THEN 'Saiu para entrega!'
+      WHEN 'completed' THEN 'Concluído'
+      WHEN 'cancelled' THEN 'Cancelado'
+      ELSE p_new_status
+    END;
+
+    INSERT INTO public.notifications (user_id, target_audience, type, title, message, link)
+    VALUES (
+      v_order.user_id,
+      'customer',
+      'order_status',
+      'Pedido ' || v_order.order_number || ': ' || v_status_label,
+      CASE
+        WHEN TRIM(COALESCE(p_note, '')) <> '' THEN p_note
+        ELSE 'O status do seu pedido foi atualizado para "' || v_status_label || '".'
+      END,
+      '/minha-conta/pedidos/' || p_order_id
+    );
+  END IF;
+
+  INSERT INTO public.admin_logs (admin_id, action, entity_type, entity_id, details)
+  VALUES (
+    p_admin_id,
+    'order.update',
+    'order',
+    p_order_id::TEXT,
+    jsonb_build_object(
+      'order_number', v_order.order_number,
+      'previous_status', v_order.status,
+      'new_status', p_new_status,
+      'payment_status', COALESCE(p_payment_status, v_order.payment_status)
+    )
+  );
+
+  RETURN jsonb_build_object('order_id', p_order_id, 'status', p_new_status);
+END;
+$$;
+
+-- ----------------------------------------------------------------------------
+-- 13. ROW LEVEL SECURITY (RLS) POLICIES
+-- ----------------------------------------------------------------------------
+ALTER TABLE public.roles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.permissions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.role_permissions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_addresses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.brands ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.product_images ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.product_variants ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.inventory ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.inventory_movements ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.promotions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.carts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.cart_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.favorites ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.order_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.order_status_history ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.admin_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.store_settings ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies safely so script is idempotent
+DO $$
+DECLARE
+  pol RECORD;
+BEGIN
+-- etapa 16/25
