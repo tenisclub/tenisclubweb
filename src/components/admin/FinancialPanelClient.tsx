@@ -72,4 +72,23 @@ const CATEGORY_PRESETS_EXPENSE = [
   'Retirada / Pró-labore',
   'Outras Saídas',
 ];
-// etapa 4/85
+
+function getTodaySaoPaulo(): string {
+  try {
+    return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date());
+  } catch {
+    return new Date().toISOString().slice(0, 10);
+  }
+}
+
+function getNowLocalInputValue(targetDate?: string): string {
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const ymd =
+    targetDate && targetDate !== 'all'
+      ? targetDate
+      : `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  return `${ymd}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+}
+
+// etapa 5/85
