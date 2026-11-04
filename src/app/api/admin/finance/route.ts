@@ -39,4 +39,13 @@ export async function GET() {
         .order('occurred_at', { ascending: false })
         .order('created_at', { ascending: false }),
       supabase
-// etapa 5/22
+        .from('financial_custom_columns')
+        .select('*')
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: true }),
+      supabase
+        .from('products')
+        .select('id, name, sku, base_price, promo_price, cost_price')
+        .order('name', { ascending: true }),
+    ]);
+// etapa 6/22
