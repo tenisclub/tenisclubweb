@@ -840,4 +840,23 @@ export function FinancialPanelClient({
                       ? 'bg-emerald-500 text-dark-950'
                       : 'text-zinc-400 hover:text-white'
                   )}
-// etapa 45/85
+                >
+                  Entrada (+)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFormType('expense');
+                    setFormCategory('Compra de Mercadoria / Fornecedor');
+                  }}
+                  className={cn(
+                    'rounded-md px-3 py-1 text-xs font-bold transition-colors',
+                    formType === 'expense'
+                      ? 'bg-red-500 text-white'
+                      : 'text-zinc-400 hover:text-white'
+                  )}
+                >
+                  Saída (−)
+                </button>
+              </div>
+// etapa 46/85
