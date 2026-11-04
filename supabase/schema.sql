@@ -972,4 +972,85 @@ BEGIN
 
   IF p_operation = 'in' THEN
     IF p_amount <= 0 THEN RAISE EXCEPTION 'A quantidade de entrada deve ser maior que zero.'; END IF;
--- etapa 12/25
+    v_new_qty := v_inv.quantity + p_amount;
+    v_moved := p_amount;
+  ELSIF p_operation = 'out' THEN
+    IF p_amount <= 0 THEN RAISE EXCEPTION 'A quantidade de saída deve ser maior que zero.'; END IF;
+    IF v_inv.quantity < p_amount THEN RAISE EXCEPTION 'Saldo insuficiente para remover % unidades (atual: %).', p_amount, v_inv.quantity; END IF;
+    v_new_qty := v_inv.quantity - p_amount;
+    v_moved := -p_amount;
+  ELSIF p_operation = 'adjustment' THEN
+    IF p_amount < 0 THEN RAISE EXCEPTION 'A quantidade corrigida não pode ser negativa.'; END IF;
+    v_new_qty := p_amount;
+    v_moved := p_amount - v_inv.quantity;
+  ELSE
+    RAISE EXCEPTION 'Tipo de operação inválido.';
+  END IF;
+
+  UPDATE public.inventory
+  SET
+    quantity = v_new_qty,
+    low_stock_threshold = COALESCE(p_low_stock_threshold, low_stock_threshold),
+    updated_at = NOW()
+  WHERE id = v_inv.id;
+
+  INSERT INTO public.inventory_movements (
+    variant_id,
+    product_id,
+    previous_quantity,
+    moved_quantity,
+    new_quantity,
+    movement_type,
+    reason,
+    performed_by
+  ) VALUES (
+    p_variant_id,
+    v_inv.product_id,
+    v_inv.quantity,
+    v_moved,
+    v_new_qty,
+    p_operation,
+    TRIM(p_reason),
+    p_admin_id
+  );
+
+  INSERT INTO public.admin_logs (admin_id, action, entity_type, entity_id, details)
+  VALUES (
+    p_admin_id,
+    'inventory.' || p_operation,
+    'product_variant',
+    p_variant_id::TEXT,
+    jsonb_build_object(
+      'product_name', v_inv.product_name,
+      'color', v_inv.color,
+      'size', v_inv.size,
+      'previous_quantity', v_inv.quantity,
+      'new_quantity', v_new_qty,
+      'reason', TRIM(p_reason)
+    )
+  );
+
+  RETURN jsonb_build_object(
+    'variant_id', p_variant_id,
+    'previous_quantity', v_inv.quantity,
+    'new_quantity', v_new_qty
+  );
+END;
+$$;
+
+-- ----------------------------------------------------------------------------
+-- 12. TRANSACTIONAL ORDER STATUS & CANCELLATION RPC (RN11, RN12, RN13)
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.change_order_status_atomic(
+  p_order_id UUID,
+  p_new_status TEXT,
+  p_note TEXT DEFAULT '',
+  p_store_notes TEXT DEFAULT NULL,
+  p_internal_notes TEXT DEFAULT NULL,
+  p_payment_status TEXT DEFAULT NULL,
+  p_payment_method_note TEXT DEFAULT NULL,
+  p_admin_id UUID DEFAULT auth.uid()
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+-- etapa 13/25
