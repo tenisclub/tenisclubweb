@@ -24,4 +24,9 @@ export default async function AdminFinancialPage() {
       .from('financial_custom_columns')
       .select('*')
       .order('sort_order', { ascending: true })
-// etapa 5/10
+      .order('created_at', { ascending: true }),
+    supabase
+      .from('products')
+      .select('id, name, sku, base_price, promo_price, cost_price')
+      .order('name', { ascending: true }),
+// etapa 6/10
