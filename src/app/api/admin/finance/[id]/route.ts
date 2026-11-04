@@ -139,4 +139,13 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getAuthSession();
-// etapa 16/20
+  if (!session?.isAdmin) {
+    return NextResponse.json({ error: 'Acesso negado.' }, { status: 403 });
+  }
+
+  const { id } = await params;
+  const { searchParams } = new URL(request.url);
+  const target = searchParams.get('target');
+
+  try {
+// etapa 17/20
