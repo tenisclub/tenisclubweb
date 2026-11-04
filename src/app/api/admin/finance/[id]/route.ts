@@ -68,4 +68,13 @@ export async function PATCH(
       updates.description = desc;
     }
     if (body.entry_type !== undefined) {
-// etapa 8/20
+      updates.entry_type = body.entry_type === 'expense' ? 'expense' : 'income';
+    }
+    if (body.category !== undefined) {
+      updates.category = String(body.category).trim() || 'Geral';
+    }
+    if (body.store_link !== undefined) {
+      updates.store_link = String(body.store_link).trim() || 'Tênis Club — Loja Online';
+    }
+    if (body.product_id !== undefined) {
+// etapa 9/20
