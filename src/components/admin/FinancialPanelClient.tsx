@@ -1270,4 +1270,23 @@ export function FinancialPanelClient({
               )}
             </tbody>
 
-// etapa 68/85
+            {pageEntries.length > 0 && (
+              <tfoot>
+                <tr className="border-t-2 border-dark-700 bg-dark-950/90 font-extrabold text-white">
+                  <td colSpan={4} className="px-3.5 py-3.5 text-right uppercase tracking-wider text-zinc-400">
+                    Totais da Página ({pageEntries.length}{' '}
+                    {pageEntries.length === 1 ? 'registro' : 'registros'}):
+                  </td>
+                  <td className="px-3 py-3.5 text-right text-emerald-400">
+                    +{formatCurrency(metrics.grossIncome)}
+                    {metrics.totalExpenses > 0 && (
+                      <div className="text-[10px] text-red-400">
+                        −{formatCurrency(metrics.totalExpenses)} saídas
+                      </div>
+                    )}
+                  </td>
+                  <td className="bg-amber-500/10 px-3.5 py-3.5 text-right text-amber-300">
+                    {formatCurrency(metrics.salesCost)}
+                  </td>
+                  <td
+// etapa 69/85
