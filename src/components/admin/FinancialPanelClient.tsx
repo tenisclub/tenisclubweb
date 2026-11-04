@@ -260,4 +260,22 @@ export function FinancialPanelClient({
     let expenseCount = 0;
 
     for (const e of pageEntries) {
-// etapa 14/85
+      const amt = Number(e.amount) || 0;
+      const cost = Number(e.cost_amount) || 0;
+      if (e.entry_type === 'income') {
+        grossIncome += amt;
+        salesCost += cost;
+        incomeCount += 1;
+      } else {
+        totalExpenses += amt + cost;
+        expenseCount += 1;
+      }
+    }
+
+    const grossProfitFromSales = grossIncome - salesCost;
+    const netProfit = grossIncome - salesCost - totalExpenses;
+    const marginPercent = grossIncome > 0 ? (netProfit / grossIncome) * 100 : 0;
+
+    return {
+      grossIncome,
+// etapa 15/85
