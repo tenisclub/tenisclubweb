@@ -810,4 +810,85 @@ BEGIN
       original_price,
       quantity,
       stock_deducted_qty,
--- etapa 10/25
+      subtotal
+    ) VALUES (
+      v_order_id,
+      v_item.product_id,
+      v_item.variant_id,
+      v_item.product_name,
+      COALESCE(v_item.product_sku, ''),
+      COALESCE(v_primary_img, ''),
+      COALESCE(v_item.brand_name, ''),
+      v_item.color,
+      v_item.size,
+      v_unit_price,
+      v_item.base_price,
+      v_item.cart_qty,
+      v_deduct_qty,
+      v_unit_price * v_item.cart_qty
+    );
+
+    UPDATE public.products
+    SET sold_count = sold_count + v_item.cart_qty, updated_at = NOW()
+    WHERE id = v_item.product_id;
+
+    IF v_deduct_qty > 0 THEN
+      v_new_qty := v_item.stock_qty - v_deduct_qty;
+
+      UPDATE public.inventory
+      SET quantity = v_new_qty, updated_at = NOW()
+      WHERE variant_id = v_item.variant_id;
+
+      INSERT INTO public.inventory_movements (
+        variant_id,
+        product_id,
+        previous_quantity,
+        moved_quantity,
+        new_quantity,
+        movement_type,
+        reason,
+        order_id,
+        performed_by
+      ) VALUES (
+        v_item.variant_id,
+        v_item.product_id,
+        v_item.stock_qty,
+        -v_deduct_qty,
+        v_new_qty,
+        'order_reserve',
+        'Reserva automática do pedido ' || v_order_number,
+        v_order_id,
+        p_user_id
+      );
+
+      -- Low stock / Out of stock admin notifications (Section 7.2)
+      IF v_new_qty = 0 THEN
+        INSERT INTO public.notifications (user_id, target_audience, type, title, message, link)
+        VALUES (
+          NULL,
+          'admin',
+          'out_of_stock',
+          'Produto sem estoque!',
+          v_item.product_name || ' (' || v_item.color || ' - Tam. ' || v_item.size || ') esgotou após o pedido ' || v_order_number || '.',
+          '/admin/estoque'
+        );
+      ELSIF v_new_qty <= v_item.low_stock_threshold THEN
+        INSERT INTO public.notifications (user_id, target_audience, type, title, message, link)
+        VALUES (
+          NULL,
+          'admin',
+          'low_stock',
+          'Alerta de estoque baixo',
+          v_item.product_name || ' (' || v_item.color || ' - Tam. ' || v_item.size || ') está com apenas ' || v_new_qty || ' un.',
+          '/admin/estoque'
+        );
+      END IF;
+    END IF;
+  END LOOP;
+
+  -- Initial order status history
+  INSERT INTO public.order_status_history (order_id, previous_status, new_status, note, changed_by)
+  VALUES (v_order_id, NULL, 'received', 'Pedido criado pelo cliente na loja virtual.', p_user_id);
+
+  -- Clear cart
+-- etapa 11/25
