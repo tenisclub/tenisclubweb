@@ -596,4 +596,23 @@ export function FinancialPanelClient({
             <Download className="h-4 w-4" />
             Exportar CSV
           </button>
-// etapa 32/85
+        </div>
+      </div>
+
+      {/* Date Pages Navigation Bar (Páginas da Planilha Separadas por Data) */}
+      <div className="rounded-2xl border border-dark-700 bg-dark-900/90 p-3 sm:p-4">
+        <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <FileSpreadsheet className="h-4 w-4 text-neon" />
+            <span className="text-xs font-extrabold uppercase tracking-wider text-zinc-200">
+              Páginas da Planilha por Data
+            </span>
+            <span className="rounded-full bg-dark-800 px-2 py-0.5 text-[11px] font-semibold text-zinc-400">
+              {allDatePages.length} {allDatePages.length === 1 ? 'página' : 'páginas'}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <label className="text-[11px] font-semibold text-zinc-400">Abrir/Criar página de data:</label>
+            <input
+// etapa 33/85
