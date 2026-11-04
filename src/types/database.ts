@@ -28,4 +28,35 @@ export interface Category {
 
 export interface Brand {
   id: string;
-// etapa 1/10
+  name: string;
+  slug: string;
+  logo_url: string | null;
+  is_active: boolean;
+}
+
+export interface ProductImage {
+  id: string;
+  product_id: string;
+  url: string;
+  alt_text: string;
+  is_primary: boolean;
+  sort_order: number;
+}
+
+export interface InventoryRecord {
+  id: string;
+  variant_id: string;
+  quantity: number;
+  low_stock_threshold: number;
+  updated_at: string;
+}
+
+export interface ProductVariant {
+  id: string;
+  product_id: string;
+  color: string;
+  color_hex: string;
+  size: string;
+  variant_sku: string | null;
+  is_active: boolean;
+// etapa 2/10
