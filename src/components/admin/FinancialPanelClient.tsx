@@ -1233,4 +1233,23 @@ export function FinancialPanelClient({
                     </div>
                   </th>
                 ))}
-// etapa 66/85
+
+                <th className="w-12 px-3 py-3.5 text-center">Ações</th>
+              </tr>
+            </thead>
+
+            <tbody className="divide-y divide-dark-800">
+              {pageEntries.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={8 + customColumns.length}
+                    className="px-6 py-12 text-center text-zinc-400"
+                  >
+                    <div className="mx-auto max-w-md space-y-2">
+                      <FileSpreadsheet className="mx-auto h-8 w-8 text-zinc-600" />
+                      <p className="text-sm font-bold text-white">
+                        Nenhum lançamento nesta página de data
+                      </p>
+                      <p className="text-xs text-zinc-400">
+                        Sempre que um produto for vendido na loja, ele aparecerá automaticamente aqui como entrada. Você também pode clicar em <strong>Nova Entrada</strong> ou <strong>Nova Saída</strong> acima.
+// etapa 67/85
