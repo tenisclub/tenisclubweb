@@ -1252,4 +1252,22 @@ export function FinancialPanelClient({
                       </p>
                       <p className="text-xs text-zinc-400">
                         Sempre que um produto for vendido na loja, ele aparecerá automaticamente aqui como entrada. Você também pode clicar em <strong>Nova Entrada</strong> ou <strong>Nova Saída</strong> acima.
-// etapa 67/85
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                pageEntries.map((entry) => (
+                  <SpreadsheetRow
+                    key={entry.id}
+                    entry={entry}
+                    customColumns={customColumns}
+                    isSaving={savingRowId === entry.id}
+                    onUpdateField={handleUpdateEntryField}
+                    onDelete={handleDeleteEntry}
+                  />
+                ))
+              )}
+            </tbody>
+
+// etapa 68/85
