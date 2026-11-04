@@ -896,4 +896,23 @@ export function FinancialPanelClient({
                 type="datetime-local"
                 required
                 value={formOccurredAt}
-// etapa 48/85
+                onChange={(e) => setFormOccurredAt(e.target.value)}
+                className="w-full rounded-xl border border-dark-700 bg-dark-950 px-3 py-2.5 text-sm text-white focus:border-neon focus:outline-none"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="mb-1 block text-xs font-bold text-zinc-300">
+                {formType === 'income' ? 'Valor da Entrada (R$) *' : 'Valor da Saída (R$) *'}
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                required
+                value={formAmount}
+                onChange={(e) => setFormAmount(e.target.value)}
+                placeholder="0,00"
+                className="w-full rounded-xl border border-dark-700 bg-dark-950 px-3 py-2.5 text-sm font-bold text-white focus:border-neon focus:outline-none"
+              />
+// etapa 49/85
