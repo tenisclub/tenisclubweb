@@ -465,4 +465,23 @@ export function FinancialPanelClient({
     } finally {
       setSavingColumn(false);
     }
-// etapa 25/85
+  };
+
+  const handleDeleteColumn = async (col: FinancialCustomColumn) => {
+    if (
+      !window.confirm(
+        `Remover a coluna personalizada "${col.name}" da planilha?`
+      )
+    ) {
+      return;
+    }
+    try {
+      const res = await fetch(`/api/admin/finance/${col.id}?target=column`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) {
+        showToast('Erro ao remover coluna.', 'error');
+        return;
+      }
+      setCustomColumns((prev) => prev.filter((c) => c.id !== col.id));
+// etapa 26/85
