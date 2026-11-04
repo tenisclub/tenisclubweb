@@ -147,4 +147,23 @@ export function FinancialPanelClient({
 }: {
   initialEntries: FinancialEntry[];
   initialColumns: FinancialCustomColumn[];
-// etapa 8/85
+  products: ProductSummary[];
+}) {
+  const { toast: showToast } = useStore();
+  const todayYmd = useMemo(() => getTodaySaoPaulo(), []);
+
+  const [entries, setEntries] = useState<FinancialEntry[]>(initialEntries);
+  const [customColumns, setCustomColumns] = useState<FinancialCustomColumn[]>(initialColumns);
+
+  useEffect(() => {
+    setEntries(initialEntries);
+  }, [initialEntries]);
+
+  useEffect(() => {
+    setCustomColumns(initialColumns);
+  }, [initialColumns]);
+
+  // Date pages management
+  const [extraDates, setExtraDates] = useState<string[]>([todayYmd]);
+  const allDatePages = useMemo(() => {
+// etapa 9/85
