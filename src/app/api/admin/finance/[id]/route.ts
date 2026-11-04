@@ -113,4 +113,12 @@ export async function PATCH(
       .eq('id', id)
       .select(
         `
-// etapa 13/20
+        *,
+        order:orders(id, order_number, customer_name, status, payment_status),
+        product:products(id, name, sku)
+      `
+      )
+      .single();
+
+    if (error) {
+// etapa 14/20
