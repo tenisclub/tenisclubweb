@@ -245,4 +245,35 @@ export interface StoreSettings {
   logo_url: string | null;
   whatsapp: string;
   phone: string;
-// etapa 8/10
+  email: string;
+  address: string;
+  business_hours: string;
+  instagram_url: string;
+  facebook_url: string;
+  tiktok_url: string;
+  pickup_info: string;
+  delivery_info: string;
+  exchange_policy: string;
+  privacy_policy: string;
+  terms_of_use: string;
+  about_text: string;
+  checkout_delivery_config?: unknown;
+}
+
+export type FinancialEntryType = 'income' | 'expense';
+export type FinancialSourceType = 'order_sale' | 'manual' | 'product_link';
+export type FinancialCustomColumnType = 'text' | 'currency' | 'number';
+
+export interface FinancialCustomColumn {
+  id: string;
+  name: string;
+  column_key: string;
+  column_type: FinancialCustomColumnType;
+  sort_order: number;
+  created_at: string;
+}
+
+export interface FinancialEntry {
+  id: string;
+  entry_type: FinancialEntryType;
+// etapa 9/10
