@@ -278,4 +278,23 @@ export function FinancialPanelClient({
 
     return {
       grossIncome,
-// etapa 15/85
+      salesCost,
+      grossProfitFromSales,
+      totalExpenses,
+      netProfit,
+      marginPercent,
+      incomeCount,
+      expenseCount,
+    };
+  }, [pageEntries]);
+
+  // Count per date page for tabs
+  const datePageStats = useMemo(() => {
+    const map: Record<string, { count: number; net: number }> = {};
+    for (const e of entries) {
+      const ymd = (e.entry_date || '').slice(0, 10);
+      if (!ymd) continue;
+      if (!map[ymd]) map[ymd] = { count: 0, net: 0 };
+      map[ymd].count += 1;
+      const amt = Number(e.amount) || 0;
+// etapa 16/85
