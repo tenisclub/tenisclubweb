@@ -1102,4 +1102,23 @@ export function FinancialPanelClient({
                 placeholder="Ex.: Fornecedor, Taxa Cartão, Entregador, Comissão..."
                 className="w-full rounded-xl border border-dark-700 bg-dark-950 px-3.5 py-2 text-sm text-white focus:border-neon focus:outline-none"
               />
-// etapa 59/85
+            </div>
+
+            <div className="sm:w-48">
+              <label className="mb-1 block text-xs font-bold text-zinc-300">
+                Formato da Coluna
+              </label>
+              <select
+                value={newColumnType}
+                onChange={(e) => setNewColumnType(e.target.value as FinancialCustomColumnType)}
+                className="w-full rounded-xl border border-dark-700 bg-dark-950 px-3 py-2 text-sm text-white focus:border-neon focus:outline-none"
+              >
+                <option value="text">Texto Livre</option>
+                <option value="currency">Valor em R$</option>
+                <option value="number">Número</option>
+              </select>
+            </div>
+
+            <button
+              type="submit"
+// etapa 60/85
