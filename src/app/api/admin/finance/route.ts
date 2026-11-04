@@ -148,4 +148,12 @@ export async function POST(request: Request) {
         source_type: productId ? 'product_link' : 'manual',
         description,
         category,
-// etapa 18/22
+        store_link: storeLink,
+        product_id: productId,
+        amount,
+        cost_amount: costAmount,
+        payment_method: paymentMethod,
+        custom_values: customValues,
+        occurred_at: occurredAt,
+        entry_date: entryDate,
+// etapa 19/22
