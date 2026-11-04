@@ -6,7 +6,6 @@ import {
   Wallet,
   TrendingUp,
   TrendingDown,
-  DollarSign,
   Plus,
   Trash2,
   Calendar,
@@ -24,6 +23,12 @@ import {
   ArrowDownRight,
   Package,
   FileSpreadsheet,
+  Sun,
+  Moon,
+  SlidersHorizontal,
+  Receipt,
+  CreditCard,
+  Percent,
 } from 'lucide-react';
 import { useStore } from '@/components/providers/StoreProvider';
 import { cn, formatCurrency } from '@/lib/utils';
@@ -152,6 +157,30 @@ export function FinancialPanelClient({
   const { toast: showToast } = useStore();
   const todayYmd = useMemo(() => getTodaySaoPaulo(), []);
 
+  // Scoped theme exclusively for the Financial Panel (defaults to Light theme, never touches storefront)
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem('tc_finance_theme');
+      if (saved === 'dark' || saved === 'light') {
+        setTheme(saved);
+      }
+    } catch {
+      // ignore storage errors
+    }
+  }, []);
+
+  const toggleTheme = (next: 'light' | 'dark') => {
+    setTheme(next);
+    try {
+      window.localStorage.setItem('tc_finance_theme', next);
+    } catch {
+      // ignore
+    }
+  };
+
+  const isLight = theme === 'light';
+
   const [entries, setEntries] = useState<FinancialEntry[]>(initialEntries);
   const [customColumns, setCustomColumns] = useState<FinancialCustomColumn[]>(initialColumns);
 
@@ -174,7 +203,6 @@ export function FinancialPanelClient({
     return Array.from(set).sort((a, b) => b.localeCompare(a));
   }, [entries, extraDates, todayYmd]);
 
-  // Default to the most recent date page that has entries, or today
   const [selectedDatePage, setSelectedDatePage] = useState<string>(() => {
     if (initialEntries.length > 0 && initialEntries[0].entry_date) {
       return initialEntries[0].entry_date.slice(0, 10);
@@ -186,7 +214,7 @@ export function FinancialPanelClient({
   const [searchQuery, setSearchQuery] = useState('');
   const [jumpDateInput, setJumpDateInput] = useState('');
 
-  // New entry form modal / drawer state
+  // New entry form state
   const [showEntryForm, setShowEntryForm] = useState(false);
   const [formType, setFormType] = useState<FinancialEntryType>('income');
   const [formDescription, setFormDescription] = useState('');
@@ -199,6 +227,14 @@ export function FinancialPanelClient({
   const [formOccurredAt, setFormOccurredAt] = useState(() => getNowLocalInputValue());
   const [formCustomValues, setFormCustomValues] = useState<Record<string, string>>({});
   const [savingEntry, setSavingEntry] = useState(false);
+
+  // Quick inline add bar at bottom of spreadsheet
+  const [quickType, setQuickType] = useState<FinancialEntryType>('expense');
+  const [quickDesc, setQuickDesc] = useState('');
+  const [quickStore, setQuickStore] = useState('Tênis Club — Loja Online');
+  const [quickAmount, setQuickAmount] = useState('');
+  const [quickCost, setQuickCost] = useState('');
+  const [savingQuick, setSavingQuick] = useState(false);
 
   // New custom column modal state
   const [showColumnModal, setShowColumnModal] = useState(false);
@@ -379,6 +415,57 @@ export function FinancialPanelClient({
     }
   };
 
+  const handleQuickAdd = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!quickDesc.trim()) {
+      showToast('Digite a descrição do lançamento rápido.', 'error');
+      return;
+    }
+    const numAmount = Number(String(quickAmount).replace(',', '.')) || 0;
+    const numCost = Number(String(quickCost).replace(',', '.')) || 0;
+
+    setSavingQuick(true);
+    try {
+      const nowIso = getNowLocalInputValue(selectedDatePage);
+      const occurredIso = new Date(nowIso).toISOString();
+      const entryDateYmd = selectedDatePage !== 'all' ? selectedDatePage : todayYmd;
+
+      const res = await fetch('/api/admin/finance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          entry_type: quickType,
+          description: quickDesc.trim(),
+          category: quickType === 'income' ? 'Entrada Loja' : 'Saída / Custo',
+          store_link: quickStore.trim() || 'Tênis Club — Loja Online',
+          amount: numAmount,
+          cost_amount: quickType === 'income' ? numCost : 0,
+          payment_method: 'Pix',
+          occurred_at: occurredIso,
+          entry_date: entryDateYmd,
+          custom_values: {},
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        showToast(data.error || 'Erro ao adicionar linha.', 'error');
+        return;
+      }
+
+      const created = data.entry as FinancialEntry;
+      setEntries((prev) => [created, ...prev]);
+      setQuickDesc('');
+      setQuickAmount('');
+      setQuickCost('');
+      showToast('Linha adicionada à planilha!', 'success');
+    } catch {
+      showToast('Erro ao salvar linha rápida.', 'error');
+    } finally {
+      setSavingQuick(false);
+    }
+  };
+
   const handleUpdateEntryField = async (
     entryId: string,
     updates: Record<string, unknown>,
@@ -468,11 +555,7 @@ export function FinancialPanelClient({
   };
 
   const handleDeleteColumn = async (col: FinancialCustomColumn) => {
-    if (
-      !window.confirm(
-        `Remover a coluna personalizada "${col.name}" da planilha?`
-      )
-    ) {
+    if (!window.confirm(`Remover a coluna personalizada "${col.name}" da planilha?`)) {
       return;
     }
     try {
@@ -539,31 +622,110 @@ export function FinancialPanelClient({
     URL.revokeObjectURL(url);
   };
 
+  const activePageLabel =
+    selectedDatePage === 'all'
+      ? 'Todas as Datas'
+      : formatDatePageTab(selectedDatePage, todayYmd).title;
+
   return (
-    <div className="space-y-6">
-      {/* Header & Main Actions */}
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-neon/15 border border-neon/30 text-neon">
-              <Wallet className="h-5 w-5" />
-            </span>
-            <div>
-              <h1 className="font-display text-2xl font-black uppercase tracking-wider text-white sm:text-3xl">
-                Painel Financeiro
+    <div
+      className={cn(
+        'rounded-3xl border p-4 sm:p-6 lg:p-8 transition-colors duration-200 shadow-xl space-y-6',
+        isLight
+          ? 'bg-[#F8FAFC] border-slate-200/90 text-slate-900'
+          : 'bg-[#0E0E12] border-zinc-800/90 text-zinc-100'
+      )}
+    >
+      {/* Top Executive Header */}
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+        <div className="flex items-start gap-3.5">
+          <div
+            className={cn(
+              'flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border shadow-sm',
+              isLight
+                ? 'bg-slate-900 border-slate-800 text-[#BEFA46]'
+                : 'bg-zinc-900 border-zinc-700 text-[#BEFA46]'
+            )}
+          >
+            <Wallet className="h-6 w-6" />
+          </div>
+          <div>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h1
+                className={cn(
+                  'text-xl sm:text-2xl font-extrabold tracking-tight',
+                  isLight ? 'text-slate-900' : 'text-white'
+                )}
+              >
+                Painel Financeiro & Planilha de Caixa
               </h1>
-              <p className="text-xs text-zinc-400 sm:text-sm">
-                Planilha inteligente separada por data • Vendas entram automaticamente • Controle de custos, saídas e colunas personalizadas
-              </p>
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
+                  isLight
+                    ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                    : 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
+                )}
+              >
+                <Sparkles className="h-3 w-3" />
+                Vendas Sincronizadas Automaticamente
+              </span>
             </div>
+            <p
+              className={cn(
+                'mt-1 text-xs sm:text-sm',
+                isLight ? 'text-slate-500' : 'text-zinc-400'
+              )}
+            >
+              Controle diário de entradas, custos por venda, saídas da loja e colunas personalizadas.
+            </p>
           </div>
         </div>
 
+        {/* Action Toolbar */}
         <div className="flex flex-wrap items-center gap-2.5">
+          {/* Theme Switcher (Scoped only to Painel Financeiro) */}
+          <div
+            className={cn(
+              'inline-flex items-center rounded-xl p-1 border',
+              isLight
+                ? 'bg-slate-200/75 border-slate-300/80'
+                : 'bg-zinc-900 border-zinc-800'
+            )}
+            title="Alternar tema apenas do Painel Financeiro"
+          >
+            <button
+              type="button"
+              onClick={() => toggleTheme('light')}
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all',
+                isLight
+                  ? 'bg-white text-slate-900 shadow-sm'
+                  : 'text-zinc-400 hover:text-zinc-200'
+              )}
+            >
+              <Sun className="h-3.5 w-3.5 text-amber-500" />
+              Claro
+            </button>
+            <button
+              type="button"
+              onClick={() => toggleTheme('dark')}
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all',
+                !isLight
+                  ? 'bg-zinc-800 text-white shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              )}
+            >
+              <Moon className="h-3.5 w-3.5 text-indigo-500" />
+              Escuro
+            </button>
+          </div>
+
           <button
             type="button"
             onClick={() => openNewEntryForm('income')}
-            className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-xs font-extrabold uppercase tracking-wider text-dark-950 shadow-lg shadow-emerald-500/20 transition-all hover:bg-emerald-400"
+            className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-emerald-700 active:scale-[0.99]"
           >
             <Plus className="h-4 w-4 stroke-[2.5]" />
             Nova Entrada
@@ -572,7 +734,7 @@ export function FinancialPanelClient({
           <button
             type="button"
             onClick={() => openNewEntryForm('expense')}
-            className="inline-flex items-center gap-2 rounded-xl bg-red-500/90 px-4 py-2.5 text-xs font-extrabold uppercase tracking-wider text-white shadow-lg shadow-red-500/20 transition-all hover:bg-red-500"
+            className="inline-flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-rose-700 active:scale-[0.99]"
           >
             <TrendingDown className="h-4 w-4 stroke-[2.5]" />
             Nova Saída
@@ -581,7 +743,12 @@ export function FinancialPanelClient({
           <button
             type="button"
             onClick={() => setShowColumnModal(true)}
-            className="inline-flex items-center gap-2 rounded-xl border border-neon/40 bg-neon/10 px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider text-neon transition-all hover:bg-neon/20"
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-2.5 text-xs font-bold transition-all',
+              isLight
+                ? 'border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
+                : 'border-indigo-500/30 bg-indigo-500/10 text-indigo-300 hover:bg-indigo-500/20'
+            )}
           >
             <Columns3 className="h-4 w-4" />
             + Nova Coluna
@@ -590,8 +757,13 @@ export function FinancialPanelClient({
           <button
             type="button"
             onClick={handleExportCsv}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-dark-700 bg-dark-900 px-3.5 py-2.5 text-xs font-bold text-zinc-300 transition-colors hover:border-zinc-500 hover:text-white"
-            title="Exportar página atual para Excel (.CSV)"
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-2.5 text-xs font-semibold transition-all',
+              isLight
+                ? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs'
+                : 'border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800'
+            )}
+            title="Baixar planilha em formato Excel (.CSV)"
           >
             <Download className="h-4 w-4" />
             Exportar CSV
@@ -599,235 +771,250 @@ export function FinancialPanelClient({
         </div>
       </div>
 
-      {/* Date Pages Navigation Bar (Páginas da Planilha Separadas por Data) */}
-      <div className="rounded-2xl border border-dark-700 bg-dark-900/90 p-3 sm:p-4">
-        <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <FileSpreadsheet className="h-4 w-4 text-neon" />
-            <span className="text-xs font-extrabold uppercase tracking-wider text-zinc-200">
-              Páginas da Planilha por Data
-            </span>
-            <span className="rounded-full bg-dark-800 px-2 py-0.5 text-[11px] font-semibold text-zinc-400">
-              {allDatePages.length} {allDatePages.length === 1 ? 'página' : 'páginas'}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <label className="text-[11px] font-semibold text-zinc-400">Abrir/Criar página de data:</label>
-            <input
-              type="date"
-              value={jumpDateInput}
-              onChange={(e) => {
-                const val = e.target.value;
-                setJumpDateInput(val);
-                if (val) handleOpenOrJumpDate(val);
-              }}
-              className="rounded-lg border border-dark-700 bg-dark-950 px-2.5 py-1 text-xs font-semibold text-white focus:border-neon focus:outline-none"
-            />
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
-          {allDatePages.map((ymd) => {
-            const { title, badge } = formatDatePageTab(ymd, todayYmd);
-            const stat = datePageStats[ymd] || { count: 0, net: 0 };
-            const isSelected = selectedDatePage === ymd;
-
-            return (
-              <button
-                key={ymd}
-                type="button"
-                onClick={() => setSelectedDatePage(ymd)}
-                className={cn(
-                  'group relative flex shrink-0 items-center gap-2.5 rounded-xl border px-3.5 py-2 text-left transition-all',
-                  isSelected
-                    ? 'border-neon bg-neon/15 text-white shadow-sm shadow-neon/10'
-                    : 'border-dark-700 bg-dark-950/70 text-zinc-400 hover:border-dark-600 hover:text-zinc-200'
-                )}
-              >
-                <Calendar
-                  className={cn(
-                    'h-4 w-4 shrink-0',
-                    isSelected ? 'text-neon' : 'text-zinc-500 group-hover:text-zinc-300'
-                  )}
-                />
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-extrabold tracking-tight">{title}</span>
-                    {badge && (
-                      <span
-                        className={cn(
-                          'rounded px-1.5 py-0.2 text-[10px] font-black uppercase',
-                          isSelected
-                            ? 'bg-neon text-dark-950'
-                            : 'bg-dark-800 text-zinc-300'
-                        )}
-                      >
-                        {badge}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2 text-[10px]">
-                    <span className="text-zinc-400">
-                      {stat.count} {stat.count === 1 ? 'registro' : 'registros'}
-                    </span>
-                    {stat.count > 0 && (
-                      <span
-                        className={cn(
-                          'font-bold',
-                          stat.net >= 0 ? 'text-emerald-400' : 'text-red-400'
-                        )}
-                      >
-                        {stat.net >= 0 ? '+' : ''}
-                        {formatCurrency(stat.net)}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </button>
-            );
-          })}
-
-          <button
-            type="button"
-            onClick={() => setSelectedDatePage('all')}
-            className={cn(
-              'flex shrink-0 items-center gap-2 rounded-xl border px-3.5 py-2 text-left transition-all',
-              selectedDatePage === 'all'
-                ? 'border-neon bg-neon/15 text-white'
-                : 'border-dark-700 bg-dark-950/70 text-zinc-400 hover:border-dark-600 hover:text-zinc-200'
-            )}
-          >
-            <div>
-              <div className="text-xs font-extrabold">Todas as Datas</div>
-              <div className="text-[10px] text-zinc-400">{entries.length} registros no total</div>
-            </div>
-          </button>
-        </div>
-      </div>
-
-      {/* KPI Cards for the Selected Date Page */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-2xl border border-emerald-500/25 bg-dark-900/90 p-4">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">
-              Entradas Brutas
-            </span>
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-400">
-              <ArrowUpRight className="h-4 w-4" />
-            </span>
-          </div>
-          <p className="mt-2 font-display text-2xl font-black text-emerald-400">
-            {formatCurrency(metrics.grossIncome)}
-          </p>
-          <p className="mt-1 text-[11px] text-zinc-400">
-            {metrics.incomeCount} {metrics.incomeCount === 1 ? 'entrada registrada' : 'entradas registradas'} nesta página
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-amber-500/25 bg-dark-900/90 p-4">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-300/90">
-              Custo das Vendas
-            </span>
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/15 text-amber-400">
-              <Package className="h-4 w-4" />
-            </span>
-          </div>
-          <p className="mt-2 font-display text-2xl font-black text-amber-400">
-            {formatCurrency(metrics.salesCost)}
-          </p>
-          <p className="mt-1 text-[11px] text-zinc-400">
-            Quanto você gastou para realizar essas vendas
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-red-500/25 bg-dark-900/90 p-4">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">
-              Saídas / Despesas da Loja
-            </span>
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/15 text-red-400">
-              <ArrowDownRight className="h-4 w-4" />
-            </span>
-          </div>
-          <p className="mt-2 font-display text-2xl font-black text-red-400">
-            {formatCurrency(metrics.totalExpenses)}
-          </p>
-          <p className="mt-1 text-[11px] text-zinc-400">
-            {metrics.expenseCount} {metrics.expenseCount === 1 ? 'saída lançada' : 'saídas lançadas'} nesta página
-          </p>
-        </div>
-
+      {/* KPI Cards Row */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {/* Card 1: Entradas Brutas */}
         <div
           className={cn(
-            'rounded-2xl border p-4',
-            metrics.netProfit >= 0
-              ? 'border-neon/35 bg-gradient-to-br from-dark-900 to-neon/5'
-              : 'border-red-500/35 bg-gradient-to-br from-dark-900 to-red-500/5'
+            'relative overflow-hidden rounded-2xl border p-5 transition-all',
+            isLight
+              ? 'bg-white border-slate-200/90 shadow-xs'
+              : 'bg-zinc-900/90 border-zinc-800'
           )}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-300">
+            <span
+              className={cn(
+                'text-xs font-bold uppercase tracking-wider',
+                isLight ? 'text-slate-500' : 'text-zinc-400'
+              )}
+            >
+              Entradas Brutas
+            </span>
+            <span
+              className={cn(
+                'flex h-9 w-9 items-center justify-center rounded-xl border',
+                isLight
+                  ? 'bg-emerald-50 border-emerald-200 text-emerald-600'
+                  : 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
+              )}
+            >
+              <ArrowUpRight className="h-5 w-5" />
+            </span>
+          </div>
+          <p
+            className={cn(
+              'mt-3 text-2xl sm:text-3xl font-extrabold tracking-tight tabular-nums',
+              isLight ? 'text-emerald-600' : 'text-emerald-400'
+            )}
+          >
+            {formatCurrency(metrics.grossIncome)}
+          </p>
+          <div className="mt-2 flex items-center justify-between text-xs">
+            <span className={isLight ? 'text-slate-500' : 'text-zinc-400'}>
+              {metrics.incomeCount}{' '}
+              {metrics.incomeCount === 1 ? 'entrada registrada' : 'entradas registradas'}
+            </span>
+            <span
+              className={cn(
+                'font-semibold',
+                isLight ? 'text-slate-700' : 'text-zinc-300'
+              )}
+            >
+              {activePageLabel}
+            </span>
+          </div>
+        </div>
+
+        {/* Card 2: Custo das Vendas */}
+        <div
+          className={cn(
+            'relative overflow-hidden rounded-2xl border p-5 transition-all',
+            isLight
+              ? 'bg-white border-amber-200/90 shadow-xs'
+              : 'bg-zinc-900/90 border-amber-500/25'
+          )}
+        >
+          <div className="flex items-center justify-between">
+            <span
+              className={cn(
+                'text-xs font-bold uppercase tracking-wider',
+                isLight ? 'text-amber-800' : 'text-amber-300'
+              )}
+            >
+              Custo das Vendas
+            </span>
+            <span
+              className={cn(
+                'flex h-9 w-9 items-center justify-center rounded-xl border',
+                isLight
+                  ? 'bg-amber-50 border-amber-200 text-amber-600'
+                  : 'bg-amber-500/15 border-amber-500/30 text-amber-400'
+              )}
+            >
+              <Package className="h-5 w-5" />
+            </span>
+          </div>
+          <p
+            className={cn(
+              'mt-3 text-2xl sm:text-3xl font-extrabold tracking-tight tabular-nums',
+              isLight ? 'text-amber-600' : 'text-amber-400'
+            )}
+          >
+            {formatCurrency(metrics.salesCost)}
+          </p>
+          <p
+            className={cn(
+              'mt-2 text-xs',
+              isLight ? 'text-slate-500' : 'text-zinc-400'
+            )}
+          >
+            Quanto foi gasto para realizar as vendas
+          </p>
+        </div>
+
+        {/* Card 3: Saídas / Despesas */}
+        <div
+          className={cn(
+            'relative overflow-hidden rounded-2xl border p-5 transition-all',
+            isLight
+              ? 'bg-white border-slate-200/90 shadow-xs'
+              : 'bg-zinc-900/90 border-zinc-800'
+          )}
+        >
+          <div className="flex items-center justify-between">
+            <span
+              className={cn(
+                'text-xs font-bold uppercase tracking-wider',
+                isLight ? 'text-slate-500' : 'text-zinc-400'
+              )}
+            >
+              Saídas & Despesas
+            </span>
+            <span
+              className={cn(
+                'flex h-9 w-9 items-center justify-center rounded-xl border',
+                isLight
+                  ? 'bg-rose-50 border-rose-200 text-rose-600'
+                  : 'bg-rose-500/15 border-rose-500/30 text-rose-400'
+              )}
+            >
+              <ArrowDownRight className="h-5 w-5" />
+            </span>
+          </div>
+          <p
+            className={cn(
+              'mt-3 text-2xl sm:text-3xl font-extrabold tracking-tight tabular-nums',
+              isLight ? 'text-rose-600' : 'text-rose-400'
+            )}
+          >
+            {formatCurrency(metrics.totalExpenses)}
+          </p>
+          <p
+            className={cn(
+              'mt-2 text-xs',
+              isLight ? 'text-slate-500' : 'text-zinc-400'
+            )}
+          >
+            {metrics.expenseCount}{' '}
+            {metrics.expenseCount === 1 ? 'saída lançada nesta página' : 'saídas lançadas nesta página'}
+          </p>
+        </div>
+
+        {/* Card 4: Lucro Líquido Real */}
+        <div
+          className={cn(
+            'relative overflow-hidden rounded-2xl border p-5 transition-all shadow-sm',
+            metrics.netProfit >= 0
+              ? isLight
+                ? 'bg-slate-900 border-slate-800 text-white'
+                : 'bg-zinc-950 border-[#BEFA46]/40 text-white'
+              : isLight
+                ? 'bg-rose-950 border-rose-800 text-white'
+                : 'bg-rose-950/60 border-rose-500/40 text-white'
+          )}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
               Lucro Líquido Real
             </span>
             <span
               className={cn(
-                'rounded-md px-2 py-0.5 text-[10px] font-black uppercase',
+                'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold',
                 metrics.netProfit >= 0
-                  ? 'bg-neon/20 text-neon'
-                  : 'bg-red-500/20 text-red-400'
+                  ? 'bg-[#BEFA46] text-slate-950'
+                  : 'bg-rose-500 text-white'
               )}
             >
+              <Percent className="h-3 w-3" />
               Margem {metrics.marginPercent.toFixed(1)}%
             </span>
           </div>
           <p
             className={cn(
-              'mt-2 font-display text-2xl font-black',
-              metrics.netProfit >= 0 ? 'text-neon' : 'text-red-400'
+              'mt-3 text-2xl sm:text-3xl font-extrabold tracking-tight tabular-nums',
+              metrics.netProfit >= 0 ? 'text-[#BEFA46]' : 'text-rose-300'
             )}
           >
             {formatCurrency(metrics.netProfit)}
           </p>
-          <p className="mt-1 text-[11px] text-zinc-400">
+          <p className="mt-2 text-xs text-slate-300">
             Entradas − Custo das Vendas − Saídas
           </p>
         </div>
       </div>
 
-      {/* New Entry Inline Card (when opened) */}
+      {/* Modal / Expandable Card: Cadastrar Entrada ou Saída Completa */}
       {showEntryForm && (
         <form
           onSubmit={handleCreateEntry}
-          className="rounded-2xl border border-neon/40 bg-dark-900 p-5 shadow-2xl"
+          className={cn(
+            'rounded-2xl border p-5 sm:p-6 shadow-lg transition-all',
+            isLight
+              ? 'bg-white border-slate-300 text-slate-900'
+              : 'bg-zinc-900 border-zinc-700 text-zinc-100'
+          )}
         >
-          <div className="mb-4 flex items-center justify-between border-b border-dark-700 pb-3">
-            <div className="flex items-center gap-2.5">
+          <div
+            className={cn(
+              'mb-5 flex flex-wrap items-center justify-between gap-3 border-b pb-4',
+              isLight ? 'border-slate-200' : 'border-zinc-800'
+            )}
+          >
+            <div className="flex items-center gap-3">
               <span
                 className={cn(
-                  'flex h-8 w-8 items-center justify-center rounded-lg text-xs font-black',
+                  'flex h-10 w-10 items-center justify-center rounded-xl',
                   formType === 'income'
-                    ? 'bg-emerald-500/20 text-emerald-400'
-                    : 'bg-red-500/20 text-red-400'
+                    ? 'bg-emerald-100 text-emerald-700'
+                    : 'bg-rose-100 text-rose-700'
                 )}
               >
-                {formType === 'income' ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
+                {formType === 'income' ? (
+                  <TrendingUp className="h-5 w-5" />
+                ) : (
+                  <TrendingDown className="h-5 w-5" />
+                )}
               </span>
               <div>
-                <h2 className="text-sm font-extrabold uppercase tracking-wider text-white">
+                <h2 className="text-base font-extrabold">
                   {formType === 'income'
-                    ? 'Cadastrar Nova Entrada na Loja'
-                    : 'Cadastrar Nova Saída / Custo da Loja'}
+                    ? 'Nova Entrada Financeira na Loja'
+                    : 'Nova Saída / Despesa da Loja'}
                 </h2>
-                <p className="text-xs text-zinc-400">
-                  Todo registro fica salvo com data, hora, vínculo com a loja e descrição detalhada
+                <p className={cn('text-xs', isLight ? 'text-slate-500' : 'text-zinc-400')}>
+                  Preencha os dados abaixo para adicionar o registro na página da data correspondente
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <div className="inline-flex rounded-lg border border-dark-700 bg-dark-950 p-0.5">
+              <div
+                className={cn(
+                  'inline-flex rounded-xl p-1 border',
+                  isLight ? 'bg-slate-100 border-slate-200' : 'bg-zinc-950 border-zinc-800'
+                )}
+              >
                 <button
                   type="button"
                   onClick={() => {
@@ -835,10 +1022,12 @@ export function FinancialPanelClient({
                     setFormCategory('Venda de Produto');
                   }}
                   className={cn(
-                    'rounded-md px-3 py-1 text-xs font-bold transition-colors',
+                    'rounded-lg px-3 py-1.5 text-xs font-bold transition-all',
                     formType === 'income'
-                      ? 'bg-emerald-500 text-dark-950'
-                      : 'text-zinc-400 hover:text-white'
+                      ? 'bg-emerald-600 text-white shadow-xs'
+                      : isLight
+                        ? 'text-slate-600 hover:text-slate-900'
+                        : 'text-zinc-400 hover:text-white'
                   )}
                 >
                   Entrada (+)
@@ -850,28 +1039,41 @@ export function FinancialPanelClient({
                     setFormCategory('Compra de Mercadoria / Fornecedor');
                   }}
                   className={cn(
-                    'rounded-md px-3 py-1 text-xs font-bold transition-colors',
+                    'rounded-lg px-3 py-1.5 text-xs font-bold transition-all',
                     formType === 'expense'
-                      ? 'bg-red-500 text-white'
-                      : 'text-zinc-400 hover:text-white'
+                      ? 'bg-rose-600 text-white shadow-xs'
+                      : isLight
+                        ? 'text-slate-600 hover:text-slate-900'
+                        : 'text-zinc-400 hover:text-white'
                   )}
                 >
                   Saída (−)
                 </button>
               </div>
+
               <button
                 type="button"
                 onClick={() => setShowEntryForm(false)}
-                className="rounded-lg p-1.5 text-zinc-400 hover:bg-dark-800 hover:text-white"
+                className={cn(
+                  'rounded-xl p-2 transition-colors',
+                  isLight
+                    ? 'text-slate-400 hover:bg-slate-100 hover:text-slate-700'
+                    : 'text-zinc-400 hover:bg-zinc-800 hover:text-white'
+                )}
               >
-                <X className="h-4 w-4" />
+                <X className="h-5 w-5" />
               </button>
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
             <div className="md:col-span-5">
-              <label className="mb-1 block text-xs font-bold text-zinc-300">
+              <label
+                className={cn(
+                  'mb-1.5 block text-xs font-bold',
+                  isLight ? 'text-slate-700' : 'text-zinc-300'
+                )}
+              >
                 Descrição (O que foi essa {formType === 'income' ? 'entrada' : 'saída'}?) *
               </label>
               <input
@@ -882,28 +1084,48 @@ export function FinancialPanelClient({
                 placeholder={
                   formType === 'income'
                     ? 'Ex.: Venda presencial Nike Air Force 1 Tam. 40'
-                    : 'Ex.: Pagamento fornecedor 10 pares / Compra de caixas e sacolas'
+                    : 'Ex.: Pagamento fornecedor 10 pares / Compra de sacolas'
                 }
-                className="w-full rounded-xl border border-dark-700 bg-dark-950 px-3.5 py-2.5 text-sm text-white placeholder-zinc-500 focus:border-neon focus:outline-none"
+                className={cn(
+                  'w-full rounded-xl border px-3.5 py-2.5 text-sm transition-colors focus:outline-none focus:ring-2',
+                  isLight
+                    ? 'border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:border-slate-900 focus:ring-slate-900/10'
+                    : 'border-zinc-700 bg-zinc-950 text-white placeholder-zinc-500 focus:border-[#BEFA46] focus:ring-[#BEFA46]/20'
+                )}
               />
             </div>
 
             <div className="md:col-span-3">
-              <label className="mb-1 block text-xs font-bold text-zinc-300">
-                Data e Hora do Registro *
+              <label
+                className={cn(
+                  'mb-1.5 block text-xs font-bold',
+                  isLight ? 'text-slate-700' : 'text-zinc-300'
+                )}
+              >
+                Data e Hora *
               </label>
               <input
                 type="datetime-local"
                 required
                 value={formOccurredAt}
                 onChange={(e) => setFormOccurredAt(e.target.value)}
-                className="w-full rounded-xl border border-dark-700 bg-dark-950 px-3 py-2.5 text-sm text-white focus:border-neon focus:outline-none"
+                className={cn(
+                  'w-full rounded-xl border px-3 py-2.5 text-sm transition-colors focus:outline-none focus:ring-2',
+                  isLight
+                    ? 'border-slate-300 bg-white text-slate-900 focus:border-slate-900 focus:ring-slate-900/10'
+                    : 'border-zinc-700 bg-zinc-950 text-white focus:border-[#BEFA46] focus:ring-[#BEFA46]/20'
+                )}
               />
             </div>
 
             <div className="md:col-span-2">
-              <label className="mb-1 block text-xs font-bold text-zinc-300">
-                {formType === 'income' ? 'Valor da Entrada (R$) *' : 'Valor da Saída (R$) *'}
+              <label
+                className={cn(
+                  'mb-1.5 block text-xs font-bold',
+                  isLight ? 'text-slate-700' : 'text-zinc-300'
+                )}
+              >
+                {formType === 'income' ? 'Valor Bruto (R$) *' : 'Valor da Saída (R$) *'}
               </label>
               <input
                 type="number"
@@ -913,13 +1135,23 @@ export function FinancialPanelClient({
                 value={formAmount}
                 onChange={(e) => setFormAmount(e.target.value)}
                 placeholder="0,00"
-                className="w-full rounded-xl border border-dark-700 bg-dark-950 px-3 py-2.5 text-sm font-bold text-white focus:border-neon focus:outline-none"
+                className={cn(
+                  'w-full rounded-xl border px-3 py-2.5 text-sm font-bold transition-colors focus:outline-none focus:ring-2',
+                  isLight
+                    ? 'border-slate-300 bg-white text-slate-900 focus:border-slate-900 focus:ring-slate-900/10'
+                    : 'border-zinc-700 bg-zinc-950 text-white focus:border-[#BEFA46] focus:ring-[#BEFA46]/20'
+                )}
               />
             </div>
 
             {formType === 'income' && (
               <div className="md:col-span-2">
-                <label className="mb-1 block text-xs font-bold text-amber-300">
+                <label
+                  className={cn(
+                    'mb-1.5 block text-xs font-bold',
+                    isLight ? 'text-amber-800' : 'text-amber-300'
+                  )}
+                >
                   Custo desta Venda (R$)
                 </label>
                 <input
@@ -929,13 +1161,23 @@ export function FinancialPanelClient({
                   value={formCostAmount}
                   onChange={(e) => setFormCostAmount(e.target.value)}
                   placeholder="Quanto gastou?"
-                  className="w-full rounded-xl border border-amber-500/40 bg-dark-950 px-3 py-2.5 text-sm font-bold text-amber-300 placeholder-zinc-500 focus:border-amber-400 focus:outline-none"
+                  className={cn(
+                    'w-full rounded-xl border px-3 py-2.5 text-sm font-bold transition-colors focus:outline-none focus:ring-2',
+                    isLight
+                      ? 'border-amber-300 bg-amber-50/60 text-amber-900 placeholder-amber-400 focus:border-amber-500 focus:ring-amber-500/20'
+                      : 'border-amber-500/40 bg-zinc-950 text-amber-300 placeholder-zinc-500 focus:border-amber-400 focus:ring-amber-400/20'
+                  )}
                 />
               </div>
             )}
 
             <div className="md:col-span-3">
-              <label className="mb-1 block text-xs font-bold text-zinc-300">
+              <label
+                className={cn(
+                  'mb-1.5 block text-xs font-bold',
+                  isLight ? 'text-slate-700' : 'text-zinc-300'
+                )}
+              >
                 Vínculo com a Loja
               </label>
               <input
@@ -944,7 +1186,12 @@ export function FinancialPanelClient({
                 value={formStoreLink}
                 onChange={(e) => setFormStoreLink(e.target.value)}
                 placeholder="Tênis Club — Loja Online"
-                className="w-full rounded-xl border border-dark-700 bg-dark-950 px-3 py-2 text-xs text-white focus:border-neon focus:outline-none"
+                className={cn(
+                  'w-full rounded-xl border px-3 py-2 text-xs transition-colors focus:outline-none',
+                  isLight
+                    ? 'border-slate-300 bg-white text-slate-900 focus:border-slate-900'
+                    : 'border-zinc-700 bg-zinc-950 text-white focus:border-[#BEFA46]'
+                )}
               />
               <datalist id="store-link-presets">
                 {STORE_LINK_PRESETS.map((preset) => (
@@ -954,7 +1201,12 @@ export function FinancialPanelClient({
             </div>
 
             <div className="md:col-span-3">
-              <label className="mb-1 block text-xs font-bold text-zinc-300">
+              <label
+                className={cn(
+                  'mb-1.5 block text-xs font-bold',
+                  isLight ? 'text-slate-700' : 'text-zinc-300'
+                )}
+              >
                 Categoria
               </label>
               <input
@@ -962,7 +1214,12 @@ export function FinancialPanelClient({
                 list="category-presets"
                 value={formCategory}
                 onChange={(e) => setFormCategory(e.target.value)}
-                className="w-full rounded-xl border border-dark-700 bg-dark-950 px-3 py-2 text-xs text-white focus:border-neon focus:outline-none"
+                className={cn(
+                  'w-full rounded-xl border px-3 py-2 text-xs transition-colors focus:outline-none',
+                  isLight
+                    ? 'border-slate-300 bg-white text-slate-900 focus:border-slate-900'
+                    : 'border-zinc-700 bg-zinc-950 text-white focus:border-[#BEFA46]'
+                )}
               />
               <datalist id="category-presets">
                 {(formType === 'income' ? CATEGORY_PRESETS_INCOME : CATEGORY_PRESETS_EXPENSE).map(
@@ -974,8 +1231,13 @@ export function FinancialPanelClient({
             </div>
 
             <div className="md:col-span-3">
-              <label className="mb-1 block text-xs font-bold text-zinc-300">
-                Vincular a Produto da Loja (opcional)
+              <label
+                className={cn(
+                  'mb-1.5 block text-xs font-bold',
+                  isLight ? 'text-slate-700' : 'text-zinc-300'
+                )}
+              >
+                Vincular a Produto (opcional)
               </label>
               <select
                 value={formProductId}
@@ -990,19 +1252,30 @@ export function FinancialPanelClient({
                     }
                   }
                 }}
-                className="w-full rounded-xl border border-dark-700 bg-dark-950 px-3 py-2 text-xs text-white focus:border-neon focus:outline-none"
+                className={cn(
+                  'w-full rounded-xl border px-3 py-2 text-xs transition-colors focus:outline-none',
+                  isLight
+                    ? 'border-slate-300 bg-white text-slate-900 focus:border-slate-900'
+                    : 'border-zinc-700 bg-zinc-950 text-white focus:border-[#BEFA46]'
+                )}
               >
                 <option value="">Sem produto específico (Geral da Loja)</option>
                 {products.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.name} {p.sku ? `(${p.sku})` : ''} — {formatCurrency(p.promo_price ?? p.base_price)}
+                    {p.name} {p.sku ? `(${p.sku})` : ''} —{' '}
+                    {formatCurrency(p.promo_price ?? p.base_price)}
                   </option>
                 ))}
               </select>
             </div>
 
             <div className="md:col-span-3">
-              <label className="mb-1 block text-xs font-bold text-zinc-300">
+              <label
+                className={cn(
+                  'mb-1.5 block text-xs font-bold',
+                  isLight ? 'text-slate-700' : 'text-zinc-300'
+                )}
+              >
                 Forma de Pagamento
               </label>
               <input
@@ -1010,20 +1283,39 @@ export function FinancialPanelClient({
                 value={formPaymentMethod}
                 onChange={(e) => setFormPaymentMethod(e.target.value)}
                 placeholder="Ex.: Pix, Cartão, Dinheiro"
-                className="w-full rounded-xl border border-dark-700 bg-dark-950 px-3 py-2 text-xs text-white focus:border-neon focus:outline-none"
+                className={cn(
+                  'w-full rounded-xl border px-3 py-2 text-xs transition-colors focus:outline-none',
+                  isLight
+                    ? 'border-slate-300 bg-white text-slate-900 focus:border-slate-900'
+                    : 'border-zinc-700 bg-zinc-950 text-white focus:border-[#BEFA46]'
+                )}
               />
             </div>
 
-            {/* Custom Columns inputs on manual entry form */}
             {customColumns.length > 0 && (
-              <div className="md:col-span-12 border-t border-dark-800 pt-3">
-                <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-zinc-400">
-                  Suas Colunas Personalizadas (opcional)
+              <div
+                className={cn(
+                  'md:col-span-12 border-t pt-4',
+                  isLight ? 'border-slate-200' : 'border-zinc-800'
+                )}
+              >
+                <p
+                  className={cn(
+                    'mb-2.5 text-xs font-bold uppercase tracking-wider',
+                    isLight ? 'text-slate-500' : 'text-zinc-400'
+                  )}
+                >
+                  Colunas Personalizadas (opcional)
                 </p>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 md:grid-cols-4">
                   {customColumns.map((col) => (
                     <div key={col.id}>
-                      <label className="mb-1 block text-xs font-semibold text-zinc-300">
+                      <label
+                        className={cn(
+                          'mb-1 block text-xs font-semibold',
+                          isLight ? 'text-slate-700' : 'text-zinc-300'
+                        )}
+                      >
                         {col.name}
                       </label>
                       <input
@@ -1036,7 +1328,12 @@ export function FinancialPanelClient({
                           }))
                         }
                         placeholder={`Preencher ${col.name}...`}
-                        className="w-full rounded-lg border border-dark-700 bg-dark-950 px-3 py-1.5 text-xs text-white focus:border-neon focus:outline-none"
+                        className={cn(
+                          'w-full rounded-lg border px-3 py-1.5 text-xs focus:outline-none',
+                          isLight
+                            ? 'border-slate-300 bg-white text-slate-900 focus:border-slate-900'
+                            : 'border-zinc-700 bg-zinc-950 text-white focus:border-[#BEFA46]'
+                        )}
                       />
                     </div>
                   ))}
@@ -1045,53 +1342,77 @@ export function FinancialPanelClient({
             )}
           </div>
 
-          <div className="mt-4 flex items-center justify-end gap-2.5 border-t border-dark-800 pt-3">
+          <div
+            className={cn(
+              'mt-5 flex items-center justify-end gap-2.5 border-t pt-4',
+              isLight ? 'border-slate-200' : 'border-zinc-800'
+            )}
+          >
             <button
               type="button"
               onClick={() => setShowEntryForm(false)}
-              className="rounded-xl border border-dark-700 px-4 py-2 text-xs font-bold text-zinc-300 hover:bg-dark-800"
+              className={cn(
+                'rounded-xl border px-4 py-2 text-xs font-bold transition-colors',
+                isLight
+                  ? 'border-slate-300 text-slate-700 hover:bg-slate-100'
+                  : 'border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+              )}
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={savingEntry}
-              className="inline-flex items-center gap-2 rounded-xl bg-neon px-5 py-2 text-xs font-extrabold uppercase tracking-wider text-dark-950 hover:bg-neon-300 disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-slate-800 disabled:opacity-50"
             >
-              {savingEntry ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+              {savingEntry ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Check className="h-4 w-4 text-[#BEFA46]" />
+              )}
               Salvar na Planilha
             </button>
           </div>
         </form>
       )}
 
-      {/* New Custom Column Modal */}
+      {/* Modal: Nova Coluna Personalizada */}
       {showColumnModal && (
         <form
           onSubmit={handleCreateColumn}
-          className="rounded-2xl border border-neon/40 bg-dark-900 p-4 sm:p-5"
+          className={cn(
+            'rounded-2xl border p-5 shadow-lg',
+            isLight
+              ? 'bg-white border-indigo-200 text-slate-900'
+              : 'bg-zinc-900 border-indigo-500/40 text-zinc-100'
+          )}
         >
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-dark-800 pb-3">
+          <div className="flex items-start justify-between gap-3">
             <div>
-              <h3 className="text-sm font-extrabold uppercase tracking-wider text-white">
-                Adicionar Coluna Personalizada na Planilha
+              <h3 className="text-sm font-extrabold">
+                Adicionar Nova Coluna Personalizada
               </h3>
-              <p className="text-xs text-zinc-400">
-                Crie colunas do seu interesse (ex.: Fornecedor, Taxa Maquininha, Motoboy, Observação). Elas ficam em branco para você preencher manualmente em cada linha.
+              <p className={cn('mt-0.5 text-xs', isLight ? 'text-slate-500' : 'text-zinc-400')}>
+                Crie colunas extras do seu interesse (ex.: Fornecedor, Taxa Maquininha, Motoboy, Observação). Elas não são preenchidas automaticamente nas vendas e ficam livres para edição manual.
               </p>
             </div>
             <button
               type="button"
               onClick={() => setShowColumnModal(false)}
-              className="rounded-lg p-1 text-zinc-400 hover:text-white"
+              className="rounded-lg p-1 text-slate-400 hover:text-slate-700"
             >
               <X className="h-4 w-4" />
             </button>
           </div>
 
-          <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end">
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
             <div className="flex-1">
-              <label className="mb-1 block text-xs font-bold text-zinc-300">
+              <label
+                className={cn(
+                  'mb-1 block text-xs font-bold',
+                  isLight ? 'text-slate-700' : 'text-zinc-300'
+                )}
+              >
                 Nome da Coluna *
               </label>
               <input
@@ -1100,18 +1421,33 @@ export function FinancialPanelClient({
                 value={newColumnName}
                 onChange={(e) => setNewColumnName(e.target.value)}
                 placeholder="Ex.: Fornecedor, Taxa Cartão, Entregador, Comissão..."
-                className="w-full rounded-xl border border-dark-700 bg-dark-950 px-3.5 py-2 text-sm text-white focus:border-neon focus:outline-none"
+                className={cn(
+                  'w-full rounded-xl border px-3.5 py-2 text-sm focus:outline-none',
+                  isLight
+                    ? 'border-slate-300 bg-white text-slate-900 focus:border-indigo-600'
+                    : 'border-zinc-700 bg-zinc-950 text-white focus:border-indigo-400'
+                )}
               />
             </div>
 
             <div className="sm:w-48">
-              <label className="mb-1 block text-xs font-bold text-zinc-300">
-                Formato da Coluna
+              <label
+                className={cn(
+                  'mb-1 block text-xs font-bold',
+                  isLight ? 'text-slate-700' : 'text-zinc-300'
+                )}
+              >
+                Tipo de Dado
               </label>
               <select
                 value={newColumnType}
                 onChange={(e) => setNewColumnType(e.target.value as FinancialCustomColumnType)}
-                className="w-full rounded-xl border border-dark-700 bg-dark-950 px-3 py-2 text-sm text-white focus:border-neon focus:outline-none"
+                className={cn(
+                  'w-full rounded-xl border px-3 py-2 text-sm focus:outline-none',
+                  isLight
+                    ? 'border-slate-300 bg-white text-slate-900 focus:border-indigo-600'
+                    : 'border-zinc-700 bg-zinc-950 text-white focus:border-indigo-400'
+                )}
               >
                 <option value="text">Texto Livre</option>
                 <option value="currency">Valor em R$</option>
@@ -1122,98 +1458,386 @@ export function FinancialPanelClient({
             <button
               type="submit"
               disabled={savingColumn}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-neon px-5 py-2.5 text-xs font-extrabold uppercase tracking-wider text-dark-950 hover:bg-neon-300 disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-xs hover:bg-indigo-700 disabled:opacity-50"
             >
-              {savingColumn ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+              {savingColumn ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Plus className="h-4 w-4" />
+              )}
               Criar Coluna
             </button>
           </div>
         </form>
       )}
 
-      {/* Spreadsheet Toolbar (Filters & Search) */}
-      <div className="flex flex-col gap-3 rounded-2xl border border-dark-700 bg-dark-900 p-3.5 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setTypeFilter('all')}
-            className={cn(
-              'rounded-lg px-3 py-1.5 text-xs font-bold transition-colors',
-              typeFilter === 'all'
-                ? 'bg-neon text-dark-950'
-                : 'bg-dark-800 text-zinc-400 hover:text-white'
-            )}
-          >
-            Todos ({pageEntries.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setTypeFilter('income')}
-            className={cn(
-              'rounded-lg px-3 py-1.5 text-xs font-bold transition-colors',
-              typeFilter === 'income'
-                ? 'bg-emerald-500 text-dark-950'
-                : 'bg-dark-800 text-emerald-400 hover:bg-emerald-500/20'
-            )}
-          >
-            Entradas (+)
-          </button>
-          <button
-            type="button"
-            onClick={() => setTypeFilter('expense')}
-            className={cn(
-              'rounded-lg px-3 py-1.5 text-xs font-bold transition-colors',
-              typeFilter === 'expense'
-                ? 'bg-red-500 text-white'
-                : 'bg-dark-800 text-red-400 hover:bg-red-500/20'
-            )}
-          >
-            Saídas (−)
-          </button>
+      {/* Spreadsheet Container (Date Pages Header + Filter Bar + Grid Table) */}
+      <div
+        className={cn(
+          'overflow-hidden rounded-2xl border shadow-sm',
+          isLight ? 'bg-white border-slate-200/90' : 'bg-zinc-900 border-zinc-800'
+        )}
+      >
+        {/* Top Sheet Tabs Bar (Páginas da Planilha Separadas por Data) */}
+        <div
+          className={cn(
+            'border-b px-4 pt-3.5 pb-3',
+            isLight ? 'bg-slate-50/80 border-slate-200' : 'bg-zinc-950/60 border-zinc-800'
+          )}
+        >
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <FileSpreadsheet
+                className={cn('h-4 w-4', isLight ? 'text-emerald-600' : 'text-[#BEFA46]')}
+              />
+              <span
+                className={cn(
+                  'text-xs font-extrabold uppercase tracking-wider',
+                  isLight ? 'text-slate-700' : 'text-zinc-200'
+                )}
+              >
+                Páginas da Planilha por Data
+              </span>
+              <span
+                className={cn(
+                  'rounded-full px-2 py-0.5 text-[11px] font-semibold',
+                  isLight
+                    ? 'bg-slate-200/80 text-slate-700'
+                    : 'bg-zinc-800 text-zinc-400'
+                )}
+              >
+                {allDatePages.length} {allDatePages.length === 1 ? 'página' : 'páginas'}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span
+                className={cn(
+                  'text-xs font-medium',
+                  isLight ? 'text-slate-500' : 'text-zinc-400'
+                )}
+              >
+                Abrir página de data:
+              </span>
+              <input
+                type="date"
+                value={jumpDateInput}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setJumpDateInput(val);
+                  if (val) handleOpenOrJumpDate(val);
+                }}
+                className={cn(
+                  'rounded-lg border px-2.5 py-1 text-xs font-semibold focus:outline-none',
+                  isLight
+                    ? 'border-slate-300 bg-white text-slate-800 focus:border-slate-900'
+                    : 'border-zinc-700 bg-zinc-900 text-white focus:border-[#BEFA46]'
+                )}
+              />
+            </div>
+          </div>
+
+          {/* Horizontal Date Tabs */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1">
+            {allDatePages.map((ymd) => {
+              const { title, badge } = formatDatePageTab(ymd, todayYmd);
+              const stat = datePageStats[ymd] || { count: 0, net: 0 };
+              const isSelected = selectedDatePage === ymd;
+
+              return (
+                <button
+                  key={ymd}
+                  type="button"
+                  onClick={() => setSelectedDatePage(ymd)}
+                  className={cn(
+                    'group flex shrink-0 items-center gap-2.5 rounded-xl border px-3.5 py-2 text-left transition-all',
+                    isSelected
+                      ? isLight
+                        ? 'border-slate-900 bg-slate-900 text-white shadow-sm'
+                        : 'border-[#BEFA46] bg-[#BEFA46]/15 text-white'
+                      : isLight
+                        ? 'border-slate-200/90 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-100/70'
+                        : 'border-zinc-800 bg-zinc-900 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
+                  )}
+                >
+                  <Calendar
+                    className={cn(
+                      'h-4 w-4 shrink-0',
+                      isSelected
+                        ? 'text-[#BEFA46]'
+                        : isLight
+                          ? 'text-slate-400 group-hover:text-slate-600'
+                          : 'text-zinc-500'
+                    )}
+                  />
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-bold tracking-tight">{title}</span>
+                      {badge && (
+                        <span
+                          className={cn(
+                            'rounded-md px-1.5 py-0.2 text-[10px] font-extrabold uppercase',
+                            isSelected
+                              ? 'bg-[#BEFA46] text-slate-950'
+                              : isLight
+                                ? 'bg-slate-200 text-slate-700'
+                                : 'bg-zinc-800 text-zinc-300'
+                          )}
+                        >
+                          {badge}
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-0.5 flex items-center gap-2 text-[10px]">
+                      <span
+                        className={
+                          isSelected
+                            ? 'text-slate-300'
+                            : isLight
+                              ? 'text-slate-500'
+                              : 'text-zinc-500'
+                        }
+                      >
+                        {stat.count} {stat.count === 1 ? 'item' : 'itens'}
+                      </span>
+                      {stat.count > 0 && (
+                        <span
+                          className={cn(
+                            'font-bold tabular-nums',
+                            stat.net >= 0
+                              ? isSelected
+                                ? 'text-[#BEFA46]'
+                                : 'text-emerald-600'
+                              : isSelected
+                                ? 'text-rose-300'
+                                : 'text-rose-600'
+                          )}
+                        >
+                          {stat.net >= 0 ? '+' : ''}
+                          {formatCurrency(stat.net)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+
+            <button
+              type="button"
+              onClick={() => setSelectedDatePage('all')}
+              className={cn(
+                'flex shrink-0 items-center gap-2 rounded-xl border px-3.5 py-2 text-left transition-all',
+                selectedDatePage === 'all'
+                  ? isLight
+                    ? 'border-slate-900 bg-slate-900 text-white shadow-sm'
+                    : 'border-[#BEFA46] bg-[#BEFA46]/15 text-white'
+                  : isLight
+                    ? 'border-slate-200/90 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-100/70'
+                    : 'border-zinc-800 bg-zinc-900 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
+              )}
+            >
+              <div>
+                <div className="text-xs font-bold">Todas as Datas</div>
+                <div
+                  className={cn(
+                    'text-[10px]',
+                    selectedDatePage === 'all'
+                      ? 'text-slate-300'
+                      : isLight
+                        ? 'text-slate-500'
+                        : 'text-zinc-500'
+                  )}
+                >
+                  {entries.length} registros no total
+                </div>
+              </div>
+            </button>
+          </div>
         </div>
 
-        <div className="relative w-full sm:w-80">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Buscar descrição, pedido, produto, loja..."
-            className="w-full rounded-xl border border-dark-700 bg-dark-950 py-1.5 pl-9 pr-3 text-xs text-white placeholder-zinc-500 focus:border-neon focus:outline-none"
-          />
-        </div>
-      </div>
+        {/* Filter & Search Sub-Toolbar */}
+        <div
+          className={cn(
+            'flex flex-col gap-3 border-b px-4 py-3 sm:flex-row sm:items-center sm:justify-between',
+            isLight ? 'bg-white border-slate-200' : 'bg-zinc-900 border-zinc-800'
+          )}
+        >
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setTypeFilter('all')}
+              className={cn(
+                'rounded-lg px-3 py-1.5 text-xs font-bold transition-all',
+                typeFilter === 'all'
+                  ? isLight
+                    ? 'bg-slate-900 text-white'
+                    : 'bg-[#BEFA46] text-slate-950'
+                  : isLight
+                    ? 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    : 'bg-zinc-800 text-zinc-400 hover:text-white'
+              )}
+            >
+              Todos ({pageEntries.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setTypeFilter('income')}
+              className={cn(
+                'rounded-lg px-3 py-1.5 text-xs font-bold transition-all',
+                typeFilter === 'income'
+                  ? 'bg-emerald-600 text-white'
+                  : isLight
+                    ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                    : 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'
+              )}
+            >
+              Entradas ({metrics.incomeCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => setTypeFilter('expense')}
+              className={cn(
+                'rounded-lg px-3 py-1.5 text-xs font-bold transition-all',
+                typeFilter === 'expense'
+                  ? 'bg-rose-600 text-white'
+                  : isLight
+                    ? 'bg-rose-50 text-rose-700 hover:bg-rose-100'
+                    : 'bg-rose-500/10 text-rose-400 hover:bg-rose-500/20'
+              )}
+            >
+              Saídas ({metrics.expenseCount})
+            </button>
+          </div>
 
-      {/* Main Spreadsheet Table */}
-      <div className="overflow-hidden rounded-2xl border border-dark-700 bg-dark-900 shadow-xl">
+          <div className="relative w-full sm:w-80">
+            <Search
+              className={cn(
+                'pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2',
+                isLight ? 'text-slate-400' : 'text-zinc-500'
+              )}
+            />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Pesquisar descrição, pedido, produto, loja..."
+              className={cn(
+                'w-full rounded-xl border py-1.5 pl-9 pr-3 text-xs transition-colors focus:outline-none',
+                isLight
+                  ? 'border-slate-300 bg-slate-50/70 text-slate-900 placeholder-slate-400 focus:border-slate-900 focus:bg-white'
+                  : 'border-zinc-700 bg-zinc-950 text-white placeholder-zinc-500 focus:border-[#BEFA46]'
+              )}
+            />
+          </div>
+        </div>
+
+        {/* Spreadsheet Grid */}
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1100px] border-collapse text-left text-xs">
+          <table className="w-full min-w-[1120px] border-collapse text-left text-xs">
             <thead>
-              <tr className="border-b border-dark-700 bg-dark-950/90 text-[11px] font-extrabold uppercase tracking-wider text-zinc-400">
-                <th className="px-3.5 py-3.5">Data & Hora</th>
-                <th className="px-3 py-3.5">Tipo</th>
-                <th className="min-w-[260px] px-3.5 py-3.5">
-                  Descrição (O que foi a Entrada / Saída)
+              <tr
+                className={cn(
+                  'border-b text-[11px] font-bold uppercase tracking-wider',
+                  isLight
+                    ? 'bg-slate-100/90 border-slate-200 text-slate-600'
+                    : 'bg-zinc-950 border-zinc-800 text-zinc-400'
+                )}
+              >
+                <th
+                  className={cn(
+                    'w-10 border-r px-3 py-3 text-center font-mono',
+                    isLight ? 'border-slate-200/80 text-slate-400' : 'border-zinc-800 text-zinc-500'
+                  )}
+                >
+                  #
                 </th>
-                <th className="min-w-[180px] px-3 py-3.5">Vínculo com a Loja</th>
-                <th className="px-3 py-3.5 text-right">Valor Bruto (R$)</th>
-                <th className="bg-amber-500/10 px-3.5 py-3.5 text-right text-amber-300">
+                <th
+                  className={cn(
+                    'w-32 border-r px-3.5 py-3',
+                    isLight ? 'border-slate-200/80' : 'border-zinc-800'
+                  )}
+                >
+                  Data & Hora
+                </th>
+                <th
+                  className={cn(
+                    'w-36 border-r px-3 py-3',
+                    isLight ? 'border-slate-200/80' : 'border-zinc-800'
+                  )}
+                >
+                  Tipo / Origem
+                </th>
+                <th
+                  className={cn(
+                    'min-w-[280px] border-r px-3.5 py-3',
+                    isLight ? 'border-slate-200/80' : 'border-zinc-800'
+                  )}
+                >
+                  Descrição da Entrada ou Saída
+                </th>
+                <th
+                  className={cn(
+                    'min-w-[190px] border-r px-3 py-3',
+                    isLight ? 'border-slate-200/80' : 'border-zinc-800'
+                  )}
+                >
+                  Vínculo com a Loja
+                </th>
+                <th
+                  className={cn(
+                    'w-36 border-r px-3.5 py-3 text-right',
+                    isLight ? 'border-slate-200/80' : 'border-zinc-800'
+                  )}
+                >
+                  Valor Bruto (R$)
+                </th>
+                <th
+                  className={cn(
+                    'w-44 border-r px-3.5 py-3 text-right',
+                    isLight
+                      ? 'bg-amber-50/90 border-amber-200/80 text-amber-900'
+                      : 'bg-amber-500/10 border-zinc-800 text-amber-300'
+                  )}
+                >
                   <div>Custo da Venda (R$)</div>
-                  <div className="text-[9px] font-semibold normal-case text-amber-300/75">
-                    Quanto gastei p/ fazer a venda
+                  <div
+                    className={cn(
+                      'text-[10px] font-medium normal-case',
+                      isLight ? 'text-amber-700' : 'text-amber-300/75'
+                    )}
+                  >
+                    Quanto gastei p/ vender
                   </div>
                 </th>
-                <th className="px-3.5 py-3.5 text-right text-neon">
-                  <div>Lucro / Resultado</div>
-                  <div className="text-[9px] font-semibold normal-case text-zinc-400">
-                    Valor líquido real
+                <th
+                  className={cn(
+                    'w-40 border-r px-3.5 py-3 text-right',
+                    isLight
+                      ? 'bg-emerald-50/60 border-slate-200/80 text-emerald-950'
+                      : 'bg-emerald-500/5 border-zinc-800 text-[#BEFA46]'
+                  )}
+                >
+                  <div>Lucro Real</div>
+                  <div
+                    className={cn(
+                      'text-[10px] font-medium normal-case',
+                      isLight ? 'text-emerald-700' : 'text-zinc-400'
+                    )}
+                  >
+                    Resultado líquido
                   </div>
                 </th>
 
                 {customColumns.map((col) => (
                   <th
                     key={col.id}
-                    className="min-w-[150px] border-l border-dark-800 bg-dark-950 px-3 py-3.5 text-zinc-200"
+                    className={cn(
+                      'min-w-[155px] border-r px-3 py-3',
+                      isLight
+                        ? 'bg-indigo-50/50 border-slate-200/80 text-indigo-950'
+                        : 'bg-indigo-950/20 border-zinc-800 text-indigo-200'
+                    )}
                   >
                     <div className="flex items-center justify-between gap-1.5">
                       <span className="truncate" title={col.name}>
@@ -1222,83 +1846,336 @@ export function FinancialPanelClient({
                       <button
                         type="button"
                         onClick={() => handleDeleteColumn(col)}
-                        className="rounded p-0.5 text-zinc-500 hover:bg-red-500/20 hover:text-red-400"
-                        title={`Excluir coluna "${col.name}"`}
+                        className={cn(
+                          'rounded p-0.5 transition-colors',
+                          isLight
+                            ? 'text-slate-400 hover:bg-rose-100 hover:text-rose-600'
+                            : 'text-zinc-500 hover:bg-rose-500/20 hover:text-rose-400'
+                        )}
+                        title={`Remover coluna "${col.name}"`}
                       >
                         <X className="h-3.5 w-3.5" />
                       </button>
                     </div>
-                    <div className="text-[9px] font-normal normal-case text-zinc-500">
-                      Coluna manual
+                    <div
+                      className={cn(
+                        'text-[9px] font-medium normal-case',
+                        isLight ? 'text-indigo-600/80' : 'text-indigo-400/70'
+                      )}
+                    >
+                      Coluna personalizada
                     </div>
                   </th>
                 ))}
 
-                <th className="w-12 px-3 py-3.5 text-center">Ações</th>
+                <th className="w-12 px-2.5 py-3 text-center">Ações</th>
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-dark-800">
+            <tbody
+              className={cn(
+                'divide-y',
+                isLight ? 'divide-slate-200/80' : 'divide-zinc-800'
+              )}
+            >
               {pageEntries.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={8 + customColumns.length}
-                    className="px-6 py-12 text-center text-zinc-400"
+                    colSpan={9 + customColumns.length}
+                    className="px-6 py-14 text-center"
                   >
                     <div className="mx-auto max-w-md space-y-2">
-                      <FileSpreadsheet className="mx-auto h-8 w-8 text-zinc-600" />
-                      <p className="text-sm font-bold text-white">
-                        Nenhum lançamento nesta página de data
+                      <div
+                        className={cn(
+                          'mx-auto flex h-12 w-12 items-center justify-center rounded-2xl',
+                          isLight ? 'bg-slate-100 text-slate-400' : 'bg-zinc-800 text-zinc-500'
+                        )}
+                      >
+                        <FileSpreadsheet className="h-6 w-6" />
+                      </div>
+                      <p
+                        className={cn(
+                          'text-sm font-bold',
+                          isLight ? 'text-slate-800' : 'text-white'
+                        )}
+                      >
+                        Nenhum lançamento registrado nesta data ({activePageLabel})
                       </p>
-                      <p className="text-xs text-zinc-400">
-                        Sempre que um produto for vendido na loja, ele aparecerá automaticamente aqui como entrada. Você também pode clicar em <strong>Nova Entrada</strong> ou <strong>Nova Saída</strong> acima.
+                      <p
+                        className={cn(
+                          'text-xs',
+                          isLight ? 'text-slate-500' : 'text-zinc-400'
+                        )}
+                      >
+                        As vendas de produtos entram automaticamente aqui. Para registrar uma saída ou entrada manual agora, use a linha rápida abaixo ou clique em <strong>Nova Entrada / Nova Saída</strong>.
                       </p>
                     </div>
                   </td>
                 </tr>
               ) : (
-                pageEntries.map((entry) => (
+                pageEntries.map((entry, idx) => (
                   <SpreadsheetRow
                     key={entry.id}
+                    rowNumber={idx + 1}
                     entry={entry}
                     customColumns={customColumns}
+                    isLight={isLight}
                     isSaving={savingRowId === entry.id}
                     onUpdateField={handleUpdateEntryField}
                     onDelete={handleDeleteEntry}
                   />
                 ))
               )}
+
+              {/* Quick Inline Add Row at the bottom of the spreadsheet */}
+              <tr
+                className={cn(
+                  'border-t-2',
+                  isLight
+                    ? 'bg-slate-50/90 border-slate-200'
+                    : 'bg-zinc-950/60 border-zinc-800'
+                )}
+              >
+                <td
+                  className={cn(
+                    'border-r px-3 py-2.5 text-center font-bold',
+                    isLight ? 'border-slate-200 text-emerald-600' : 'border-zinc-800 text-[#BEFA46]'
+                  )}
+                >
+                  +
+                </td>
+                <td
+                  className={cn(
+                    'border-r px-3.5 py-2.5 text-[11px] font-semibold',
+                    isLight ? 'border-slate-200 text-slate-500' : 'border-zinc-800 text-zinc-400'
+                  )}
+                >
+                  Lançamento Rápido
+                </td>
+                <td
+                  className={cn(
+                    'border-r px-2.5 py-2',
+                    isLight ? 'border-slate-200' : 'border-zinc-800'
+                  )}
+                >
+                  <select
+                    value={quickType}
+                    onChange={(e) => setQuickType(e.target.value as FinancialEntryType)}
+                    className={cn(
+                      'w-full rounded-lg border px-2 py-1.5 text-xs font-bold focus:outline-none',
+                      quickType === 'income'
+                        ? isLight
+                          ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
+                          : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300'
+                        : isLight
+                          ? 'border-rose-300 bg-rose-50 text-rose-800'
+                          : 'border-rose-500/40 bg-rose-500/10 text-rose-300'
+                    )}
+                  >
+                    <option value="income">Entrada (+)</option>
+                    <option value="expense">Saída (−)</option>
+                  </select>
+                </td>
+                <td
+                  className={cn(
+                    'border-r px-2.5 py-2',
+                    isLight ? 'border-slate-200' : 'border-zinc-800'
+                  )}
+                >
+                  <input
+                    type="text"
+                    value={quickDesc}
+                    onChange={(e) => setQuickDesc(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleQuickAdd(e);
+                    }}
+                    placeholder="Digite a descrição da entrada ou saída rápida..."
+                    className={cn(
+                      'w-full rounded-lg border px-2.5 py-1.5 text-xs focus:outline-none',
+                      isLight
+                        ? 'border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:border-slate-900'
+                        : 'border-zinc-700 bg-zinc-900 text-white placeholder-zinc-500 focus:border-[#BEFA46]'
+                    )}
+                  />
+                </td>
+                <td
+                  className={cn(
+                    'border-r px-2.5 py-2',
+                    isLight ? 'border-slate-200' : 'border-zinc-800'
+                  )}
+                >
+                  <input
+                    type="text"
+                    list="store-link-presets"
+                    value={quickStore}
+                    onChange={(e) => setQuickStore(e.target.value)}
+                    className={cn(
+                      'w-full rounded-lg border px-2 py-1.5 text-xs focus:outline-none',
+                      isLight
+                        ? 'border-slate-300 bg-white text-slate-800 focus:border-slate-900'
+                        : 'border-zinc-700 bg-zinc-900 text-zinc-200 focus:border-[#BEFA46]'
+                    )}
+                  />
+                </td>
+                <td
+                  className={cn(
+                    'border-r px-2.5 py-2',
+                    isLight ? 'border-slate-200' : 'border-zinc-800'
+                  )}
+                >
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={quickAmount}
+                    onChange={(e) => setQuickAmount(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleQuickAdd(e);
+                    }}
+                    placeholder="Valor R$"
+                    className={cn(
+                      'w-full rounded-lg border px-2 py-1.5 text-right text-xs font-bold focus:outline-none',
+                      isLight
+                        ? 'border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:border-slate-900'
+                        : 'border-zinc-700 bg-zinc-900 text-white placeholder-zinc-500 focus:border-[#BEFA46]'
+                    )}
+                  />
+                </td>
+                <td
+                  className={cn(
+                    'border-r px-2.5 py-2',
+                    isLight ? 'bg-amber-50/40 border-slate-200' : 'bg-amber-500/5 border-zinc-800'
+                  )}
+                >
+                  {quickType === 'income' ? (
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={quickCost}
+                      onChange={(e) => setQuickCost(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleQuickAdd(e);
+                      }}
+                      placeholder="Custo R$"
+                      className={cn(
+                        'w-full rounded-lg border px-2 py-1.5 text-right text-xs font-bold focus:outline-none',
+                        isLight
+                          ? 'border-amber-300 bg-white text-amber-900 placeholder-amber-400 focus:border-amber-600'
+                          : 'border-amber-500/40 bg-zinc-900 text-amber-300 placeholder-zinc-500'
+                      )}
+                    />
+                  ) : (
+                    <div className="text-right text-[11px] text-slate-400">—</div>
+                  )}
+                </td>
+                <td
+                  colSpan={1 + customColumns.length}
+                  className={cn(
+                    'border-r px-3 py-2 text-right',
+                    isLight ? 'border-slate-200' : 'border-zinc-800'
+                  )}
+                >
+                  <button
+                    type="button"
+                    disabled={savingQuick}
+                    onClick={handleQuickAdd}
+                    className={cn(
+                      'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold text-white shadow-2xs transition-all',
+                      quickType === 'income'
+                        ? 'bg-emerald-600 hover:bg-emerald-700'
+                        : 'bg-rose-600 hover:bg-rose-700'
+                    )}
+                  >
+                    {savingQuick ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Plus className="h-3.5 w-3.5" />
+                    )}
+                    Adicionar Linha
+                  </button>
+                </td>
+                <td />
+              </tr>
             </tbody>
 
+            {/* Spreadsheet Footer Totals */}
             {pageEntries.length > 0 && (
               <tfoot>
-                <tr className="border-t-2 border-dark-700 bg-dark-950/90 font-extrabold text-white">
-                  <td colSpan={4} className="px-3.5 py-3.5 text-right uppercase tracking-wider text-zinc-400">
+                <tr
+                  className={cn(
+                    'border-t-2 font-extrabold',
+                    isLight
+                      ? 'bg-slate-100 border-slate-300 text-slate-900'
+                      : 'bg-zinc-950 border-zinc-700 text-white'
+                  )}
+                >
+                  <td
+                    colSpan={5}
+                    className={cn(
+                      'border-r px-4 py-3.5 text-right text-xs uppercase tracking-wider',
+                      isLight
+                        ? 'border-slate-200 text-slate-600'
+                        : 'border-zinc-800 text-zinc-400'
+                    )}
+                  >
                     Totais da Página ({pageEntries.length}{' '}
                     {pageEntries.length === 1 ? 'registro' : 'registros'}):
                   </td>
-                  <td className="px-3 py-3.5 text-right text-emerald-400">
-                    +{formatCurrency(metrics.grossIncome)}
+                  <td
+                    className={cn(
+                      'border-r px-3.5 py-3.5 text-right tabular-nums',
+                      isLight ? 'border-slate-200' : 'border-zinc-800'
+                    )}
+                  >
+                    <div className={isLight ? 'text-emerald-700' : 'text-emerald-400'}>
+                      +{formatCurrency(metrics.grossIncome)}
+                    </div>
                     {metrics.totalExpenses > 0 && (
-                      <div className="text-[10px] text-red-400">
+                      <div
+                        className={cn(
+                          'text-[11px]',
+                          isLight ? 'text-rose-600' : 'text-rose-400'
+                        )}
+                      >
                         −{formatCurrency(metrics.totalExpenses)} saídas
                       </div>
                     )}
                   </td>
-                  <td className="bg-amber-500/10 px-3.5 py-3.5 text-right text-amber-300">
+                  <td
+                    className={cn(
+                      'border-r px-3.5 py-3.5 text-right tabular-nums',
+                      isLight
+                        ? 'bg-amber-100/70 border-amber-200 text-amber-900'
+                        : 'bg-amber-500/10 border-zinc-800 text-amber-300'
+                    )}
+                  >
                     {formatCurrency(metrics.salesCost)}
                   </td>
                   <td
                     className={cn(
-                      'px-3.5 py-3.5 text-right text-sm',
-                      metrics.netProfit >= 0 ? 'text-neon' : 'text-red-400'
+                      'border-r px-3.5 py-3.5 text-right text-sm tabular-nums',
+                      isLight ? 'border-slate-200' : 'border-zinc-800',
+                      metrics.netProfit >= 0
+                        ? isLight
+                          ? 'bg-emerald-100/70 text-emerald-900'
+                          : 'text-[#BEFA46]'
+                        : isLight
+                          ? 'bg-rose-100 text-rose-800'
+                          : 'text-rose-400'
                     )}
                   >
                     {metrics.netProfit >= 0 ? '+' : ''}
                     {formatCurrency(metrics.netProfit)}
                   </td>
                   {customColumns.map((col) => (
-                    <td key={col.id} className="border-l border-dark-800 px-3 py-3.5" />
+                    <td
+                      key={col.id}
+                      className={cn(
+                        'border-r px-3 py-3.5',
+                        isLight ? 'border-slate-200' : 'border-zinc-800'
+                      )}
+                    />
                   ))}
                   <td />
                 </tr>
@@ -1312,14 +2189,18 @@ export function FinancialPanelClient({
 }
 
 function SpreadsheetRow({
+  rowNumber,
   entry,
   customColumns,
+  isLight,
   isSaving,
   onUpdateField,
   onDelete,
 }: {
+  rowNumber: number;
   entry: FinancialEntry;
   customColumns: FinancialCustomColumn[];
+  isLight: boolean;
   isSaving: boolean;
   onUpdateField: (id: string, updates: Record<string, unknown>, silent?: boolean) => Promise<void>;
   onDelete: (entry: FinancialEntry) => Promise<void>;
@@ -1354,54 +2235,100 @@ function SpreadsheetRow({
       : null;
 
   return (
-    <tr className="group transition-colors hover:bg-dark-800/50">
+    <tr
+      className={cn(
+        'group transition-colors',
+        isLight ? 'hover:bg-slate-50/90' : 'hover:bg-zinc-800/40'
+      )}
+    >
+      {/* Row # */}
+      <td
+        className={cn(
+          'border-r px-2.5 py-3 text-center font-mono text-[11px]',
+          isLight
+            ? 'border-slate-200/80 bg-slate-50/50 text-slate-400'
+            : 'border-zinc-800 bg-zinc-950/40 text-zinc-500'
+        )}
+      >
+        {rowNumber}
+      </td>
+
       {/* Data e Hora */}
-      <td className="whitespace-nowrap px-3.5 py-2.5 align-middle">
+      <td
+        className={cn(
+          'whitespace-nowrap border-r px-3.5 py-2.5 align-middle',
+          isLight ? 'border-slate-200/80' : 'border-zinc-800'
+        )}
+      >
         {editingDateTime ? (
-          <div className="flex items-center gap-1">
-            <input
-              type="datetime-local"
-              value={dateTimeVal}
-              onChange={(e) => setDateTimeVal(e.target.value)}
-              onBlur={() => {
-                setEditingDateTime(false);
-                if (dateTimeVal) {
-                  const iso = new Date(dateTimeVal).toISOString();
-                  const ymd = dateTimeVal.slice(0, 10);
-                  onUpdateField(entry.id, { occurred_at: iso, entry_date: ymd }, true);
-                }
-              }}
-              className="rounded border border-neon bg-dark-950 px-1.5 py-1 text-[11px] text-white focus:outline-none"
-              autoFocus
-            />
-          </div>
+          <input
+            type="datetime-local"
+            value={dateTimeVal}
+            onChange={(e) => setDateTimeVal(e.target.value)}
+            onBlur={() => {
+              setEditingDateTime(false);
+              if (dateTimeVal) {
+                const iso = new Date(dateTimeVal).toISOString();
+                const ymd = dateTimeVal.slice(0, 10);
+                onUpdateField(entry.id, { occurred_at: iso, entry_date: ymd }, true);
+              }
+            }}
+            className={cn(
+              'rounded-lg border px-2 py-1 text-[11px] focus:outline-none',
+              isLight
+                ? 'border-slate-900 bg-white text-slate-900'
+                : 'border-[#BEFA46] bg-zinc-950 text-white'
+            )}
+            autoFocus
+          />
         ) : (
           <button
             type="button"
             onClick={() => setEditingDateTime(true)}
             className="text-left group/dt"
-            title="Clique para alterar data e hora"
+            title="Clique para editar data e hora"
           >
-            <div className="font-bold text-zinc-200 group-hover/dt:text-neon">
+            <div
+              className={cn(
+                'font-bold tabular-nums',
+                isLight
+                  ? 'text-slate-800 group-hover/dt:text-indigo-600'
+                  : 'text-zinc-200 group-hover/dt:text-[#BEFA46]'
+              )}
+            >
               {dtDisplay.date}
             </div>
-            <div className="flex items-center gap-1 text-[11px] text-zinc-400">
-              <Clock className="h-3 w-3 text-zinc-500" />
+            <div
+              className={cn(
+                'mt-0.5 inline-flex items-center gap-1 text-[11px] tabular-nums',
+                isLight ? 'text-slate-500' : 'text-zinc-400'
+              )}
+            >
+              <Clock className="h-3 w-3 opacity-70" />
               {dtDisplay.time}
             </div>
           </button>
         )}
       </td>
 
-      {/* Tipo (Entrada / Saída + Badge Venda Automática) */}
-      <td className="whitespace-nowrap px-3 py-2.5 align-middle">
+      {/* Tipo / Origem */}
+      <td
+        className={cn(
+          'whitespace-nowrap border-r px-3 py-2.5 align-middle',
+          isLight ? 'border-slate-200/80' : 'border-zinc-800'
+        )}
+      >
         <div className="flex flex-col items-start gap-1">
           <span
             className={cn(
-              'inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider',
+              'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider',
               entry.entry_type === 'income'
-                ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
-                : 'bg-red-500/15 text-red-400 border border-red-500/30'
+                ? isLight
+                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                  : 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
+                : isLight
+                  ? 'bg-rose-100 text-rose-800 border border-rose-200'
+                  : 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
             )}
           >
             {entry.entry_type === 'income' ? 'Entrada' : 'Saída'}
@@ -1410,21 +2337,38 @@ function SpreadsheetRow({
           {entry.source_type === 'order_sale' && entry.order ? (
             <Link
               href={`/admin/pedidos/${entry.order.id}`}
-              className="inline-flex items-center gap-1 rounded bg-neon/10 px-1.5 py-0.5 text-[10px] font-bold text-neon hover:underline"
-              title="Ver pedido que gerou esta venda automática"
+              className={cn(
+                'inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold transition-colors',
+                isLight
+                  ? 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
+                  : 'bg-indigo-500/15 text-indigo-300 hover:underline'
+              )}
+              title="Abrir detalhes do pedido"
             >
               <Sparkles className="h-2.5 w-2.5" />
               #{entry.order.order_number}
               <ExternalLink className="h-2.5 w-2.5" />
             </Link>
           ) : (
-            <span className="text-[10px] text-zinc-500">{entry.category}</span>
+            <span
+              className={cn(
+                'text-[10px] font-medium',
+                isLight ? 'text-slate-500' : 'text-zinc-500'
+              )}
+            >
+              {entry.category}
+            </span>
           )}
         </div>
       </td>
 
       {/* Descrição Editável */}
-      <td className="px-3.5 py-2.5 align-middle">
+      <td
+        className={cn(
+          'border-r px-3 py-2.5 align-middle',
+          isLight ? 'border-slate-200/80' : 'border-zinc-800'
+        )}
+      >
         <input
           type="text"
           value={desc}
@@ -1437,19 +2381,45 @@ function SpreadsheetRow({
             }
           }}
           placeholder="Descreva esta entrada/saída..."
-          className="w-full rounded-lg border border-transparent bg-transparent px-2 py-1.5 text-xs font-medium text-white transition-colors hover:border-dark-700 focus:border-neon focus:bg-dark-950 focus:outline-none"
+          className={cn(
+            'w-full rounded-lg border border-transparent bg-transparent px-2 py-1.5 text-xs font-semibold transition-all focus:outline-none',
+            isLight
+              ? 'text-slate-900 hover:border-slate-300 hover:bg-white focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/15'
+              : 'text-white hover:border-zinc-700 focus:border-[#BEFA46] focus:bg-zinc-950'
+          )}
         />
         {entry.product && (
-          <div className="px-2 text-[10px] text-zinc-400">
-            Produto vinculado: <strong className="text-zinc-300">{entry.product.name}</strong>
+          <div
+            className={cn(
+              'mt-0.5 flex items-center gap-1 px-2 text-[11px]',
+              isLight ? 'text-slate-500' : 'text-zinc-400'
+            )}
+          >
+            <Package className="h-3 w-3 shrink-0 opacity-70" />
+            <span>
+              Produto:{' '}
+              <strong className={isLight ? 'text-slate-700' : 'text-zinc-200'}>
+                {entry.product.name}
+              </strong>
+            </span>
           </div>
         )}
       </td>
 
       {/* Vínculo com a Loja */}
-      <td className="px-3 py-2.5 align-middle">
+      <td
+        className={cn(
+          'border-r px-3 py-2.5 align-middle',
+          isLight ? 'border-slate-200/80' : 'border-zinc-800'
+        )}
+      >
         <div className="flex items-center gap-1.5">
-          <Store className="h-3.5 w-3.5 shrink-0 text-zinc-500" />
+          <Store
+            className={cn(
+              'h-3.5 w-3.5 shrink-0',
+              isLight ? 'text-slate-400' : 'text-zinc-500'
+            )}
+          />
           <input
             type="text"
             list="store-link-presets"
@@ -1462,15 +2432,32 @@ function SpreadsheetRow({
                 setStoreLink(entry.store_link);
               }
             }}
-            className="w-full rounded-lg border border-transparent bg-transparent px-1.5 py-1 text-xs text-zinc-300 transition-colors hover:border-dark-700 focus:border-neon focus:bg-dark-950 focus:outline-none"
+            className={cn(
+              'w-full rounded-lg border border-transparent bg-transparent px-2 py-1 text-xs font-medium transition-all focus:outline-none',
+              isLight
+                ? 'text-slate-700 hover:border-slate-300 hover:bg-white focus:border-indigo-500 focus:bg-white'
+                : 'text-zinc-300 hover:border-zinc-700 focus:border-[#BEFA46] focus:bg-zinc-950'
+            )}
           />
         </div>
       </td>
 
       {/* Valor Bruto */}
-      <td className="whitespace-nowrap px-3 py-2.5 text-right align-middle">
+      <td
+        className={cn(
+          'whitespace-nowrap border-r px-3 py-2.5 text-right align-middle',
+          isLight ? 'border-slate-200/80' : 'border-zinc-800'
+        )}
+      >
         <div className="inline-flex items-center justify-end gap-1">
-          <span className="text-[10px] font-bold text-zinc-500">R$</span>
+          <span
+            className={cn(
+              'text-[10px] font-bold',
+              isLight ? 'text-slate-400' : 'text-zinc-500'
+            )}
+          >
+            R$
+          </span>
           <input
             type="number"
             step="0.01"
@@ -1484,18 +2471,41 @@ function SpreadsheetRow({
               }
             }}
             className={cn(
-              'w-24 rounded-lg border border-transparent bg-transparent px-2 py-1 text-right text-xs font-extrabold transition-colors hover:border-dark-700 focus:border-neon focus:bg-dark-950 focus:outline-none',
-              entry.entry_type === 'income' ? 'text-emerald-400' : 'text-red-400'
+              'w-24 rounded-lg border border-transparent bg-transparent px-2 py-1 text-right text-xs font-extrabold tabular-nums transition-all focus:outline-none',
+              isLight
+                ? 'hover:border-slate-300 hover:bg-white focus:border-indigo-500 focus:bg-white'
+                : 'hover:border-zinc-700 focus:border-[#BEFA46] focus:bg-zinc-950',
+              entry.entry_type === 'income'
+                ? isLight
+                  ? 'text-emerald-700'
+                  : 'text-emerald-400'
+                : isLight
+                  ? 'text-rose-600'
+                  : 'text-rose-400'
             )}
           />
         </div>
       </td>
 
       {/* Custo da Venda ("Quanto gastei pra fazer essa venda?") */}
-      <td className="whitespace-nowrap bg-amber-500/5 px-3.5 py-2.5 text-right align-middle">
+      <td
+        className={cn(
+          'whitespace-nowrap border-r px-3.5 py-2.5 text-right align-middle',
+          isLight
+            ? 'bg-amber-50/45 border-amber-200/70'
+            : 'bg-amber-500/5 border-zinc-800'
+        )}
+      >
         {entry.entry_type === 'income' ? (
           <div className="inline-flex items-center justify-end gap-1">
-            <span className="text-[10px] font-bold text-amber-400/70">R$</span>
+            <span
+              className={cn(
+                'text-[10px] font-bold',
+                isLight ? 'text-amber-700/70' : 'text-amber-400/70'
+              )}
+            >
+              R$
+            </span>
             <input
               type="number"
               step="0.01"
@@ -1509,40 +2519,74 @@ function SpreadsheetRow({
                 }
               }}
               placeholder="0,00"
-              title="Informe quanto você gastou para realizar esta venda (ex.: custo do tênis, frete, embalagem, comissão)"
-              className="w-24 rounded-lg border border-amber-500/30 bg-dark-950/90 px-2 py-1 text-right text-xs font-extrabold text-amber-300 transition-colors hover:border-amber-400 focus:border-amber-400 focus:outline-none"
+              title="Informe quanto você gastou para realizar esta venda"
+              className={cn(
+                'w-24 rounded-lg border px-2 py-1 text-right text-xs font-extrabold tabular-nums transition-all focus:outline-none',
+                isLight
+                  ? 'border-amber-300/90 bg-white text-amber-900 shadow-2xs hover:border-amber-400 focus:border-amber-600 focus:ring-2 focus:ring-amber-500/15'
+                  : 'border-amber-500/30 bg-zinc-950 text-amber-300 hover:border-amber-400 focus:border-amber-400'
+              )}
             />
           </div>
         ) : (
-          <span className="text-[11px] text-zinc-600">—</span>
+          <span className={cn('text-xs', isLight ? 'text-slate-400' : 'text-zinc-600')}>
+            —
+          </span>
         )}
       </td>
 
-      {/* Lucro Líquido / Resultado Real da Linha */}
-      <td className="whitespace-nowrap px-3.5 py-2.5 text-right align-middle">
+      {/* Lucro Real / Resultado */}
+      <td
+        className={cn(
+          'whitespace-nowrap border-r px-3.5 py-2.5 text-right align-middle',
+          isLight
+            ? 'bg-emerald-50/25 border-slate-200/80'
+            : 'border-zinc-800'
+        )}
+      >
         <div
           className={cn(
-            'font-extrabold',
-            netResult >= 0 ? 'text-neon' : 'text-red-400'
+            'font-extrabold tabular-nums',
+            netResult >= 0
+              ? isLight
+                ? 'text-emerald-700'
+                : 'text-[#BEFA46]'
+              : isLight
+                ? 'text-rose-600'
+                : 'text-rose-400'
           )}
         >
           {netResult >= 0 ? '+' : ''}
           {formatCurrency(netResult)}
         </div>
         {profitMargin !== null && (
-          <div className="text-[10px] text-zinc-400">
-            Margem: {profitMargin.toFixed(0)}%
+          <div
+            className={cn(
+              'mt-0.5 inline-block rounded px-1.5 py-0.2 text-[10px] font-semibold',
+              profitMargin >= 30
+                ? isLight
+                  ? 'bg-emerald-100 text-emerald-800'
+                  : 'bg-emerald-500/15 text-emerald-300'
+                : isLight
+                  ? 'bg-slate-200 text-slate-700'
+                  : 'bg-zinc-800 text-zinc-300'
+            )}
+          >
+            Margem {profitMargin.toFixed(0)}%
           </div>
         )}
       </td>
 
-      {/* Células das Colunas Personalizadas pelo Usuário */}
+      {/* Colunas Personalizadas pelo Usuário */}
       {customColumns.map((col) => {
         const val = customVals[col.column_key] ?? '';
         return (
           <td
             key={col.id}
-            className="border-l border-dark-800 px-2.5 py-2.5 align-middle"
+            className={cn(
+              'border-r px-2.5 py-2.5 align-middle',
+              isLight ? 'border-slate-200/80' : 'border-zinc-800'
+            )}
           >
             <input
               type={col.column_type === 'number' ? 'number' : 'text'}
@@ -1563,23 +2607,38 @@ function SpreadsheetRow({
                   onUpdateField(entry.id, { custom_values: nextCustom }, true);
                 }
               }}
-              placeholder="—"
-              className="w-full rounded-lg border border-transparent bg-transparent px-2 py-1 text-xs text-zinc-200 placeholder-zinc-600 transition-colors hover:border-dark-700 focus:border-neon focus:bg-dark-950 focus:outline-none"
+              placeholder="Preencher..."
+              className={cn(
+                'w-full rounded-lg border border-transparent bg-transparent px-2 py-1 text-xs transition-all focus:outline-none',
+                isLight
+                  ? 'text-slate-800 placeholder-slate-300 hover:border-slate-300 hover:bg-white focus:border-indigo-500 focus:bg-white'
+                  : 'text-zinc-200 placeholder-zinc-600 hover:border-zinc-700 focus:border-[#BEFA46] focus:bg-zinc-950'
+              )}
             />
           </td>
         );
       })}
 
       {/* Ações */}
-      <td className="px-3 py-2.5 text-center align-middle">
+      <td className="px-2.5 py-2.5 text-center align-middle">
         {isSaving ? (
-          <Loader2 className="mx-auto h-4 w-4 animate-spin text-neon" />
+          <Loader2
+            className={cn(
+              'mx-auto h-4 w-4 animate-spin',
+              isLight ? 'text-indigo-600' : 'text-[#BEFA46]'
+            )}
+          />
         ) : (
           <button
             type="button"
             onClick={() => onDelete(entry)}
-            className="rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-red-500/15 hover:text-red-400"
-            title="Excluir linha da planilha"
+            className={cn(
+              'rounded-lg p-1.5 transition-colors',
+              isLight
+                ? 'text-slate-400 hover:bg-rose-50 hover:text-rose-600'
+                : 'text-zinc-500 hover:bg-rose-500/15 hover:text-rose-400'
+            )}
+            title="Excluir lançamento"
           >
             <Trash2 className="h-4 w-4" />
           </button>
