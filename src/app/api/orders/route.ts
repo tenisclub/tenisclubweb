@@ -203,6 +203,8 @@ export async function POST(request: Request) {
           ...orderUpdates,
         };
       }
+
+      await supabase.rpc('sync_order_financial_entry', { p_order_id: orderId });
     }
 
     revalidateStoreData('orders');

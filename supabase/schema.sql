@@ -1794,3 +1794,236 @@ BEGIN
     ALTER PUBLICATION supabase_realtime ADD TABLE public.site_sync_state;
   END IF;
 END $$;
+
+-- ----------------------------------------------------------------------------
+-- 17. PAINEL FINANCEIRO & PLANILHA AUTOMÁTICA DE ENTRADAS/SAÍDAS
+-- ----------------------------------------------------------------------------
+ALTER TABLE public.products
+  ADD COLUMN IF NOT EXISTS cost_price NUMERIC(10, 2) NOT NULL DEFAULT 0 CHECK (cost_price >= 0);
+
+CREATE TABLE IF NOT EXISTS public.financial_custom_columns (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  column_key TEXT UNIQUE NOT NULL,
+  column_type TEXT NOT NULL DEFAULT 'text' CHECK (column_type IN ('text', 'currency', 'number')),
+  sort_order INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.financial_entries (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  entry_type TEXT NOT NULL CHECK (entry_type IN ('income', 'expense')),
+  source_type TEXT NOT NULL DEFAULT 'manual' CHECK (source_type IN ('order_sale', 'manual', 'product_link')),
+  description TEXT NOT NULL,
+  category TEXT NOT NULL DEFAULT 'Geral',
+  store_link TEXT NOT NULL DEFAULT 'Tênis Club — Loja Online',
+  order_id UUID UNIQUE REFERENCES public.orders(id) ON DELETE CASCADE,
+  product_id UUID REFERENCES public.products(id) ON DELETE SET NULL,
+  amount NUMERIC(12, 2) NOT NULL DEFAULT 0 CHECK (amount >= 0),
+  cost_amount NUMERIC(12, 2) NOT NULL DEFAULT 0 CHECK (cost_amount >= 0),
+  payment_method TEXT NOT NULL DEFAULT '',
+  custom_values JSONB NOT NULL DEFAULT '{}'::jsonb,
+  occurred_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  entry_date DATE NOT NULL DEFAULT ((NOW() AT TIME ZONE 'America/Sao_Paulo')::DATE),
+  created_by UUID REFERENCES public.user_profiles(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_financial_entries_date
+  ON public.financial_entries(entry_date DESC, occurred_at DESC);
+CREATE INDEX IF NOT EXISTS idx_financial_entries_type
+  ON public.financial_entries(entry_type);
+CREATE INDEX IF NOT EXISTS idx_financial_entries_order
+  ON public.financial_entries(order_id);
+CREATE INDEX IF NOT EXISTS idx_financial_entries_product
+  ON public.financial_entries(product_id);
+
+CREATE OR REPLACE FUNCTION public.set_updated_at()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  NEW.updated_at := NOW();
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_financial_entries_updated_at ON public.financial_entries;
+CREATE TRIGGER trg_financial_entries_updated_at
+  BEFORE UPDATE ON public.financial_entries
+  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+ALTER TABLE public.financial_custom_columns ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.financial_entries ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "financial_custom_columns_admin_all" ON public.financial_custom_columns;
+CREATE POLICY "financial_custom_columns_admin_all" ON public.financial_custom_columns
+  FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "financial_entries_admin_all" ON public.financial_entries;
+CREATE POLICY "financial_entries_admin_all" ON public.financial_entries
+  FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+CREATE OR REPLACE FUNCTION public.sync_order_financial_entry(p_order_id UUID)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_order RECORD;
+  v_items_summary TEXT;
+  v_calc_cost NUMERIC(12, 2) := 0;
+  v_first_product_id UUID := NULL;
+  v_desc TEXT;
+  v_payment TEXT;
+BEGIN
+  SELECT * INTO v_order
+  FROM public.orders
+  WHERE id = p_order_id;
+
+  IF NOT FOUND THEN
+    RETURN;
+  END IF;
+
+  IF v_order.status = 'cancelled' THEN
+    DELETE FROM public.financial_entries
+    WHERE order_id = p_order_id AND source_type = 'order_sale';
+    RETURN;
+  END IF;
+
+  SELECT
+    STRING_AGG(
+      oi.quantity || 'x ' || oi.product_name || ' (' || oi.color || ' Tam. ' || oi.size || ')',
+      ', '
+      ORDER BY oi.created_at ASC
+    ),
+    COALESCE(SUM(COALESCE(p.cost_price, 0) * oi.quantity), 0),
+    (ARRAY_AGG(oi.product_id ORDER BY oi.created_at ASC))[1]
+  INTO v_items_summary, v_calc_cost, v_first_product_id
+  FROM public.order_items oi
+  LEFT JOIN public.products p ON p.id = oi.product_id
+  WHERE oi.order_id = p_order_id;
+
+  IF v_items_summary IS NOT NULL AND v_items_summary <> '' THEN
+    v_desc := 'Venda Pedido ' || v_order.order_number || ' (' || v_order.customer_name || ') — ' || v_items_summary;
+  ELSE
+    v_desc := 'Venda Pedido ' || v_order.order_number || ' (' || v_order.customer_name || ')';
+  END IF;
+
+  v_payment := COALESCE(NULLIF(TRIM(v_order.payment_method_note), ''), 'A combinar');
+
+  INSERT INTO public.financial_entries (
+    entry_type,
+    source_type,
+    description,
+    category,
+    store_link,
+    order_id,
+    product_id,
+    amount,
+    cost_amount,
+    payment_method,
+    custom_values,
+    occurred_at,
+    entry_date
+  ) VALUES (
+    'income',
+    'order_sale',
+    v_desc,
+    'Venda de Produto',
+    'Tênis Club — Loja Online',
+    v_order.id,
+    v_first_product_id,
+    GREATEST(COALESCE(v_order.total, 0), 0),
+    GREATEST(COALESCE(v_calc_cost, 0), 0),
+    v_payment,
+    '{}'::jsonb,
+    COALESCE(v_order.created_at, NOW()),
+    (COALESCE(v_order.created_at, NOW()) AT TIME ZONE 'America/Sao_Paulo')::DATE
+  )
+  ON CONFLICT (order_id) DO UPDATE SET
+    description = CASE
+      WHEN public.financial_entries.description LIKE 'Venda Pedido %' THEN EXCLUDED.description
+      ELSE public.financial_entries.description
+    END,
+    product_id = COALESCE(public.financial_entries.product_id, EXCLUDED.product_id),
+    amount = EXCLUDED.amount,
+    cost_amount = CASE
+      WHEN public.financial_entries.cost_amount > 0 THEN public.financial_entries.cost_amount
+      ELSE EXCLUDED.cost_amount
+    END,
+    payment_method = CASE
+      WHEN EXCLUDED.payment_method <> 'A combinar' THEN EXCLUDED.payment_method
+      ELSE public.financial_entries.payment_method
+    END,
+    updated_at = NOW();
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.trg_fn_sync_order_financial()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  PERFORM public.sync_order_financial_entry(NEW.id);
+  RETURN NEW;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.trg_fn_sync_order_items_financial()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_oid UUID;
+BEGIN
+  v_oid := CASE WHEN TG_OP = 'DELETE' THEN OLD.order_id ELSE NEW.order_id END;
+  IF v_oid IS NOT NULL THEN
+    PERFORM public.sync_order_financial_entry(v_oid);
+  END IF;
+  RETURN NULL;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.sync_order_financial_entry(UUID) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.sync_order_financial_entry(UUID) TO postgres, service_role;
+
+DROP TRIGGER IF EXISTS trg_orders_sync_financial ON public.orders;
+CREATE TRIGGER trg_orders_sync_financial
+  AFTER INSERT OR UPDATE ON public.orders
+  FOR EACH ROW
+  EXECUTE FUNCTION public.trg_fn_sync_order_financial();
+
+DROP TRIGGER IF EXISTS trg_order_items_sync_financial ON public.order_items;
+CREATE TRIGGER trg_order_items_sync_financial
+  AFTER INSERT OR UPDATE OR DELETE ON public.order_items
+  FOR EACH ROW
+  EXECUTE FUNCTION public.trg_fn_sync_order_items_financial();
+
+DROP TRIGGER IF EXISTS trg_realtime_financial_entries ON public.financial_entries;
+CREATE TRIGGER trg_realtime_financial_entries
+  AFTER INSERT OR UPDATE OR DELETE ON public.financial_entries
+  FOR EACH STATEMENT
+  EXECUTE FUNCTION internal.trg_sync_global('orders');
+
+DROP TRIGGER IF EXISTS trg_realtime_financial_columns ON public.financial_custom_columns;
+CREATE TRIGGER trg_realtime_financial_columns
+  AFTER INSERT OR UPDATE OR DELETE ON public.financial_custom_columns
+  FOR EACH STATEMENT
+  EXECUTE FUNCTION internal.trg_sync_global('orders');
+
+-- Backfill existing non-cancelled orders into financial_entries
+DO $$
+DECLARE
+  r RECORD;
+BEGIN
+  FOR r IN SELECT id FROM public.orders WHERE status <> 'cancelled' LOOP
+    PERFORM public.sync_order_financial_entry(r.id);
+  END LOOP;
+END $$;

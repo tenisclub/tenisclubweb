@@ -16,6 +16,7 @@ import {
   ShieldAlert,
   Settings,
   BarChart3,
+  Wallet,
   ExternalLink,
   Menu,
   X,
@@ -30,6 +31,7 @@ import type { UserProfile, UserRole } from '@/types/database';
 const ADMIN_NAV = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { href: '/admin/pedidos', label: 'Pedidos', icon: ShoppingCart },
+  { href: '/admin/financeiro', label: 'Painel Financeiro', icon: Wallet },
   { href: '/admin/produtos', label: 'Produtos', icon: Package },
   { href: '/admin/estoque', label: 'Controle de Estoque', icon: Boxes },
   { href: '/admin/movimentacoes', label: 'Movimentações', icon: History },

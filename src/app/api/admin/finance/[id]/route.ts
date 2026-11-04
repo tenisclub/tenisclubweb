@@ -1,0 +1,176 @@
+import { NextResponse } from 'next/server';
+import { getAuthSession } from '@/lib/auth';
+import { revalidateStoreData } from '@/lib/revalidate-store';
+import { createServiceClient } from '@/lib/supabase/server';
+
+function toSaoPauloDateStr(isoDate: string): string {
+  try {
+    const dt = new Date(isoDate);
+    if (Number.isNaN(dt.getTime())) {
+      return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date());
+    }
+    return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(dt);
+  } catch {
+    return new Date().toISOString().slice(0, 10);
+  }
+}
+
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await getAuthSession();
+  if (!session?.isAdmin) {
+    return NextResponse.json({ error: 'Acesso negado.' }, { status: 403 });
+  }
+
+  const { id } = await params;
+
+  try {
+    const body = await request.json();
+    const supabase = createServiceClient();
+
+    if (body.target === 'column') {
+      const updates: Record<string, unknown> = {};
+      if (body.name !== undefined) {
+        const cleanName = String(body.name).trim();
+        if (!cleanName) {
+          return NextResponse.json({ error: 'O nome da coluna não pode ficar vazio.' }, { status: 400 });
+        }
+        updates.name = cleanName;
+      }
+      if (body.column_type && ['text', 'currency', 'number'].includes(body.column_type)) {
+        updates.column_type = body.column_type;
+      }
+
+      const { data: column, error } = await supabase
+        .from('financial_custom_columns')
+        .update(updates)
+        .eq('id', id)
+        .select('*')
+        .single();
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 400 });
+      }
+
+      revalidateStoreData('orders');
+      return NextResponse.json({ column });
+    }
+
+    const updates: Record<string, unknown> = {};
+
+    if (body.description !== undefined) {
+      const desc = String(body.description).trim();
+      if (!desc) {
+        return NextResponse.json({ error: 'A descrição não pode ficar vazia.' }, { status: 400 });
+      }
+      updates.description = desc;
+    }
+    if (body.entry_type !== undefined) {
+      updates.entry_type = body.entry_type === 'expense' ? 'expense' : 'income';
+    }
+    if (body.category !== undefined) {
+      updates.category = String(body.category).trim() || 'Geral';
+    }
+    if (body.store_link !== undefined) {
+      updates.store_link = String(body.store_link).trim() || 'Tênis Club — Loja Online';
+    }
+    if (body.product_id !== undefined) {
+      updates.product_id = body.product_id ? String(body.product_id) : null;
+    }
+    if (body.amount !== undefined) {
+      updates.amount = Math.max(0, Number(body.amount) || 0);
+    }
+    if (body.cost_amount !== undefined) {
+      updates.cost_amount = Math.max(0, Number(body.cost_amount) || 0);
+    }
+    if (body.payment_method !== undefined) {
+      updates.payment_method = String(body.payment_method).trim();
+    }
+    if (body.occurred_at !== undefined) {
+      const iso = new Date(body.occurred_at).toISOString();
+      updates.occurred_at = iso;
+      if (body.entry_date === undefined) {
+        updates.entry_date = toSaoPauloDateStr(iso);
+      }
+    }
+    if (body.entry_date !== undefined) {
+      updates.entry_date = String(body.entry_date).slice(0, 10);
+    }
+    if (
+      body.custom_values !== undefined &&
+      body.custom_values &&
+      typeof body.custom_values === 'object' &&
+      !Array.isArray(body.custom_values)
+    ) {
+      updates.custom_values = body.custom_values;
+    }
+
+    const { data: entry, error } = await supabase
+      .from('financial_entries')
+      .update(updates)
+      .eq('id', id)
+      .select(
+        `
+        *,
+        order:orders(id, order_number, customer_name, status, payment_status),
+        product:products(id, name, sku)
+      `
+      )
+      .single();
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
+    revalidateStoreData('orders');
+    return NextResponse.json({ entry });
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Erro ao atualizar lançamento.' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await getAuthSession();
+  if (!session?.isAdmin) {
+    return NextResponse.json({ error: 'Acesso negado.' }, { status: 403 });
+  }
+
+  const { id } = await params;
+  const { searchParams } = new URL(request.url);
+  const target = searchParams.get('target');
+
+  try {
+    const supabase = createServiceClient();
+
+    if (target === 'column') {
+      const { error } = await supabase.from('financial_custom_columns').delete().eq('id', id);
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 400 });
+      }
+      revalidateStoreData('orders');
+      return NextResponse.json({ deleted: true });
+    }
+
+    const { error } = await supabase.from('financial_entries').delete().eq('id', id);
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
+    revalidateStoreData('orders');
+    return NextResponse.json({ deleted: true });
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Erro ao excluir registro.' },
+      { status: 500 }
+    );
+  }
+}
+

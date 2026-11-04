@@ -51,6 +51,13 @@ async function run() {
   await client.query(schemaSql);
   console.log('   Schema, triggers, RLS policies & RPCs created!');
 
+  if (process.argv.includes('--schema-only')) {
+    const { rows } = await client.query('SELECT count(*)::int AS total FROM public.financial_entries');
+    console.log(`   Financial entries synced: ${rows[0]?.total ?? 0}`);
+    await client.end();
+    return;
+  }
+
   console.log('3. Configuring Supabase Storage buckets...');
   for (const bucketName of ['products', 'store']) {
     const { data: existing } = await supabase.storage.getBucket(bucketName);
