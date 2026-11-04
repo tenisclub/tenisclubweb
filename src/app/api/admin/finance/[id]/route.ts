@@ -24,4 +24,13 @@ export async function PATCH(
     return NextResponse.json({ error: 'Acesso negado.' }, { status: 403 });
   }
 
-// etapa 3/20
+  const { id } = await params;
+
+  try {
+    const body = await request.json();
+    const supabase = createServiceClient();
+
+    if (body.target === 'column') {
+      const updates: Record<string, unknown> = {};
+      if (body.name !== undefined) {
+// etapa 4/20
