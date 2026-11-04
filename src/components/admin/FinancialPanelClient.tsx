@@ -802,4 +802,23 @@ export function FinancialPanelClient({
           onSubmit={handleCreateEntry}
           className="rounded-2xl border border-neon/40 bg-dark-900 p-5 shadow-2xl"
         >
-// etapa 43/85
+          <div className="mb-4 flex items-center justify-between border-b border-dark-700 pb-3">
+            <div className="flex items-center gap-2.5">
+              <span
+                className={cn(
+                  'flex h-8 w-8 items-center justify-center rounded-lg text-xs font-black',
+                  formType === 'income'
+                    ? 'bg-emerald-500/20 text-emerald-400'
+                    : 'bg-red-500/20 text-red-400'
+                )}
+              >
+                {formType === 'income' ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
+              </span>
+              <div>
+                <h2 className="text-sm font-extrabold uppercase tracking-wider text-white">
+                  {formType === 'income'
+                    ? 'Cadastrar Nova Entrada na Loja'
+                    : 'Cadastrar Nova Saída / Custo da Loja'}
+                </h2>
+                <p className="text-xs text-zinc-400">
+// etapa 44/85
