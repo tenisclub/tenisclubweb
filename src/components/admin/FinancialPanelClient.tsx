@@ -334,4 +334,23 @@ export function FinancialPanelClient({
         ? formOccurredAt.slice(0, 10)
         : selectedDatePage !== 'all'
           ? selectedDatePage
-// etapa 18/85
+          : todayYmd;
+
+      const res = await fetch('/api/admin/finance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          entry_type: formType,
+          description: formDescription.trim(),
+          category: formCategory.trim() || (formType === 'income' ? 'Entrada' : 'Saída'),
+          store_link: formStoreLink.trim() || 'Tênis Club — Loja Online',
+          product_id: formProductId || null,
+          amount: numAmount,
+          cost_amount: formType === 'income' ? numCost : 0,
+          payment_method: formPaymentMethod.trim(),
+          occurred_at: occurredIso,
+          entry_date: entryDateYmd,
+          custom_values: formCustomValues,
+        }),
+      });
+// etapa 19/85
