@@ -859,4 +859,22 @@ export function FinancialPanelClient({
                   Saída (−)
                 </button>
               </div>
-// etapa 46/85
+              <button
+                type="button"
+                onClick={() => setShowEntryForm(false)}
+                className="rounded-lg p-1.5 text-zinc-400 hover:bg-dark-800 hover:text-white"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
+            <div className="md:col-span-5">
+              <label className="mb-1 block text-xs font-bold text-zinc-300">
+                Descrição (O que foi essa {formType === 'income' ? 'entrada' : 'saída'}?) *
+              </label>
+              <input
+                type="text"
+                required
+// etapa 47/85
