@@ -297,4 +297,23 @@ export function FinancialPanelClient({
       if (!map[ymd]) map[ymd] = { count: 0, net: 0 };
       map[ymd].count += 1;
       const amt = Number(e.amount) || 0;
-// etapa 16/85
+      const cost = Number(e.cost_amount) || 0;
+      if (e.entry_type === 'income') {
+        map[ymd].net += amt - cost;
+      } else {
+        map[ymd].net -= amt + cost;
+      }
+    }
+    return map;
+  }, [entries]);
+
+  const handleOpenOrJumpDate = (ymd: string) => {
+    if (!ymd) return;
+    if (!extraDates.includes(ymd)) {
+      setExtraDates((prev) => [...prev, ymd]);
+    }
+    setSelectedDatePage(ymd);
+  };
+
+  const handleCreateEntry = async (e: React.FormEvent) => {
+// etapa 17/85
