@@ -129,4 +129,22 @@ function formatDateTimeDisplay(iso: string): { date: string; time: string } {
         year: 'numeric',
         timeZone: 'America/Sao_Paulo',
       }).format(d),
-// etapa 7/85
+      time: new Intl.DateTimeFormat('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'America/Sao_Paulo',
+      }).format(d),
+    };
+  } catch {
+    return { date: '--/--/----', time: '--:--' };
+  }
+}
+
+export function FinancialPanelClient({
+  initialEntries,
+  initialColumns,
+  products,
+}: {
+  initialEntries: FinancialEntry[];
+  initialColumns: FinancialCustomColumn[];
+// etapa 8/85
