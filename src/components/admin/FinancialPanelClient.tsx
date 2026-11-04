@@ -540,4 +540,23 @@ export function FinancialPanelClient({
   };
 
   return (
-// etapa 29/85
+    <div className="space-y-6">
+      {/* Header & Main Actions */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-neon/15 border border-neon/30 text-neon">
+              <Wallet className="h-5 w-5" />
+            </span>
+            <div>
+              <h1 className="font-display text-2xl font-black uppercase tracking-wider text-white sm:text-3xl">
+                Painel Financeiro
+              </h1>
+              <p className="text-xs text-zinc-400 sm:text-sm">
+                Planilha inteligente separada por data • Vendas entram automaticamente • Controle de custos, saídas e colunas personalizadas
+              </p>
+            </div>
+          </div>
+        </div>
+
+// etapa 30/85
