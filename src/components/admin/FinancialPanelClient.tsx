@@ -933,4 +933,23 @@ export function FinancialPanelClient({
                 />
               </div>
             )}
-// etapa 50/85
+
+            <div className="md:col-span-3">
+              <label className="mb-1 block text-xs font-bold text-zinc-300">
+                Vínculo com a Loja
+              </label>
+              <input
+                type="text"
+                list="store-link-presets"
+                value={formStoreLink}
+                onChange={(e) => setFormStoreLink(e.target.value)}
+                placeholder="Tênis Club — Loja Online"
+                className="w-full rounded-xl border border-dark-700 bg-dark-950 px-3 py-2 text-xs text-white focus:border-neon focus:outline-none"
+              />
+              <datalist id="store-link-presets">
+                {STORE_LINK_PRESETS.map((preset) => (
+                  <option key={preset} value={preset} />
+                ))}
+              </datalist>
+            </div>
+// etapa 51/85
