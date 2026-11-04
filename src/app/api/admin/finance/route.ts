@@ -156,4 +156,13 @@ export async function POST(request: Request) {
         custom_values: customValues,
         occurred_at: occurredAt,
         entry_date: entryDate,
-// etapa 19/22
+        created_by: session.userId,
+      })
+      .select(
+        `
+        *,
+        order:orders(id, order_number, customer_name, status, payment_status),
+        product:products(id, name, sku)
+      `
+      )
+// etapa 20/22
