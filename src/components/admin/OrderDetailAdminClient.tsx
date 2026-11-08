@@ -222,7 +222,8 @@ export function OrderDetailAdminClient({ initialOrder }: { initialOrder: Order }
               <strong className="text-white">Nome:</strong> {initialOrder.customer_name}
             </p>
             <p className="text-zinc-300">
-              <strong className="text-white">E-mail:</strong> {initialOrder.customer_email}
+              <strong className="text-white">E-mail:</strong>{' '}
+              {initialOrder.customer_email || 'Não informado (compra sem login)'}
             </p>
             <p className="text-zinc-300">
               <strong className="text-white">Telefone/WhatsApp:</strong>{' '}

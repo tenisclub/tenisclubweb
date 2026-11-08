@@ -6,13 +6,21 @@ import {
   normalizeCheckoutDeliveryConfig,
   shouldRequireCheckoutAddress,
 } from '@/lib/checkout-config';
+import { clearGuestCartFlagCookie, readGuestCartId } from '@/lib/guest-cart';
 import { revalidateStoreData } from '@/lib/revalidate-store';
 import { createServiceClient } from '@/lib/supabase/server';
 
 export async function POST(request: Request) {
-  const session = await getAuthSession();
-  if (!session) {
-    return NextResponse.json({ error: 'Faça login para finalizar o pedido.' }, { status: 401 });
+  const [session, guestId] = await Promise.all([
+    getAuthSession(),
+    readGuestCartId(),
+  ]);
+
+  if (!session && !guestId) {
+    return NextResponse.json(
+      { error: 'Sua sacola está vazia. Adicione um produto antes de finalizar.' },
+      { status: 400 }
+    );
   }
 
   try {
@@ -31,12 +39,14 @@ export async function POST(request: Request) {
     const cleanPaymentMethod =
       typeof paymentMethod === 'string' ? paymentMethod.trim() : '';
 
-    if (!customerName?.trim() || !customerEmail?.trim() || !customerPhone?.trim()) {
+    if (!customerName?.trim() || !customerPhone?.trim()) {
       return NextResponse.json(
-        { error: 'Preencha nome completo, e-mail e telefone/WhatsApp.' },
+        { error: 'Preencha seu nome completo e telefone/WhatsApp.' },
         { status: 400 }
       );
     }
+
+    const cleanEmail = typeof customerEmail === 'string' ? customerEmail.trim() : '';
 
     const settings = await getStoreSettings();
     const deliveryCfg = normalizeCheckoutDeliveryConfig(settings.checkout_delivery_config);
@@ -127,8 +137,15 @@ export async function POST(request: Request) {
 
     const supabase = createServiceClient();
 
+    if (session && guestId) {
+      await supabase.rpc('merge_guest_cart_into_user', {
+        p_guest_id: guestId,
+        p_user_id: session.userId,
+      });
+    }
+
     const phoneUpdatePromise =
-      !session.profile.phone && customerPhone
+      session && !session.profile.phone && customerPhone
         ? supabase
             .from('user_profiles')
             .update({ phone: customerPhone.trim() })
@@ -137,13 +154,14 @@ export async function POST(request: Request) {
 
     const [{ data: rpcResult, error: rpcError }] = await Promise.all([
       supabase.rpc('create_order_from_cart', {
-        p_user_id: session.userId,
+        p_user_id: session?.userId ?? null,
         p_customer_name: customerName.trim(),
-        p_customer_email: customerEmail.trim(),
+        p_customer_email: cleanEmail,
         p_customer_phone: customerPhone.trim(),
         p_delivery_method: effectiveDeliveryMethod,
         p_shipping_address: finalShippingAddress,
         p_customer_notes: customerNotes || '',
+        p_guest_id: session ? null : guestId,
       }),
       phoneUpdatePromise,
     ]);
@@ -209,7 +227,7 @@ export async function POST(request: Request) {
 
     revalidateStoreData('orders');
 
-    return NextResponse.json({
+    const res = NextResponse.json({
       order: orderData
         ? {
             ...orderData,
@@ -219,6 +237,12 @@ export async function POST(request: Request) {
       orderId,
       orderNumber: r?.order_number,
     });
+
+    if (!session) {
+      clearGuestCartFlagCookie(res);
+    }
+
+    return res;
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Erro ao processar pedido.' },

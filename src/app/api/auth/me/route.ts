@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getVerifiedClaims } from '@/lib/auth';
 import { getUserNavbarState } from '@/lib/catalog';
+import { clearGuestCartCookies, readGuestCartId } from '@/lib/guest-cart';
 import { computeUserSyncTag } from '@/lib/revalidate-store';
 import { createServiceClient } from '@/lib/supabase/server';
 import type { UserProfile, UserRole } from '@/types/database';
@@ -24,6 +25,13 @@ export async function GET() {
   const appMeta = claims.app_metadata || {};
 
   const supabase = createServiceClient();
+  const guestId = await readGuestCartId();
+  if (guestId) {
+    await supabase.rpc('merge_guest_cart_into_user', {
+      p_guest_id: guestId,
+      p_user_id: userId,
+    });
+  }
 
   // Single parallel wave instead of 2 sequential round-trips to Postgres
   const [{ data: profileRow }, { data: userRoles }, navState, { data: unreadRows }] =
@@ -93,7 +101,7 @@ export async function GET() {
     isAdmin ? n.target_audience === 'admin' : n.target_audience === 'customer' && n.user_id === userId
   ).length;
 
-  return NextResponse.json({
+  const res = NextResponse.json({
     authenticated: true,
     user: { ...resolvedProfile, role },
     role,
@@ -104,4 +112,10 @@ export async function GET() {
     favoriteIds: navState.favoriteIds,
     unreadNotifications,
   });
+
+  if (guestId) {
+    clearGuestCartCookies(res);
+  }
+
+  return res;
 }

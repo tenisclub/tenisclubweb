@@ -50,6 +50,8 @@ function formatPhoneBr(value: string): string {
   return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
 }
 
+const GUEST_DRAFT_STORAGE_KEY = 'tc_guest_checkout_draft';
+
 export function CheckoutClient({
   items,
   total,
@@ -61,7 +63,7 @@ export function CheckoutClient({
   items: CartItemView[];
   total: number;
   subtotal: number;
-  profile: UserProfile;
+  profile: UserProfile | null;
   savedAddresses: UserAddress[];
   settings: StoreSettings;
 }) {
@@ -82,10 +84,10 @@ export function CheckoutClient({
   );
 
   // Step 2: Customer info & intended payment method
-  const [customerName, setCustomerName] = useState(profile.full_name || '');
-  const [customerEmail, setCustomerEmail] = useState(profile.email || '');
+  const [customerName, setCustomerName] = useState(profile?.full_name || '');
+  const [customerEmail, setCustomerEmail] = useState(profile?.email || '');
   const [customerPhone, setCustomerPhone] = useState(() =>
-    formatPhoneBr(profile.phone || '')
+    formatPhoneBr(profile?.phone || '')
   );
   const [paymentChoice, setPaymentChoice] = useState<
     'pix' | 'card' | 'cash' | 'other' | ''
@@ -130,6 +132,85 @@ export function CheckoutClient({
   const [city, setCity] = useState(defaultAddr?.city || 'São Paulo');
   const [stateUf, setStateUf] = useState(defaultAddr?.state || 'SP');
   const [reference, setReference] = useState(defaultAddr?.reference || '');
+
+  // Restore saved guest checkout fields from localStorage so returning buyers don't retype everything
+  const [draftHydrated, setDraftHydrated] = useState(false);
+  useEffect(() => {
+    if (profile || typeof window === 'undefined') {
+      setDraftHydrated(true);
+      return;
+    }
+    try {
+      const raw = localStorage.getItem(GUEST_DRAFT_STORAGE_KEY);
+      if (raw) {
+        const draft = JSON.parse(raw) as Partial<{
+          customerName: string;
+          customerEmail: string;
+          customerPhone: string;
+          zipCode: string;
+          street: string;
+          number: string;
+          complement: string;
+          neighborhood: string;
+          city: string;
+          stateUf: string;
+          reference: string;
+        }>;
+        if (draft.customerName) setCustomerName(draft.customerName);
+        if (draft.customerEmail) setCustomerEmail(draft.customerEmail);
+        if (draft.customerPhone) setCustomerPhone(formatPhoneBr(draft.customerPhone));
+        if (draft.zipCode) setZipCode(draft.zipCode);
+        if (draft.street) setStreet(draft.street);
+        if (draft.number) setNumber(draft.number);
+        if (draft.complement) setComplement(draft.complement);
+        if (draft.neighborhood) setNeighborhood(draft.neighborhood);
+        if (draft.city) setCity(draft.city);
+        if (draft.stateUf) setStateUf(draft.stateUf);
+        if (draft.reference) setReference(draft.reference);
+      }
+    } catch {
+      // Ignore malformed draft
+    }
+    setDraftHydrated(true);
+  }, [profile]);
+
+  useEffect(() => {
+    if (profile || !draftHydrated || typeof window === 'undefined') return;
+    try {
+      localStorage.setItem(
+        GUEST_DRAFT_STORAGE_KEY,
+        JSON.stringify({
+          customerName,
+          customerEmail,
+          customerPhone,
+          zipCode,
+          street,
+          number,
+          complement,
+          neighborhood,
+          city,
+          stateUf,
+          reference,
+        })
+      );
+    } catch {
+      // Ignore storage quota errors
+    }
+  }, [
+    profile,
+    draftHydrated,
+    customerName,
+    customerEmail,
+    customerPhone,
+    zipCode,
+    street,
+    number,
+    complement,
+    neighborhood,
+    city,
+    stateUf,
+    reference,
+  ]);
 
   // Notes & submission
   const [customerNotes, setCustomerNotes] = useState('');
@@ -206,8 +287,8 @@ export function CheckoutClient({
   };
 
   const handleContinueFromStep2 = () => {
-    if (!customerName.trim() || !customerPhone.trim() || !customerEmail.trim()) {
-      setErrorMsg('Preencha seu nome, WhatsApp e e-mail para continuar.');
+    if (!customerName.trim() || !customerPhone.trim()) {
+      setErrorMsg('Preencha seu nome completo e WhatsApp para continuar.');
       return;
     }
     if (!paymentChoice) {
@@ -222,8 +303,8 @@ export function CheckoutClient({
   };
 
   const handleConfirmOrder = async () => {
-    if (!customerName.trim() || !customerPhone.trim() || !customerEmail.trim()) {
-      setErrorMsg('Preencha nome, WhatsApp e e-mail na Etapa 2 antes de finalizar.');
+    if (!customerName.trim() || !customerPhone.trim()) {
+      setErrorMsg('Preencha nome completo e WhatsApp na Etapa 2 antes de finalizar.');
       return;
     }
     if (!resolvedPaymentMethod) {
@@ -535,14 +616,24 @@ export function CheckoutClient({
           {/* STEP 2: CUSTOMER INFO */}
           {step === 2 && (
             <div className="space-y-5">
-              <div>
-                <h2 className="text-base sm:text-xl font-black text-white flex items-center gap-2">
-                  <User className="w-5 h-5 text-[#BEFA46] shrink-0" />
-                  <span>Quem vai receber?</span>
-                </h2>
-                <p className="text-xs text-zinc-400 mt-0.5">
-                  Usaremos estes dados para identificar seu pedido no atendimento.
-                </p>
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <div>
+                  <h2 className="text-base sm:text-xl font-black text-white flex items-center gap-2">
+                    <User className="w-5 h-5 text-[#BEFA46] shrink-0" />
+                    <span>Quem vai receber?</span>
+                  </h2>
+                  <p className="text-xs text-zinc-400 mt-0.5">
+                    Compra rápida sem burocracia — informe seus dados para o atendimento no WhatsApp.
+                  </p>
+                </div>
+                {!profile && (
+                  <Link
+                    href="/login?redirect=/checkout"
+                    className="text-[11px] font-bold text-zinc-400 hover:text-[#BEFA46] underline underline-offset-2 transition shrink-0"
+                  >
+                    Já tem conta? Entrar
+                  </Link>
+                )}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
@@ -577,14 +668,16 @@ export function CheckoutClient({
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-zinc-300">E-mail *</label>
+                  <label className="text-xs font-bold text-zinc-300">
+                    E-mail <span className="font-normal text-zinc-500">(opcional)</span>
+                  </label>
                   <div className="relative">
                     <Mail className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                     <input
                       type="email"
                       value={customerEmail}
                       onChange={(e) => setCustomerEmail(e.target.value)}
-                      placeholder="voce@email.com"
+                      placeholder="voce@email.com (opcional)"
                       className="w-full h-12 pl-10 pr-4 rounded-xl bg-[#0D0D11] border border-zinc-800 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#BEFA46]"
                     />
                   </div>

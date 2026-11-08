@@ -95,18 +95,24 @@ export function CustomersClient({ initialCustomers }: { initialCustomers: Custom
               <div className="min-w-0">
                 <p className="text-sm font-bold text-white truncate">{c.full_name}</p>
                 <p className="text-[11px] text-zinc-500 truncate">
-                  {c.email} • {c.auth_provider === 'google' ? 'Google' : 'E-mail'}
+                  {c.auth_provider === 'guest'
+                    ? c.email
+                      ? `${c.email} • Compra sem login`
+                      : 'Compra rápida (sem login)'
+                    : `${c.email} • ${c.auth_provider === 'google' ? 'Google' : 'E-mail'}`}
                 </p>
               </div>
               <span
                 className={cn(
                   'px-2.5 py-0.5 rounded-full text-[10px] font-bold shrink-0',
-                  c.is_active
-                    ? 'bg-emerald-500/15 text-emerald-400'
-                    : 'bg-red-500/15 text-red-400'
+                  c.auth_provider === 'guest'
+                    ? 'bg-sky-500/15 text-sky-400'
+                    : c.is_active
+                      ? 'bg-emerald-500/15 text-emerald-400'
+                      : 'bg-red-500/15 text-red-400'
                 )}
               >
-                {c.is_active ? 'Ativo' : 'Desativado'}
+                {c.auth_provider === 'guest' ? 'Sem login' : c.is_active ? 'Ativo' : 'Desativado'}
               </span>
             </div>
 
@@ -146,13 +152,15 @@ export function CustomersClient({ initialCustomers }: { initialCustomers: Custom
                   Último Pedido
                 </Link>
               )}
-              <button
-                type="button"
-                onClick={() => toggleStatus(c)}
-                className="flex-1 h-9 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-zinc-300"
-              >
-                {c.is_active ? 'Desativar' : 'Reativar'}
-              </button>
+              {c.auth_provider !== 'guest' && (
+                <button
+                  type="button"
+                  onClick={() => toggleStatus(c)}
+                  className="flex-1 h-9 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-zinc-300"
+                >
+                  {c.is_active ? 'Desativar' : 'Reativar'}
+                </button>
+              )}
             </div>
           </div>
         ))}
@@ -184,7 +192,11 @@ export function CustomersClient({ initialCustomers }: { initialCustomers: Custom
                   <td className="px-4 py-3.5">
                     <p className="font-bold text-white">{c.full_name}</p>
                     <p className="text-[11px] text-zinc-500">
-                      {c.email} • {c.auth_provider === 'google' ? 'Google' : 'E-mail'}
+                      {c.auth_provider === 'guest'
+                        ? c.email
+                          ? `${c.email} • Compra sem login`
+                          : 'Compra rápida (sem login)'
+                        : `${c.email} • ${c.auth_provider === 'google' ? 'Google' : 'E-mail'}`}
                     </p>
                   </td>
                   <td className="px-4 py-3.5 text-zinc-300">
@@ -211,12 +223,18 @@ export function CustomersClient({ initialCustomers }: { initialCustomers: Custom
                     <span
                       className={cn(
                         'px-2.5 py-0.5 rounded-full text-[11px] font-bold',
-                        c.is_active
-                          ? 'bg-emerald-500/15 text-emerald-400'
-                          : 'bg-red-500/15 text-red-400'
+                        c.auth_provider === 'guest'
+                          ? 'bg-sky-500/15 text-sky-400'
+                          : c.is_active
+                            ? 'bg-emerald-500/15 text-emerald-400'
+                            : 'bg-red-500/15 text-red-400'
                       )}
                     >
-                      {c.is_active ? 'Ativo' : 'Desativado'}
+                      {c.auth_provider === 'guest'
+                        ? 'Sem login'
+                        : c.is_active
+                          ? 'Ativo'
+                          : 'Desativado'}
                     </span>
                   </td>
                   <td className="px-4 py-3.5 text-right space-x-2">
@@ -228,13 +246,15 @@ export function CustomersClient({ initialCustomers }: { initialCustomers: Custom
                         Último Pedido
                       </Link>
                     )}
-                    <button
-                      type="button"
-                      onClick={() => toggleStatus(c)}
-                      className="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-zinc-300"
-                    >
-                      {c.is_active ? 'Desativar' : 'Reativar'}
-                    </button>
+                    {c.auth_provider !== 'guest' && (
+                      <button
+                        type="button"
+                        onClick={() => toggleStatus(c)}
+                        className="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-zinc-300"
+                      >
+                        {c.is_active ? 'Desativar' : 'Reativar'}
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

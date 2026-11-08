@@ -2018,3 +2018,902 @@ CREATE TRIGGER trg_realtime_financial_columns
   FOR EACH STATEMENT
   EXECUTE FUNCTION internal.trg_sync_global('orders');
 
+
+-- ----------------------------------------------------------------------------
+-- 18. GUEST CART & GUEST CHECKOUT (PURCHASE WITHOUT MANDATORY LOGIN)
+-- ----------------------------------------------------------------------------
+ALTER TABLE public.carts
+  ALTER COLUMN user_id DROP NOT NULL;
+
+ALTER TABLE public.carts
+  ADD COLUMN IF NOT EXISTS guest_id UUID UNIQUE;
+
+CREATE INDEX IF NOT EXISTS idx_carts_guest_id
+  ON public.carts(guest_id)
+  WHERE guest_id IS NOT NULL;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'carts_owner_check'
+      AND conrelid = 'public.carts'::regclass
+  ) THEN
+    ALTER TABLE public.carts
+      ADD CONSTRAINT carts_owner_check CHECK (user_id IS NOT NULL OR guest_id IS NOT NULL);
+  END IF;
+END $$;
+
+ALTER TABLE public.orders
+  ALTER COLUMN user_id DROP NOT NULL;
+
+ALTER TABLE public.orders
+  ALTER COLUMN customer_email SET DEFAULT '';
+
+DROP POLICY IF EXISTS "orders_select_own_or_admin" ON public.orders;
+CREATE POLICY "orders_select_own_or_admin" ON public.orders
+  FOR SELECT USING ((user_id IS NOT NULL AND auth.uid() = user_id) OR public.is_admin());
+
+DROP POLICY IF EXISTS "order_items_select_own_or_admin" ON public.order_items;
+CREATE POLICY "order_items_select_own_or_admin" ON public.order_items
+  FOR SELECT USING (
+    public.is_admin() OR EXISTS (
+      SELECT 1 FROM public.orders o WHERE o.id = order_id AND o.user_id IS NOT NULL AND o.user_id = auth.uid()
+    )
+  );
+
+DROP POLICY IF EXISTS "order_history_select_own_or_admin" ON public.order_status_history;
+CREATE POLICY "order_history_select_own_or_admin" ON public.order_status_history
+  FOR SELECT USING (
+    public.is_admin() OR EXISTS (
+      SELECT 1 FROM public.orders o WHERE o.id = order_id AND o.user_id IS NOT NULL AND o.user_id = auth.uid()
+    )
+  );
+
+-- Avoid unnecessary realtime sync writes on anonymous guest cart edits
+CREATE OR REPLACE FUNCTION internal.trg_sync_cart_items()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_cart_id UUID;
+  v_uid UUID;
+BEGIN
+  v_cart_id := CASE WHEN TG_OP = 'DELETE' THEN OLD.cart_id ELSE NEW.cart_id END;
+  SELECT c.user_id INTO v_uid FROM public.carts c WHERE c.id = v_cart_id;
+  IF v_uid IS NOT NULL THEN
+    PERFORM internal.emit_site_sync('user_private', 'cart_items', v_uid);
+  END IF;
+  RETURN NULL;
+END;
+$$;
+
+-- Upgrade add_to_cart_fast to support both authenticated users and guest carts
+DROP FUNCTION IF EXISTS public.add_to_cart_fast(UUID, UUID, UUID, INT);
+
+CREATE OR REPLACE FUNCTION public.add_to_cart_fast(
+  p_user_id UUID,
+  p_product_id UUID,
+  p_variant_id UUID,
+  p_quantity INT DEFAULT 1,
+  p_guest_id UUID DEFAULT NULL
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_is_active BOOLEAN;
+  v_prod_active BOOLEAN;
+  v_allow_backorder BOOLEAN := FALSE;
+  v_var_active BOOLEAN;
+  v_size TEXT;
+  v_stock INT;
+  v_cart_id UUID;
+  v_existing_qty INT := 0;
+  v_target_qty INT;
+  v_total_items INT := 0;
+BEGIN
+  IF current_user IN ('anon', 'authenticated') THEN
+    RAISE EXCEPTION 'Operação não autorizada diretamente.';
+  END IF;
+
+  IF p_user_id IS NULL AND p_guest_id IS NULL THEN
+    RAISE EXCEPTION 'Identificador da sacola ausente.';
+  END IF;
+
+  IF p_quantity IS NULL OR p_quantity < 1 THEN
+    RAISE EXCEPTION 'Selecione a quantidade desejada.';
+  END IF;
+
+  IF p_user_id IS NOT NULL THEN
+    SELECT up.is_active INTO v_is_active
+    FROM public.user_profiles up
+    WHERE up.id = p_user_id;
+
+    IF v_is_active IS DISTINCT FROM true THEN
+      RAISE EXCEPTION 'Conta inativa ou não encontrada.';
+    END IF;
+  END IF;
+
+  SELECT p.is_active, COALESCE(p.allow_backorder, FALSE), pv.is_active, pv.size, COALESCE(inv.quantity, 0)
+  INTO v_prod_active, v_allow_backorder, v_var_active, v_size, v_stock
+  FROM public.product_variants pv
+  JOIN public.products p ON p.id = pv.product_id
+  LEFT JOIN public.inventory inv ON inv.variant_id = pv.id
+  WHERE pv.id = p_variant_id AND pv.product_id = p_product_id;
+
+  IF v_size IS NULL THEN
+    RAISE EXCEPTION 'Variação do produto não encontrada.';
+  END IF;
+
+  IF v_prod_active IS DISTINCT FROM true OR v_var_active IS DISTINCT FROM true THEN
+    RAISE EXCEPTION 'Este produto não está disponível no momento.';
+  END IF;
+
+  IF NOT v_allow_backorder AND v_stock <= 0 THEN
+    RAISE EXCEPTION 'A numeração % está esgotada.', v_size;
+  END IF;
+
+  IF p_user_id IS NOT NULL THEN
+    INSERT INTO public.carts (user_id)
+    VALUES (p_user_id)
+    ON CONFLICT (user_id) DO UPDATE SET updated_at = NOW()
+    RETURNING id INTO v_cart_id;
+  ELSE
+    INSERT INTO public.carts (guest_id)
+    VALUES (p_guest_id)
+    ON CONFLICT (guest_id) DO UPDATE SET updated_at = NOW()
+    RETURNING id INTO v_cart_id;
+  END IF;
+
+  SELECT ci.quantity INTO v_existing_qty
+  FROM public.cart_items ci
+  WHERE ci.cart_id = v_cart_id AND ci.variant_id = p_variant_id;
+
+  v_target_qty := COALESCE(v_existing_qty, 0) + p_quantity;
+
+  IF NOT v_allow_backorder AND v_target_qty > v_stock THEN
+    RAISE EXCEPTION 'Temos apenas % unidade(s) disponível(is) na numeração %.', v_stock, v_size;
+  ELSIF v_allow_backorder AND v_target_qty > 99 THEN
+    RAISE EXCEPTION 'Limite máximo de 99 unidades por numeração atingido.';
+  END IF;
+
+  INSERT INTO public.cart_items (cart_id, product_id, variant_id, quantity, updated_at)
+  VALUES (v_cart_id, p_product_id, p_variant_id, p_quantity, NOW())
+  ON CONFLICT (cart_id, variant_id)
+  DO UPDATE SET quantity = v_target_qty, updated_at = NOW();
+
+  SELECT COALESCE(
+    SUM(
+      CASE
+        WHEN COALESCE(p.allow_backorder, FALSE) THEN ci.quantity
+        ELSE LEAST(ci.quantity, COALESCE(inv.quantity, 0))
+      END
+    ),
+    0
+  )::INT
+  INTO v_total_items
+  FROM public.cart_items ci
+  JOIN public.products p ON p.id = ci.product_id
+  JOIN public.product_variants pv ON pv.id = ci.variant_id
+  LEFT JOIN public.inventory inv ON inv.variant_id = pv.id
+  WHERE ci.cart_id = v_cart_id
+    AND p.is_active = true
+    AND pv.is_active = true
+    AND (COALESCE(inv.quantity, 0) > 0 OR COALESCE(p.allow_backorder, FALSE) = true);
+
+  RETURN jsonb_build_object(
+    'totalItems', v_total_items,
+    'cartId', v_cart_id
+  );
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.add_to_cart_fast(UUID, UUID, UUID, INT, UUID) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.add_to_cart_fast(UUID, UUID, UUID, INT, UUID) TO postgres, service_role;
+
+-- Seamlessly merge guest cart items when a visitor decides to sign in
+CREATE OR REPLACE FUNCTION public.merge_guest_cart_into_user(
+  p_guest_id UUID,
+  p_user_id UUID
+)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_guest_cart_id UUID;
+  v_user_cart_id UUID;
+  v_item RECORD;
+  v_target_qty INT;
+BEGIN
+  IF p_guest_id IS NULL OR p_user_id IS NULL THEN
+    RETURN;
+  END IF;
+
+  SELECT id INTO v_guest_cart_id
+  FROM public.carts
+  WHERE guest_id = p_guest_id;
+
+  IF v_guest_cart_id IS NULL THEN
+    RETURN;
+  END IF;
+
+  INSERT INTO public.carts (user_id)
+  VALUES (p_user_id)
+  ON CONFLICT (user_id) DO UPDATE SET updated_at = NOW()
+  RETURNING id INTO v_user_cart_id;
+
+  FOR v_item IN
+    SELECT
+      ci.product_id,
+      ci.variant_id,
+      ci.quantity,
+      COALESCE(p.allow_backorder, FALSE) AS allow_backorder,
+      COALESCE(inv.quantity, 0) AS stock_qty
+    FROM public.cart_items ci
+    JOIN public.products p ON p.id = ci.product_id
+    LEFT JOIN public.inventory inv ON inv.variant_id = ci.variant_id
+    WHERE ci.cart_id = v_guest_cart_id
+  LOOP
+    IF v_item.allow_backorder THEN
+      v_target_qty := LEAST(99, v_item.quantity);
+    ELSE
+      v_target_qty := LEAST(v_item.stock_qty, v_item.quantity);
+    END IF;
+
+    IF v_target_qty > 0 THEN
+      INSERT INTO public.cart_items (cart_id, product_id, variant_id, quantity, updated_at)
+      VALUES (v_user_cart_id, v_item.product_id, v_item.variant_id, v_target_qty, NOW())
+      ON CONFLICT (cart_id, variant_id)
+      DO UPDATE SET
+        quantity = CASE
+          WHEN v_item.allow_backorder THEN LEAST(99, public.cart_items.quantity + EXCLUDED.quantity)
+          ELSE LEAST(v_item.stock_qty, public.cart_items.quantity + EXCLUDED.quantity)
+        END,
+        updated_at = NOW();
+    END IF;
+  END LOOP;
+
+  DELETE FROM public.carts WHERE id = v_guest_cart_id;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.merge_guest_cart_into_user(UUID, UUID) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.merge_guest_cart_into_user(UUID, UUID) TO postgres, service_role;
+
+-- Upgrade create_order_from_cart to support both logged-in customers and guest buyers
+DROP FUNCTION IF EXISTS public.create_order_from_cart(UUID, TEXT, TEXT, TEXT, TEXT, JSONB, TEXT);
+
+CREATE OR REPLACE FUNCTION public.create_order_from_cart(
+  p_user_id UUID,
+  p_customer_name TEXT,
+  p_customer_email TEXT,
+  p_customer_phone TEXT,
+  p_delivery_method TEXT,
+  p_shipping_address JSONB DEFAULT NULL,
+  p_customer_notes TEXT DEFAULT '',
+  p_guest_id UUID DEFAULT NULL
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_cart_id UUID;
+  v_item RECORD;
+  v_subtotal NUMERIC(10, 2) := 0;
+  v_discount_total NUMERIC(10, 2) := 0;
+  v_shipping_cost NUMERIC(10, 2) := 0;
+  v_items_total NUMERIC(10, 2) := 0;
+  v_total NUMERIC(10, 2) := 0;
+  v_unit_price NUMERIC(10, 2);
+  v_promo_price NUMERIC(10, 2);
+  v_order_id UUID;
+  v_order_number TEXT;
+  v_items_count INT := 0;
+  v_primary_img TEXT;
+  v_deduct_qty INT;
+  v_new_qty INT;
+  v_delivery_cfg JSONB := '{}'::jsonb;
+  v_custom_card JSONB := NULL;
+  v_fee NUMERIC(10, 2) := 0;
+  v_free_min NUMERIC(10, 2) := 0;
+BEGIN
+  IF current_user IN ('anon', 'authenticated') THEN
+    RAISE EXCEPTION 'Operação não autorizada diretamente.';
+  END IF;
+
+  IF p_user_id IS NULL AND p_guest_id IS NULL THEN
+    RAISE EXCEPTION 'Sua sacola expirou. Adicione o produto novamente.';
+  END IF;
+
+  IF p_delivery_method NOT IN ('pickup', 'local_delivery') THEN
+    RAISE EXCEPTION 'Modalidade de recebimento inválida.';
+  END IF;
+
+  IF p_user_id IS NOT NULL THEN
+    SELECT id INTO v_cart_id FROM public.carts WHERE user_id = p_user_id;
+  ELSE
+    SELECT id INTO v_cart_id FROM public.carts WHERE guest_id = p_guest_id;
+  END IF;
+
+  IF v_cart_id IS NULL THEN
+    RAISE EXCEPTION 'Seu carrinho está vazio.';
+  END IF;
+
+  SELECT COUNT(*) INTO v_items_count FROM public.cart_items WHERE cart_id = v_cart_id;
+  IF v_items_count = 0 THEN
+    RAISE EXCEPTION 'Seu carrinho está vazio.';
+  END IF;
+
+  SELECT COALESCE(checkout_delivery_config, '{}'::jsonb)
+  INTO v_delivery_cfg
+  FROM public.store_settings
+  WHERE id = 1;
+
+  -- Generate unique order number TC-YYYY-XXXX
+  v_order_number := 'TC-' || EXTRACT(YEAR FROM NOW())::TEXT || '-' || LPAD(NEXTVAL('public.order_number_seq')::TEXT, 4, '0');
+
+  -- First pass: lock inventory rows and validate stock & active status
+  FOR v_item IN
+    SELECT
+      ci.id AS cart_item_id,
+      ci.quantity AS cart_qty,
+      p.id AS product_id,
+      p.name AS product_name,
+      p.sku AS product_sku,
+      p.base_price,
+      p.promo_price AS product_promo_price,
+      p.is_active AS product_active,
+      COALESCE(p.allow_backorder, FALSE) AS allow_backorder,
+      b.name AS brand_name,
+      pv.id AS variant_id,
+      pv.color,
+      pv.size,
+      pv.is_active AS variant_active,
+      inv.id AS inv_id,
+      inv.quantity AS stock_qty,
+      inv.low_stock_threshold
+    FROM public.cart_items ci
+    JOIN public.products p ON p.id = ci.product_id
+    LEFT JOIN public.brands b ON b.id = p.brand_id
+    JOIN public.product_variants pv ON pv.id = ci.variant_id
+    JOIN public.inventory inv ON inv.variant_id = pv.id
+    WHERE ci.cart_id = v_cart_id
+    ORDER BY inv.id
+    FOR UPDATE OF inv
+  LOOP
+    IF NOT v_item.product_active OR NOT v_item.variant_active THEN
+      RAISE EXCEPTION 'O produto "%" (Tam. %) não está mais disponível para venda.', v_item.product_name, v_item.size;
+    END IF;
+
+    IF NOT v_item.allow_backorder AND v_item.stock_qty < v_item.cart_qty THEN
+      IF v_item.stock_qty = 0 THEN
+        RAISE EXCEPTION 'O produto "%" na numeração % esgotou.', v_item.product_name, v_item.size;
+      ELSE
+        RAISE EXCEPTION 'Estoque insuficiente para "%" (Tam. %). Disponível: % un.', v_item.product_name, v_item.size, v_item.stock_qty;
+      END IF;
+    END IF;
+
+    SELECT pr.promo_price INTO v_promo_price
+    FROM public.promotions pr
+    WHERE pr.product_id = v_item.product_id
+      AND pr.is_active = TRUE
+      AND (pr.starts_at IS NULL OR pr.starts_at <= NOW())
+      AND (pr.ends_at IS NULL OR pr.ends_at >= NOW())
+    ORDER BY pr.promo_price ASC
+    LIMIT 1;
+
+    v_unit_price := COALESCE(v_promo_price, v_item.product_promo_price, v_item.base_price);
+    IF v_unit_price > v_item.base_price THEN
+      v_unit_price := v_item.base_price;
+    END IF;
+
+    v_subtotal := v_subtotal + (v_item.base_price * v_item.cart_qty);
+    v_discount_total := v_discount_total + ((v_item.base_price - v_unit_price) * v_item.cart_qty);
+    v_items_total := v_items_total + (v_unit_price * v_item.cart_qty);
+  END LOOP;
+
+  IF p_shipping_address IS NOT NULL AND (p_shipping_address ? 'custom_option_id') THEN
+    SELECT elem INTO v_custom_card
+    FROM jsonb_array_elements(COALESCE(v_delivery_cfg->'extra_cards', '[]'::jsonb)) AS elem
+    WHERE elem->>'id' = (p_shipping_address->>'custom_option_id')
+      AND COALESCE((elem->>'enabled')::boolean, TRUE) = TRUE
+      AND elem->>'card_type' = 'option'
+    LIMIT 1;
+  END IF;
+
+  IF v_custom_card IS NOT NULL THEN
+    IF COALESCE(v_custom_card->>'fee_mode', 'to_combine') = 'fixed' THEN
+      BEGIN
+        v_fee := GREATEST(COALESCE(NULLIF(v_custom_card->>'fee', '')::NUMERIC(10, 2), 0), 0);
+        v_free_min := GREATEST(COALESCE(NULLIF(v_custom_card->>'free_threshold', '')::NUMERIC(10, 2), 0), 0);
+      EXCEPTION WHEN OTHERS THEN
+        v_fee := 0;
+        v_free_min := 0;
+      END;
+      IF v_free_min > 0 AND v_items_total >= v_free_min THEN
+        v_shipping_cost := 0;
+      ELSE
+        v_shipping_cost := v_fee;
+      END IF;
+    ELSE
+      v_shipping_cost := 0;
+    END IF;
+  ELSIF p_delivery_method = 'local_delivery'
+    AND NOT COALESCE((v_delivery_cfg->>'delivery_removed')::boolean, FALSE)
+    AND COALESCE((v_delivery_cfg->>'delivery_enabled')::boolean, TRUE)
+    AND COALESCE(v_delivery_cfg->>'delivery_fee_mode', 'to_combine') = 'fixed'
+  THEN
+    BEGIN
+      v_fee := GREATEST(COALESCE(NULLIF(v_delivery_cfg->>'delivery_fee', '')::NUMERIC(10, 2), 0), 0);
+      v_free_min := GREATEST(COALESCE(NULLIF(v_delivery_cfg->>'free_delivery_threshold', '')::NUMERIC(10, 2), 0), 0);
+    EXCEPTION WHEN OTHERS THEN
+      v_fee := 0;
+      v_free_min := 0;
+    END;
+    IF v_free_min > 0 AND v_items_total >= v_free_min THEN
+      v_shipping_cost := 0;
+    ELSE
+      v_shipping_cost := v_fee;
+    END IF;
+  ELSIF p_delivery_method = 'pickup'
+    AND NOT COALESCE((v_delivery_cfg->>'pickup_removed')::boolean, FALSE)
+    AND COALESCE((v_delivery_cfg->>'pickup_enabled')::boolean, TRUE)
+  THEN
+    BEGIN
+      v_shipping_cost := GREATEST(COALESCE(NULLIF(v_delivery_cfg->>'pickup_fee', '')::NUMERIC(10, 2), 0), 0);
+    EXCEPTION WHEN OTHERS THEN
+      v_shipping_cost := 0;
+    END;
+  END IF;
+
+  v_total := v_items_total + v_shipping_cost;
+
+  INSERT INTO public.orders (
+    order_number,
+    user_id,
+    customer_name,
+    customer_email,
+    customer_phone,
+    delivery_method,
+    shipping_address,
+    subtotal,
+    discount_total,
+    shipping_cost,
+    total,
+    status,
+    payment_status,
+    customer_notes,
+    stock_deducted
+  ) VALUES (
+    v_order_number,
+    p_user_id,
+    TRIM(p_customer_name),
+    LOWER(TRIM(COALESCE(p_customer_email, ''))),
+    TRIM(p_customer_phone),
+    p_delivery_method,
+    p_shipping_address,
+    v_subtotal,
+    v_discount_total,
+    v_shipping_cost,
+    v_total,
+    'received',
+    'pending',
+    COALESCE(p_customer_notes, ''),
+    TRUE
+  ) RETURNING id INTO v_order_id;
+
+  FOR v_item IN
+    SELECT
+      ci.quantity AS cart_qty,
+      p.id AS product_id,
+      p.name AS product_name,
+      p.sku AS product_sku,
+      p.base_price,
+      p.promo_price AS product_promo_price,
+      COALESCE(p.allow_backorder, FALSE) AS allow_backorder,
+      b.name AS brand_name,
+      pv.id AS variant_id,
+      pv.color,
+      pv.size,
+      inv.quantity AS stock_qty,
+      inv.low_stock_threshold
+    FROM public.cart_items ci
+    JOIN public.products p ON p.id = ci.product_id
+    LEFT JOIN public.brands b ON b.id = p.brand_id
+    JOIN public.product_variants pv ON pv.id = ci.variant_id
+    JOIN public.inventory inv ON inv.variant_id = pv.id
+    WHERE ci.cart_id = v_cart_id
+  LOOP
+    SELECT pr.promo_price INTO v_promo_price
+    FROM public.promotions pr
+    WHERE pr.product_id = v_item.product_id
+      AND pr.is_active = TRUE
+      AND (pr.starts_at IS NULL OR pr.starts_at <= NOW())
+      AND (pr.ends_at IS NULL OR pr.ends_at >= NOW())
+    ORDER BY pr.promo_price ASC
+    LIMIT 1;
+
+    v_unit_price := COALESCE(v_promo_price, v_item.product_promo_price, v_item.base_price);
+    IF v_unit_price > v_item.base_price THEN
+      v_unit_price := v_item.base_price;
+    END IF;
+
+    SELECT url INTO v_primary_img
+    FROM public.product_images
+    WHERE product_id = v_item.product_id
+    ORDER BY is_primary DESC, sort_order ASC
+    LIMIT 1;
+
+    v_deduct_qty := GREATEST(0, LEAST(v_item.stock_qty, v_item.cart_qty));
+
+    INSERT INTO public.order_items (
+      order_id,
+      product_id,
+      variant_id,
+      product_name,
+      product_sku,
+      product_image,
+      brand_name,
+      color,
+      size,
+      unit_price,
+      original_price,
+      quantity,
+      stock_deducted_qty,
+      subtotal
+    ) VALUES (
+      v_order_id,
+      v_item.product_id,
+      v_item.variant_id,
+      v_item.product_name,
+      COALESCE(v_item.product_sku, ''),
+      COALESCE(v_primary_img, ''),
+      COALESCE(v_item.brand_name, ''),
+      v_item.color,
+      v_item.size,
+      v_unit_price,
+      v_item.base_price,
+      v_item.cart_qty,
+      v_deduct_qty,
+      v_unit_price * v_item.cart_qty
+    );
+
+    UPDATE public.products
+    SET sold_count = sold_count + v_item.cart_qty, updated_at = NOW()
+    WHERE id = v_item.product_id;
+
+    IF v_deduct_qty > 0 THEN
+      v_new_qty := v_item.stock_qty - v_deduct_qty;
+
+      UPDATE public.inventory
+      SET quantity = v_new_qty, updated_at = NOW()
+      WHERE variant_id = v_item.variant_id;
+
+      INSERT INTO public.inventory_movements (
+        variant_id,
+        product_id,
+        previous_quantity,
+        moved_quantity,
+        new_quantity,
+        movement_type,
+        reason,
+        order_id,
+        performed_by
+      ) VALUES (
+        v_item.variant_id,
+        v_item.product_id,
+        v_item.stock_qty,
+        -v_deduct_qty,
+        v_new_qty,
+        'order_reserve',
+        'Reserva automática do pedido ' || v_order_number,
+        v_order_id,
+        p_user_id
+      );
+
+      IF v_new_qty = 0 THEN
+        INSERT INTO public.notifications (user_id, target_audience, type, title, message, link)
+        VALUES (
+          NULL,
+          'admin',
+          'out_of_stock',
+          'Produto sem estoque!',
+          v_item.product_name || ' (' || v_item.color || ' - Tam. ' || v_item.size || ') esgotou após o pedido ' || v_order_number || '.',
+          '/admin/estoque'
+        );
+      ELSIF v_new_qty <= v_item.low_stock_threshold THEN
+        INSERT INTO public.notifications (user_id, target_audience, type, title, message, link)
+        VALUES (
+          NULL,
+          'admin',
+          'low_stock',
+          'Alerta de estoque baixo',
+          v_item.product_name || ' (' || v_item.color || ' - Tam. ' || v_item.size || ') está com apenas ' || v_new_qty || ' un.',
+          '/admin/estoque'
+        );
+      END IF;
+    END IF;
+  END LOOP;
+
+  INSERT INTO public.order_status_history (order_id, previous_status, new_status, note, changed_by)
+  VALUES (
+    v_order_id,
+    NULL,
+    'received',
+    CASE
+      WHEN p_user_id IS NOT NULL THEN 'Pedido criado pelo cliente na loja virtual.'
+      ELSE 'Pedido criado via compra rápida (sem login) na loja virtual.'
+    END,
+    p_user_id
+  );
+
+  DELETE FROM public.cart_items WHERE cart_id = v_cart_id;
+
+  IF p_user_id IS NOT NULL THEN
+    INSERT INTO public.notifications (user_id, target_audience, type, title, message, link)
+    VALUES (
+      p_user_id,
+      'customer',
+      'order_received',
+      'Pedido ' || v_order_number || ' recebido!',
+      'Recebemos sua solicitação. Nossa equipe já vai conferir e confirmar os detalhes.',
+      '/minha-conta/pedidos/' || v_order_id
+    );
+  END IF;
+
+  INSERT INTO public.notifications (user_id, target_audience, type, title, message, link)
+  VALUES (
+    NULL,
+    'admin',
+    'new_order',
+    'Novo pedido ' || v_order_number,
+    p_customer_name || ' realizou um pedido no valor de R$ ' || TO_CHAR(v_total, 'FM999G990D00') || '.',
+    '/admin/pedidos/' || v_order_id
+  );
+
+  RETURN jsonb_build_object(
+    'order_id', v_order_id,
+    'order_number', v_order_number,
+    'total', v_total
+  );
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.create_order_from_cart(UUID, TEXT, TEXT, TEXT, TEXT, JSONB, TEXT, UUID) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.create_order_from_cart(UUID, TEXT, TEXT, TEXT, TEXT, JSONB, TEXT, UUID) TO postgres, service_role;
+
+-- Update change_order_status_atomic so guest orders (user_id IS NULL) skip customer notification safely
+CREATE OR REPLACE FUNCTION public.change_order_status_atomic(
+  p_order_id UUID,
+  p_new_status TEXT,
+  p_note TEXT DEFAULT '',
+  p_store_notes TEXT DEFAULT NULL,
+  p_internal_notes TEXT DEFAULT NULL,
+  p_payment_status TEXT DEFAULT NULL,
+  p_payment_method_note TEXT DEFAULT NULL,
+  p_admin_id UUID DEFAULT auth.uid()
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_order RECORD;
+  v_item RECORD;
+  v_inv_qty INT;
+  v_restore_qty INT;
+  v_deduct_qty INT;
+  v_allow_backorder BOOLEAN;
+  v_status_label TEXT;
+  v_stock_deducted BOOLEAN;
+BEGIN
+  IF p_admin_id IS NOT NULL AND NOT public.is_admin(p_admin_id) THEN
+    RAISE EXCEPTION 'Acesso negado: apenas administradores podem gerenciar pedidos.';
+  END IF;
+
+  SELECT * INTO v_order
+  FROM public.orders
+  WHERE id = p_order_id
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Pedido não encontrado.';
+  END IF;
+
+  v_stock_deducted := v_order.stock_deducted;
+
+  IF p_new_status = 'cancelled' AND v_order.status <> 'cancelled' AND v_order.stock_deducted = TRUE THEN
+    FOR v_item IN
+      SELECT * FROM public.order_items WHERE order_id = p_order_id
+    LOOP
+      v_restore_qty := GREATEST(0, COALESCE(v_item.stock_deducted_qty, v_item.quantity));
+
+      IF v_item.variant_id IS NOT NULL AND v_restore_qty > 0 THEN
+        SELECT quantity INTO v_inv_qty
+        FROM public.inventory
+        WHERE variant_id = v_item.variant_id
+        FOR UPDATE;
+
+        IF FOUND THEN
+          UPDATE public.inventory
+          SET quantity = v_inv_qty + v_restore_qty, updated_at = NOW()
+          WHERE variant_id = v_item.variant_id;
+
+          INSERT INTO public.inventory_movements (
+            variant_id,
+            product_id,
+            previous_quantity,
+            moved_quantity,
+            new_quantity,
+            movement_type,
+            reason,
+            order_id,
+            performed_by
+          ) VALUES (
+            v_item.variant_id,
+            v_item.product_id,
+            v_inv_qty,
+            v_restore_qty,
+            v_inv_qty + v_restore_qty,
+            'order_cancel_return',
+            'Estorno de estoque por cancelamento do pedido ' || v_order.order_number,
+            p_order_id,
+            p_admin_id
+          );
+        END IF;
+      END IF;
+
+      IF v_item.product_id IS NOT NULL THEN
+        UPDATE public.products
+        SET sold_count = GREATEST(0, sold_count - v_item.quantity), updated_at = NOW()
+        WHERE id = v_item.product_id;
+      END IF;
+    END LOOP;
+
+    v_stock_deducted := FALSE;
+  END IF;
+
+  IF v_order.status = 'cancelled' AND p_new_status <> 'cancelled' AND v_order.stock_deducted = FALSE THEN
+    FOR v_item IN
+      SELECT * FROM public.order_items WHERE order_id = p_order_id
+    LOOP
+      v_allow_backorder := FALSE;
+      IF v_item.product_id IS NOT NULL THEN
+        SELECT COALESCE(allow_backorder, FALSE) INTO v_allow_backorder
+        FROM public.products
+        WHERE id = v_item.product_id;
+      END IF;
+
+      IF v_item.variant_id IS NOT NULL THEN
+        SELECT quantity INTO v_inv_qty
+        FROM public.inventory
+        WHERE variant_id = v_item.variant_id
+        FOR UPDATE;
+
+        IF NOT COALESCE(v_allow_backorder, FALSE) AND COALESCE(v_inv_qty, 0) < v_item.quantity THEN
+          RAISE EXCEPTION 'Não é possível reativar o pedido: estoque insuficiente para "%" (Tam. %).', v_item.product_name, v_item.size;
+        END IF;
+
+        v_deduct_qty := GREATEST(0, LEAST(COALESCE(v_inv_qty, 0), v_item.quantity));
+
+        UPDATE public.order_items
+        SET stock_deducted_qty = v_deduct_qty
+        WHERE id = v_item.id;
+
+        IF v_deduct_qty > 0 THEN
+          UPDATE public.inventory
+          SET quantity = v_inv_qty - v_deduct_qty, updated_at = NOW()
+          WHERE variant_id = v_item.variant_id;
+
+          INSERT INTO public.inventory_movements (
+            variant_id,
+            product_id,
+            previous_quantity,
+            moved_quantity,
+            new_quantity,
+            movement_type,
+            reason,
+            order_id,
+            performed_by
+          ) VALUES (
+            v_item.variant_id,
+            v_item.product_id,
+            v_inv_qty,
+            -v_deduct_qty,
+            v_inv_qty - v_deduct_qty,
+            'order_reserve',
+            'Reativação do pedido ' || v_order.order_number,
+            p_order_id,
+            p_admin_id
+          );
+        END IF;
+      END IF;
+
+      IF v_item.product_id IS NOT NULL THEN
+        UPDATE public.products
+        SET sold_count = sold_count + v_item.quantity, updated_at = NOW()
+        WHERE id = v_item.product_id;
+      END IF;
+    END LOOP;
+    v_stock_deducted := TRUE;
+  END IF;
+
+  UPDATE public.orders
+  SET
+    status = p_new_status,
+    store_notes = COALESCE(p_store_notes, store_notes),
+    internal_notes = COALESCE(p_internal_notes, internal_notes),
+    payment_status = COALESCE(p_payment_status, payment_status),
+    payment_method_note = COALESCE(p_payment_method_note, payment_method_note),
+    paid_at = CASE
+      WHEN p_payment_status = 'paid_manual' AND paid_at IS NULL THEN NOW()
+      WHEN p_payment_status = 'pending' THEN NULL
+      ELSE paid_at
+    END,
+    stock_deducted = v_stock_deducted,
+    updated_at = NOW()
+  WHERE id = p_order_id;
+
+  IF v_order.status <> p_new_status OR TRIM(COALESCE(p_note, '')) <> '' THEN
+    INSERT INTO public.order_status_history (order_id, previous_status, new_status, note, changed_by)
+    VALUES (p_order_id, v_order.status, p_new_status, COALESCE(p_note, ''), p_admin_id);
+  END IF;
+
+  IF v_order.status <> p_new_status AND v_order.user_id IS NOT NULL THEN
+    v_status_label := CASE p_new_status
+      WHEN 'received' THEN 'Pedido recebido'
+      WHEN 'awaiting_confirmation' THEN 'Aguardando confirmação'
+      WHEN 'confirmed' THEN 'Confirmado'
+      WHEN 'separating' THEN 'Em separação'
+      WHEN 'ready_for_pickup' THEN 'Pronto para retirada na loja!'
+      WHEN 'out_for_delivery' THEN 'Saiu para entrega!'
+      WHEN 'completed' THEN 'Concluído'
+      WHEN 'cancelled' THEN 'Cancelado'
+      ELSE p_new_status
+    END;
+
+    INSERT INTO public.notifications (user_id, target_audience, type, title, message, link)
+    VALUES (
+      v_order.user_id,
+      'customer',
+      'order_status',
+      'Pedido ' || v_order.order_number || ': ' || v_status_label,
+      CASE
+        WHEN TRIM(COALESCE(p_note, '')) <> '' THEN p_note
+        ELSE 'O status do seu pedido foi atualizado para "' || v_status_label || '".'
+      END,
+      '/minha-conta/pedidos/' || p_order_id
+    );
+  END IF;
+
+  INSERT INTO public.admin_logs (admin_id, action, entity_type, entity_id, details)
+  VALUES (
+    p_admin_id,
+    'order.update',
+    'order',
+    p_order_id::TEXT,
+    jsonb_build_object(
+      'order_number', v_order.order_number,
+      'previous_status', v_order.status,
+      'new_status', p_new_status,
+      'payment_status', COALESCE(p_payment_status, v_order.payment_status)
+    )
+  );
+
+  RETURN jsonb_build_object('order_id', p_order_id, 'status', p_new_status);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.change_order_status_atomic(uuid, text, text, text, text, text, text, uuid) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.change_order_status_atomic(uuid, text, text, text, text, text, text, uuid) TO postgres, service_role;

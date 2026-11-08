@@ -29,6 +29,8 @@ import {
   Receipt,
   CreditCard,
   Percent,
+  Maximize2,
+  Minimize2,
 } from 'lucide-react';
 import { useStore } from '@/components/providers/StoreProvider';
 import { cn, formatCurrency } from '@/lib/utils';
@@ -213,6 +215,48 @@ export function FinancialPanelClient({
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [jumpDateInput, setJumpDateInput] = useState('');
+  const [isTableFullscreen, setIsTableFullscreen] = useState(false);
+
+  const activateTableFullscreen = () => {
+    setIsTableFullscreen(true);
+    if (typeof document !== 'undefined' && !document.fullscreenElement) {
+      document.documentElement.requestFullscreen?.().catch(() => {});
+    }
+  };
+
+  const deactivateTableFullscreen = () => {
+    setIsTableFullscreen(false);
+    if (typeof document !== 'undefined' && document.fullscreenElement) {
+      document.exitFullscreen?.().catch(() => {});
+    }
+  };
+
+  const toggleTableFullscreen = () => {
+    if (isTableFullscreen) {
+      deactivateTableFullscreen();
+    } else {
+      activateTableFullscreen();
+    }
+  };
+
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      if (!document.fullscreenElement) {
+        setIsTableFullscreen(false);
+      }
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isTableFullscreen) {
+        setIsTableFullscreen(false);
+      }
+    };
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('fullscreenchange', onFullscreenChange);
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [isTableFullscreen]);
 
   // New entry form state
   const [showEntryForm, setShowEntryForm] = useState(false);
@@ -636,7 +680,10 @@ export function FinancialPanelClient({
           : 'bg-[#0E0E12] text-zinc-100'
       )}
     >
-      <div style={{ zoom: 0.72 }} className="p-4 sm:p-6 space-y-4">
+      <div
+        style={isTableFullscreen ? undefined : { zoom: 0.88 }}
+        className="p-4 sm:p-6 space-y-4"
+      >
         {/* Top Action Toolbar (Minimalist & Clean) */}
       <div className="flex flex-wrap items-center justify-between gap-2.5">
         {/* Theme Switcher */}
@@ -943,15 +990,23 @@ export function FinancialPanelClient({
 
       {/* Modal / Expandable Card: Cadastrar Entrada ou Saída Completa */}
       {showEntryForm && (
-        <form
-          onSubmit={handleCreateEntry}
+        <div
           className={cn(
-            'rounded-2xl border p-5 sm:p-6 shadow-lg transition-all',
-            isLight
-              ? 'bg-white border-slate-300 text-slate-900'
-              : 'bg-zinc-900 border-zinc-700 text-zinc-100'
+            isTableFullscreen &&
+              'fixed inset-0 z-[95] flex items-center justify-center bg-black/55 backdrop-blur-[1px] p-4 overflow-y-auto'
           )}
         >
+          <form
+            onSubmit={handleCreateEntry}
+            style={isTableFullscreen ? { zoom: 0.88 } : undefined}
+            className={cn(
+              'rounded-2xl border p-5 sm:p-6 shadow-lg transition-all',
+              isTableFullscreen && 'w-full max-w-4xl my-auto',
+              isLight
+                ? 'bg-white border-slate-300 text-slate-900'
+                : 'bg-zinc-900 border-zinc-700 text-zinc-100'
+            )}
+          >
           <div
             className={cn(
               'mb-5 flex flex-wrap items-center justify-between gap-3 border-b pb-4',
@@ -1350,20 +1405,29 @@ export function FinancialPanelClient({
               Salvar na Planilha
             </button>
           </div>
-        </form>
+          </form>
+        </div>
       )}
 
       {/* Modal: Nova Coluna Personalizada */}
       {showColumnModal && (
-        <form
-          onSubmit={handleCreateColumn}
+        <div
           className={cn(
-            'rounded-2xl border p-5 shadow-lg',
-            isLight
-              ? 'bg-white border-indigo-200 text-slate-900'
-              : 'bg-zinc-900 border-indigo-500/40 text-zinc-100'
+            isTableFullscreen &&
+              'fixed inset-0 z-[95] flex items-center justify-center bg-black/55 backdrop-blur-[1px] p-4 overflow-y-auto'
           )}
         >
+          <form
+            onSubmit={handleCreateColumn}
+            style={isTableFullscreen ? { zoom: 0.88 } : undefined}
+            className={cn(
+              'rounded-2xl border p-5 shadow-lg',
+              isTableFullscreen && 'w-full max-w-2xl my-auto',
+              isLight
+                ? 'bg-white border-slate-300 text-slate-900'
+                : 'bg-zinc-900 border-zinc-700 text-zinc-100'
+            )}
+          >
           <div className="flex items-start justify-between gap-3">
             <div>
               <h3 className="text-sm font-extrabold">
@@ -1401,8 +1465,8 @@ export function FinancialPanelClient({
                 className={cn(
                   'w-full rounded-xl border px-3.5 py-2 text-sm focus:outline-none',
                   isLight
-                    ? 'border-slate-300 bg-white text-slate-900 focus:border-indigo-600'
-                    : 'border-zinc-700 bg-zinc-950 text-white focus:border-indigo-400'
+                    ? 'border-slate-300 bg-white text-slate-900 focus:border-slate-600'
+                    : 'border-zinc-700 bg-zinc-950 text-white focus:border-zinc-400'
                 )}
               />
             </div>
@@ -1422,8 +1486,8 @@ export function FinancialPanelClient({
                 className={cn(
                   'w-full rounded-xl border px-3 py-2 text-sm focus:outline-none',
                   isLight
-                    ? 'border-slate-300 bg-white text-slate-900 focus:border-indigo-600'
-                    : 'border-zinc-700 bg-zinc-950 text-white focus:border-indigo-400'
+                    ? 'border-slate-300 bg-white text-slate-900 focus:border-slate-600'
+                    : 'border-zinc-700 bg-zinc-950 text-white focus:border-zinc-400'
                 )}
               >
                 <option value="text">Texto Livre</option>
@@ -1435,7 +1499,10 @@ export function FinancialPanelClient({
             <button
               type="submit"
               disabled={savingColumn}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-xs hover:bg-indigo-700 disabled:opacity-50"
+              className={cn(
+                'inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-xs font-bold text-white shadow-xs disabled:opacity-50',
+                isLight ? 'bg-slate-900 hover:bg-slate-800' : 'bg-zinc-100 text-zinc-900 hover:bg-white'
+              )}
             >
               {savingColumn ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -1445,20 +1512,27 @@ export function FinancialPanelClient({
               Criar Coluna
             </button>
           </div>
-        </form>
+          </form>
+        </div>
       )}
 
       {/* Spreadsheet Container (Date Pages Header + Filter Bar + Grid Table) */}
       <div
         className={cn(
-          'overflow-hidden rounded-2xl border shadow-sm',
-          isLight ? 'bg-white border-slate-200/90' : 'bg-zinc-900 border-zinc-800'
+          isTableFullscreen
+            ? 'fixed inset-0 z-[80] flex flex-col w-screen h-dvh rounded-none border-0'
+            : 'overflow-hidden rounded-2xl border shadow-sm',
+          isLight ? 'bg-white border-slate-200/90 text-slate-800' : 'bg-zinc-900 border-zinc-800 text-zinc-100'
         )}
       >
+        <div
+          style={isTableFullscreen ? { zoom: 0.88 } : undefined}
+          className={cn(isTableFullscreen && 'flex-1 flex flex-col min-h-0 overflow-hidden')}
+        >
         {/* Top Sheet Tabs Bar (Páginas da Planilha Separadas por Data) */}
         <div
           className={cn(
-            'border-b px-4 pt-3.5 pb-3',
+            'border-b px-4 pt-3.5 pb-3 shrink-0',
             isLight ? 'bg-slate-50/80 border-slate-200' : 'bg-zinc-950/60 border-zinc-800'
           )}
         >
@@ -1487,7 +1561,51 @@ export function FinancialPanelClient({
               </span>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              {isTableFullscreen && (
+                <div className="flex flex-wrap items-center gap-1.5 mr-1">
+                  <button
+                    type="button"
+                    onClick={() => openNewEntryForm('income')}
+                    className={cn(
+                      'inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-bold transition-all cursor-pointer',
+                      isLight
+                        ? 'border-slate-200 bg-white text-slate-800 hover:bg-slate-50'
+                        : 'border-zinc-700 bg-zinc-900 text-zinc-100 hover:bg-zinc-800'
+                    )}
+                  >
+                    <Plus className="h-3.5 w-3.5 text-emerald-600" />
+                    Nova Entrada
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => openNewEntryForm('expense')}
+                    className={cn(
+                      'inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-bold transition-all cursor-pointer',
+                      isLight
+                        ? 'border-slate-200 bg-white text-slate-800 hover:bg-slate-50'
+                        : 'border-zinc-700 bg-zinc-900 text-zinc-100 hover:bg-zinc-800'
+                    )}
+                  >
+                    <TrendingDown className="h-3.5 w-3.5 text-rose-600" />
+                    Nova Saída
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowColumnModal(true)}
+                    className={cn(
+                      'inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-semibold transition-all cursor-pointer',
+                      isLight
+                        ? 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                        : 'border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800'
+                    )}
+                  >
+                    <Columns3 className="h-3.5 w-3.5 text-slate-500" />
+                    + Coluna
+                  </button>
+                </div>
+              )}
+
               <span
                 className={cn(
                   'text-xs font-medium',
@@ -1511,6 +1629,38 @@ export function FinancialPanelClient({
                     : 'border-zinc-700 bg-zinc-900 text-white focus:border-zinc-500'
                 )}
               />
+
+              <button
+                type="button"
+                onClick={toggleTableFullscreen}
+                className={cn(
+                  'inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-bold transition-all cursor-pointer',
+                  isTableFullscreen
+                    ? isLight
+                      ? 'border-slate-900 bg-slate-900 text-white hover:bg-slate-800 shadow-xs'
+                      : 'border-zinc-100 bg-zinc-100 text-zinc-900 hover:bg-white'
+                    : isLight
+                      ? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100 shadow-2xs'
+                      : 'border-zinc-700 bg-zinc-900 text-zinc-200 hover:bg-zinc-800'
+                )}
+                title={
+                  isTableFullscreen
+                    ? 'Desativar modo tela cheia (Esc)'
+                    : 'Expandir tabela em modo tela cheia'
+                }
+              >
+                {isTableFullscreen ? (
+                  <>
+                    <Minimize2 className="h-3.5 w-3.5" />
+                    Desativar Tela Cheia
+                  </>
+                ) : (
+                  <>
+                    <Maximize2 className="h-3.5 w-3.5" />
+                    Modo Tela Cheia
+                  </>
+                )}
+              </button>
             </div>
           </div>
 
@@ -1696,9 +1846,14 @@ export function FinancialPanelClient({
         </div>
 
         {/* Spreadsheet Grid */}
-        <div className="overflow-x-auto">
+        <div
+          className={cn(
+            'overflow-x-auto',
+            isTableFullscreen && 'flex-1 overflow-y-auto min-h-0'
+          )}
+        >
           <table className="w-full border-collapse text-left text-xs">
-            <thead>
+            <thead className={cn(isTableFullscreen && 'sticky top-0 z-10 shadow-2xs')}>
               <tr
                 className={cn(
                   'border-b text-[11px] font-bold uppercase tracking-wider',
@@ -2131,6 +2286,7 @@ export function FinancialPanelClient({
               </tfoot>
             )}
           </table>
+        </div>
         </div>
       </div>
       </div>

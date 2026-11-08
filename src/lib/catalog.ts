@@ -507,20 +507,20 @@ export const getUserNavbarState = cache(
   }
 );
 
-export const getUserCartView = cache(
-  async (
-    userId: string
-  ): Promise<{
-    items: CartItemView[];
-    totalItems: number;
-    subtotal: number;
-    total: number;
-  }> => {
-    const supabase = createServiceClient();
-    const { data: cartRow } = await supabase
-      .from('carts')
-      .select(
-        `
+async function fetchCartViewByOwner(
+  ownerColumn: 'user_id' | 'guest_id',
+  ownerId: string
+): Promise<{
+  items: CartItemView[];
+  totalItems: number;
+  subtotal: number;
+  total: number;
+}> {
+  const supabase = createServiceClient();
+  const { data: cartRow } = await supabase
+    .from('carts')
+    .select(
+      `
         id,
         cart_items (
           id,
@@ -541,89 +541,96 @@ export const getUserCartView = cache(
           )
         )
       `
-      )
-      .eq('user_id', userId)
-      .maybeSingle();
+    )
+    .eq(ownerColumn, ownerId)
+    .maybeSingle();
 
-    if (!cartRow) {
-      return { items: [], totalItems: 0, subtotal: 0, total: 0 };
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rawItems: any[] = [...((cartRow as any).cart_items || [])].sort(
-      (a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime()
-    );
-
-    const items: CartItemView[] = [];
-    const clampUpdates: PromiseLike<unknown>[] = [];
-
-    for (const row of rawItems) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const prodRaw: any = Array.isArray(row.products) ? row.products[0] : row.products;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const varRaw: any = Array.isArray(row.product_variants)
-        ? row.product_variants[0]
-        : row.product_variants;
-
-      if (!prodRaw || !varRaw) continue;
-
-      const enrichedProd = enrichProductRow({
-        ...prodRaw,
-        product_variants: [varRaw],
-      });
-
-      const inv = Array.isArray(varRaw.inventory) ? varRaw.inventory[0] : varRaw.inventory;
-      const stock = Number(inv?.quantity ?? 0);
-      const allowBackorder = Boolean(prodRaw.allow_backorder);
-      const isAvailable = Boolean(
-        prodRaw.is_active && varRaw.is_active && (stock > 0 || allowBackorder)
-      );
-      const clampedQty = allowBackorder
-        ? Math.min(row.quantity, 99)
-        : stock > 0
-          ? Math.min(row.quantity, stock)
-          : row.quantity;
-
-      if (!allowBackorder && stock > 0 && row.quantity > stock) {
-        clampUpdates.push(
-          supabase.from('cart_items').update({ quantity: stock }).eq('id', row.id)
-        );
-      }
-
-      items.push({
-        id: row.id,
-        cart_id: row.cart_id,
-        product_id: row.product_id,
-        variant_id: row.variant_id,
-        quantity: clampedQty,
-        product_name: enrichedProd.name,
-        product_slug: enrichedProd.slug,
-        product_sku: enrichedProd.sku || '',
-        product_image: enrichedProd.primary_image,
-        brand_name: enrichedProd.brand?.name || '',
-        color: varRaw.color || 'Padrão',
-        color_hex: varRaw.color_hex || '#18181B',
-        size: String(varRaw.size),
-        base_price: enrichedProd.base_price,
-        unit_price: enrichedProd.effective_price,
-        available_stock: stock,
-        allow_backorder: allowBackorder,
-        is_available: isAvailable,
-        subtotal: enrichedProd.effective_price * clampedQty,
-      });
-    }
-
-    if (clampUpdates.length > 0) {
-      Promise.all(clampUpdates).catch(() => {});
-    }
-
-    const activeItems = items.filter((i) => i.is_available);
-    const totalItems = activeItems.reduce((acc, i) => acc + i.quantity, 0);
-    const subtotal = activeItems.reduce((acc, i) => acc + i.base_price * i.quantity, 0);
-    const total = activeItems.reduce((acc, i) => acc + i.subtotal, 0);
-
-    return { items, totalItems, subtotal, total };
+  if (!cartRow) {
+    return { items: [], totalItems: 0, subtotal: 0, total: 0 };
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rawItems: any[] = [...((cartRow as any).cart_items || [])].sort(
+    (a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime()
+  );
+
+  const items: CartItemView[] = [];
+  const clampUpdates: PromiseLike<unknown>[] = [];
+
+  for (const row of rawItems) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const prodRaw: any = Array.isArray(row.products) ? row.products[0] : row.products;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const varRaw: any = Array.isArray(row.product_variants)
+      ? row.product_variants[0]
+      : row.product_variants;
+
+    if (!prodRaw || !varRaw) continue;
+
+    const enrichedProd = enrichProductRow({
+      ...prodRaw,
+      product_variants: [varRaw],
+    });
+
+    const inv = Array.isArray(varRaw.inventory) ? varRaw.inventory[0] : varRaw.inventory;
+    const stock = Number(inv?.quantity ?? 0);
+    const allowBackorder = Boolean(prodRaw.allow_backorder);
+    const isAvailable = Boolean(
+      prodRaw.is_active && varRaw.is_active && (stock > 0 || allowBackorder)
+    );
+    const clampedQty = allowBackorder
+      ? Math.min(row.quantity, 99)
+      : stock > 0
+        ? Math.min(row.quantity, stock)
+        : row.quantity;
+
+    if (!allowBackorder && stock > 0 && row.quantity > stock) {
+      clampUpdates.push(
+        supabase.from('cart_items').update({ quantity: stock }).eq('id', row.id)
+      );
+    }
+
+    items.push({
+      id: row.id,
+      cart_id: row.cart_id,
+      product_id: row.product_id,
+      variant_id: row.variant_id,
+      quantity: clampedQty,
+      product_name: enrichedProd.name,
+      product_slug: enrichedProd.slug,
+      product_sku: enrichedProd.sku || '',
+      product_image: enrichedProd.primary_image,
+      brand_name: enrichedProd.brand?.name || '',
+      color: varRaw.color || 'Padrão',
+      color_hex: varRaw.color_hex || '#18181B',
+      size: String(varRaw.size),
+      base_price: enrichedProd.base_price,
+      unit_price: enrichedProd.effective_price,
+      available_stock: stock,
+      allow_backorder: allowBackorder,
+      is_available: isAvailable,
+      subtotal: enrichedProd.effective_price * clampedQty,
+    });
+  }
+
+  if (clampUpdates.length > 0) {
+    Promise.all(clampUpdates).catch(() => {});
+  }
+
+  const activeItems = items.filter((i) => i.is_available);
+  const totalItems = activeItems.reduce((acc, i) => acc + i.quantity, 0);
+  const subtotal = activeItems.reduce((acc, i) => acc + i.base_price * i.quantity, 0);
+  const total = activeItems.reduce((acc, i) => acc + i.subtotal, 0);
+
+  return { items, totalItems, subtotal, total };
+}
+
+export const getUserCartView = cache(async (userId: string) =>
+  fetchCartViewByOwner('user_id', userId)
+);
+
+export const getGuestCartView = cache(async (guestId: string) =>
+  fetchCartViewByOwner('guest_id', guestId)
 );
 
 export async function getUserFavoriteIds(userId: string): Promise<string[]> {

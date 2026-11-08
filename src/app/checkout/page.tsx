@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { CheckoutClient } from '@/components/cart/CheckoutClient';
-import { getAuthSession, requireUserId } from '@/lib/auth';
-import { getStoreSettings, getUserCartView } from '@/lib/catalog';
+import { getAuthSession } from '@/lib/auth';
+import { getGuestCartView, getStoreSettings, getUserCartView } from '@/lib/catalog';
+import { readGuestCartId } from '@/lib/guest-cart';
 import { createServiceClient } from '@/lib/supabase/server';
 import type { UserAddress } from '@/types/database';
 
@@ -13,23 +14,38 @@ export const metadata: Metadata = {
 };
 
 export default async function CheckoutPage() {
-  const userId = await requireUserId('/checkout');
-  const supabase = createServiceClient();
-
-  const [session, cart, settings, { data: addresses }] = await Promise.all([
+  const [session, guestId, settings] = await Promise.all([
     getAuthSession(),
-    getUserCartView(userId),
+    readGuestCartId(),
     getStoreSettings(),
-    supabase
-      .from('user_addresses')
-      .select('*')
-      .eq('user_id', userId)
-      .order('is_default', { ascending: false }),
   ]);
 
-  if (!session) {
-    redirect('/login?redirect=/checkout');
+  if (!session && !guestId) {
+    redirect('/carrinho');
   }
+
+  const supabase = createServiceClient();
+
+  if (session && guestId) {
+    await supabase.rpc('merge_guest_cart_into_user', {
+      p_guest_id: guestId,
+      p_user_id: session.userId,
+    });
+  }
+
+  const [cart, savedAddresses] = await Promise.all([
+    session
+      ? getUserCartView(session.userId)
+      : getGuestCartView(guestId!),
+    session
+      ? supabase
+          .from('user_addresses')
+          .select('*')
+          .eq('user_id', session.userId)
+          .order('is_default', { ascending: false })
+          .then(({ data }) => (data || []) as UserAddress[])
+      : Promise.resolve([] as UserAddress[]),
+  ]);
 
   const activeItems = cart.items.filter((i) => i.is_available);
   if (activeItems.length === 0) {
@@ -58,11 +74,10 @@ export default async function CheckoutPage() {
         items={activeItems}
         total={cart.total}
         subtotal={cart.subtotal}
-        profile={session.profile}
-        savedAddresses={(addresses || []) as UserAddress[]}
+        profile={session?.profile ?? null}
+        savedAddresses={savedAddresses}
         settings={settings}
       />
     </div>
   );
 }
-
